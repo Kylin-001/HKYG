@@ -868,7 +868,7 @@ mkdir -p /opt/projects
 cd /opt/projects
 
 # 克隆项目代码（假设已上传到Git仓库）
-git clone https://github.com/your-repo/heikeji-mall.git
+git clone https://github.com/Kylin-001/HKYG
 cd heikeji-mall
 
 # 或者使用文件传输工具（如WinSCP）将项目文件上传到/opt/projects/heikeji-mall目录

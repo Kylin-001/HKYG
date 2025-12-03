@@ -123,7 +123,7 @@
 ### 2.4 安装 MySQL 8.3.x
 1. 下载 MySQL 8.3.x 安装包：
    ```bash
-   wget https://dev.mysql.com/get/mysql80-community-release-el7-11.noarch.rpm
+   sudo wget https://dev.mysql.com/get/mysql80-community-release-el7-11.noarch.rpm
    ```
 2. 安装 MySQL 源：
    ```bash
@@ -148,11 +148,12 @@
    ```
    输入初始密码，然后执行：
    ```sql
-   ALTER USER 'root'@'localhost' IDENTIFIED BY 'YourStrongPassword123!';
+   ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'Mysql@8Root!2025';
+   FLUSH PRIVILEGES;
    ```
 7. 配置 MySQL 允许远程访问：
    ```sql
-   CREATE USER 'root'@'%' IDENTIFIED BY 'YourStrongPassword123!';
+   CREATE USER 'root'@'%' IDENTIFIED BY 'Mysql@8Root!2025';
    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
    FLUSH PRIVILEGES;
    ```
