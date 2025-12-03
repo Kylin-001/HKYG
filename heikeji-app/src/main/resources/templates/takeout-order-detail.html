@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外卖订单详情 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* 加载遮罩层样�?*/
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        /* 信息卡片样式 */
+        .info-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        /* 状态标签样�?*/
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
+        /* 分隔线样�?*/
+        .divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 1rem 0;
+        }
+        /* 订单商品列表样式 */
+        .order-item {
+            transition: background-color 0.2s;
+        }
+        .order-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button</div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/category/list">商品分类</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将通过JavaScript动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区�?-->
+    <main class="container mt-5 mb-5">
+        <h2 class="text-center mb-4">外卖订单详情</h2>
+        
+        <!-- 返回按钮 --><div class="mb-4">
+            <a href="javascript:history.back()" class="btn btn-outline-primary">返回订单列表</a>
+        </div>
+
+        <!-- 订单状态卡�?--><div class="info-card bg-light">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-1">订单号：<span id="orderNo">--</span></h5>
+                    <p class="text-sm text-gray-600 mb-0">下单时间�?span id="createTime">--</span></p>
+                </div>
+                <span id="statusBadge" class="status-badge bg-gray-100 text-gray-800">--</span>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">商家�?/span>
+                            <span id="merchantName">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">配送方式：</span>
+                            <span id="deliveryType">--</span>
+                        </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">预计送达�?/span>
+                            <span id="estimatedTime">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">实际送达�?/span>
+                            <span id="actualTime">--</span>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配送信息卡�?--><div class="info-card">
+            <h5 class="mb-3">配送信�?/h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">收货人：</span>
+                            <span id="receiverName">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">联系电话�?/span>
+                            <span id="receiverPhone">--</span>
+                        </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">配送地址�?/span>
+                            <span id="receiverAddress">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-sm text-gray-600">详细位置�?/span>
+                            <span id="detailedLocation">--</span>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 配送员信息卡片 --><div id="deliveryPersonCard" class="info-card" style="display: none;">
+            <h5 class="mb-3">配送员信息</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-sm text-gray-600">配送员姓名�?/span>
+                        <span id="deliveryPersonName">--</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-sm text-gray-600">联系电话�?/span>
+                        <span id="deliveryPersonPhone">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品列表卡片 --><div class="info-card">
+            <h5 class="mb-3">商品信息</h5>
+            <div id="orderItemsList">
+                <!-- 商品列表将通过JavaScript动态生�?-->
+                <div class="text-center py-3">
+                    <p class="text-gray-500">加载�?..</p>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="d-flex justify-content-end">
+                <div class="text-right">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-gray-600">商品总价�?/span>
+                        <span id="subtotalAmount">¥0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-gray-600">运费�?/span>
+                        <span id="freightAmount">¥0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between font-bold text-lg text-danger">
+                        <span>订单总额�?/span>
+                        <span id="totalAmount">¥0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮区域 --><div id="actionButtons" class="d-flex justify-content-center mt-5 mb-3">
+            <!-- 操作按钮将根据订单状态动态生�?-->
+        </div>
+    </main>
+
+    <!-- 页脚 --><footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为黑河学院的学生提供便捷的校园生活服务，包括外卖、跑腿等多种功能�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 加载遮罩�?--><div id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载�?..</span>
+        </div>
+    </div>
+
+    <!-- 引入 jQuery -->
+<script src="/js/jquery.min.js"></script>
+    <!-- 引入 Bootstrap JS -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入认证工具 -->
+    <script src="/js/auth-utils.js"></script>
+    <script>
+        // 更新用户菜单
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            const userInfo = authUtils.getUserInfo();
+            
+            if (userInfo) {
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            ${userInfo.username || '用户'
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/api/order/list">我的订单</a></li>
+                            <li><a class="dropdown-item" href="/api/takeout/order/list">我的外卖</a></li>
+                            <li><a class="dropdown-item" href="/api/delivery/request/list">我的跑腿</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登�?/a></li>
+                        </ul>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户登出
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 显示加载状�?
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+        
+        // 隐藏加载状�?
+        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 获取状态显示文本和样式
+        function getStatusDisplay(status) {
+            const statusMap = {
+                0: { text: '待接�?, class: 'bg-yellow-100 text-yellow-800' },
+                1: { text: '已接�?, class: 'bg-blue-100 text-blue-800' },
+                2: { text: '配送中', class: 'bg-green-100 text-green-800' },
+                3: { text: '已完�?, class: 'bg-gray-100 text-gray-800' },
+                4: { text: '已取�?, class: 'bg-red-100 text-red-800' }
+            };
+            return statusMap[status] || { text: '未知', class: 'bg-gray-100 text-gray-800' };
+        }
+        
+        // 获取配送方式显示文�?
+        function getDeliveryTypeDisplay(type) {
+            const typeMap = {
+                0: '外卖配�?,
+                1: '指定地点',
+                2: '送到楼下'
+            };
+            return typeMap[type] || '鏈�?;
+        }
+        
+        // 鑾峰彇璇︾粏浣嶇疆淇℃伅
+        function getDetailedLocation(order) {
+            if (order.deliveryType === 0 && order.deliveryLockerCode) {
+                return `澶栧崠鏌?${order.deliveryLockerCode}`;
+            } else if (order.deliveryType === 1 && order.deliverySpecialPlace) {
+                return order.deliverySpecialPlace;
+            } else if (order.deliveryType === 2 && order.deliveryDormBuilding) {
+                return `${order.deliveryDormBuilding} ${order.deliveryDormRoom || ''}`.trim();
+            }
+            return '--';
+        }
+        
+        // 鍔犺浇璁㈠崟璇︽�?
+        let currentOrderDetail = null;
+        
+        function loadOrderDetail(orderNo) {
+            showLoading();
+            $.authAjax({
+                url: '/api/takeout/order/detail',
+                method: 'GET',
+                data: { orderNo: orderNo },
+                success: function(response) {
+                    if (response.code === 200) {
+                        currentOrderDetail = response.data;
+                        renderOrderDetail(currentOrderDetail);
+                        loadOrderItems(orderNo);
+                    } else {
+                        alert('鑾峰彇璁㈠崟璇︽儏澶辫触�? + response.msg);
+                        window.location.href = '/api/takeout/order/list';
+                    }
+                },
+                error: function() {
+                    alert('鑾峰彇璁㈠崟璇︽儏澶辫触锛岃绋嶅悗閲嶈�?);
+                    window.location.href = '/api/takeout/order/list';
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+        
+        // 鍔犺浇璁㈠崟鍟嗗�?
+        function loadOrderItems(orderNo) {
+            // 璁㈠崟鍟嗗搧淇℃伅宸插寘鍚湪璁㈠崟璇︽儏涓紝鏃犻渶鍗曠嫭璇锋�?
+            if (currentOrderDetail && currentOrderDetail.orderItems) {
+                renderOrderItems(currentOrderDetail.orderItems);
+            } else {
+                $('#orderItemsList').html('<div class="text-center py-3"><p class="text-gray-500">鏆傛棤鍟嗗搧淇℃�?/p></div>');
+            }
+        }
+        
+        // 娓叉煋璁㈠崟璇︽�?
+        function renderOrderDetail(order) {
+            const statusInfo = getStatusDisplay(order.status);
+            
+            // 填充订单基本信息
+            $('#orderNo').text(order.orderNo || '--');
+            $('#createTime').text(order.createTime || '--');
+            $('#statusBadge').text(statusInfo.text).removeClass().addClass('status-badge').addClass(statusInfo.class);
+            $('#merchantName').text(order.merchantName || '--');
+            $('#deliveryType').text(getDeliveryTypeDisplay(order.deliveryType));
+            $('#estimatedTime').text(order.estimatedTime || '--');
+            $('#actualTime').text(order.actualTime || '--');
+            
+            // 濉厖閰嶉€佷俊�?            $('#receiverName').text(order.receiverName || '--');
+            $('#receiverPhone').text(order.receiverPhone || '--');
+            $('#receiverAddress').text(order.receiverAddress || '--');
+            $('#detailedLocation').text(getDetailedLocation(order));
+            
+            // 鏄剧ず閰嶉€佸憳淇℃�?
+            if (order.deliveryPersonId) {
+                $('#deliveryPersonCard').show();
+                $('#deliveryPersonName').text(order.deliveryPersonName || '--');
+                $('#deliveryPersonPhone').text(order.deliveryPersonPhone || '--');
+            }
+            
+            // 濉厖閲戦淇℃�?
+            $('#subtotalAmount').text(`�?{(order.subtotalAmount || 0).toFixed(2)}`);
+            $('#freightAmount').text(`�?{(order.freightAmount || 0).toFixed(2)}`);
+            $('#totalAmount').text(`�?{(order.totalAmount || 0).toFixed(2)}`);
+            
+            // 娓叉煋鎿嶄綔鎸夐�?
+            renderActionButtons(order.status);
+        }
+        
+        // 娓叉煋璁㈠崟鍟嗗�?
+        function renderOrderItems(items) {
+            if (!items || items.length === 0) {
+                $('#orderItemsList').html('<div class="text-center py-3"><p class="text-gray-500">鏆傛棤鍟嗗搧淇℃�?/p></div>');
+                return;
+            }
+            
+            let html = '';
+            items.forEach(item => {
+                html += `
+                <div class="order-item d-flex justify-content-between align-items-center py-2 px-2 rounded">
+                    <div class="flex-1">
+                        <div class="font-medium">${item.productName || '鏈煡鍟嗗搧'}</div>
+                        <div class="text-sm text-gray-500">${item.specifications || ''}</div>
+                    </div>
+                    <div class="d-flex items-center">
+                        <div class="text-gray-600 me-3">�?{(item.price || 0).toFixed(2)}</div>
+                        <div class="text-gray-600">x${item.quantity || 1}</div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            $('#orderItemsList').html(html);
+        }
+        
+        // 娓叉煋鎿嶄綔鎸夐�?
+        function renderActionButtons(status) {
+            let buttonsHtml = '';
+            
+            switch(status) {
+                case 0: // 寰呮敮浠?                    buttonsHtml = `
+                    <button class="btn btn-primary me-3" onclick="payOrder()">绔嬪嵆鏀粯</button>
+                    <button class="btn btn-outline-danger" onclick="cancelOrder()">鍙栨秷璁㈠崟</button>
+                    `;
+                    break;
+                case 1: // 宸叉敮浠?                    buttonsHtml = `
+                    <button class="btn btn-outline-danger" onclick="cancelOrder()">鍙栨秷璁㈠崟</button>
+                    `;
+                    break;
+                case 2: // 閰嶉€佷�?
+                    buttonsHtml = `
+                    <button class="btn btn-outline-primary me-3" onclick="contactDeliveryPerson()">鑱旂郴閰嶉€佸憳</button>
+                    `;
+                    break;
+                case 3: // 宸插畬鎴?                    buttonsHtml = `
+                    <button class="btn btn-outline-primary" onclick="reorder()">鍐嶆涓嬪崟</button>
+                    `;
+                    break;
+            }
+            
+            $('#actionButtons').html(buttonsHtml);
+        }
+        
+        // 鏀粯璁㈠�?
+        function payOrder() {
+            if (currentOrderDetail) {
+                window.location.href = `/api/payment?orderNo=${currentOrderDetail.orderNo}&amount=${currentOrderDetail.totalAmount}&type=takeout`;
+            }
+        }
+        
+        // 取消订单
+        function cancelOrder() {
+            if (currentOrderDetail && confirm('确定要取消该订单吗？')) {
+                showLoading();
+                $.authAjax({
+                    url: '/api/takeout/order/cancel',
+                    method: 'POST',
+                    data: { orderNo: currentOrderDetail.orderNo },
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('取消成功');
+                            window.location.reload();
+                        } else {
+                            alert('取消失败�? + response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('取消失败，请稍后重试');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+        }
+        
+        // 联系配送员
+        function contactDeliveryPerson() {
+            if (currentOrderDetail && currentOrderDetail.deliveryPersonPhone) {
+                alert(`配送员电话�?{currentOrderDetail.deliveryPersonPhone}`);
+            } else {
+                alert('暂未分配配送员');
+            }
+        }
+        
+        // 再次下单
+        function reorder() {
+            alert('功能开发中');
+        }
+        
+        // 页面加载完成后初始化
+        $(document).ready(function() {
+            // 检查登录状�?           if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            // 更新用户菜单
+            updateUserMenu();
+            
+            // 获取URL中的订单号参�?           const urlParams = new URLSearchParams(window.location.search);
+            const orderNo = urlParams.get('orderNo');
+            
+            if (!orderNo) {
+                alert('订单号不存在');
+                window.location.href = '/api/takeout/order/list';
+                return;
+            }
+            
+            // 加载订单详情
+            loadOrderDetail(orderNo);
+        });
+    </script>
+</body>
+</html>

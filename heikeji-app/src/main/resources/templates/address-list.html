@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地址管理 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* 自定义样�?*/
+        .address-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        .address-item:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+        .address-item .default-badge {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .address-actions {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .address-item:hover .address-actions {
+            opacity: 1;
+        }
+        .add-address-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .add-address-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="/static/images/logo.png" alt="黑科易购" height="30">
+                    <span class="ms-2">黑科易购</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/category-list">分类</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product-list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i>
+                            <span id="username">{{username}}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/api/address-list">地址管理</a></li>
+                            <li><a class="dropdown-item" href="/api/order-list">我的订单</a></li>
+                            <li><a class="dropdown-item" href="/api/takeout-order-list">外卖订单</a></li>
+                            <li><a class="dropdown-item" href="/api/delivery-request-list">跑腿服务</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" id="logoutBtn">退出登�?/a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <div class="container my-5">
+        <div class="row">
+            <!-- 侧边�?-->
+            <div class="col-lg-3 mb-5 mb-lg-0">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">用户中心</div>
+                    <div class="list-group">
+                        <a href="/api/order-list" class="list-group-item list-group-item-action">我的订单</a>
+                        <a href="/api/takeout-order-list" class="list-group-item list-group-item-action">外卖订单</a>
+                        <a href="/api/delivery-request-list" class="list-group-item list-group-item-action">跑腿服务</a>
+                        <a href="/api/address-list" class="list-group-item list-group-item-action active">地址管理</a>
+                        <a href="/api/profile" class="list-group-item list-group-item-action">个人资料</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 地址列表区域 -->
+            <div class="col-lg-9">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">我的收货地址</h5>
+                        <span class="text-muted" id="addressCount"></span>
+                    </div>
+                    <div class="card-body">
+                        <!-- 加载中状�?-->
+                        <div id="loading" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">加载�?..</span>
+                            </div>
+                            <p class="mt-2">正在加载地址信息...</p>
+                        </div>
+
+                        <!-- 地址列表 -->
+                        <div id="addressList" class="mt-4 d-none">
+                            <!-- 地址项将通过JS动态生�?-->
+                        </div>
+
+                        <!-- 空状�?-->
+                        <div id="emptyState" class="text-center py-10 d-none">
+                            <img src="/static/images/empty-address.png" alt="暂无地址" class="mb-3" style="width: 150px;">
+                            <p class="text-muted">您还没有添加收货地址</p>
+                            <button class="btn btn-primary mt-2" id="emptyAddAddressBtn">添加地址</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加地址按钮 -->
+    <button class="add-address-btn" id="addAddressBtn">+</button>
+
+    <!-- 遮罩�?-->
+    <div id="mask" class="fixed inset-0 bg-black bg-opacity-50 d-none" style="z-index: 1000;"></div>
+
+    <!-- 地址表单模态框 -->
+    <div id="addressModal" class="fixed top-50 left-50 transform -translate-x-50 -translate-y-50 bg-white rounded-lg shadow-lg p-5 w-100 max-w-2xl d-none" style="z-index: 1001;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0" id="modalTitle">添加收货地址</h5>
+            <button class="btn-close" id="closeModalBtn"></button>
+        </div>
+        <form id="addressForm">
+            <input type="hidden" id="addressId" name="addressId">
+            <div class="mb-3">
+                <label for="consignee" class="form-label">收货�?/label>
+                <input type="text" class="form-control" id="consignee" name="consignee" required placeholder="请输入收货人姓名">
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">手机号码</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required placeholder="请输入手机号�?>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">详细地址</label>
+                <textarea class="form-control" id="address" name="address" rows="3" required placeholder="请输入完整地址信息"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="location" class="form-label">位置类型</label>
+                <select class="form-select" id="location" name="location" required>
+                    <option value="">请选择位置类型</option>
+                    <option value="dorm">宿舍</option>
+                    <option value="office">办公�?/option>
+                    <option value="other">其他</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="isDefault" name="isDefault">
+                    <label class="form-check-label" for="isDefault">设为默认地址</label>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
+                <button type="submit" class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 确认对话�?-->
+    <div id="confirmModal" class="fixed top-50 left-50 transform -translate-x-50 -translate-y-50 bg-white rounded-lg shadow-lg p-5 w-100 max-w-sm d-none" style="z-index: 1001;">
+        <h5 class="mb-3">确认操作</h5>
+        <p class="mb-4" id="confirmMessage">确定要删除该地址吗？</p>
+        <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-secondary" id="confirmCancelBtn">取消</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">删除</button>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="text-center">
+                <p class="text-muted">黑科易购 - 校园生活服务平台</p>
+                <p class="text-muted">© 2023 heikeji-mall. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 引入 jQuery -->
+<script src="/js/jquery.min.js"></script>
+    <!-- 引入 Bootstrap JS -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入认证工具 -->
+    <script src="/js/auth-utils.js"></script>
+    
+    <script>
+        // 当前正在编辑或删除的地址ID
+        let currentAddressId = null;
+        let isEditMode = false;
+        
+        /**
+         * 验证工具函数
+         */
+        const validators = {
+            isValidPhone: function(phone) {
+                const phoneRegex = /^1[3-9]\d{9}$/;
+                return phoneRegex.test(phone);
+            }
+        };
+        
+        /**
+         * 显示成功消息
+         */
+        function showSuccessMessage(message) {
+            // 创建一个简单的成功消息提示
+            const messageElement = $('<div class="alert alert-success alert-dismissible fade show position-fixed top-20 left-50 transform -translate-x-50 z-50" role="alert">').text(message);
+            const closeButton = $('<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>');
+            messageElement.append(closeButton);
+            
+            $('body').append(messageElement);
+            
+            // 3秒后自动关闭
+            setTimeout(() => {
+                messageElement.alert('close');
+            }, 3000);
+        }
+
+        $(document).ready(function() {
+            // 检查登录状�?
+            authUtils.checkLogin();
+            
+            // 更新用户�?
+            $('#username').text(authUtils.getUsername() || '用户');
+            
+            // 加载地址列表
+            loadAddressList();
+            
+            // 添加地址按钮点击事件
+            $('#addAddressBtn, #emptyAddAddressBtn').click(function() {
+                openAddressModal();
+            });
+            
+            // 关闭模态框
+            $('#closeModalBtn, #cancelBtn').click(function() {
+                closeAddressModal();
+            });
+            
+            // 遮罩层点击关闭模态框
+            $('#mask').click(function() {
+                closeAddressModal();
+                closeConfirmModal();
+            });
+            
+            // 地址表单提交
+            $('#addressForm').submit(function(event) {
+                event.preventDefault();
+                saveAddress();
+            });
+            
+            // 确认删除按钮点击事件
+            $('#confirmDeleteBtn').click(function() {
+                deleteAddress();
+            });
+            
+            // 取消删除
+            $('#confirmCancelBtn').click(function() {
+                closeConfirmModal();
+            });
+            
+            // 退出登�?
+            $('#logoutBtn').click(function() {
+                authUtils.logout();
+                window.location.href = '/api/auth/login';
+            });
+        });
+
+        /**
+         * 加载地址列表
+         */
+        function loadAddressList() {
+            $('#loading').removeClass('d-none');
+            $('#addressList').addClass('d-none');
+            $('#emptyState').addClass('d-none');
+            
+            $.authAjax({
+                url: '/api/address/list',
+                type: 'GET',
+                success: function(response) {
+                    $('#loading').addClass('d-none');
+                    
+                    if (response.code === 200 && response.data && response.data.length > 0) {
+                        const addresses = response.data;
+                        $('#addressCount').text(`�?${addresses.length} 个地址`);
+                        renderAddressList(addresses);
+                        $('#addressList').removeClass('d-none');
+                    } else {
+                        $('#emptyState').removeClass('d-none');
+                    }
+                },
+                error: function() {
+                    $('#loading').addClass('d-none');
+                    alert('加载地址失败，请稍后重试');
+                }
+            });
+        }
+
+        /**
+         * 渲染地址列表
+         */
+        function renderAddressList(addresses) {
+            const $addressList = $('#addressList');
+            $addressList.empty();
+            
+            addresses.forEach(address => {
+                const addressHtml = `
+                    <div class="address-item" data-id="${address.addressId}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <strong class="me-3">${address.consignee}</strong>
+                                <span>${address.phone}</span>
+                                ${address.isDefault ? '<span class="default-badge ml-2">默认</span>' : ''}
+                            </div>
+                            <div class="address-actions">
+                                <button class="btn btn-sm btn-outline-primary me-1 edit-btn">编辑</button>
+                                <button class="btn btn-sm btn-outline-danger delete-btn">删除</button>
+                            </div>
+                        </div>
+                        <div class="text-muted">${address.address}</div>
+                        <div class="mt-2 text-sm text-muted">
+                            位置类型�?{address.location === 'dorm' ? '宿舍' : address.location === 'office' ? '办公�? : '其他'}
+                        </div>
+                    </div>
+                `;
+                
+                $addressList.append(addressHtml);
+            });
+            
+            // 绑定编辑和删除按钮事�?
+            $('.edit-btn').click(function() {
+                const addressId = $(this).closest('.address-item').data('id');
+                editAddress(addressId);
+            });
+            
+            $('.delete-btn').click(function() {
+                const addressId = $(this).closest('.address-item').data('id');
+                confirmDelete(addressId);
+            });
+        }
+
+        /**
+         * 打开地址编辑模态框
+         */
+        function openAddressModal() {
+            isEditMode = false;
+            $('#modalTitle').text('添加收货地址');
+            $('#addressForm')[0].reset();
+            $('#addressId').val('');
+            
+            $('#mask').removeClass('d-none');
+            $('#addressModal').removeClass('d-none');
+        }
+
+        /**
+         * 编辑地址
+         */
+        function editAddress(addressId) {
+            isEditMode = true;
+            currentAddressId = addressId;
+            $('#modalTitle').text('编辑收货地址');
+            
+            // 加载地址详情
+            $.authAjax({
+                url: `/api/address/detail/${addressId}`,
+                type: 'GET',
+                success: function(response) {
+                    if (response.code === 200 && response.data) {
+                        const address = response.data;
+                        $('#addressId').val(address.addressId);
+                        $('#consignee').val(address.consignee);
+                        $('#phone').val(address.phone);
+                        $('#address').val(address.address);
+                        $('#location').val(address.location);
+                        $('#isDefault').prop('checked', address.isDefault);
+                        
+                        $('#mask').removeClass('d-none');
+                        $('#addressModal').removeClass('d-none');
+                    }
+                }
+            });
+        }
+
+        /**
+         * 关闭地址模态框
+         */
+        function closeAddressModal() {
+            $('#mask').addClass('d-none');
+            $('#addressModal').addClass('d-none');
+            currentAddressId = null;
+        }
+
+        /**
+         * 保存地址
+         */
+        function saveAddress() {
+            // 表单验证
+            const consignee = $('#consignee').val().trim();
+            const phone = $('#phone').val().trim();
+            const address = $('#address').val().trim();
+            const location = $('#location').val();
+            
+            if (!consignee) {
+                alert('请输入收货人姓名');
+                return;
+            }
+            
+            if (!validators.isValidPhone(phone)) {
+                alert('请输入正确的手机号码');
+                return;
+            }
+            
+            if (!address) {
+                alert('请输入详细地址');
+                return;
+            }
+            
+            if (!location) {
+                alert('请选择位置类型');
+                return;
+            }
+            
+            // 构建请求数据
+            const data = {
+                consignee: consignee,
+                phone: phone,
+                address: address,
+                location: location,
+                isDefault: $('#isDefault').is(':checked')
+            };
+            
+            // 如果是编辑模式，添加地址ID
+            if (isEditMode) {
+                data.addressId = $('#addressId').val();
+            }
+            
+            // 禁用保存按钮
+            $('#saveBtn').prop('disabled', true).text('保存�?.');
+            
+            $.authAjax({
+                url: isEditMode ? '/api/address/update' : '/api/address/add',
+                type: isEditMode ? 'PUT' : 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    $('#saveBtn').prop('disabled', false).text('保存');
+                    
+                    if (response.code === 200) {
+                        showSuccessMessage(isEditMode ? '地址更新成功' : '地址添加成功');
+                        closeAddressModal();
+                        loadAddressList(); // 重新加载地址列表
+                    } else {
+                        alert(response.message || (isEditMode ? '地址更新失败' : '地址添加失败'));
+                    }
+                },
+                error: function() {
+                    $('#saveBtn').prop('disabled', false).text('淇濆�?);
+                    alert('网络错误，请稍后重试');
+                }
+            });
+        }
+
+        /**
+         * 确认删除
+         */
+        function confirmDelete(addressId) {
+            currentAddressId = addressId;
+            $('#confirmMessage').text('确定要删除该地址吗？删除后不可恢�?);
+            $('#mask').removeClass('d-none');
+            $('#confirmModal').removeClass('d-none');
+        }
+
+        /**
+         * 关闭确认对话�?
+         */
+        function closeConfirmModal() {
+            $('#mask').addClass('d-none');
+            $('#confirmModal').addClass('d-none');
+            currentAddressId = null;
+        }
+
+        /**
+         * 删除地址
+         */
+        function deleteAddress() {
+            if (!currentAddressId) return;
+            
+            // 禁用删除按钮
+            $('#confirmDeleteBtn').prop('disabled', true).text('删除�?.');
+            
+            $.authAjax({
+                url: `/api/address/delete/${currentAddressId}`,
+                type: 'DELETE',
+                success: function(response) {
+                    $('#confirmDeleteBtn').prop('disabled', false).text('删除');
+                    
+                    if (response.code === 200) {
+                        showSuccessMessage('地址删除成功');
+                        closeConfirmModal();
+                        loadAddressList(); // 重新加载地址列表
+                    } else {
+                        alert(response.message || '地址删除失败');
+                        closeConfirmModal();
+                    }
+                },
+                error: function() {
+                    $('#confirmDeleteBtn').prop('disabled', false).text('删除');
+                    alert('网络错误，请稍后重试');
+                    closeConfirmModal();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

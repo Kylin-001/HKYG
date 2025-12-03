@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<script src="/js/jquery.min.js"></script>
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        .order-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .order-header {
+            background-color: #f8f9fa;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .order-body {
+            padding: 16px;
+        }
+        .order-product {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        .order-product:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-name {
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .product-price {
+            color: #ff6700;
+            font-weight: bold;
+        }
+        .product-quantity {
+            color: #999;
+            font-size: 12px;
+            float: right;
+        }
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+        }
+        .order-total {
+            color: #333;
+            font-size: 14px;
+        }
+        .order-total-price {
+            color: #ff6700;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .order-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        .order-status {
+            color: #ff6700;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/api/order/list">我的订单</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将根据登录状态动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="mt-4 mb-4">
+            <h2>我的订单</h2>
+            <div class="d-flex mt-3 mb-4 border-bottom">
+                <button class="btn btn-outline-primary me-4 pb-2" id="btn-all">全部订单</button>
+                <button class="btn btn-outline-secondary me-4 pb-2" id="btn-unpaid">待付�?/button>
+                <button class="btn btn-outline-secondary me-4 pb-2" id="btn-unshipped">待发�?/button>
+                <button class="btn btn-outline-secondary me-4 pb-2" id="btn-shipped">待收�?/button>
+                <button class="btn btn-outline-secondary me-4 pb-2" id="btn-completed">已完�?/button>
+            </div>
+        </div>
+        
+        <div id="order-list" class="order-container">
+            <!-- 订单列表将通过AJAX动态加�?-->
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">加载�?..</span>
+                </div>
+                <p class="mt-2">加载订单�?..</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center; display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载�?..</span>
+        </div>
+    </div>
+
+    <script>
+        // 显示加载遮罩�?
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 隐藏加载遮罩�?
+        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 更新导航栏用户状�?
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            if (authUtils.isLoggedIn()) {
+                const username = authUtils.getUsername() || '用户';
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${username}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/api/order/list">我的订单</a>
+                            <a class="dropdown-item" href="/api/cart">购物�?/a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="logout()">退出登�?/a>
+                        </div>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户登出
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        $(document).ready(function() {
+            // 更新导航栏用户状�?
+            updateUserMenu();
+            
+            // 检查登录状�?
+            if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            // 加载全部订单
+            loadOrders('all');
+            
+            // 订单状态按钮点击事�?
+            $('#btn-all').click(function() {
+                setActiveButton(this);
+                loadOrders('all');
+            });
+            
+            $('#btn-unpaid').click(function() {
+                setActiveButton(this);
+                loadOrders('0'); // 待付�?
+            });
+            
+            $('#btn-unshipped').click(function() {
+                setActiveButton(this);
+                loadOrders('1'); // 待发�?
+            });
+            
+            $('#btn-shipped').click(function() {
+                setActiveButton(this);
+                loadOrders('2'); // 待收�?
+            });
+            
+            $('#btn-completed').click(function() {
+                setActiveButton(this);
+                loadOrders('3'); // 已完�?
+            });
+        });
+        
+        // 设置当前激活的按钮样式
+        function setActiveButton(button) {
+            $('.d-flex button').removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+            $(button).removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+        }
+        
+        // 加载订单列表
+        function loadOrders(status) {
+            $('#order-list').html('<div class="text-center py-5"><div class="spinner-border" role="status"><span class="sr-only">加载�?..</span></div><p class="mt-2">加载订单�?..</p></div>');
+            showLoading();
+            
+            $.authAjax({
+                url: '/api/order/list',
+                type: 'GET',
+                data: { status: status },
+                success: function(data) {
+                    hideLoading();
+                    if (data.code === 200 && data.data && data.data.length > 0) {
+                        renderOrderList(data.data);
+                    } else {
+                        $('#order-list').html('<div class="text-center py-10"><p>暂无订单</p></div>');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    $('#order-list').html('<div class="text-center py-10"><p>加载失败，请稍后重试</p></div>');
+                }
+            });
+        }
+        
+        // 渲染订单列表
+        function renderOrderList(orders) {
+            let html = '';
+            
+            orders.forEach(order => {
+                html += `
+                <div class="order-item">
+                    <div class="order-header">
+                        <div>
+                            <span>订单号：${order.orderNo}</span>
+                            <span class="ms-4">下单时间：{formatDate(order.createTime)}</span>
+                        </div>
+                        <span class="order-status">${getStatusText(order.status)}</span>
+                    </div>
+                    <div class="order-body">`;
+                    
+                // 渲染订单商品
+                order.orderItems.forEach(item => {
+                    html += `
+                    <div class="order-product">
+                        <img src="${item.productImage}" alt="${item.productName}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${item.productName}</div>
+                            <div>
+                                <span class="product-price">¥${item.price.toFixed(2)}</span>
+                                <span class="product-quantity">x${item.quantity}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                
+                html += `
+                    </div>
+                    <div class="order-footer">
+                        <div class="order-total">
+                            �?{getTotalQuantity(order.orderItems)}件商品，合计�?span class="order-total-price">¥${order.totalAmount.toFixed(2)}</span>
+                        </div>
+                        <div class="order-actions">`;
+                
+                // 根据订单状态显示不同操作按�?
+                if (order.status === 0) { // 待付�?
+                    html += `
+                        <button class="btn btn-sm btn-outline-secondary" onclick="cancelOrder('${order.orderNo}')">取消订单</button>
+                        <button class="btn btn-sm btn-primary" onclick="goPayment('${order.orderNo}')">立即支付</button>`;
+                } else if (order.status === 2) { // 待收�?
+                    html += `
+                        <button class="btn btn-sm btn-primary" onclick="confirmReceipt('${order.orderNo}')">确认收货</button>`;
+                } else if (order.status === 3) { // 已完�?
+                    html += `
+                        <button class="btn btn-sm btn-outline-secondary" onclick="viewOrderDetail('${order.orderNo}')">查看详情</button>`;
+                } else {
+                    html += `
+                        <button class="btn btn-sm btn-outline-secondary" onclick="viewOrderDetail('${order.orderNo}')">查看详情</button>`;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            $('#order-list').html(html);
+        }
+        
+        // 获取订单商品总数�?
+        function getTotalQuantity(items) {
+            return items.reduce((total, item) => total + item.quantity, 0);
+        }
+        
+        // 格式化日�?
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+        
+        // 获取订单状态文�?
+        function getStatusText(status) {
+            const statusMap = {
+                0: '待付�?,
+                1: '待发�?,
+                2: '待收�?,
+                3: '已完�?,
+                4: '已取�?
+            };
+            return statusMap[status] || '未知状�?;
+        }
+        
+        // 取消订单
+        function cancelOrder(orderNo) {
+            if (confirm('确定要取消该订单吗？')) {
+                showLoading();
+                $.authAjax({
+                    url: '/api/order/cancel',
+                    type: 'POST',
+                    data: { orderNo: orderNo },
+                    success: function(data) {
+                        hideLoading();
+                        if (data.code === 200) {
+                            alert('订单已取�?);
+                            loadOrders('all');
+                        } else {
+                            alert('取消失败�? + data.message);
+                        }
+                    },
+                    error: function() {
+                        hideLoading();
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            }
+        }
+        
+        // 去支�?
+        function goPayment(orderNo) {
+            window.location.href = '/api/payment?orderNo=' + orderNo;
+        }
+        
+        // 确认收货
+        function confirmReceipt(orderNo) {
+            if (confirm('确认已收到商品吗�?)) {
+                showLoading();
+                $.authAjax({
+                    url: '/api/order/confirm-receipt',
+                    type: 'POST',
+                    data: { orderNo: orderNo },
+                    success: function(data) {
+                        hideLoading();
+                        if (data.code === 200) {
+                            alert('收货成功');
+                            loadOrders('all');
+                        } else {
+                            alert('收货失败�? + data.message);
+                        }
+                    },
+                    error: function() {
+                        hideLoading();
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            }
+        }
+        
+        // 查看订单详情
+        function viewOrderDetail(orderNo) {
+            window.location.href = '/api/order/detail?orderNo=' + orderNo;
+        }
+    </script>
+    
+    <!-- 页脚 -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>关于我们</h4>
+                    <p>黑科易购是一家专注于电子产品销售的电商平台，提供优质的购物体验和完善的售后服务�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h4>快速链�?/h4>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/api/product/list">商品列表</a></li>
+                        <li><a href="/api/auth/login">登录</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h4>联系我们</h4>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>© 2024 黑科易购 版权所�?/p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

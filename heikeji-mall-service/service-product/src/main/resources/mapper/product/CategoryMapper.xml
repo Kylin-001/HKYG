@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.product.mapper.CategoryMapper">
+
+    <sql id="Base_Column_List">
+        id, name, parent_id, icon, sort_order, status, level, created_by, created_time, updated_by, updated_time, deleted
+    </sql>
+
+    <select id="selectEnabledCategories" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            status = 1
+            AND deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <select id="selectCategoriesByStatus" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            status = #{status}
+            AND deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <select id="selectCategoriesBySort" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <select id="selectSubCategoriesByParentId" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            parent_id = #{parentId}
+            AND deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <select id="selectAllWithRelations" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <select id="selectEnabledCategoryTree" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            status = 1
+            AND deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <!-- 计算分类深度 -->
+    <select id="selectCategoryDepth" resultType="java.lang.Integer">
+        WITH RECURSIVE category_path AS (
+            SELECT 
+                id, parent_id, 1 as depth
+            FROM 
+                category
+            WHERE 
+                id = #{categoryId}
+                AND deleted = 0
+            UNION ALL
+            SELECT 
+                c.id, c.parent_id, cp.depth + 1
+            FROM 
+                category c
+            JOIN 
+                category_path cp ON c.id = cp.parent_id
+            WHERE 
+                c.parent_id != 0
+                AND c.deleted = 0
+        )
+        SELECT 
+            MAX(depth) as category_depth
+        FROM 
+            category_path
+    </select>
+
+    <!-- 检查是否存在启用状态的子分类 -->
+    <select id="countEnabledSubCategories" resultType="java.lang.Integer">
+        WITH RECURSIVE sub_categories AS (
+            SELECT 
+                id
+            FROM 
+                category
+            WHERE 
+                parent_id = #{categoryId}
+                AND deleted = 0
+            UNION ALL
+            SELECT 
+                c.id
+            FROM 
+                category c
+            JOIN 
+                sub_categories sc ON c.parent_id = sc.id
+            WHERE 
+                c.deleted = 0
+        )
+        SELECT 
+            COUNT(*)
+        FROM 
+            category
+        WHERE 
+            id IN (SELECT id FROM sub_categories)
+            AND status = 1
+    </select>
+
+    <!-- 检查是否存在子分类 -->
+    <select id="countSubCategories" resultType="java.lang.Integer">
+        WITH RECURSIVE sub_categories AS (
+            SELECT 
+                id
+            FROM 
+                category
+            WHERE 
+                parent_id = #{categoryId}
+                AND deleted = 0
+            UNION ALL
+            SELECT 
+                c.id
+            FROM 
+                category c
+            JOIN 
+                sub_categories sc ON c.parent_id = sc.id
+            WHERE 
+                c.deleted = 0
+        )
+        SELECT 
+            COUNT(*)
+        FROM 
+            sub_categories
+    </select>
+
+    <!-- 获取完整分类路径 -->
+    <select id="selectCategoryPath" resultType="com.heikeji.mall.product.entity.Category">
+        WITH RECURSIVE category_path AS (
+            SELECT 
+                <include refid="Base_Column_List" />
+            FROM 
+                category
+            WHERE 
+                id = #{categoryId}
+                AND deleted = 0
+            UNION ALL
+            SELECT 
+                c.*
+            FROM 
+                category c
+            JOIN 
+                category_path cp ON c.id = cp.parent_id
+            WHERE 
+                c.parent_id != 0
+                AND c.deleted = 0
+        )
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category_path
+        ORDER BY 
+            level ASC
+    </select>
+
+    <!-- 获取父分类列表 -->
+    <select id="selectParentCategories" resultType="com.heikeji.mall.product.entity.Category">
+        WITH RECURSIVE parent_path AS (
+            SELECT 
+                <include refid="Base_Column_List" />
+            FROM 
+                category
+            WHERE 
+                id = #{categoryId}
+                AND deleted = 0
+            UNION ALL
+            SELECT 
+                c.*
+            FROM 
+                category c
+            JOIN 
+                parent_path pp ON c.id = pp.parent_id
+            WHERE 
+                c.parent_id != 0
+                AND c.deleted = 0
+        )
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            parent_path
+        WHERE 
+            id != #{categoryId}
+        ORDER BY 
+            level ASC
+    </select>
+
+    <!-- 查询指定层级的分类 -->
+    <select id="selectCategoriesByLevel" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            level = #{level}
+            AND deleted = 0
+        ORDER BY 
+            sort_order ASC
+    </select>
+
+    <!-- 根据分类ID列表查询 -->
+    <select id="selectCategoriesByIds" resultType="com.heikeji.mall.product.entity.Category">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            category
+        WHERE 
+            id IN
+            <foreach item="id" collection="ids" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            AND deleted = 0
+    </select>
+
+    <!-- 检查分类名称是否存在 -->
+    <select id="checkCategoryNameExists" resultType="java.lang.Integer">
+        SELECT 
+            COUNT(*)
+        FROM 
+            category
+        WHERE 
+            name = #{name}
+            AND deleted = 0
+            <if test="id != null">
+                AND id != #{id}
+            </if>
+    </select>
+</mapper>

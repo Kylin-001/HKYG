@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单结算 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        .order-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+        .order-summary {
+            text-align: right;
+            padding: 10px 0;
+        }
+        .submit-order {
+            margin-top: 20px;
+            margin-bottom: 50px;
+            text-align: right;
+        }
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+        .payment-method input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+        }
+        .price-text {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .order-btn {
+            padding: 10px 30px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/api/checkout">确认订单</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/order/list">我的订单</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将根据登录状态动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 加载遮罩�?-->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container mt-4">
+        <h2>确认订单信息</h2>
+        
+        <!-- 收货地址 -->
+        <div class="section">
+            <div class="section-title">收货地址</div>
+            <div id="address-list">
+                <div class="address-item p-3 border rounded mb-2" data-id="1">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input address-radio" name="address" value="1" checked>
+                        <label class="form-check-label ml-2">
+                            <strong>张三</strong> 13800138000<br>
+                            <span>北京市朝阳区中关村大�?�?/span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button id="add-address-btn" class="btn btn-outline-secondary btn-sm mt-2">
+                <i class="fas fa-plus"></i> 添加新地址
+            </button>
+        </div>
+
+        <!-- 支付方式 -->
+        <div class="section">
+            <div class="section-title">支付方式</div>
+            <div class="payment-method">
+                <input type="radio" name="payment" id="payment-wechat" value="wechat" checked>
+                <label for="payment-wechat">微信支付</label>
+            </div>
+            <div class="payment-method">
+                <input type="radio" name="payment" id="payment-alipay" value="alipay">
+                <label for="payment-alipay">支付�?/label>
+            </div>
+            <div class="payment-method">
+                <input type="radio" name="payment" id="payment-card" value="card">
+                <label for="payment-card">银行卡支�?/label>
+            </div>
+        </div>
+        
+        <!-- 订单商品 -->
+        <div class="section">
+            <div class="section-title">订单商品</div>
+            <div id="order-items">
+                <!-- 订单商品列表将通过JS动态加�?-->
+            </div>
+        </div>
+
+        <!-- 订单备注 -->
+        <div class="section">
+            <div class="section-title">订单备注</div>
+            <textarea class="form-control" id="orderRemark" rows="3" placeholder="请输入订单备注（选填�?></textarea>
+        </div>
+        
+        <!-- 订单金额 -->
+        <div class="section">
+            <div class="section-title">订单金额</div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="couponCode">优惠�?/label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="couponCode" placeholder="请输入优惠码">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" onclick="applyCoupon()">应用</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="order-summary">
+                        <p>商品总价�?span class="text-danger">¥<span id="subtotal">0.00</span></span></p>
+                        <p>运费�?span>¥<span id="freight">0.00</span></span></p>
+                        <p>优惠�?span class="text-success">-¥<span id="discount">0.00</span></span></p>
+                        <hr>
+                        <p class="font-weight-bold">应付金额�?span class="text-danger" style="font-size: 1.5em;">¥<span id="total-amount">0.00</span></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 提交订单 -->
+        <div class="submit-order">
+            <button id="submit-order-btn" class="btn btn-danger order-btn">提交订单</button>
+        </div>
+    </div>
+
+    <!-- 支付结果提示模态框 -->
+    <div class="modal fade" id="payment-result-modal" tabindex="-1" aria-labelledby="payment-result-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="payment-result-modal-label">订单提交成功</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您的订单已创建成功，订单号：<strong id="order-no-text"></strong></p>
+                    <p>请尽快完成支�?/p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">稍后支付</button>
+                    <button type="button" id="go-pay-btn" class="btn btn-primary">立即支付</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储订单商品数据
+        let orderItems = [];
+        let productDetails = {};
+        let directBuy = false;
+        let orderNo = '';
+
+        $(document).ready(function() {
+            // 更新导航栏用户状�?
+            updateUserMenu();
+            
+            // 检查登录状�?
+            // 检查登录状态，如果未登录则跳转
+            if (!authUtils.checkLogin()) {
+                return;
+            }
+            // 加载订单商品数据
+            loadOrderItems();
+            
+            // 提交订单按钮点击事件
+            $('#submit-order-btn').click(function() {
+                const addressId = $('input[name="address"]:checked').val();
+                submitOrder(addressId);
+            });
+            
+            // 立即支付按钮点击事件
+            $('#go-pay-btn').click(function() {
+                const paymentType = $('input[name="payment"]:checked').val();
+                window.location.href = `/api/payment?orderNo=${orderNo}&paymentMethod=${paymentType}`;
+            });
+        });
+
+        // 加载订单商品数据
+        function loadOrderItems() {
+            showLoading();
+            
+            // 检查是否是直接购买模式
+            const directBuyFlag = localStorage.getItem('directBuyFlag');
+            
+            if (directBuyFlag === 'true') {
+                directBuy = true;
+                const productData = localStorage.getItem('directBuyItem');
+                
+                if (productData) {
+                    const product = JSON.parse(productData);
+                    
+                    // 保存到订单商品列�?
+                    orderItems = [{
+                        productId: product.productId,
+                        quantity: product.quantity
+                    }];
+                    
+                    // 从本地存储中删除
+                    localStorage.removeItem('directBuyFlag');
+                    localStorage.removeItem('directBuyItem');
+                    
+                    // 获取商品详情
+                    fetchProductDetails([product.productId]);
+                } else {
+                    // 如果直接购买数据丢失，跳转至购物车页�?
+                    hideLoading();
+                    alert('购买信息丢失，请重新选择商品');
+                    window.location.href = '/api/cart';
+                }
+            } else {
+                // 从购物车选择的商�?
+                const cartItemsData = localStorage.getItem('cartCheckoutItems');
+                if (cartItemsData) {
+                    orderItems = JSON.parse(cartItemsData);
+                    
+                    // 从本地存储中删除
+                    localStorage.removeItem('directBuyFlag');
+                    localStorage.removeItem('cartCheckoutItems');
+                    
+                    // 获取所有商品ID
+                    const productIds = orderItems.map(item => item.productId);
+                    // 获取商品详情
+                    fetchProductDetails(productIds);
+                } else {
+                    // 加载购物车数�?
+                    loadCartItems();
+                }
+            }
+        }
+
+        // 加载购物车数�?
+        function loadCartItems() {
+            $.authAjax({
+                url: '/api/cart/list',
+                type: 'GET',
+                success: function(response) {
+                    hideLoading();
+                    
+                    if (response.code === 200 && response.data && response.data.length > 0) {
+                        const cartItems = response.data;
+                        let subtotal = 0;
+                        
+                        const itemsHtml = cartItems.map(item => {
+                            const itemTotal = item.productPrice * item.quantity;
+                            subtotal += itemTotal;
+                            
+                            return `
+                                <div class="order-item row align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="${item.productImage || '/images/default-product.jpg'}" alt="${item.productName}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a href="/api/product/detail/${item.productId}" class="text-dark">${item.productName}</a>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                <span>¥{item.productPrice.toFixed(2)}</span>
+                            </div>
+                                    <div class="col-md-2 text-center">
+                                        <span>x${item.quantity}</span>
+                                    </div>
+                                    <div class="col-md-2 text-right">
+                                <span class="text-danger">¥{itemTotal.toFixed(2)}</span>
+                            </div>
+                                </div>
+                            `;
+                        }).join('');
+                        
+                        $('#order-items').html(itemsHtml);
+                        
+                        // 更新订单金额
+                        $('#subtotal').text(subtotal.toFixed(2));
+                        $('#freight').text('0.00'); // 免运�?
+                        $('#discount').text('0.00'); // 暂无优惠
+                        $('#total-amount').text(subtotal.toFixed(2));
+                    } else {
+                        $('#order-items').html('<p class="text-center py-3">购物车为空，无法提交订单</p>');
+                        $('#submit-order-btn').attr('disabled', 'disabled');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('加载订单商品失败');
+                }
+            });
+        }
+
+        // 获取商品详情
+        function fetchProductDetails(productIds) {
+            if (productIds.length === 0) {
+                hideLoading();
+                return;
+            }
+            
+            $.authAjax({
+                url: '/api/product/batch',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(productIds),
+                success: function(response) {
+                    hideLoading();
+                    
+                    if (response.code === 200 && response.data) {
+                        // 构建商品详情映射
+                        response.data.forEach(product => {
+                            productDetails[product.id] = product;
+                        });
+                        
+                        // 渲染订单商品
+                        renderOrderProducts();
+                        
+                        // 计算订单金额
+                        calculateOrderAmount();
+                    } else {
+                        alert('获取商品信息失败，请稍后重试');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('网络异常，请稍后重试');
+                }
+            });
+        }
+
+        // 渲染订单商品
+        function renderOrderProducts() {
+            const productsContainer = $('#order-items');
+            productsContainer.empty();
+            
+            orderItems.forEach(item => {
+                const product = productDetails[item.productId] || {};
+                const price = product.price || 0;
+                const subtotal = (price * item.quantity).toFixed(2);
+                const imageUrl = product.mainImage || '/images/default-product.jpg';
+                
+                const productHtml = `
+                    <div class="order-item row align-items-center">
+                        <div class="col-md-2">
+                                <img src="${imageUrl}" alt="${product.name || '商品'}">
+                            </div>
+                            <div class="col-md-4">
+                                <a href="/api/product/detail/${item.productId}" class="text-dark">${product.name || '商品'}</a>
+                            </div>
+                        <div class="col-md-2 text-center">
+                                <span>¥{price.toFixed(2)}</span>
+                            </div>
+                        <div class="col-md-2 text-center">
+                            <span>x${item.quantity}</span>
+                        </div>
+                        <div class="col-md-2 text-right">
+                                <span class="text-danger">¥{subtotal}</span>
+                            </div>
+                    </div>
+                `;
+                
+                productsContainer.append(productHtml);
+            });
+        }
+
+        // 计算订单金额
+        function calculateOrderAmount() {
+            let subtotal = 0;
+            const freight = 0; // 免运�?
+            const discount = 0; // 暂无优惠
+            
+            orderItems.forEach(item => {
+                const product = productDetails[item.productId] || {};
+                const price = product.price || 0;
+                subtotal += price * item.quantity;
+            });
+            
+            const totalAmount = subtotal - discount + freight;
+            
+            $('#subtotal').text(subtotal.toFixed(2));
+            $('#freight').text(freight.toFixed(2));
+            $('#discount').text(discount.toFixed(2));
+            $('#total-amount').text(totalAmount.toFixed(2));
+        }
+
+        // 应用优惠�?
+        function applyCoupon() {
+            const couponCode = $('#couponCode').val().trim();
+            if (!couponCode) {
+                alert('请输入优惠券');
+                return;
+            }
+            
+            // 模拟优惠券验�?
+            alert('优惠券暂未开放使�?);
+        }
+
+        // 提交订单
+        function submitOrder(addressId) {
+            // 检查商品库�?
+            checkProductStock(addressId);
+        }
+
+        // 检查商品库�?
+        function checkProductStock(addressId) {
+            showLoading();
+            
+            $.authAjax({
+                url: '/api/cart/check-stock',
+                type: 'GET',
+                success: function(response) {
+                    hideLoading();
+                    
+                    let hasStockIssues = false;
+                    let errorMessage = '';
+                    
+                    // 适配不同的响应格�?code�?00�?)
+                    if ((response.code === 200 || response.code === 0) && response.data && response.data.length > 0) {
+                        // 有库存不足的商品
+                    hasStockIssues = true;
+                    errorMessage = '以下商品库存不足：\n';
+                        response.data.forEach(msg => {
+                            errorMessage += msg + '\n';
+                        });
+                        alert(errorMessage);
+                    }
+                    
+                    // 即使有库存问题也允许用户继续，但会提�?
+                    if (!hasStockIssues || confirm('部分商品库存不足，是否继续提交订单？')) {
+                        // 提交订单
+                        doSubmitOrder(addressId);
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    console.error('库存检查失�?);
+                    
+                    // 库存检查失败也允许用户继续提交订单
+                    if (confirm('库存检查失败，是否继续提交订单�?)) {
+                        doSubmitOrder(addressId);
+                    }
+                }
+            });
+        }
+
+        // 执行订单提交
+        function doSubmitOrder(addressId) {
+            // 构建订单数据，确保与后端OrderController期望的格式一�?
+            const orderData = {
+                addressId: addressId,
+                payType: mapPaymentMethod($('input[name="payment"]:checked').val()),
+                orderRemark: $('#orderRemark').val().trim(),
+                couponCode: null,
+                isDirectBuy: directBuy
+            };
+            
+            // 如果是直接购买模式，添加商品信息
+            if (directBuy && orderItems.length > 0) {
+                orderData.productId = orderItems[0].productId;
+                orderData.productNum = orderItems[0].quantity;
+            }
+            
+            showLoading();
+            
+            $.authAjax({
+                url: '/api/order/create',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(orderData),
+                success: function(response) {
+                    hideLoading();
+                    
+                    // 根据后端返回格式调整处理逻辑
+                    // 后端可能返回AjaxResult格式
+                    if ((response.code === 200 || response.code === 0) && (response.data || response.orderNo)) {
+                        // 保存订单�?
+                    orderNo = response.data ? (response.data.orderNo || response.data) : response.orderNo;
+                        $('#order-no-text').text(orderNo);
+                        
+                        // 如果是直接购买，不需要从购物车删�?
+                        if (!directBuy) {
+                            // 从购物车删除已购买的商品
+                        deletePurchasedItems();
+                        }
+                        
+                        // 显示支付结果提示模态框
+                        $('#payment-result-modal').modal('show');
+                    } else {
+                        alert('创建订单失败�? + (response.msg || response.message || '未知错误'));
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('网络异常，请稍后重试');
+                }
+            });
+        }
+        
+        // 将前端支付方式映射为后端支付类型数字
+        function mapPaymentMethod(paymentMethod) {
+            switch(paymentMethod) {
+                case 'wechat':
+                    return 1; // 微信支付
+                case 'alipay':
+                    return 2; // 支付�?
+                case 'card':
+                    return 3; // 银行卡支�?
+                default:
+                    return 1; // 默认微信支付
+            }
+        }
+
+        // 删除已购买的商品
+        function deletePurchasedItems() {
+            const productIds = orderItems.map(item => item.productId);
+            
+            $.authAjax({
+                url: '/api/cart/batch-delete',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(productIds),
+                success: function(response) {
+                    // 删除购物车商品成功或失败不影响订单流�?
+                },
+                error: function() {
+                    // 静默错误
+```             }
+            });
+        }
+
+        // 显示加载遮罩�?
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 隐藏加载遮罩�?
+        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 更新导航栏用户状�?
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            if (authUtils.isLoggedIn()) {
+                const username = authUtils.getUsername() || '用户';
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${username}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/api/order/list">我的订单</a>
+                            <a class="dropdown-item" href="/api/cart">购物�?/a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="logout()">退出登�?/a>
+                        </div>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户退�?
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+    </div>
+    <!-- 页脚 -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为用户提供高品质的电子产品和优质的购物体验�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                      <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 版权所�?/p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

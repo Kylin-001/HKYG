@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布跑腿需�?- 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* 加载遮罩层样�?*/
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        /* 表单样式 */
+        .form-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        /* 表单组间�?*/
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        /* 表单标签样式 */
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        /* 按钮组样�?*/
+        .btn-group {
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/category/list">商品分类</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将通过JavaScript动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区�?-->
+    <main class="container mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>发布跑腿需�?/h2>
+            <a href="/api/delivery/request/list" class="btn btn-outline-primary">返回列表</a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-card bg-white">
+                    <form id="requestForm" onsubmit="return false;">
+                        <!-- 需求类�?-->
+                        <div class="form-group">
+                            <label for="requestType" class="form-label">需求类�?*</label>
+                            <select id="requestType" class="form-select" required>
+                                <option value="" disabled selected>请选择需求类�?/option>
+                                <option value="1">取快�?/option>
+                                <option value="2">代购</option>
+                                <option value="3">代办</option>
+                            </select>
+                        </div>
+
+                        <!-- 需求标�?-->
+                        <div class="form-group">
+                            <label for="title" class="form-label">需求标�?*</label>
+                            <input type="text" id="title" class="form-control" placeholder="请输入需求标�? maxlength="100" required>
+                        </div>
+
+                        <!-- 需求描�?-->
+                        <div class="form-group">
+                            <label for="description" class="form-label">需求描�?*</label>
+                            <textarea id="description" class="form-control" rows="4" placeholder="请详细描述您的需求，包括物品信息、时间要求等" maxlength="500" required></textarea>
+                        </div>
+
+                        <!-- 取件地址 -->
+                        <div class="form-group">
+                            <label for="pickupAddress" class="form-label">取件地址 *</label>
+                            <input type="text" id="pickupAddress" class="form-control" placeholder="请输入取件地址" maxlength="200" required>
+                            <div class="form-text">请提供详细的取件位置信息，如菜鸟驿站具体位置�?/div>
+                        </div>
+
+                        <!-- 取件码（仅取快递类型显示）--<div id="pickupCodeGroup" class="form-group" style="display: none;">
+                            <label for="pickupCode" class="form-label">取件�?*</label>
+                            <input type="text" id="pickupCode" class="form-control" placeholder="请输入快递取件码" maxlength="50">
+                        </div>
+
+                        <!-- 送达地址 --<div class="form-group">
+                            <label for="deliveryAddress" class="form-label">送达地址 *</label>
+                            <input type="text" id="deliveryAddress" class="form-control" placeholder="请输入送达地址" maxlength="200" required>
+                            <div class="form-text">请提供详细的送达位置信息，如寝室楼号、具体位置等</div>
+                        </div>
+
+                        <!-- 悬赏金额 --<div class="form-group">
+                            <label for="rewardAmount" class="form-label">悬赏金额（元�?</label>
+                            <input type="number" id="rewardAmount" class="form-control" min="0.01" step="0.01" placeholder="请输入悬赏金�? required>
+                            <div class="form-text">请根据跑腿难度、距离等因素合理设置悬赏金额</div>
+                        </div>
+
+                        <!-- 联系方式（默认使用用户注册信息）--<div class="form-group">
+                            <label class="form-label">联系方式</label>
+                            <div class="alert alert-info mb-0">
+                                系统将使用您的注册信息作为联系方式，请确保信息准确�?                            </div>
+                        </div>
+
+                        <!-- 提交按钮 --<div class="form-group text-center mt-5">
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg px-5">发布需�?/button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为黑龙江科技大学的学生提供便捷的校园生活服务，包括外卖、跑腿等多种功能�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>客服电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载�?..</span>
+        </div>
+    </div>
+
+    <!-- 引入 jQuery -->
+<script src="/js/jquery.min.js"></script>
+    <!-- 引入 Bootstrap JS -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入认证工具 -->
+    <script src="/js/auth-utils.js"></script>
+    <script>
+        // 更新用户菜单
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            const userInfo = authUtils.getUserInfo();
+            
+            if (userInfo) {
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            ${userInfo.username || '用户'}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/api/order/list">我的订单</a></li>
+                            <li><a class="dropdown-item" href="/api/takeout/order/list">我的外卖</a></li>
+                            <li><a class="dropdown-item" href="/api/delivery/request/list">我的跑腿</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登�?/a></li>
+                        </ul>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户登出
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 显示加载状�?        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+        
+        // 隐藏加载状�?        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 表单验证
+        function validateForm() {
+            const requestType = $('#requestType').val();
+            const title = $('#title').val().trim();
+            const description = $('#description').val().trim();
+            const pickupAddress = $('#pickupAddress').val().trim();
+            const deliveryAddress = $('#deliveryAddress').val().trim();
+            const rewardAmount = $('#rewardAmount').val();
+            
+            // 基本验证
+            if (!requestType) {
+                alert('请选择需求类�?);
+                return false;
+            }
+            
+            if (!title) {
+                alert('请输入需求标�?);
+                return false;
+            }
+            
+            if (!description) {
+                alert('请输入需求描�?);
+                return false;
+            }
+            
+            if (!pickupAddress) {
+                alert('请输入取件地址');
+                return false;
+            }
+            
+            // 取快递类型必须输入取件码
+            if (requestType === '1' && !$('#pickupCode').val().trim()) {
+                alert('取快递类型必须输入取件码');
+                return false;
+            }
+            
+            if (!deliveryAddress) {
+                alert('请输入送达地址');
+                return false;
+            }
+            
+            if (!rewardAmount || parseFloat(rewardAmount) <= 0) {
+                alert('请输入有效的悬赏金额');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // 提交表单
+        function submitForm() {
+            if (!validateForm()) {
+                return;
+            }
+            
+            const formData = {
+                requestType: parseInt($('#requestType').val()),
+                title: $('#title').val().trim(),
+                description: $('#description').val().trim(),
+                pickupAddress: $('#pickupAddress').val().trim(),
+                pickupCode: $('#pickupCode').val().trim(),
+                deliveryAddress: $('#deliveryAddress').val().trim(),
+                rewardAmount: parseFloat($('#rewardAmount').val())
+            };
+            
+            showLoading();
+            $.authAjax({
+                url: '/api/delivery/request/create',
+                method: 'POST',
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('发布成功�?);
+                        window.location.href = '/api/delivery/request/list';
+                    } else {
+                        alert('发布失败�? + response.msg);
+                    }
+                },
+                error: function() {
+                    alert('发布失败，请稍后重试');
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+        
+        // 自动填充常用地址（以菜鸟驿站为例�?        function setupAutoFill() {
+            // 菜鸟驿站地址选项
+            const pickupAddresses = [
+                '黑龙江科技大学东区菜鸟驿站',
+                '黑龙江科技大学西区菜鸟驿站',
+                '黑龙江科技大学南区菜鸟驿站'
+            ];
+            
+            // 寝室楼地址选项
+            const dormAddresses = [
+                '黑龙江科技大学东区1号楼',
+                '黑龙江科技大学东区2号楼',
+                '黑龙江科技大学西区1号楼',
+                '黑龙江科技大学西区2号楼',
+                '黑龙江科技大学南区1号楼'
+            ];
+            
+            // 为取件地址添加快速选择按钮
+            const pickupAddressDiv = $('#pickupAddress').parent();
+            let quickPickupHtml = '\n<div class="d-flex flex-wrap gap-2 mt-2">\n';
+            pickupAddresses.forEach(addr => {
+                quickPickupHtml += `\n<button type="button" class="btn btn-outline-secondary btn-sm" onclick="$('#pickupAddress').val('${addr}')">${addr}</button>\n`;
+            });
+            quickPickupHtml += '\n</div>\n';
+            pickupAddressDiv.append(quickPickupHtml);
+            
+            // 为送达地址添加快速选择按钮
+            const deliveryAddressDiv = $('#deliveryAddress').parent();
+            let quickDeliveryHtml = '\n<div class="d-flex flex-wrap gap-2 mt-2">\n';
+            dormAddresses.forEach(addr => {
+                quickDeliveryHtml += `\n<button type="button" class="btn btn-outline-secondary btn-sm" onclick="$('#deliveryAddress').val('${addr}')">${addr}</button>\n`;
+            });
+            quickDeliveryHtml += '\n</div>\n';
+            deliveryAddressDiv.append(quickDeliveryHtml);
+        }
+        
+        // 页面加载完成后初始化
+        $(document).ready(function() {
+            // 检查登录状�?            if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            // 更新用户菜单
+            updateUserMenu();
+            
+            // 设置需求类型变化事�?            $('#requestType').change(function() {
+                if ($(this).val() === '1') {
+                    // 取快递类型显示取件码输入�?                    $('#pickupCodeGroup').show();
+                    $('#pickupCode').attr('required', true);
+                } else {
+                    // 其他类型隐藏取件码输入框
+                    $('#pickupCodeGroup').hide();
+                    $('#pickupCode').attr('required', false);
+                    $('#pickupCode').val('');
+                }
+            });
+            
+            // 设置自动填充功能
+            setupAutoFill();
+            
+            // 绑定表单提交事件
+            $('#submitBtn').click(function() {
+                submitForm();
+            });
+            
+            // 设置默认�?            $('#rewardAmount').val('3.00');
+        });
+    </script>
+</body>
+</html>

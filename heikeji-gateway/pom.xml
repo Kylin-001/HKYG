@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>heikeji-mall</artifactId>
+        <groupId>com.heikeji</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>heikeji-gateway</artifactId>
+    <name>heikeji-gateway</name>
+    <description>API网关模块</description>
+
+    <!-- 使用父项目中定义的版本变量 -->
+
+    <dependencies>
+        <!-- Spring Cloud Gateway -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+
+        <!-- Nacos服务发现 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!-- Nacos配置中心 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <!-- Spring Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Redis依赖（用于限流） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+
+        <!-- 监控指标 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- 日志增强 -->
+        <!-- 暂时注释掉，因为依赖无法解析 -->
+        <!-- <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-sleuth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
+        </dependency> -->
+
+        <!-- 自定义通用模块 -->
+        <dependency>
+            <groupId>com.heikeji</groupId>
+            <artifactId>common-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.heikeji</groupId>
+            <artifactId>common-security</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                    <addResources>true</addResources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

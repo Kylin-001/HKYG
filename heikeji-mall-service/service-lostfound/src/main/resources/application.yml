@@ -1,0 +1,42 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /api/lostfound
+
+spring:
+  application:
+    name: service-lostfound
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    type: com.alibaba.druid.pool.DruidDataSource
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/lostfound/**/*.xml
+  type-aliases-package: com.heikeji.mall.lostfound.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.heikeji.mall.lostfound: debug
+    com.baomidou.mybatisplus: debug
+
+# 自定义配置
+lostfound:
+  upload:
+    path: /opt/upload/lostfound
+    max-size: 10MB

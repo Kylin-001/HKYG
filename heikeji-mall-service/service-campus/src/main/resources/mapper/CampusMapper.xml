@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.campus.mapper.CampusMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.campus.entity.Campus">
+        <id column="id" property="id"/>
+        <result column="campus_name" property="campusName"/>
+        <result column="campus_code" property="campusCode"/>
+        <result column="address" property="address"/>
+        <result column="status" property="status"/>
+        <result column="sort" property="sort"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询启用的校区 -->
+    <select id="selectEnabledCampuses" resultMap="BaseResultMap">
+        SELECT * FROM campus WHERE status = 1 ORDER BY sort ASC, id ASC
+    </select>
+
+    <!-- 根据校区编码查询校区 -->
+    <select id="selectByCampusCode" resultMap="BaseResultMap">
+        SELECT * FROM campus WHERE campus_code = #{campusCode}
+    </select>
+
+</mapper>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .register-container {
+            max-width: 450px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        .register-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control {
+            height: 45px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding-left: 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #4dabf7;
+            box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.25);
+        }
+        .btn-primary {
+            width: 100%;
+            height: 45px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            background-color: #4dabf7;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #339af0;
+            transform: translateY(-1px);
+        }
+        .register-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        .register-footer a {
+            color: #4dabf7;
+            text-decoration: none;
+        }
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+        /* 加载遮罩�?*/
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        #loadingOverlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .register-error {
+            color: #f03e3e;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .form-check {
+            margin-bottom: 20px;
+        }
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+        }
+        .form-check-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .form-check-label a {
+            color: #4dabf7;
+            text-decoration: none;
+        }
+        .form-check-label a:hover {
+            text-decoration: underline;
+        }
+        .phone-code {
+            display: flex;
+            gap: 10px;
+        }
+        .phone-code input[type="text"] {
+            flex: 1;
+        }
+        .send-code-btn {
+            width: 120px;
+            height: 45px;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #e7f5ff;
+            color: #4dabf7;
+            border: 1px solid #4dabf7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .send-code-btn:hover:not(:disabled) {
+            background-color: #4dabf7;
+            color: white;
+        }
+        .send-code-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2 class="register-title">注册 黑科易购</h2>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <input type="text" class="form-control" id="username" placeholder="请输入学�?手机�? required>
+                <div id="username-error" class="register-error"></div>
+            </div>
+            
+            <div class="form-group phone-code">
+                <input type="text" class="form-control" id="phone" placeholder="请输入手机号" required>
+            </div>
+            <div id="phone-error" class="register-error"></div>
+            
+            <div class="form-group phone-code">
+                <input type="text" class="form-control" id="verificationCode" placeholder="请输入验证码" required>
+                <button type="button" class="send-code-btn" id="sendCodeBtn" onclick="sendVerificationCode()">获取验证�?/button>
+            </div>
+            <div id="verificationCode-error" class="register-error"></div>
+            
+            <div class="form-group">
+                <input type="password" class="form-control" id="password" placeholder="请输入密码（6-20位字母数字组合）" required>
+                <div id="password-error" class="register-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" class="form-control" id="confirmPassword" placeholder="请再次输入密�? required>
+                <div id="confirmPassword-error" class="register-error"></div>
+            </div>
+            
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                <label class="form-check-label" for="agreeTerms">
+                    我已阅读并同�?a href="#">用户协议</a> �?a href="#">隐私政策</a>
+                </label>
+            </div>
+            <div id="agreeTerms-error" class="register-error"></div>
+            
+            <button type="submit" class="btn btn-primary">注册</button>
+        </form>
+        
+        <div class="register-footer">
+            已有账号�?a href="/api/auth/login">立即登录</a>
+        </div>
+    </div>
+    
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay" style="display: none; display: flex;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载�?..</span>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>鍏充簬鎴戜滑</h5>
+                    <p>榛戠鏄撹喘鑷村姏浜庝负鐢ㄦ埛鎻愪緵楂樺搧璐ㄧ殑鐢靛瓙浜у搧鍜屼紭璐ㄧ殑璐墿浣撻獙銆?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // 显示加载遮罩�?       function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 隐藏加载遮罩�?       function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 发送验证码
+        function sendVerificationCode() {
+            const phone = $('#phone').val().trim();
+            const phoneError = $('#phone-error');
+            
+            // 验证手机�?           if (!phone) {
+                phoneError.text('请输入手机号').show();
+                return;
+            }
+            
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                phoneError.text('请输入正确的手机号格�?).show();
+                return;
+            }
+            
+            // 隐藏错误提示
+            phoneError.hide();
+            
+            // 调用发送验证码接口
+            showLoading();
+            $.ajax({
+                url: '/api/auth/send-code',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ phone: phone }),
+                success: function(data) {
+                    hideLoading();
+                    if (data.code === 200) {
+                        alert('验证码发送成功，请查�?);
+                        // 倒计�?
+                        let countdown = 60;
+                        const btn = $('#sendCodeBtn');
+                        btn.prop('disabled', true);
+                        btn.text(countdown + '秒后重新获取');
+                        
+                        const timer = setInterval(function() {
+                            countdown--;
+                            btn.text(countdown + '秒后重新获取');
+                            if (countdown <= 0) {
+                                clearInterval(timer);
+                                btn.prop('disabled', false);
+                                btn.text('获取验证�?);
+                            }
+                        }, 1000);
+                    } else {
+                        alert('验证码发送失败：' + (data.message || '请重�?) + '');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('网络错误，请稍后重试');
+                }
+            });
+        }
+        
+        // 注册表单提交
+        $('#registerForm').submit(function(e) {
+            e.preventDefault();
+            
+            // 重置错误提示
+            $('.register-error').hide();
+            
+            const username = $('#username').val().trim();
+            const phone = $('#phone').val().trim();
+            const verificationCode = $('#verificationCode').val().trim();
+            const password = $('#password').val().trim();
+            const confirmPassword = $('#confirmPassword').val().trim();
+            const agreeTerms = $('#agreeTerms').is(':checked');
+            
+            // 楠岃瘉琛ㄥ崟
+            let isValid = true;
+            
+            if (!username) {
+                $('#username-error').text('请输入学�?手机�?).show();
+                isValid = false;
+            }
+            
+            if (!phone) {
+                $('#phone-error').text('请输入手机号').show();
+                isValid = false;
+            } else if (!/^1[3-9]\d{9}$/.test(phone)) {
+                $('#phone-error').text('请输入正确的手机号格�?).show();
+                isValid = false;
+            }
+            
+            if (!verificationCode) {
+                $('#verificationCode-error').text('请输入验证码').show();
+                isValid = false;
+            }
+            
+            if (!password) {
+                $('#password-error').text('请输入密�?).show();
+                isValid = false;
+            } else if (!/^[a-zA-Z0-9]{6,20}$/.test(password)) {
+                $('#password-error').text('密码必须�?-20位字母数字组合！').show();
+                isValid = false;
+            }
+            
+            if (password !== confirmPassword) {
+                $('#confirmPassword-error').text('两次输入的密码不一�?).show();
+                isValid = false;
+            }
+            
+            if (!agreeTerms) {
+                $('#agreeTerms-error').text('请阅读并同意用户协议和隐私政�?).show();
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                return;
+            }
+            
+            // 调用注册接口
+            showLoading();
+            $.ajax({
+                url: '/api/auth/register',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: username,
+                    phone: phone,
+                    verificationCode: verificationCode,
+                    password: password
+                }),
+                success: function(data) {
+                    hideLoading();
+                    if (data.code === 200) {
+                        alert('注册成功，即将跳转到登录页面');
+                        // 跳转到登录页�?                       window.location.href = '/api/auth/login';
+                    } else {
+                        alert('注册失败�? + (data.message || '请重�?) + '');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('网络错误，请稍后重试');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

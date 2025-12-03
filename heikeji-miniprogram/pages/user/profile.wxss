@@ -1,0 +1,200 @@
+/* pages/user/profile.wxss */
+.container {
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.user-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 20rpx;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(102, 126, 234, 0.3);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  color: white;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-right: 24rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+  color: white;
+}
+
+.student-info {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-bottom: 4rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.campus-info {
+  font-size: 24rpx;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.edit-btn {
+  font-size: 28rpx;
+  color: white;
+  padding: 8rpx 16rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  border-radius: 20rpx;
+  background-color: transparent;
+}
+
+.stats-section {
+  display: flex;
+  margin: 0 20rpx;
+  background: white;
+  border-radius: 20rpx;
+  padding: 32rpx 0;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.stats-card {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-card:not(:last-child) {
+  border-right: 1rpx solid #f0f0f0;
+}
+
+.stats-number {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.menu-section {
+  margin: 20rpx;
+  background: white;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.menu-icon {
+  font-size: 32rpx;
+  margin-right: 24rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.menu-name {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.menu-arrow {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.action-section {
+  margin: 20rpx;
+  background: white;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.action-item:last-child {
+  border-bottom: none;
+}
+
+.action-icon {
+  font-size: 32rpx;
+  margin-right: 24rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.action-name {
+  font-size: 30rpx;
+  color: #333;
+  flex: 1;
+}
+
+.action-arrow {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 响应式适配 */
+@media (max-width: 750rpx) {
+  .container {
+    padding-bottom: 20rpx;
+  }
+  
+  .user-card {
+    margin: 10rpx;
+    padding: 24rpx;
+  }
+  
+  .stats-section {
+    margin: 10rpx;
+  }
+  
+  .menu-section {
+    margin: 10rpx;
+  }
+  
+  .action-section {
+    margin: 10rpx;
+  }
+}

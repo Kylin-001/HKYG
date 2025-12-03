@@ -1,0 +1,85 @@
+// 颜色变量
+$primary: #667eea;
+$primary-light: #764ba2;
+$success: #67c23a;
+$warning: #e6a23c;
+$danger: #f56c6c;
+$info: #909399;
+$text-primary: #303133;
+$text-regular: #606266;
+$text-secondary: #909399;
+$text-placeholder: #c0c4cc;
+$border-color: #dcdfe6;
+$border-light: #ebeef5;
+$background-color: #f5f7fa;
+$card-background: #ffffff;
+$hover-background: #f5f7fa;
+
+// 布局变量
+$header-height: 50px;
+$sideBarWidth: 220px;
+$logoHeight: 60px;
+$main-content-min-height: calc(100vh - #{$header-height});
+
+// 菜单相关颜色
+$menuBackground: #001529;
+$menuText: #ffffff;
+$menuActiveText: #409eff;
+$menuHover: rgba(255, 255, 255, 0.1);
+$subMenuBackground: #1f2d3d;
+
+// 滚动条相关
+$scrollbarWidth: 6px;
+$scrollbarColor: rgba(0, 0, 0, 0.3);
+$scrollbarTrackColor: rgba(0, 0, 0, 0.05);
+
+// 响应式断点
+$screen-xs: 480px;
+$screen-sm: 576px;
+$screen-md: 768px;
+$screen-lg: 992px;
+$screen-xl: 1200px;
+$screen-xxl: 1600px;
+
+// 阴影
+$box-shadow-base: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+$box-shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+// 边框圆角
+$border-radius-base: 4px;
+$border-radius-small: 2px;
+$border-radius-medium: 6px;
+$border-radius-large: 8px;
+$border-radius-round: 16px;
+$border-radius-circle: 50%;
+
+// 字体大小
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 20px;
+$font-size-xxl: 24px;
+
+// 间距
+$margin-xs: 4px;
+$margin-sm: 8px;
+$margin-base: 12px;
+$margin-md: 16px;
+$margin-lg: 20px;
+$margin-xl: 24px;
+$margin-xxl: 32px;
+
+$padding-xs: 4px;
+$padding-sm: 8px;
+$padding-base: 12px;
+$padding-md: 16px;
+$padding-lg: 20px;
+$padding-xl: 24px;
+$padding-xxl: 32px;
+
+// 动画时间
+$transition-time: 0.3s;
+$transition-time-fast: 0.2s;
+$transition-time-slow: 0.5s;

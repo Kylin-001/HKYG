@@ -1,0 +1,48 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /admin
+
+spring:
+  application:
+    name: heikeji-admin
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://192.168.110.162:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+
+# 日志配置
+logging:
+  level:
+    root: info
+    com.heikeji: debug
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+
+# 自定义配置
+admin:
+  security:
+    # 是否开启验证码
+    captchaEnabled: true
+    # 是否开启记住我
+    rememberMeEnabled: true
+    # token配置
+    token:
+      # token有效期（默认30分钟）
+      expireTime: 30
+      # 令牌自定义标识
+      header: Authorization
+      # 令牌前缀
+      tokenStartWith: Bearer

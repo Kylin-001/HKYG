@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.campus.mapper.CampusSiteMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.campus.entity.CampusSite">
+        <id column="id" property="id"/>
+        <result column="campus_id" property="campusId"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="description" property="description"/>
+        <result column="location" property="location"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="status" property="status"/>
+        <result column="sort" property="sort"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询站点列表 -->
+    <select id="selectSiteList" resultMap="BaseResultMap">
+        SELECT * FROM campus_site
+        <where>
+            <if test="params.campusId != null">
+                AND campus_id = #{params.campusId}
+            </if>
+            <if test="params.type != null and params.type != ''">
+                AND type = #{params.type}
+            </if>
+            <if test="params.status != null">
+                AND status = #{params.status}
+            </if>
+            <if test="params.name != null and params.name != ''">
+                AND name LIKE CONCAT('%', #{params.name}, '%')
+            </if>
+        </where>
+        ORDER BY sort ASC, create_time DESC
+    </select>
+
+    <!-- 根据ID查询站点 -->
+    <select id="selectSiteById" resultMap="BaseResultMap">
+        SELECT * FROM campus_site WHERE id = #{id}
+    </select>
+
+    <!-- 根据校区ID查询站点列表 -->
+    <select id="selectSitesByCampusId" resultMap="BaseResultMap">
+        SELECT * FROM campus_site WHERE campus_id = #{campusId} ORDER BY sort ASC, id ASC
+    </select>
+    
+    <!-- 根据类型查询站点列表 -->
+    <select id="selectSitesByType" resultMap="BaseResultMap">
+        SELECT * FROM campus_site WHERE type = #{type} AND status = 1 ORDER BY sort ASC, id ASC
+    </select>
+
+    <!-- 校验站点名称是否唯一 -->
+    <select id="checkSiteName" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM campus_site
+        WHERE name = #{params.name}
+        <if test="params.campusId != null">
+            AND campus_id = #{params.campusId}
+        </if>
+        <if test="params.id != null">
+            AND id != #{params.id}
+        </if>
+    </select>
+
+    <!-- 校验站点类型是否存在 -->
+    <select id="checkSiteType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM campus_site WHERE type = #{type}
+    </select>
+</mapper>

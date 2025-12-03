@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.takeout.mapper.TakeoutReviewMapper">
+
+    <select id="selectByMerchantId" resultType="com.heikeji.mall.takeout.entity.TakeoutReview">
+        SELECT * FROM takeout_review 
+        WHERE merchant_id = #{merchantId} 
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByUserId" resultType="com.heikeji.mall.takeout.entity.TakeoutReview">
+        SELECT * FROM takeout_review 
+        WHERE user_id = #{userId} 
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByOrderId" resultType="com.heikeji.mall.takeout.entity.TakeoutReview">
+        SELECT * FROM takeout_review 
+        WHERE order_id = #{orderId}
+    </select>
+
+    <select id="selectHighRatingReviews" resultType="com.heikeji.mall.takeout.entity.TakeoutReview">
+        SELECT * FROM takeout_review 
+        WHERE merchant_id = #{merchantId} 
+        AND rating >= 4 
+        ORDER BY create_time DESC 
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByTags" resultType="com.heikeji.mall.takeout.entity.TakeoutReview">
+        SELECT * FROM takeout_review 
+        WHERE merchant_id = #{merchantId}
+        <if test="tags != null and tags.size() > 0">
+            AND (
+                <foreach collection="tags" item="tag" separator=" OR ">
+                    JSON_CONTAINS(tags, #{tag}, '$')
+                </foreach>
+            )
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="updateHelpfulCount">
+        UPDATE takeout_review 
+        SET helpful_count = helpful_count + 1 
+        WHERE id = #{reviewId}
+    </update>
+
+</mapper>

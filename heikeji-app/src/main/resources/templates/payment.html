@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单支付 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-weight: bold;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        .payment-qrcode {
+            text-align: center;
+            padding: 20px;
+        }
+        .payment-qrcode img {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        .payment-status {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .payment-status-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .status-success {
+            color: #28a745;
+        }
+        .status-pending {
+            color: #ffc107;
+        }
+        .btn-group {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/api/order/list">我的订单</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将根据登录状态动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>订单支付</h2>
+        
+        <!-- 订单信息 -->
+        <div class="section">
+            <div class="section-title">订单信息</div>
+            <div class="order-info">
+                <p><strong>订单号：</strong><span id="order-no"></span></p>
+                <p><strong>支付金额�?/strong><span class="text-danger" id="payment-amount"></span></p>
+                <p><strong>订单状态：</strong><span id="order-status"></span></p>
+            </div>
+        </div>
+        
+        <!-- 支付状�?-->
+        <div class="section">
+            <div class="section-title">支付状�?/div>
+            <div id="payment-status-container" class="payment-status">
+                <div id="status-icon" class="payment-status-icon">�?/div>
+                <h3 id="status-text">请尽快完成支�?/h3>
+                <p id="status-desc">支付二维码有效期�?<span id="countdown">15:00</span></p>
+                <div id="qr-code-container" class="payment-qrcode d-none">
+                        <img id="qr-code-img" src="/images/payment-placeholder.png" alt="支付二维�? class="qrcode-image">
+                        <p class="qrcode-text">请使用微信扫码支�?/p>
+                        <button id="simulate-payment-btn" class="btn btn-primary mt-3" style="display: block; margin: 20px auto;">模拟支付成功</button>
+                    </div>
+                <div class="btn-group">
+                    <a href="/api/order/list" class="btn btn-secondary">查看我的订单</a>
+                    <a href="/" class="btn btn-primary">继续购物</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载�?..</span>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // 页面初始�?
+            updateUserMenu();
+            initPayment();
+        });
+        
+        // 支付相关变量
+        let orderNo = '';
+        let paymentAmount = '';
+        
+        // 初始化支付功�?
+        function initPayment() {
+            // 检查登录状态，如果未登录则跳转
+            if (!authUtils.checkLogin()) {
+                return;
+            }
+            
+            // 从URL获取订单�?
+            const urlParams = new URLSearchParams(window.location.search);
+            orderNo = urlParams.get('orderNo');
+            
+            if (!orderNo) {
+                showError('订单号不存在');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                return;
+            }
+            
+            // 显示订单�?
+            $('#order-no').text(orderNo);
+            
+            // 获取订单详情
+            getOrderDetail(orderNo);
+            
+            // 模拟支付成功按钮点击事件
+            $('#simulate-payment-btn').click(function() {
+                clearInterval(window.pollingTimer);
+                updatePaymentStatus(true);
+                $('#order-status').text('已支�?);
+            });
+        }
+        
+        // 获取订单详情
+        function getOrderDetail(orderNo) {
+            showLoading();
+            $.authAjax({
+                url: '/api/order/detail',
+                type: 'GET',
+                data: { orderNo: orderNo },
+                success: function(response) {
+                    hideLoading();
+                    if (response.code === 200 && response.data) {
+                        const order = response.data;
+                        paymentAmount = order.totalAmount + order.freightAmount;
+                        
+                        // 更新页面显示
+                        $('#payment-amount').text('¥' + paymentAmount.toFixed(2));
+                        updateOrderStatusText(order.status);
+                        
+                        // 如果订单未支付，创建支付
+                        if (order.status === 0) {
+                            createPayment(order.id, orderNo, paymentAmount, 1); // 默认微信支付
+                        } else if (order.status === 1) {
+                            // 如果订单已支付，直接显示成功
+                            updatePaymentStatus(true);
+                        }
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showError('获取订单信息失败');
+                }
+            });
+        }
+        
+        // 倒计时相关变�?
+        let countdownTimer = null;
+        const EXPIRY_TIME = 15 * 60; // 15分钟，单位秒
+        
+        // 创建支付订单
+        function createPayment(orderId, orderNo, amount, payType) {
+            showLoading();
+            $.authAjax({
+                url: '/api/payment/create',
+                type: 'POST',
+                data: { 
+                    orderId: orderId, 
+                    orderNo: orderNo, 
+                    amount: amount, 
+                    paymentType: getPaymentMethodValue(payType) 
+                },
+                success: function(response) {
+                    hideLoading();
+                    if ((response.code === 200 || response.code === 0) && response.data) {
+                        // 显示支付二维码区�?
+                        $('#qr-code-container').removeClass('d-none');
+                        
+                        // 生成支付二维�?
+                        generateQRCode(orderNo);
+                        
+                        // 开始轮询支付状�?
+                        startPolling(orderNo);
+                        
+                        // 开始倒计�?
+                        startCountdown();
+                    } else {
+                        showError('创建支付失败�? + (response.message || '未知错误'));
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    showError('创建支付订单失败');
+                }
+            });
+        }
+        
+        // 开始轮询支付状�?
+        function startPolling(orderNo) {
+            window.pollingTimer = setInterval(() => {
+                checkPaymentStatus(orderNo, window.pollingTimer);
+            }, 3000);
+        }
+        
+        // 开始倒计�?
+        function startCountdown() {
+            let seconds = EXPIRY_TIME;
+            updateCountdownDisplay(seconds);
+            
+            countdownTimer = setInterval(() => {
+                seconds--;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownTimer);
+                    clearInterval(window.pollingTimer);
+                    paymentTimeout();
+                    return;
+                }
+                
+                updateCountdownDisplay(seconds);
+            }, 1000);
+        }
+        
+        // 更新倒计时显�?
+        function updateCountdownDisplay(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            $('#countdown').text(formattedTime);
+        }
+        
+        // 支付超时处理
+        function paymentTimeout() {
+            $('#status-desc').text('支付已超时，请重新下�?);
+            $('#qr-code-container').addClass('d-none');
+            $('#status-icon').text('�?);
+            $('#status-text').text('支付超时');
+            
+            // 提示用户
+            alert('支付已超时，请重新下�?);
+            
+            // 可选：自动跳转回订单列�?           setTimeout(() => {
+                window.location.href = '/api/order/list';
+            }, 3000);
+        }
+        
+        // 生成二维�?
+        function generateQRCode(paymentInfo) {
+            // 模拟生成二维�?
+            const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('PAY_' + paymentInfo);
+            $('#qr-code-img').attr('src', qrCodeUrl);
+        }
+        
+        // 查询支付状�?
+        function checkPaymentStatus(orderNo, interval) {
+            $.authAjax({
+                url: '/api/payment/status?orderNo=' + orderNo,
+                type: 'GET',
+                success: function(response) {
+                    if (response.code === 200 && response.data) {
+                        const status = response.data;
+                        if (status === 1) { // 已支�?
+                            clearInterval(interval);
+                            clearInterval(countdownTimer);
+                            updatePaymentStatus(true);
+                            $('#order-status').text('已支�?);
+                        }
+                    }
+                },
+                error: function() {
+                    console.error('查询支付状态失�?);
+                }
+            });
+        }
+        
+        // 更新支付状态显�?
+        function updatePaymentStatus(isSuccess) {
+            const statusIcon = $('#status-icon');
+            const statusText = $('#status-text');
+            const statusDesc = $('#status-desc');
+            
+            if (isSuccess) {
+                statusIcon.text('�?);
+                statusIcon.addClass('status-success');
+                statusIcon.removeClass('status-pending');
+                statusText.text('支付成功');
+                statusDesc.text('您的订单已支付成�?);
+                $('#qr-code-container').addClass('d-none');
+                clearInterval(countdownTimer);
+            } else {
+                statusIcon.text('�?);
+                statusIcon.removeClass('status-success');
+                statusIcon.addClass('status-pending');
+                statusText.text('支付失败');
+                statusDesc.text('支付过程中出现错误，请重�?);
+            }
+        }
+        
+        // 更新订单状态文�?
+        function updateOrderStatusText(status) {
+            const statusMap = {
+                0: '待支�?,
+                1: '已支�?,
+                2: '已发�?,
+                3: '已完�?,
+                4: '已收�?
+            };
+            $('#order-status').text(statusMap[status] || '未知状�?);
+        }
+        
+        // 获取支付方式�?
+        function getPaymentMethodValue(payType) {
+            const paymentMap = {
+                'wechat': 1,
+                'alipay': 2,
+                'card': 3,
+                1: 1,  // 微信支付
+                2: 2,  // 支付�?
+                3: 3   // 银行�?
+            };
+            return paymentMap[payType] || 1;
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            alert(message);
+            console.error(message);
+        }
+        
+        // 显示加载遮罩�?
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 隐藏加载遮罩�?
+        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 更新导航栏用户状�?
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            if (authUtils.isLoggedIn()) {
+                const username = authUtils.getUsername() || '用户';
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${username}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/api/order/list">我的订单</a>
+                            <a class="dropdown-item" href="/api/cart">购物�?/a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="logout()">退出登�?/a>
+                        </div>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户登出
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+    </script>
+    
+    <!-- 页脚 -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>关于我们</h4>
+                    <p>黑科易购是一家专注于电子产品销售的电商平台，提供优质的购物体验和完善的售后服务�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h4>快速链�?/h4>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/api/product/list">商品列表</a></li>
+                        <li><a href="/api/auth/login">登录</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h4>联系我们</h4>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>© 2024 黑科易购 版权所�?/p>
+            </div>
+        </div>
+    </footer>
+    </body>
+</html>

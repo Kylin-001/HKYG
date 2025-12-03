@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外卖订单 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* 加载遮罩层样�?*/
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        /* 订单卡片样式 */
+        .order-card {
+            transition: box-shadow 0.3s;
+        }
+        .order-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        /* 配送状态标签样�?*/
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        /* 分页样式 */
+        .pagination {
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/category/list">商品分类</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将通过JavaScript动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区�?-->
+    <main class="container mt-5 mb-5">
+        <h2 class="text-center mb-4">我的外卖订单</h2>
+        
+        <!-- 订单状态筛�?-->
+        <div class="bg-light p-3 rounded mb-4">
+            <div class="d-flex justify-content-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm active" data-status="all">全部</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-status="0">待付�?/button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-status="1">已付�?/button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-status="2">配送中</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-status="3">已完�?/button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-status="4">已取�?/button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单列表 -->
+        <div id="orderList" class="space-y-4">
+            <!-- 订单列表将通过JavaScript动态生�?-->
+            <div class="text-center py-5">
+                <p>加载�?..</p>
+            </div>
+        </div>
+
+        <!-- 分页控件 -->
+        <div id="pagination" class="mt-5">
+            <!-- 分页将通过JavaScript动态生�?-->
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为黑龙江科技大学的学生提供优质的校园生活服务，包括外卖、跑腿等多种功能�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>客服电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载�?..</span>
+        </div>
+    </div>
+
+    <!-- 引入 jQuery -->
+<script src="/js/jquery.min.js"></script>
+    <!-- 引入 Bootstrap JS -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入认证工具 -->
+    <script src="/js/auth-utils.js"></script>
+    <script>
+        // 更新用户菜单
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            const userInfo = authUtils.getUserInfo();
+            
+            if (userInfo) {
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            ${userInfo.username || '用户'
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/api/order/list">我的订单</a></li>
+                            <li><a class="dropdown-item" href="/api/takeout/order/list">我的外卖</a></li>
+                            <li><a class="dropdown-item" href="/api/delivery/request/list">我的跑腿</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登�?/a></li>
+                        </ul>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户登出
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 显示加载状�?
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+        
+        // 隐藏加载状�?
+        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 获取状态显示文本和样式
+        function getStatusDisplay(status) {
+            const statusMap = {
+                0: { text: '待付�?, class: 'bg-warning bg-opacity-10 text-warning' },
+                1: { text: '已付�?, class: 'bg-primary bg-opacity-10 text-primary' },
+                2: { text: '配送中', class: 'bg-success bg-opacity-10 text-success' },
+                3: { text: '已完�?, class: 'bg-secondary bg-opacity-10 text-secondary' },
+                4: { text: '已取�?, class: 'bg-danger bg-opacity-10 text-danger'
+            };
+            return statusMap[status] || { text: '未知', class: 'bg-secondary bg-opacity-10 text-secondary' };
+        }
+        
+        // 获取配送方式显示文�?
+        function getDeliveryTypeDisplay(type) {
+            const typeMap = {
+                0: '外卖�?,
+                1: '特殊地点',
+                2: '送到�?
+            return typeMap[type] || '未知';
+        }
+        
+        // 加载订单列表
+        let currentPage = 1;
+        let currentStatus = 'all';
+        let totalPages = 1;
+        
+        function loadOrderList(pageNo = 1, status = 'all') {
+            showLoading();
+            $.authAjax({
+                url: '/api/takeout/order/page',
+                method: 'GET',
+                data: {
+                    pageNo: pageNo,
+                    pageSize: 10,
+                    status: status === 'all' ? null : status
+                },
+                success: function(response) {
+                    if (response.code === 200) {
+                        renderOrderList(response.data.records);
+                        currentPage = pageNo;
+                        totalPages = response.data.pages;
+                        renderPagination();
+                    } else {
+                        $('#orderList').html('<div class="text-center py-5"><p class="text-danger">加载失败�? + response.msg + '</p></div>');
+                    }
+                },
+                error: function() {
+                    $('#orderList').html('<div class="text-center py-5"><p class="text-danger">加载失败，请稍后重试</p></div>');
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+        
+        // 渲染订单列表
+        function renderOrderList(orders) {
+            if (!orders || orders.length === 0) {
+                $('#orderList').html('<div class="text-center py-5"><p>暂无订单记录</p></div>');
+                return;
+            }
+            
+            let html = '';
+            orders.forEach(order => {
+                const statusInfo = getStatusDisplay(order.status);
+                const deliveryType = getDeliveryTypeDisplay(order.deliveryType);
+                
+                html += `
+                <div class="order-card border rounded-lg p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="mb-0">订单号：${order.orderNo}</h5>
+                            <p class="text-sm text-gray-500">下单时间：{order.createTime || ''}</p>
+                        </div>
+                        <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                    </div>
+                    
+                    <div class="border-top border-bottom py-2 mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <span class="text-sm text-gray-600">商家�?/span>
+                                <span>${order.merchantName || '未知商家'}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-sm text-gray-600">配送方式：</span>
+                                <span>${deliveryType}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-sm text-gray-600">预计送达�?/span>
+                                <span>${order.estimatedTime || '待安�?}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="text-sm text-gray-600">订单金额�?/span>
+                                <span class="text-danger font-bold">¥${order.totalAmount || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="text-sm text-gray-600">商品数量�?/span>
+                                <span>${order.itemCount || 0} �?/span>
+                        </div>
+                        <div>
+                            <a href="/api/takeout/order/detail?orderNo=${order.orderNo}" class="btn btn-outline-primary btn-sm me-2">查看详情</a>
+                            ${order.status === 0 ? '<button class="btn btn-danger btn-sm" onclick="cancelOrder(\'' + order.orderNo + '\')">取消订单</button>' : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            $('#orderList').html(html);
+        }
+        
+        // 渲染分页
+        function renderPagination() {
+            let html = '';
+            
+            if (totalPages <= 1) {
+                html = '<div class="text-center"><p class="text-sm text-gray-500">�?1 �?/p></div>';
+            } else {
+                html = `
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="#" onclick="loadOrderList(${currentPage - 1}, '${currentStatus}')">上一�?/a>
+                        </li>
+                `;
+                
+                // 生成页码按钮
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadOrderList(${i}, '${currentStatus}')">${i}</a>
+                    </li>
+                    `;
+                }
+                
+                html += `
+                        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="#" onclick="loadOrderList(${currentPage + 1}, '${currentStatus}')">下一�?/a>
+                        </li>
+                    </ul>
+                </nav>
+                `;
+            }
+            
+            $('#pagination').html(html);
+        }
+        
+        // 取消订单
+        function cancelOrder(orderNo) {
+            if (confirm('确定要取消该订单吗？')) {
+                showLoading();
+                $.authAjax({
+                    url: '/api/takeout/order/cancel',
+                    method: 'POST',
+                    data: { orderNo: orderNo },
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('取消成功');
+                            loadOrderList(currentPage, currentStatus);
+                        } else {
+                            alert('取消失败�? + response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('取消失败，请稍后重试');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化
+        $(document).ready(function() {
+            // 检查登录状�?           if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            // 更新用户菜单
+            updateUserMenu();
+            
+            // 加载订单列表
+            loadOrderList();
+            
+            // 绑定状态选择按钮事件            $('.btn-group button').click(function() {
+                $('.btn-group button').removeClass('active');
+                $(this).addClass('active');
+                currentStatus = $(this).data('status');
+                loadOrderList(1, currentStatus);
+            });
+        });
+    </script>
+</body>
+</html>

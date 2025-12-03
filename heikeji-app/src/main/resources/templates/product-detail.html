@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .product-main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+        }
+        .image-thumbnails {
+            margin-top: 10px;
+        }
+        .image-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            margin-right: 10px;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+        .image-thumbnail.active {
+            border-color: #007bff;
+        }
+        .product-price {
+            color: #e74c3c;
+            font-size: 28px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .product-original-price {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 16px;
+        }
+        .product-info {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-input {
+            width: 50px;
+            height: 30px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            border-left: none;
+            border-right: none;
+        }
+        .btn-add-cart, .btn-buy-now {
+            padding: 10px 30px;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+        .product-detail-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                    <a class="nav-link" href="/api/product/list">商品列表</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/cart">购物�?/a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api/order/list">我的订单</a>
+                </li>
+                </ul>
+                <div class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将根据登录状态动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 面包屑导�?-->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">首页</a></li>
+                <li class="breadcrumb-item"><a href="/api/product/list">商品列表</a></li>
+                <li class="breadcrumb-item active" aria-current="page" id="breadcrumbProductName"></li>
+            </ol>
+        </nav>
+
+        <!-- 加载中状�?-->
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">加载�?..</span>
+            </div>
+        </div>
+
+        <!-- 商品信息区域 -->
+        <div id="productDetail" style="display: none;">
+            <div class="row">
+                <!-- 商品图片 -->
+                <div class="col-md-6">
+                    <img id="mainImage" src="" alt="商品图片" class="product-main-image">
+                    <div class="image-thumbnails" id="imageThumbnails">
+                        <!-- 缩略图会动态加�?-->
+                    </div>
+                </div>
+
+                <!-- 商品信息 -->
+                <div class="col-md-6">
+                    <h1 id="productName" class="mb-3"></h1>
+                    <p id="productSubtitle" class="text-muted mb-4"></p>
+
+                    <div class="product-info">
+                        <div class="d-flex items-center mb-3">
+                            <span class="product-price" id="productPrice"></span>
+                              <span class="product-original-price" id="productOriginalPrice"></span>
+                          </div>
+                        <div class="mb-2">
+                            <span class="text-muted mr-2">销�?</span>
+                            <span id="productSales"></span>
+                        </div>
+                        <div>
+                            <span class="text-muted mr-2">库存:</span>
+                            <span id="productStock"></span>
+                        </div>
+                    </div>
+
+                    <!-- 购买数量 -->
+                    <div class="quantity-control">
+                        <span class="text-muted mr-2">数量:</span>
+                        <button class="quantity-btn" onclick="changeQuantity(-1)">-</button>
+                        <input type="number" id="quantity" class="quantity-input" value="1" min="1" onchange="validateQuantity()">
+                        <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="mt-4">
+                        <button class="btn btn-primary btn-add-cart" onclick="addToCart()">加入购物�?/button>
+                        <button class="btn btn-danger btn-buy-now" onclick="buyNow()">立即购买</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品详情 -->
+            <div class="product-detail-section">
+                <h3 class="section-title">商品详情</h3>
+                <div id="productDetailContent" class="text-muted">
+                    <!-- 商品详情会动态加�?-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/auth-utils.js"></script>
+    <script>
+        // 更新导航栏用户状�?
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            if (authUtils.isLoggedIn()) {
+                const username = authUtils.getUsername() || '用户';
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${username}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="/api/order/list">鎴戠殑璁㈠崟</a>
+                        <a class="dropdown-item" href="/api/cart">璐墿杞?/a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="logout()">閫€鍑虹櫥褰?/a>
+                        </div>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">鐧诲�?/a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 鏄剧ず鍔犺浇閬僵灞?        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 闅愯棌鍔犺浇閬僵灞?        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+
+        // 鐢ㄦ埛鐧诲嚭
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('宸查€€鍑虹櫥褰?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 椤甸潰鍔犺浇鏃舵洿鏂扮敤鎴疯彍鍗?        $(document).ready(function() {
+            updateUserMenu();
+        });
+    </script>
+    <script>
+        let productId = null;
+        let productData = null;
+
+        $(function() {
+            // 浠嶶RL鑾峰彇鍟嗗搧ID
+            const urlParams = new URLSearchParams(window.location.search);
+            productId = urlParams.get('productId') || window.location.pathname.split('/').pop();
+            
+            if (productId) {
+                loadProductDetail();
+            } else {
+                alert('鍟嗗搧ID涓嶅瓨鍦?);
+                window.history.back();
+            }
+        });
+
+        // 鍔犺浇鍟嗗搧璇︽�?
+        function loadProductDetail() {
+            showLoading();
+            $.authAjax({
+                url: `/api/product/detail/${productId}`,
+                type: 'GET',
+                success: function(res) {
+                    hideLoading();
+                    if (res.code === 200) {
+                        productData = res.data;
+                        renderProductDetail(productData);
+                        $('#loading').hide();
+                        $('#productDetail').show();
+                    } else {
+                        alert(res.msg || '鍟嗗搧涓嶅瓨�?);
+                        window.history.back();
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('缃戠粶寮傚父锛岃绋嶅悗閲嶈�?);
+                }
+            });
+        }
+
+        // 娓叉煋鍟嗗搧璇︽�?
+        function renderProductDetail(product) {
+            $('#productName').text(product.name);
+            $('#productSubtitle').text(product.subtitle);
+            $('#breadcrumbProductName').text(product.name);
+            $('#productPrice').text('�? + product.price);
+            $('#productOriginalPrice').text('�? + product.originalPrice);
+            $('#productSales').text(product.sales);
+            $('#productStock').text(product.stock);
+            
+            // 璁剧疆涓诲浘
+            $('#mainImage').attr('src', product.mainImage);
+            
+            // 娓叉煋缂╃暐�?            const imageThumbnails = $('#imageThumbnails');
+            imageThumbnails.empty();
+            
+            // 涓诲浘浣滀负绗竴涓缉鐣ュ浘
+            const mainThumbnail = $('<img>')
+                .attr('src', product.mainImage)
+                .addClass('image-thumbnail active')
+                .on('click', function() {
+                    $('#mainImage').attr('src', product.mainImage);
+                    $('.image-thumbnail').removeClass('active');
+                    $(this).addClass('active');
+                });
+            imageThumbnails.append(mainThumbnail);
+            
+            // 鍏朵粬鍥剧墖浣滀负缂╃暐�?            if (product.images) {
+                const images = product.images.split(',');
+                images.forEach(img => {
+                    if (img && img.trim()) {
+                        const thumbnail = $('<img>')
+                            .attr('src', img.trim())
+                            .addClass('image-thumbnail')
+                            .on('click', function() {
+                                $('#mainImage').attr('src', img.trim());
+                                $('.image-thumbnail').removeClass('active');
+                                $(this).addClass('active');
+                            });
+                        imageThumbnails.append(thumbnail);
+                    }
+                });
+            }
+            
+            // 娓叉煋鍟嗗搧璇︽�?
+            $('#productDetailContent').html(product.detail || '<p>鏆傛棤璇︽儏</p>');
+        }
+
+        // 鏀瑰彉璐拱鏁伴噺
+        function changeQuantity(delta) {
+            const quantityInput = $('#quantity');
+            let currentQuantity = parseInt(quantityInput.val());
+            currentQuantity += delta;
+            
+            // 纭繚鏁伴噺鍦ㄥ悎鐞嗚寖鍥村�?
+            if (currentQuantity < 1) {
+                currentQuantity = 1;
+            }
+            if (productData && currentQuantity > productData.stock) {
+                currentQuantity = productData.stock;
+            }
+            
+            quantityInput.val(currentQuantity);
+        }
+
+        // 楠岃瘉鏁伴噺杈撳�?
+        function validateQuantity() {
+            const quantityInput = $('#quantity');
+            let currentQuantity = parseInt(quantityInput.val());
+            
+            if (isNaN(currentQuantity) || currentQuantity < 1) {
+                currentQuantity = 1;
+            }
+            if (productData && currentQuantity > productData.stock) {
+                currentQuantity = productData.stock;
+            }
+            
+            quantityInput.val(currentQuantity);
+        }
+
+        // 鍔犲叆璐墿�?        function addToCart() {
+            // 妫€鏌ョ櫥褰曠姸�?            if (!authUtils.isLoggedIn()) {
+                alert('璇峰厛鐧诲綍');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            const quantity = parseInt($('#quantity').val());
+            
+            if (!productData) {
+                alert('鍟嗗搧淇℃伅鍔犺浇澶辫触');
+                return;
+            }
+            
+            if (quantity > productData.stock) {
+                alert('搴撳瓨涓嶈冻');
+                return;
+            }
+            
+            showLoading();
+            $.authAjax({
+                url: '/api/cart/add',
+                type: 'POST',
+                data: {
+                    productId: productData.id,
+                    quantity: quantity
+                },
+                success: function(res) {
+                    hideLoading();
+                    if (res.code === 200) {
+                        alert('娣诲姞鎴愬姛�?);
+                    // 娣诲姞鎴愬姛鍚庢洿鏂癠I鎻愮�?
+                    const btn = $(this);
+                    btn.text('宸插姞鍏?);
+                    btn.prop('disabled', true);
+                    btn.addClass('btn-success');
+                    btn.removeClass('btn-primary');
+                    
+                    // 3秒后恢复按钮状�?
+                    setTimeout(() => {
+                        btn.text('加入购物�?);
+                        btn.prop('disabled', false);
+                        btn.removeClass('btn-success');
+                        btn.addClass('btn-primary');
+                    }, 3000);
+                    } else {
+                        alert(res.msg || '添加失败，请稍后重试');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('网络异常，请稍后重试');
+                }
+            });
+        }
+
+        // 立即购买
+        function buyNow() {
+            // 检查登录状�?
+            if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            const quantity = parseInt($('#quantity').val());
+            
+            // 验证数量不小�?
+            if (!quantity || quantity < 1) {
+                alert('购买数量必须大于0');
+                return;
+            }
+            
+            if (!productData) {
+                alert('商品信息加载失败');
+                return;
+            }
+            
+            if (quantity > productData.stock) {
+                alert('库存不足');
+                return;
+            }
+            
+            // 创建临时订单信息，使用与cart.html和checkout.html一致的localStorage键名
+            localStorage.setItem('directBuyFlag', 'true');
+            localStorage.setItem('directBuyItem', JSON.stringify({
+                productId: productData.id,
+                quantity: quantity
+            }));
+            
+            window.location.href = '/api/checkout';
+        }
+    </script>
+    
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center; display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载�?..</span>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为用户提供高品质的电子产品和优质的购物体验�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                    <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                    <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                    <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

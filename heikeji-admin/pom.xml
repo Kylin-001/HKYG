@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>heikeji-mall</artifactId>
+        <groupId>com.heikeji</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>heikeji-admin</artifactId>
+    <name>管理后台</name>
+    <description>管理后台服务</description>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- 项目公共模块 -->
+        <dependency>
+            <groupId>com.heikeji</groupId>
+            <artifactId>common-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <!-- 暂时移除common-security依赖，避免SecurityConfig冲突 -->
+        <!-- <dependency>
+            <groupId>com.heikeji</groupId>
+            <artifactId>common-security</artifactId>
+            <version>1.0.0</version>
+        </dependency> -->
+        <!-- Spring Boot 核心依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.20</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.heikeji</groupId>
+            <artifactId>heikeji-system</artifactId>
+            <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.heikeji</groupId>
+                    <artifactId>heikeji-system</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <configuration>
+                    <mainClass>com.heikeji.admin.AdminApplication</mainClass>
+                    <skip>false</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
+
+

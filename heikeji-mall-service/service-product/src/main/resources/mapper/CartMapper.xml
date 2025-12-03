@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.product.mapper.CartMapper">
+
+    <!-- 根据用户ID和商品ID查询购物车记录 -->
+    <select id="selectByUserIdAndProductId" resultType="com.heikeji.mall.product.entity.Cart">
+        SELECT
+            id,
+            user_id AS userId,
+            product_id AS productId,
+            quantity,
+            selected,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM cart
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+    </select>
+
+    <!-- 根据用户ID查询购物车列表 -->
+    <select id="selectByUserId" resultType="com.heikeji.mall.product.entity.Cart">
+        SELECT
+            id,
+            user_id AS userId,
+            product_id AS productId,
+            quantity,
+            selected,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM cart
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 根据用户ID删除购物车记录 -->
+    <delete id="deleteByUserId">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 根据用户ID和商品ID列表删除购物车记录 -->
+    <delete id="deleteByUserIdAndProductIds">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+          AND product_id IN
+              <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
+                  #{productId}
+              </foreach>
+    </delete>
+    
+    <!-- 根据用户ID和商品ID删除购物车记录 -->
+    <delete id="deleteByUserIdAndProductId">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+    </delete>
+    
+    <!-- 更新购物车商品数量 -->
+    <update id="updateQuantity">
+        UPDATE cart
+        SET quantity = #{quantity},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+    </update>
+    
+    <!-- 更新购物车商品选中状态 -->
+    <update id="updateSelectedStatus">
+        UPDATE cart
+        SET selected = #{selected},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+    </update>
+    
+    <!-- 批量更新购物车商品选中状态 -->
+    <update id="updateBatchSelectedStatus">
+        UPDATE cart
+        SET selected = #{selected},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND product_id IN
+              <foreach collection="productIds" item="productId" open="(" close=")" separator=",">
+                  #{productId}
+              </foreach>
+    </update>
+    
+    <!-- 更新用户所有购物车商品选中状态 -->
+    <update id="updateAllSelectedStatus">
+        UPDATE cart
+        SET selected = #{selected},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <!-- 查询购物车商品总数 -->
+    <select id="selectCartItemCount">
+        SELECT SUM(quantity) AS totalCount
+        FROM cart
+        WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 查询用户选中的购物车商品 -->
+    <select id="selectSelectedCartItems" resultType="com.heikeji.mall.product.entity.Cart">
+        SELECT
+            id,
+            user_id AS userId,
+            product_id AS productId,
+            quantity,
+            selected,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM cart
+        WHERE user_id = #{userId}
+          AND selected = 1
+    </select>
+
+</mapper>

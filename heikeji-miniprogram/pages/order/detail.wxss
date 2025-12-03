@@ -1,0 +1,441 @@
+/* pages/order/detail.wxss */
+.container {
+  padding: 0 20rpx 100rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 状态卡片 */
+.status-card {
+  background-color: #fff;
+  margin-top: 20rpx;
+  padding: 30rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.status-warning {
+  border-left: 10rpx solid #ff9800;
+}
+
+.status-info {
+  border-left: 10rpx solid #2196f3;
+}
+
+.status-success {
+  border-left: 10rpx solid #4caf50;
+}
+
+.status-default {
+  border-left: 10rpx solid #999;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.status-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-no {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.order-amount {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 15rpx;
+}
+
+.amount-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.amount-value {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ff6b6b;
+  margin-left: 10rpx;
+}
+
+.order-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 通用卡片样式 */
+.section-card {
+  background-color: #fff;
+  margin-top: 20rpx;
+  padding: 30rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 收货信息 */
+.address-info {
+  padding-bottom: 10rpx;
+}
+
+.recipient {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.address-detail {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 36rpx;
+}
+
+/* 商品列表 */
+.product-list {
+  padding-bottom: 10rpx;
+}
+
+.product-item {
+  display: flex;
+  margin-bottom: 20rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.product-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.product-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  margin-right: 20rpx;
+}
+
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-name {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.product-spec {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-price {
+  font-size: 28rpx;
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.product-quantity {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 配送信息 */
+.delivery-info {
+  padding-bottom: 10rpx;
+}
+
+.delivery-item {
+  display: flex;
+  margin-bottom: 15rpx;
+}
+
+.delivery-item:last-child {
+  margin-bottom: 0;
+}
+
+.delivery-label {
+  font-size: 26rpx;
+  color: #666;
+  width: 120rpx;
+}
+
+.delivery-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+/* 订单信息 */
+.order-info {
+  padding-bottom: 10rpx;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 15rpx;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #666;
+  width: 120rpx;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+.payment-status-success {
+  color: #4caf50;
+}
+
+.payment-status-warning {
+  color: #ff9800;
+}
+
+.payment-status-default {
+  color: #999;
+}
+
+/* 价格明细 */
+.price-detail {
+  padding-bottom: 10rpx;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15rpx;
+}
+
+.price-item:last-child {
+  margin-bottom: 0;
+}
+
+.price-item.total {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.price-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.price-value {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.price-value.discount {
+  color: #ff6b6b;
+}
+
+.price-value.total {
+  font-size: 32rpx;
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.actions-left {
+  display: flex;
+  gap: 10rpx;
+}
+
+.actions-right {
+  display: flex;
+  gap: 10rpx;
+}
+
+.bottom-bar button {
+  margin: 0;
+  padding: 0 20rpx;
+  font-size: 26rpx;
+  line-height: 70rpx;
+}
+
+.bottom-bar button::after {
+  border: none;
+  border-radius: 35rpx;
+}
+
+/* 支付方式弹窗 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-top-left-radius: 20rpx;
+  border-top-right-radius: 20rpx;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #999;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.payment-methods {
+  padding: 20rpx 0;
+}
+
+.payment-method {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.payment-method:last-child {
+  border-bottom: none;
+}
+
+.method-info {
+  display: flex;
+  align-items: center;
+}
+
+.method-icon {
+  width: 50rpx;
+  height: 50rpx;
+  margin-right: 20rpx;
+}
+
+.method-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.modal-footer {
+  padding: 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.modal-footer button {
+  margin: 0;
+  font-size: 32rpx;
+  line-height: 90rpx;
+}
+
+.modal-footer button::after {
+  border: none;
+  border-radius: 45rpx;
+}

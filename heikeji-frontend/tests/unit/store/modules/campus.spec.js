@@ -1,0 +1,527 @@
+import campusModule from '@/store/modules/campus'
+import * as campusApi from '@/api/campus'
+
+// Mock the API calls
+jest.mock('@/api/campus', () => ({
+  getCampusList: jest.fn(),
+  getCampusById: jest.fn(),
+  addCampus: jest.fn(),
+  updateCampus: jest.fn(),
+  updateCampusStatus: jest.fn(),
+  getBuildingList: jest.fn(),
+  getBuildingById: jest.fn(),
+  addBuilding: jest.fn(),
+  updateBuilding: jest.fn(),
+  updateBuildingStatus: jest.fn(),
+  getDeliveryLockerList: jest.fn(),
+  getDeliveryLockerById: jest.fn(),
+  addDeliveryLocker: jest.fn(),
+  updateDeliveryLocker: jest.fn(),
+  updateLockerStatus: jest.fn(),
+  getCampusSiteList: jest.fn(),
+  getCampusSiteById: jest.fn(),
+  addCampusSite: jest.fn(),
+  updateCampusSite: jest.fn(),
+  getTakeoutOrderList: jest.fn(),
+  getTakeoutOrderDetail: jest.fn(),
+  updateTakeoutOrderStatus: jest.fn(),
+  getDeliveryRequestList: jest.fn(),
+  getDeliveryRequestDetail: jest.fn(),
+  updateDeliveryRequestStatus: jest.fn(),
+}))
+
+describe('Campus Store Module', () => {
+  let state
+  let commit
+  let dispatch
+
+  beforeEach(() => {
+    state = {
+      campusList: [],
+      campusDetail: null,
+      campusTotal: 0,
+      buildingList: [],
+      buildingDetail: null,
+      buildingTotal: 0,
+      lockerList: [],
+      lockerDetail: null,
+      lockerTotal: 0,
+      siteList: [],
+      siteDetail: null,
+      siteTotal: 0,
+      takeoutOrderList: [],
+      takeoutOrderDetail: null,
+      takeoutOrderTotal: 0,
+      deliveryRequestList: [],
+      deliveryRequestDetail: null,
+      deliveryRequestTotal: 0,
+    }
+    commit = jest.fn()
+    dispatch = jest.fn()
+
+    // Clear all mocks before each test
+    Object.keys(campusApi).forEach(key => {
+      campusApi[key].mockClear()
+    })
+
+    // Mock console.error for error handling tests
+    console.error = jest.fn()
+  })
+
+  describe('Campus Actions', () => {
+    it('getCampuses should fetch campus list successfully', async () => {
+      const mockResponse = {
+        data: [
+          { id: 1, name: '测试校区1' },
+          { id: 2, name: '测试校区2' },
+        ],
+      }
+      campusApi.getCampusList.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.getCampuses({ commit })
+
+      expect(campusApi.getCampusList).toHaveBeenCalled()
+      expect(commit).toHaveBeenCalledWith('SET_CAMPUS_LIST', {
+        list: mockResponse.data,
+        total: mockResponse.data.length,
+      })
+    })
+
+    it('getCampusDetail should fetch campus detail successfully', async () => {
+      const mockCampus = { id: 1, name: '测试校区' }
+      campusApi.getCampusById.mockResolvedValue({ data: mockCampus })
+
+      await campusModule.actions.getCampusDetail({ commit }, 1)
+
+      expect(campusApi.getCampusById).toHaveBeenCalledWith(1)
+      expect(commit).toHaveBeenCalledWith('SET_CAMPUS_DETAIL', mockCampus)
+    })
+
+    it('addNewCampus should add campus and refresh list', async () => {
+      const mockData = { name: '新校区' }
+      const mockResponse = { success: true }
+      campusApi.addCampus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.addNewCampus({ dispatch }, mockData)
+
+      expect(campusApi.addCampus).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getCampuses')
+    })
+
+    it('updateExistingCampus should update campus and refresh list', async () => {
+      const mockData = { id: 1, name: '更新校区' }
+      const mockResponse = { success: true }
+      campusApi.updateCampus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateExistingCampus({ dispatch }, mockData)
+
+      expect(campusApi.updateCampus).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getCampuses')
+    })
+
+    it('updateCampusEnabledStatus should update status and refresh list', async () => {
+      const params = { id: 1, status: 1 }
+      const mockResponse = { success: true }
+      campusApi.updateCampusStatus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateCampusEnabledStatus({ dispatch }, params)
+
+      expect(campusApi.updateCampusStatus).toHaveBeenCalledWith(1, 1)
+      expect(dispatch).toHaveBeenCalledWith('getCampuses')
+    })
+  })
+
+  describe('Building Actions', () => {
+    it('getBuildings should fetch building list successfully', async () => {
+      const mockParams = { campusId: 1 }
+      const mockResponse = {
+        data: [
+          { id: 1, name: '测试楼栋1' },
+          { id: 2, name: '测试楼栋2' },
+        ],
+        total: 2,
+      }
+      campusApi.getBuildingList.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.getBuildings({ commit }, mockParams)
+
+      expect(campusApi.getBuildingList).toHaveBeenCalledWith(mockParams)
+      expect(commit).toHaveBeenCalledWith('SET_BUILDING_LIST', {
+        list: mockResponse.data,
+        total: mockResponse.total,
+      })
+    })
+
+    it('getBuildingDetail should fetch building detail successfully', async () => {
+      const mockBuilding = { id: 1, name: '测试楼栋' }
+      campusApi.getBuildingById.mockResolvedValue({ data: mockBuilding })
+
+      await campusModule.actions.getBuildingDetail({ commit }, 1)
+
+      expect(campusApi.getBuildingById).toHaveBeenCalledWith(1)
+      expect(commit).toHaveBeenCalledWith('SET_BUILDING_DETAIL', mockBuilding)
+    })
+
+    it('addNewBuilding should add building and refresh list', async () => {
+      const mockData = { name: '新楼栋', campusId: 1 }
+      const mockResponse = { success: true }
+      campusApi.addBuilding.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.addNewBuilding({ dispatch }, mockData)
+
+      expect(campusApi.addBuilding).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getBuildings')
+    })
+
+    it('updateExistingBuilding should update building and refresh list', async () => {
+      const mockData = { id: 1, name: '更新楼栋' }
+      const mockResponse = { success: true }
+      campusApi.updateBuilding.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateExistingBuilding({ dispatch }, mockData)
+
+      expect(campusApi.updateBuilding).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getBuildings')
+    })
+
+    it('updateBuildingEnabledStatus should update status and refresh list', async () => {
+      const params = { id: 1, status: 1 }
+      const mockResponse = { success: true }
+      campusApi.updateBuildingStatus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateBuildingEnabledStatus({ dispatch }, params)
+
+      expect(campusApi.updateBuildingStatus).toHaveBeenCalledWith(1, 1)
+      expect(dispatch).toHaveBeenCalledWith('getBuildings')
+    })
+  })
+
+  describe('Locker Actions', () => {
+    it('getLockers should fetch locker list successfully', async () => {
+      const mockParams = { campusId: 1 }
+      const mockResponse = {
+        data: [
+          { id: 1, lockerNumber: '1001' },
+          { id: 2, lockerNumber: '1002' },
+        ],
+        total: 2,
+      }
+      campusApi.getDeliveryLockerList.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.getLockers({ commit }, mockParams)
+
+      expect(campusApi.getDeliveryLockerList).toHaveBeenCalledWith(mockParams)
+      expect(commit).toHaveBeenCalledWith('SET_LOCKER_LIST', {
+        list: mockResponse.data,
+        total: mockResponse.total,
+      })
+    })
+
+    it('getLockerDetail should fetch locker detail successfully', async () => {
+      const mockLocker = { id: 1, lockerNumber: '1001' }
+      campusApi.getDeliveryLockerById.mockResolvedValue({ data: mockLocker })
+
+      await campusModule.actions.getLockerDetail({ commit }, 1)
+
+      expect(campusApi.getDeliveryLockerById).toHaveBeenCalledWith(1)
+      expect(commit).toHaveBeenCalledWith('SET_LOCKER_DETAIL', mockLocker)
+    })
+
+    it('addNewLocker should add locker and refresh list', async () => {
+      const mockData = { lockerNumber: '1003', campusId: 1 }
+      const mockResponse = { success: true }
+      campusApi.addDeliveryLocker.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.addNewLocker({ dispatch }, mockData)
+
+      expect(campusApi.addDeliveryLocker).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getLockers')
+    })
+
+    it('updateExistingLocker should update locker and refresh list', async () => {
+      const mockData = { id: 1, lockerNumber: '1001-updated' }
+      const mockResponse = { success: true }
+      campusApi.updateDeliveryLocker.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateExistingLocker({ dispatch }, mockData)
+
+      expect(campusApi.updateDeliveryLocker).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getLockers')
+    })
+
+    it('updateLockerEnabledStatus should update status and refresh list', async () => {
+      const params = { id: 1, status: 1 }
+      const mockResponse = { success: true }
+      campusApi.updateLockerStatus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateLockerEnabledStatus({ dispatch }, params)
+
+      expect(campusApi.updateLockerStatus).toHaveBeenCalledWith(1, 1)
+      expect(dispatch).toHaveBeenCalledWith('getLockers')
+    })
+  })
+
+  describe('Site Actions', () => {
+    it('getSites should fetch site list successfully', async () => {
+      const mockParams = { campusId: 1 }
+      const mockResponse = {
+        data: [
+          { id: 1, name: '测试站点1' },
+          { id: 2, name: '测试站点2' },
+        ],
+        total: 2,
+      }
+      campusApi.getCampusSiteList.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.getSites({ commit }, mockParams)
+
+      expect(campusApi.getCampusSiteList).toHaveBeenCalledWith(mockParams)
+      expect(commit).toHaveBeenCalledWith('SET_SITE_LIST', {
+        list: mockResponse.data,
+        total: mockResponse.total,
+      })
+    })
+
+    it('getSiteDetail should fetch site detail successfully', async () => {
+      const mockSite = { id: 1, name: '测试站点' }
+      campusApi.getCampusSiteById.mockResolvedValue({ data: mockSite })
+
+      await campusModule.actions.getSiteDetail({ commit }, 1)
+
+      expect(campusApi.getCampusSiteById).toHaveBeenCalledWith(1)
+      expect(commit).toHaveBeenCalledWith('SET_SITE_DETAIL', mockSite)
+    })
+
+    it('addNewSite should add site and refresh list', async () => {
+      const mockData = { name: '新站点', campusId: 1 }
+      const mockResponse = { success: true }
+      campusApi.addCampusSite.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.addNewSite({ dispatch }, mockData)
+
+      expect(campusApi.addCampusSite).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getSites')
+    })
+
+    it('updateExistingSite should update site and refresh list', async () => {
+      const mockData = { id: 1, name: '更新站点' }
+      const mockResponse = { success: true }
+      campusApi.updateCampusSite.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateExistingSite({ dispatch }, mockData)
+
+      expect(campusApi.updateCampusSite).toHaveBeenCalledWith(mockData)
+      expect(dispatch).toHaveBeenCalledWith('getSites')
+    })
+  })
+
+  describe('Takeout Order Actions', () => {
+    it('getTakeoutOrders should fetch takeout order list successfully', async () => {
+      const mockParams = { campusId: 1 }
+      const mockResponse = {
+        data: [
+          { id: 1, orderNumber: 'TO001' },
+          { id: 2, orderNumber: 'TO002' },
+        ],
+        total: 2,
+      }
+      campusApi.getTakeoutOrderList.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.getTakeoutOrders({ commit }, mockParams)
+
+      expect(campusApi.getTakeoutOrderList).toHaveBeenCalledWith(mockParams)
+      expect(commit).toHaveBeenCalledWith('SET_TAKEOUT_ORDER_LIST', {
+        list: mockResponse.data,
+        total: mockResponse.total,
+      })
+    })
+
+    it('getTakeoutOrderInfo should fetch takeout order detail successfully', async () => {
+      const mockOrder = { id: 1, orderNumber: 'TO001' }
+      campusApi.getTakeoutOrderDetail.mockResolvedValue({ data: mockOrder })
+
+      await campusModule.actions.getTakeoutOrderInfo({ commit }, 1)
+
+      expect(campusApi.getTakeoutOrderDetail).toHaveBeenCalledWith(1)
+      expect(commit).toHaveBeenCalledWith('SET_TAKEOUT_ORDER_DETAIL', mockOrder)
+    })
+
+    it('updateTakeoutOrderState should update order status and refresh list', async () => {
+      const params = { id: 1, status: 2 }
+      const mockResponse = { success: true }
+      campusApi.updateTakeoutOrderStatus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateTakeoutOrderState({ dispatch }, params)
+
+      expect(campusApi.updateTakeoutOrderStatus).toHaveBeenCalledWith(1, 2)
+      expect(dispatch).toHaveBeenCalledWith('getTakeoutOrders')
+    })
+  })
+
+  describe('Delivery Request Actions', () => {
+    it('getDeliveryRequests should fetch delivery request list successfully', async () => {
+      const mockParams = { campusId: 1 }
+      const mockResponse = {
+        data: [
+          { id: 1, requestNumber: 'DR001' },
+          { id: 2, requestNumber: 'DR002' },
+        ],
+        total: 2,
+      }
+      campusApi.getDeliveryRequestList.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.getDeliveryRequests({ commit }, mockParams)
+
+      expect(campusApi.getDeliveryRequestList).toHaveBeenCalledWith(mockParams)
+      expect(commit).toHaveBeenCalledWith('SET_DELIVERY_REQUEST_LIST', {
+        list: mockResponse.data,
+        total: mockResponse.total,
+      })
+    })
+
+    it('getDeliveryRequestInfo should fetch delivery request detail successfully', async () => {
+      const mockRequest = { id: 1, requestNumber: 'DR001' }
+      campusApi.getDeliveryRequestDetail.mockResolvedValue({ data: mockRequest })
+
+      await campusModule.actions.getDeliveryRequestInfo({ commit }, 1)
+
+      expect(campusApi.getDeliveryRequestDetail).toHaveBeenCalledWith(1)
+      expect(commit).toHaveBeenCalledWith('SET_DELIVERY_REQUEST_DETAIL', mockRequest)
+    })
+
+    it('updateDeliveryRequestState should update request status and refresh list', async () => {
+      const params = { id: 1, status: 3 }
+      const mockResponse = { success: true }
+      campusApi.updateDeliveryRequestStatus.mockResolvedValue(mockResponse)
+
+      await campusModule.actions.updateDeliveryRequestState({ dispatch }, params)
+
+      expect(campusApi.updateDeliveryRequestStatus).toHaveBeenCalledWith(1, 3)
+      expect(dispatch).toHaveBeenCalledWith('getDeliveryRequests')
+    })
+  })
+
+  describe('Error Handling', () => {
+    const testErrorScenarios = [
+      { action: 'getCampuses', api: 'getCampusList', errorMsg: '获取校区列表失败:' },
+      { action: 'getCampusDetail', api: 'getCampusById', errorMsg: '获取校区详情失败:', args: 1 },
+      {
+        action: 'addNewCampus',
+        api: 'addCampus',
+        errorMsg: '添加校区失败:',
+        args: { name: '新校区' },
+      },
+      {
+        action: 'updateExistingCampus',
+        api: 'updateCampus',
+        errorMsg: '更新校区失败:',
+        args: { id: 1, name: '更新校区' },
+      },
+      {
+        action: 'updateCampusEnabledStatus',
+        api: 'updateCampusStatus',
+        errorMsg: '更新校区状态失败:',
+        args: { id: 1, status: 1 },
+      },
+      {
+        action: 'getBuildings',
+        api: 'getBuildingList',
+        errorMsg: '获取楼栋列表失败:',
+        args: { campusId: 1 },
+      },
+      {
+        action: 'getLockers',
+        api: 'getDeliveryLockerList',
+        errorMsg: '获取外卖柜列表失败:',
+        args: { campusId: 1 },
+      },
+      {
+        action: 'getSites',
+        api: 'getCampusSiteList',
+        errorMsg: '获取校园站点列表失败:',
+        args: { campusId: 1 },
+      },
+      {
+        action: 'getTakeoutOrders',
+        api: 'getTakeoutOrderList',
+        errorMsg: '获取外卖订单列表失败:',
+        args: { campusId: 1 },
+      },
+      {
+        action: 'getDeliveryRequests',
+        api: 'getDeliveryRequestList',
+        errorMsg: '获取跑腿请求列表失败:',
+        args: { campusId: 1 },
+      },
+    ]
+
+    testErrorScenarios.forEach(({ action, api, errorMsg, args }) => {
+      it(`should handle error in ${action} action`, async () => {
+        const error = new Error('API Error')
+        campusApi[api].mockRejectedValue(error)
+
+        await expect(campusModule.actions[action]({ commit, dispatch }, args)).rejects.toThrow(
+          'API Error'
+        )
+        expect(console.error).toHaveBeenCalledWith(errorMsg, error)
+      })
+    })
+  })
+
+  describe('Mutations', () => {
+    it('SET_CAMPUS_LIST should update campus list and total', () => {
+      const payload = { list: [{ id: 1, name: '测试校区' }], total: 1 }
+      campusModule.mutations.SET_CAMPUS_LIST(state, payload)
+
+      expect(state.campusList).toEqual(payload.list)
+      expect(state.campusTotal).toBe(payload.total)
+    })
+
+    it('SET_CAMPUS_DETAIL should update campus detail', () => {
+      const campus = { id: 1, name: '测试校区' }
+      campusModule.mutations.SET_CAMPUS_DETAIL(state, campus)
+
+      expect(state.campusDetail).toEqual(campus)
+    })
+
+    it('SET_BUILDING_LIST should update building list and total', () => {
+      const payload = { list: [{ id: 1, name: '测试楼栋' }], total: 1 }
+      campusModule.mutations.SET_BUILDING_LIST(state, payload)
+
+      expect(state.buildingList).toEqual(payload.list)
+      expect(state.buildingTotal).toBe(payload.total)
+    })
+
+    it('SET_LOCKER_LIST should update locker list and total', () => {
+      const payload = { list: [{ id: 1, lockerNumber: '1001' }], total: 1 }
+      campusModule.mutations.SET_LOCKER_LIST(state, payload)
+
+      expect(state.lockerList).toEqual(payload.list)
+      expect(state.lockerTotal).toBe(payload.total)
+    })
+
+    it('SET_SITE_LIST should update site list and total', () => {
+      const payload = { list: [{ id: 1, name: '测试站点' }], total: 1 }
+      campusModule.mutations.SET_SITE_LIST(state, payload)
+
+      expect(state.siteList).toEqual(payload.list)
+      expect(state.siteTotal).toBe(payload.total)
+    })
+
+    it('SET_TAKEOUT_ORDER_LIST should update takeout order list and total', () => {
+      const payload = { list: [{ id: 1, orderNumber: 'TO001' }], total: 1 }
+      campusModule.mutations.SET_TAKEOUT_ORDER_LIST(state, payload)
+
+      expect(state.takeoutOrderList).toEqual(payload.list)
+      expect(state.takeoutOrderTotal).toBe(payload.total)
+    })
+
+    it('SET_DELIVERY_REQUEST_LIST should update delivery request list and total', () => {
+      const payload = { list: [{ id: 1, requestNumber: 'DR001' }], total: 1 }
+      campusModule.mutations.SET_DELIVERY_REQUEST_LIST(state, payload)
+
+      expect(state.deliveryRequestList).toEqual(payload.list)
+      expect(state.deliveryRequestTotal).toBe(payload.total)
+    })
+  })
+})

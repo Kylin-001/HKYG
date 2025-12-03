@@ -1,0 +1,276 @@
+/* pages/index/index.wxss */
+.banner-swiper {
+  height: 200rpx;
+  width: 100%;
+  border-radius: 0 0 20rpx 20rpx;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 快捷入口 */
+.quick-entry {
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.quick-entry-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.entry-item {
+  width: 22%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+  border-radius: 10rpx;
+  transition: all 0.3s;
+}
+
+.entry-item:active {
+  background-color: #f0f0f0;
+  transform: scale(0.95);
+}
+
+.entry-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 10rpx;
+  border-radius: 50%;
+}
+
+.entry-text {
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
+}
+
+/* 推荐商品 */
+.recommended-section {
+  margin: 20rpx 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-more {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 20rpx;
+  justify-content: space-between;
+}
+
+.product-item {
+  width: 48%;
+  background: white;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.product-item:active {
+  transform: translateY(-5rpx);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.product-image {
+  width: 100%;
+  height: 200rpx;
+  background-color: #f0f0f0;
+}
+
+.product-info {
+  padding: 20rpx;
+}
+
+.product-name {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-desc {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 15rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-price {
+  font-size: 32rpx;
+  color: #ff4757;
+  font-weight: bold;
+}
+
+.add-cart-btn {
+  background-color: #ff4757;
+  color: white;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  line-height: 40rpx;
+  height: 40rpx;
+  padding: 0 20rpx;
+}
+
+/* 热门商家 */
+.hot-merchants-section {
+  margin: 20rpx 0;
+}
+
+.merchant-scroll {
+  white-space: nowrap;
+  padding: 0 20rpx;
+}
+
+.merchant-list {
+  display: flex;
+  padding: 20rpx 0;
+}
+
+.merchant-item {
+  width: 300rpx;
+  background: white;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.merchant-item:active {
+  transform: scale(0.95);
+}
+
+.merchant-logo {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-bottom: 15rpx;
+  background-color: #f0f0f0;
+}
+
+.merchant-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.merchant-name {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.merchant-rating {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+}
+
+.merchant-sales {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 校园公告 */
+.announcements-section {
+  margin: 20rpx;
+  padding: 20rpx;
+}
+
+.announcement-list {
+  margin-top: 20rpx;
+}
+
+.announcement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: all 0.3s;
+}
+
+.announcement-item:last-child {
+  border-bottom: none;
+}
+
+.announcement-item:active {
+  background-color: #f8f8f8;
+  margin: 0 -20rpx;
+  padding-left: 20rpx;
+  padding-right: 20rpx;
+  border-radius: 8rpx;
+}
+
+.announcement-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.announcement-title {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.announcement-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.announcement-arrow {
+  font-size: 28rpx;
+  color: #ccc;
+  margin-left: 20rpx;
+}
+
+.bottom-space {
+  height: 120rpx;
+}

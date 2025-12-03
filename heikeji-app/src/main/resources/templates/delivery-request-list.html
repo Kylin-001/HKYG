@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑腿请求 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* 加载遮罩层样�?*/
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        /* 请求卡片样式 */
+        .request-card {
+            transition: box-shadow 0.3s;
+        }
+        .request-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        /* 状态标签样�?*/
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        /* 请求类型标签样式 */
+        .type-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            background-color: #e9ecef;
+        }
+        /* 悬赏金额样式 */
+        .reward-amount {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        /* 分页样式 */
+        .pagination {
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/category/list">商品分类</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将通过JavaScript动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区�?-->
+    <main class="container mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>我的跑腿请求</h2>
+            <button class="btn btn-primary" onclick="window.location.href='/api/delivery/request/create'">发布请求</button>
+        </div>
+        
+        <!-- 请求状态切�?-->
+        <div class="bg-light p-3 rounded mb-4">
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm active" data-status="all">全部</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-status="0">待接�?/button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-status="1">已接�?/button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-status="2">进行�?/button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-status="3">已完�?/button>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-status="4">已取�?/button>
+            </div>
+        </div>
+
+        <!-- 请求列表 -->
+        <div id="requestList" class="space-y-4">
+            <!-- 请求列表将通过JavaScript动态生�?-->
+            <div class="text-center py-5">
+                <p>加载�?..</p>
+            </div>
+        </div>
+
+        <!-- 分页组件 -->
+        <div id="pagination" class="mt-5">
+            <!-- 分页将通过JavaScript动态生�?-->
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为黑龙江科技大学的学生提供便捷的校园生活服务，包括外卖、跑腿等多种功能�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">鍔犺浇涓?..</span>
+        </div>
+    </div>
+
+    <!-- 寮曞�?jQuery -->
+<script src="/js/jquery.min.js"></script>
+    <!-- 寮曞�?Bootstrap JS -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- 寮曞叆璁よ瘉宸ュ�?-->
+    <script src="/js/auth-utils.js"></script>
+    <script>
+        // 鏇存柊鐢ㄦ埛鑿滃�?
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            const userInfo = authUtils.getUserInfo();
+            
+            if (userInfo) {
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            ${userInfo.username || '鐢ㄦ�?}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/api/order/list">鎴戠殑璁㈠崟</a></li>
+                            <li><a class="dropdown-item" href="/api/takeout/order/list">鎴戠殑澶栧崠</a></li>
+                            <li><a class="dropdown-item" href="/api/delivery/request/list">鎴戠殑璺戣吙</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">閫€鍑虹櫥褰?/a></li>
+                        </ul>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">鐧诲�?/a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 鐢ㄦ埛鐧诲嚭
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('宸查€€鍑虹櫥褰?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 鏄剧ず鍔犺浇鐘舵�?        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+        
+        // 闅愯棌鍔犺浇鐘舵�?        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 鑾峰彇鐘舵€佹樉绀烘枃鏈拰鏍峰紡
+        function getStatusDisplay(status) {
+            const statusMap = {
+                0: { text: '寰呮帴鍗?, class: 'bg-warning bg-opacity-10 text-warning' },
+                1: { text: '宸叉帴鍗?, class: 'bg-primary bg-opacity-10 text-primary' },
+                2: { text: '杩涜涓?, class: 'bg-success bg-opacity-10 text-success' },
+                3: { text: '宸插畬鎴?, class: 'bg-secondary bg-opacity-10 text-secondary' },
+                4: { text: '已取�?, class: 'bg-danger bg-opacity-10 text-danger' }
+            };
+            return statusMap[status] || { text: '鏈�?, class: 'bg-secondary bg-opacity-10 text-secondary' };
+        }
+        
+        // 鑾峰彇闇€姹傜被鍨嬫樉绀烘枃�?        function getRequestTypeDisplay(type) {
+            const typeMap = {
+                1: '取快�?,
+                2: '代买',
+                3: '代办'
+            };
+            return typeMap[type] || '鏈�?;
+        }
+        
+        // 鍔犺浇闇€姹傚垪�?        let currentPage = 1;
+        let currentStatus = 'all';
+        let totalPages = 1;
+        
+        function loadRequestList(pageNo = 1, status = 'all') {
+            showLoading();
+            $.authAjax({
+                url: '/api/delivery/request/page',
+                method: 'GET',
+                data: {
+                    pageNo: pageNo,
+                    pageSize: 10,
+                    status: status === 'all' ? null : status
+                },
+                success: function(response) {
+                    if (response.code === 200) {
+                        renderRequestList(response.data.records);
+                        currentPage = pageNo;
+                        totalPages = response.data.pages;
+                        renderPagination();
+                    } else {
+                        $('#requestList').html('<div class="text-center py-5"><p class="text-danger">鍔犺浇澶辫触�? + response.msg + '</p></div>');
+                    }
+                },
+                error: function() {
+                    $('#requestList').html('<div class="text-center py-5"><p class="text-danger">鍔犺浇澶辫触锛岃绋嶅悗閲嶈�?/p></div>');
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+        
+        // 娓叉煋闇€姹傚垪�?        function renderRequestList(requests) {
+            if (!requests || requests.length === 0) {
+                $('#requestList').html('<div class="text-center py-5"><p>鏆傛棤闇€姹傝�?/p></div>');
+                return;
+            }
+            
+            let html = '';
+            requests.forEach(request => {
+                const statusInfo = getStatusDisplay(request.status);
+                const requestType = getRequestTypeDisplay(request.requestType);
+                
+                html += `
+                <div class="request-card border rounded-lg p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="mb-0">${request.title || '未命名请�?}</h5>
+                                <span class="type-badge">${requestType}</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-0">鍙戝竷鏃堕棿�?{request.createTime || ''}</p>
+                        </div>
+                        <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                    </div>
+                    
+                    <div class="border-top border-bottom py-2 mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <span class="text-sm text-gray-600">鍙栦欢鍦板潃�?/span>
+                                <span>${request.pickupAddress || '-'}</span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="text-sm text-gray-600">閫佽揪鍦板潃�?/span>
+                                <span>${request.deliveryAddress || '-'}</span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="text-sm text-gray-600">鎮祻閲戦�?/span>
+                                <span class="reward-amount">�?{request.rewardAmount || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            ${request.requestType === 1 && request.pickupCode ? `<span class="text-sm text-gray-600">取件码：</span><span class="font-semibold">${request.pickupCode}</span>` : ''}
+                        </div>
+                        <div>
+                            <a href="/api/delivery/request/detail?id=${request.id}" class="btn btn-outline-primary btn-sm me-2">查看详情</a>
+                            ${(request.status === 0 || request.status === 1) ? `<button class="btn btn-danger btn-sm" onclick="cancelRequest(${request.id})">取消请求</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            $('#requestList').html(html);
+        }
+        
+        // 渲染分页
+        function renderPagination() {
+            let html = '';
+            
+            if (totalPages <= 1) {
+                html = '<div class="text-center"><p class="text-sm text-gray-500">�?1 �?/p></div>';
+            } else {
+                html = `
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="#" onclick="loadRequestList(${currentPage - 1}, '${currentStatus}')">上一�?/a>
+                        </li>
+                `;
+                
+                // 生成页码按钮
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadRequestList(${i}, '${currentStatus}')">${i}</a>
+                    </li>
+                    `;
+                }
+                
+                html += `
+                        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="#" onclick="loadRequestList(${currentPage + 1}, '${currentStatus}')">下一�?/a>
+                        </li>
+                    </ul>
+                </nav>
+                `;
+            }
+            
+            $('#pagination').html(html);
+        }
+        
+        // 取消请求
+        function cancelRequest(requestId) {
+            if (confirm('确定要取消该请求吗？')) {
+                showLoading();
+                $.authAjax({
+                    url: '/api/delivery/request/cancel',
+                    method: 'POST',
+                    data: { id: requestId },
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('取消成功');
+                            loadRequestList(currentPage, currentStatus);
+                        } else {
+                            alert('取消失败�? + response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('取消失败，请稍后重试');
+                    },
+                    complete: function() {
+                        hideLoading();
+                    }
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化
+        $(document).ready(function() {
+            // 检查登录状�?           if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            // 更新用户菜单
+            updateUserMenu();
+            
+            // 加载请求列表            loadRequestList();
+            
+            // 绑定状态选择按钮事件            $('.btn-group button').click(function() {
+                $('.btn-group button').removeClass('active');
+                $(this).addClass('active');
+                currentStatus = $(this).data('status');
+                loadRequestList(1, currentStatus);
+            });
+        });
+    </script>
+</body>
+</html>

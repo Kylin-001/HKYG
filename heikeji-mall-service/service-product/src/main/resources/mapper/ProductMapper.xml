@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.product.mapper.ProductMapper">
+
+    <select id="selectProductPage" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where del_flag = 0
+        <if test="categoryId != null">
+            and category_id = #{categoryId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (name like concat('%', #{keyword}, '%') or subtitle like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        order by sort_order asc, update_time desc
+    </select>
+
+    <select id="selectByMerchantId" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where merchant_id = #{merchantId} and del_flag = 0
+        order by sort_order asc, update_time desc
+    </select>
+
+    <select id="selectByCategoryId" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where category_id = #{categoryId} and del_flag = 0 and status = 1
+        order by sort_order asc, sales desc
+    </select>
+
+    <update id="updateStock">
+        update product set stock = stock + #{quantity}, update_time = now() 
+        where id = #{id} and (stock + #{quantity}) >= 0
+    </update>
+    
+    <!-- 锁定库存 -->
+    <update id="lockStock">
+        update product set 
+            stock = stock - #{quantity}, 
+            locked_stock = locked_stock + #{quantity}, 
+            update_time = now(),
+            version = version + 1
+        where id = #{id} 
+            and stock >= #{quantity} 
+            and version = #{version}
+    </update>
+    
+    <!-- 释放锁定库存 -->
+    <update id="unlockStock">
+        update product set 
+            stock = stock + #{quantity}, 
+            locked_stock = case when locked_stock >= #{quantity} then locked_stock - #{quantity} else 0 end, 
+            update_time = now(),
+            version = version + 1
+        where id = #{id}
+            and locked_stock >= #{quantity}
+            and version = #{version}
+    </update>
+
+    <update id="updateSales">
+        update product set sales = sales + #{sales}, update_time = now() 
+        where id = #{id}
+    </update>
+    
+    <update id="deductStock">
+        update product set 
+            locked_stock = locked_stock - #{quantity}, 
+            sales = sales + #{quantity}, 
+            version = version + 1, 
+            update_time = now() 
+        where id = #{id} 
+            and locked_stock >= #{quantity} 
+            and version = #{version}
+    </update>
+    
+    <update id="restoreStock">
+        update product set 
+            stock = stock + #{quantity}, 
+            sales = case when sales >= #{quantity} then sales - #{quantity} else 0 end, 
+            version = version + 1, 
+            update_time = now() 
+        where id = #{id}
+            and version = #{version}
+    </update>
+    
+    <!-- 分页查询商品，支持更多条件 -->
+    <select id="selectPageProduct" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where del_flag = 0
+        <if test="merchantId != null">
+            and merchant_id = #{merchantId}
+        </if>
+        <if test="categoryId != null">
+            and category_id = #{categoryId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (name like concat('%', #{keyword}, '%') or subtitle like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        order by sort_order asc, update_time desc
+    </select>
+    
+    <!-- 查询热门商品 -->
+    <select id="selectHotProducts" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where del_flag = 0 and status = 1
+        order by sales desc, sort_order asc
+        limit #{limit}
+    </select>
+    
+    <!-- 查询新品 -->
+    <select id="selectNewProducts" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where del_flag = 0 and status = 1
+        and is_new = 1
+        order by create_time desc, sort_order asc
+        limit #{limit}
+    </select>
+    
+    <!-- 查询推荐商品 -->
+    <select id="selectRecommendProducts" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where del_flag = 0 and status = 1
+        and is_recommend = 1
+        order by sort_order asc, sales desc
+        limit #{limit}
+    </select>
+    
+    <!-- 根据用户个性化信息推荐商品 -->
+    <select id="selectPersonalizedRecommendProducts" resultType="com.heikeji.mall.product.entity.Product">
+        select p.*
+        from product p
+        where p.del_flag = 0 and p.status = 1
+        <if test="excludedProductIds != null and !excludedProductIds.isEmpty()">
+            and p.id not in <foreach item="id" collection="excludedProductIds" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+        <!-- 优先推荐用户浏览过的相同分类的商品 -->
+        <if test="categoryIds != null and !categoryIds.isEmpty()">
+            and p.category_id in <foreach item="cid" collection="categoryIds" open="(" separator="," close=")">#{cid}</foreach>
+        </if>
+        <!-- 按相关性排序：销量、是否推荐、更新时间 -->
+        order by 
+            <if test="categoryIds != null and !categoryIds.isEmpty()">
+                field(p.category_id, <foreach item="cid" collection="categoryIds" separator=",">#{cid}</foreach>),
+            </if>
+            p.sales desc, 
+            p.is_recommend desc,
+            p.update_time desc
+        limit #{limit}
+    </select>
+    <!-- 获取用户购买过的商品分类 -->
+    <select id="selectUserPurchasedCategoryIds" resultType="java.lang.Long">
+        select distinct p.category_id
+        from `order` o
+        join order_item oi on o.order_no = oi.order_no
+        join product p on oi.product_id = p.id
+        where o.user_id = #{userId}
+          and o.status = 3 -- 已完成订单
+          and o.order_type = 1 -- 商品订单
+        group by p.category_id
+        order by count(*) desc
+        limit #{limit}
+    </select>
+    <!-- 获取用户购买过的商品ID列表 -->
+    <select id="selectUserPurchasedProductIds" resultType="java.lang.Long">
+        select distinct oi.product_id
+        from `order` o
+        join order_item oi on o.order_no = oi.order_no
+        where o.user_id = #{userId}
+          and o.status = 3 -- 已完成订单
+          and o.order_type = 1 -- 商品订单
+        order by max(o.create_time) desc
+        limit #{limit}
+    </select>
+    
+    <!-- 高级搜索商品 -->
+    <select id="advancedSearch" resultType="com.heikeji.mall.product.entity.Product">
+        select * from product 
+        where del_flag = 0
+        
+        <!-- 基本条件 -->
+        <if test="search.keyword != null and search.keyword != ''">
+            and (name like concat('%', #{search.keyword}, '%') 
+                 or subtitle like concat('%', #{search.keyword}, '%')
+                 or description like concat('%', #{search.keyword}, '%'))
+        </if>
+        
+        <if test="search.categoryId != null">
+            and category_id = #{search.categoryId}
+        </if>
+        
+        <if test="search.merchantId != null">
+            and merchant_id = #{search.merchantId}
+        </if>
+        
+        <if test="search.status != null">
+            and status = #{search.status}
+        </if>
+        
+        <!-- 价格区间 -->
+        <if test="search.minPrice != null">
+            and price >= #{search.minPrice}
+        </if>
+        
+        <if test="search.maxPrice != null">
+            and price <= #{search.maxPrice}
+        </if>
+        
+        <!-- 库存筛选 -->
+        <if test="search.hasStock != null and search.hasStock == true">
+            and stock > 0
+        </if>
+        
+        <!-- 新品筛选 -->
+        <if test="search.isNew != null and search.isNew == true">
+            and is_new = 1
+        </if>
+        
+        <!-- 推荐筛选 -->
+        <if test="search.isRecommend != null and search.isRecommend == true">
+            and is_recommend = 1
+        </if>
+        
+        <!-- 排序 -->
+        <choose>
+            <when test="search.sortBy != null and search.sortOrder != null">
+                <choose>
+                    <when test="search.sortBy == 'price'">
+                        order by price ${search.sortOrder},
+                                sort_order asc, update_time desc
+                    </when>
+                    <when test="search.sortBy == 'sales'">
+                        order by sales ${search.sortOrder},
+                                sort_order asc, update_time desc
+                    </when>
+                    <when test="search.sortBy == 'update_time'">
+                        order by update_time ${search.sortOrder},
+                                sort_order asc
+                    </when>
+                    <when test="search.sortBy == 'create_time'">
+                        order by create_time ${search.sortOrder},
+                                sort_order asc
+                    </when>
+                    <when test="search.sortBy == 'stock'">
+                        order by stock ${search.sortOrder},
+                                sort_order asc, update_time desc
+                    </when>
+                    <otherwise>
+                        order by sort_order asc, update_time desc
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by sort_order asc, update_time desc
+            </otherwise>
+        </choose>
+    </select>
+    
+    <!-- 根据分类和子分类查询商品 -->
+    <select id="selectByCategoryAndChildren" resultType="com.heikeji.mall.product.entity.Product">
+        select p.* from product p
+        left join category c on p.category_id = c.id
+        where p.del_flag = 0 and p.status = 1
+        and (
+            c.id = #{categoryId}
+            or c.parent_id = #{categoryId}
+        )
+        order by p.sort_order asc, p.sales desc
+    </select>
+
+</mapper>

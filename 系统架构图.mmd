@@ -1,0 +1,142 @@
+graph TD
+    subgraph "客户端层"
+        A1["Web端"] --> A5
+        A2["移动端APP"] --> A5
+        A3["小程序"] --> A5
+        A4["第三方系统"] --> A5
+    end
+    
+    subgraph "接入层"
+        A5["CDN/负载均衡"] --> B1
+    end
+    
+    subgraph "网关层"
+        B1["Spring Cloud Gateway 集群"] --> C1
+        B1 --> C2
+        B1 --> C3
+        B1 --> C4
+        B1 --> C5
+        B1 --> C6
+        B1 --> C7
+        B1 --> C8
+    end
+    
+    subgraph "微服务层"
+        C1["商品服务 product-service"] --> D1
+        C1 --> D2
+        C1 --> D3
+        
+        C2["订单服务 order-service"] --> D1
+        C2 --> D2
+        C2 --> D3
+        C2 --> D4
+        
+        C3["用户服务 user-service"] --> D1
+        C2 --> D2
+        
+        C4["支付服务 payment-service"] --> D1
+        C4 --> D3
+        C4 --> D4
+        
+        C5["购物车服务 cart-service"] --> D2
+        
+        C6["搜索服务 search-service"] --> D2
+        C6 --> D5
+        
+        C7["推荐服务 recommend-service"] --> D2
+        C7 --> D5
+        
+        C8["通知服务 notification-service"] --> D3
+        C8 --> D6
+    end
+    
+    subgraph "数据层"
+        D1["MySQL 主从集群"] 
+        D2["Redis Cluster 集群"]
+        D3["RabbitMQ 集群"]
+        D4["Elasticsearch 集群"]
+        D5["MongoDB"]
+        D6["文件存储"]
+    end
+    
+    subgraph "服务治理"
+        E1["Nacos 服务注册中心"] 
+        E2["Nacos 配置中心"]
+        E3["Sentinel 熔断降级"]
+        E4["Prometheus 监控"]
+        E5["Grafana 可视化"]
+        E6["ELK 日志系统"]
+    end
+    
+    %% 服务注册与发现关系
+    C1 --> E1
+    C2 --> E1
+    C3 --> E1
+    C4 --> E1
+    C5 --> E1
+    C6 --> E1
+    C7 --> E1
+    C8 --> E1
+    
+    %% 配置中心关系
+    C1 --> E2
+    C2 --> E2
+    C3 --> E2
+    C4 --> E2
+    C5 --> E2
+    C6 --> E2
+    C7 --> E2
+    C8 --> E2
+    
+    %% 熔断降级关系
+    C1 --> E3
+    C2 --> E3
+    C3 --> E3
+    C4 --> E3
+    C5 --> E3
+    C6 --> E3
+    C7 --> E3
+    C8 --> E3
+    
+    %% 监控关系
+    C1 --> E4
+    C2 --> E4
+    C3 --> E4
+    C4 --> E4
+    C5 --> E4
+    C6 --> E4
+    C7 --> E4
+    C8 --> E4
+    D1 --> E4
+    D2 --> E4
+    D3 --> E4
+    
+    E4 --> E5
+    
+    %% 日志关系
+    C1 --> E6
+    C2 --> E6
+    C3 --> E6
+    C4 --> E6
+    C5 --> E6
+    C6 --> E6
+    C7 --> E6
+    C8 --> E6
+    
+    %% 数据库读写分离
+    D1 -- 写操作 --> D11["MySQL 主库"]
+    D1 -- 读操作 --> D12["MySQL 从库1"]
+    D1 -- 读操作 --> D13["MySQL 从库2"]
+    
+    %% 图例说明
+    classDef client fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef gateway fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef service fill:#bfb,stroke:#333,stroke-width:2px;
+    classDef data fill:#fbb,stroke:#333,stroke-width:2px;
+    classDef governance fill:#ffb,stroke:#333,stroke-width:2px;
+    
+    class A1,A2,A3,A4,A5 client;
+    class B1 gateway;
+    class C1,C2,C3,C4,C5,C6,C7,C8 service;
+    class D1,D2,D3,D4,D5,D6,D11,D12,D13 data;
+    class E1,E2,E3,E4,E5,E6 governance;

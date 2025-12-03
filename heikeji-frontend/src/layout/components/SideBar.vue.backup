@@ -1,0 +1,121 @@
+<template>
+  <div :class="{ 'sidebar-container': true, 'fixed-sidebar': fixedSidebar }">
+    <div class="scrollbar-wrapper">
+      <div :class="{ sidebar: true, 'has-logo': showLogo }">
+        <div v-if="showLogo" class="logo-container">
+          <router-link to="/" class="logo-wrapper">
+            <!-- 暂时注释掉logo图片 -->
+            <!-- <img src="@/assets/logo.png" class="logo-img" /> -->
+            <span class="logo-title">黑科易购管理系统</span>
+          </router-link>
+        </div>
+        <nav class="sidebar-nav">
+          <sidebar-item
+            v-for="route in permission_routes"
+            :key="route.path"
+            :item="route"
+            :base-path="route.path"
+          />
+        </nav>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import SidebarItem from './SidebarItem'
+
+export default {
+  name: 'Sidebar',
+  components: {
+    SidebarItem
+  },
+  computed: {
+    ...mapGetters(['sidebar', 'permission_routes', 'fixedSidebar', 'showLogo'])
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@use '@/styles/variables.scss' as *;
+
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1001;
+  height: 100%;
+  width: $sideBarWidth;
+  transition: width 0.28s;
+  background: $menuBackground;
+  &.fixed-sidebar {
+    position: fixed;
+  }
+}
+
+.scrollbar-wrapper {
+  height: 100%;
+  overflow-x: hidden;
+  position: relative;
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: $scrollbarColor;
+  }
+  &::-webkit-scrollbar-track {
+    background: $scrollbarTrackColor;
+  }
+}
+
+.sidebar {
+  height: 100%;
+  width: $sideBarWidth;
+  overflow: hidden;
+  position: relative;
+  background: $menuBackground;
+  &.has-logo {
+    padding-top: $logoHeight;
+  }
+}
+
+.logo-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: $logoHeight;
+  width: $sideBarWidth;
+  padding: 0 20px;
+  box-sizing: border-box;
+  background: $menuBackground;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-decoration: none;
+}
+
+.logo-img {
+  height: 32px;
+  width: auto;
+}
+
+.logo-title {
+  color: $menuText;
+  font-size: 16px;
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+.sidebar-nav {
+  padding: 20px 0;
+}
+</style>

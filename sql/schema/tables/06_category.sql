@@ -1,0 +1,13 @@
+-- 商品分类表
+CREATE TABLE IF NOT EXISTS `category` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '分类ID',
+  `name` VARCHAR(50) NOT NULL COMMENT '分类名称',
+  `parent_id` BIGINT DEFAULT 0 COMMENT '父分类ID',
+  `icon` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
+  `sort_order` INT DEFAULT 0 COMMENT '排序',
+  `is_enabled` TINYINT(1) DEFAULT 1 COMMENT '是否启用',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_parent_id` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品分类表';

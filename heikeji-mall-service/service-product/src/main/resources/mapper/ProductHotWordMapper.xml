@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.product.mapper.ProductHotWordMapper">
+
+    <!-- 获取热门搜索词列表 -->
+    <select id="getHotWords" resultType="com.heikeji.mall.product.entity.ProductHotWord">
+        select * from product_hot_word
+        where status = 1
+        order by search_count desc, sort_order asc
+        limit #{limit}
+    </select>
+
+    <!-- 获取首页展示的热词 -->
+    <select id="getHomeShowHotWords" resultType="com.heikeji.mall.product.entity.ProductHotWord">
+        select * from product_hot_word
+        where status = 1
+          and show_on_home = 1
+        order by sort_order asc, search_count desc
+        limit #{limit}
+    </select>
+
+    <!-- 增加热词搜索次数 -->
+    <update id="incrementSearchCount">
+        update product_hot_word
+        set search_count = search_count + 1,
+            update_time = now()
+        where word = #{word}
+          and status = 1
+    </update>
+
+    <!-- 根据关键词获取热词 -->
+    <select id="getByWord" resultType="com.heikeji.mall.product.entity.ProductHotWord">
+        select * from product_hot_word
+        where word = #{word}
+    </select>
+</mapper>

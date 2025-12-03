@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.secondhand.mapper.SecondhandProductMapper">
+
+    <!-- 增加商品浏览量 -->
+    <update id="increaseViewCount" parameterType="java.lang.Long">
+        UPDATE secondhand_product
+        SET view_count = view_count + 1
+        WHERE id = #{productId}
+    </update>
+
+    <!-- 自定义查询示例 -->
+    <select id="selectProductList" resultType="com.heikeji.mall.secondhand.entity.SecondhandProduct">
+        SELECT * FROM secondhand_product
+        WHERE del_flag = 0
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

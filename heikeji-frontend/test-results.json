@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-11-18T03:23:55.538Z",
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "results": [
+    {
+      "name": "根路径访问测试",
+      "url": "/",
+      "passed": true,
+      "statusCode": 200
+    },
+    {
+      "name": "登录路由测试",
+      "url": "/login",
+      "passed": true,
+      "statusCode": 200
+    },
+    {
+      "name": "产品路由测试",
+      "url": "/products",
+      "passed": true,
+      "statusCode": 200
+    },
+    {
+      "name": "深度嵌套路由测试",
+      "url": "/admin/users/profile",
+      "passed": true,
+      "statusCode": 200
+    },
+    {
+      "name": "静态资源测试",
+      "url": "/bundle.js",
+      "passed": true,
+      "statusCode": 200
+    }
+  ]
+}

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单详情 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        .detail-section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 16px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        .info-label {
+            color: #999;
+        }
+        .info-value {
+            color: #333;
+        }
+        .product-item {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        .product-item:last-child {
+            border-bottom: none;
+        }
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 16px;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-name {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .product-price {
+            color: #ff6700;
+            font-weight: bold;
+        }
+        .product-quantity {
+            color: #999;
+            font-size: 12px;
+            float: right;
+        }
+        .order-status {
+            color: #ff6700;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .order-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .delivery-address {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .address-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .address-detail {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .tracking-info {
+            background-color: #f0f9ff;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #1890ff;
+            margin-top: 12px;
+        }
+        .tracking-title {
+            font-weight: bold;
+            color: #1890ff;
+            margin-bottom: 8px;
+        }
+        .tracking-detail {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/product/list">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/cart">购物�?/a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/order/list">我的订单</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将根据登录状态动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="mb-4">
+            <h2>订单详情</h2>
+        </div>
+        
+        <div id="order-detail" class="mb-4">
+        <!-- 订单详情将通过AJAX动态加�?-->
+        <div class="text-center py-5">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">加载�?..</span>
+            </div>
+            <p class="mt-2">加载订单详情�?..</p>
+        </div>
+    </div>
+    
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载�?..</span>
+        </div>
+    </div>
+    
+    <!-- 评价订单模态框 -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">评价订单</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reviewOrderNo">
+                    <div id="reviewItemsContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="submitReviews()">提交评价</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 显示加载遮罩�?       function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 隐藏加载遮罩�?       function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 更新导航栏用户状�?       function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            if (authUtils.isLoggedIn()) {
+                const username = authUtils.getUsername() || '用户';
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${username}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/api/order/list">我的订单</a>
+                            <a class="dropdown-item" href="/api/cart">购物�?/a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="logout()">退出登�?/a>
+                        </div>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">鐧诲�?/a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户退�?
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 页面加载时更新用户菜�?       $(document).ready(function() {
+            updateUserMenu();
+        });
+        
+        // 全局变量存储订单信息
+        let currentOrderDetail = null;
+        
+        $(document).ready(function() {
+            // 更新导航栏用户状�?           updateUserMenu();
+            // 获取URL中的订单号参�?           const urlParams = new URLSearchParams(window.location.search);
+            const orderNo = urlParams.get('orderNo');
+            
+            if (!orderNo) {
+                $('#order-detail').html('<div class="text-center py-5"><p class="text-danger">订单号不存在</p></div>');
+                return;
+            }
+            
+            // 加载订单详情
+            loadOrderDetail(orderNo);
+        });
+        
+        // 加载订单详情
+        function loadOrderDetail(orderNo) {
+            showLoading();
+            $.authAjax({
+                url: '/api/order/detail',
+                type: 'GET',
+                data: { orderNo: orderNo },
+                success: function(data) {
+                    hideLoading();
+                    if (data.code === 200 && data.data) {
+                        renderOrderDetail(data.data);
+                    } else {
+                        $('#order-detail').html('<div class="text-center py-5"><p class="text-danger">订单不存在或已被删除</p></div>');
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    $('#order-detail').html('<div class="text-center py-5"><p>加载失败，请稍后重试</p></div>');
+                }
+            });
+        }
+        
+        // 渲染订单详情
+        function renderOrderDetail(order) {
+            // 瀛樺偍褰撳墠璁㈠崟璇︽儏
+            currentOrderDetail = order;
+            let html = `
+            <div class="detail-section">
+                <div class="order-status">${getStatusText(order.status)}</div>
+                <div class="info-row">
+                    <span class="info-label">订单号：</span>
+                    <span class="info-value">${order.orderNo}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">下单时间�?/span>
+                    <span class="info-value">${formatDate(order.createTime)}</span>
+                </div>
+                ${order.payTime ? `
+                <div class="info-row">
+                    <span class="info-label">支付时间�?/span>
+                    <span class="info-value">${formatDate(order.payTime)}</span>
+                </div>` : ''}
+                ${order.shipTime ? `
+                <div class="info-row">
+                    <span class="info-label">发货时间�?/span>
+                    <span class="info-value">${formatDate(order.shipTime)}</span>
+                </div>` : ''}
+                ${order.completeTime ? `
+                <div class="info-row">
+                    <span class="info-label">完成时间�?/span>
+                    <span class="info-value">${formatDate(order.completeTime)}</span>
+                </div>` : ''}
+            </div>
+            
+            <div class="detail-section">
+                <div class="section-title">收货信息</div>
+                <div class="delivery-address">
+                    <div class="address-title">${order.receiverName} ${order.receiverPhone}</div>
+                    <div class="address-detail">${order.receiverProvince} ${order.receiverCity} ${order.receiverDistrict} ${order.receiverAddress}</div>
+                </div>
+                ${order.status >= 2 && order.logisticsCompany ? `
+                <div class="tracking-info">
+                    <div class="tracking-title">物流信息</div>
+                    <div class="tracking-detail">${order.logisticsCompany}�?{order.trackingNumber}</div>
+                </div>` : ''}
+            </div>
+            
+            <div class="detail-section">
+                <div class="section-title">商品信息</div>
+                ${order.orderItems.map(item => `
+                <div class="product-item">
+                    <img src="${item.productImage}" alt="${item.productName}" class="product-image">
+                    <div class="product-info">
+                        <div class="product-name">${item.productName}</div>
+                        <div class="mt-2">
+                            <span class="product-price">¥${item.price.toFixed(2)}</span>
+                            <span class="product-quantity">x${item.quantity}</span>
+                        </div>
+                    </div>
+                </div>`).join('')}
+            </div>
+            
+            <div class="detail-section">
+                <div class="section-title">价格明细</div>
+                <div class="info-row">
+                    <span class="info-label">商品总价�?/span>
+                    <span class="info-value">¥${order.totalAmount.toFixed(2)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">运费�?/span>
+                    <span class="info-value">¥${order.freightAmount.toFixed(2)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">实付金额�?/span>
+                    <span class="info-value font-weight-bold text-danger" style="font-size: 16px;">¥${(order.totalAmount + order.freightAmount).toFixed(2)}</span>
+                </div>
+                
+                <div class="info-row" style="margin-top: 16px;">
+                    <span class="info-label">支付方式�?/span>
+                    <span class="info-value">${getPaymentMethodText(order.paymentMethod)}</span>
+                </div>
+                ${order.paymentNo ? `
+                <div class="info-row">
+                    <span class="info-label">支付流水号：</span>
+                    <span class="info-value">${order.paymentNo}</span>
+                </div>` : ''}
+            </div>
+            `;
+            
+            // 根据订单状态添加操作按�?           let actionButtons = '';
+            if (order.status === 0) { // 寰呬粯娆?                actionButtons = `
+                <div class="order-actions">
+                    <button class="btn btn-outline-secondary" onclick="cancelOrder('${order.orderNo}')">取消订单</button>
+                    <button class="btn btn-primary" onclick="goPayment('${order.orderNo}')">立即支付</button>
+                </div>`;
+            } else if (order.status === 2) { // 寰呮敹璐?                actionButtons = `
+                <div class="order-actions">
+                    <button class="btn btn-primary" onclick="confirmReceipt('${order.orderNo}')">确认收货</button>
+                </div>`;
+            } else if (order.status === 3) { // 宸插畬鎴愶紝娣诲姞璇勪环鎸夐�?
+                actionButtons = `
+                <div class="order-actions">
+                    <button class="btn btn-primary" onclick="showReviewModal('${order.orderNo}', ${JSON.stringify(order.orderItems)})">评价订单</button>
+                </div>`;
+            }
+            
+            $('#order-detail').html(html + actionButtons);
+        }
+        
+        // 格式化日�?       function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+        
+        // 获取订单状态文�?       function getStatusText(status) {
+            const statusMap = {
+                0: '待付�?,
+                1: '待发�?,
+                2: '待收�?,
+                3: '已完�?,
+                4: '已取�?
+            };
+            return statusMap[status] || '未知状�?;
+        }
+        
+        // 获取支付方式文本
+        function getPaymentMethodText(method) {
+            const methodMap = {
+                1: '微信支付',
+                2: '支付�?,
+                3: '银行�?
+            };
+            return methodMap[method] || '不支�?;
+        }
+        
+        // 取消订单
+        function cancelOrder(orderNo) {
+            if (confirm('确定要取消该订单吗？')) {
+                $.authAjax({
+                    url: '/api/order/cancel',
+                    type: 'POST',
+                    data: { orderNo: orderNo },
+                    success: function(data) {
+                        if (data.code === 200) {
+                            alert('订单已取�?);
+                            loadOrderDetail(orderNo);
+                        } else {
+                            alert('取消失败�? + data.message);
+                        }
+                    },
+                    error: function() {
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            }
+        }
+        
+        // 去支�?
+        function goPayment(orderNo) {
+            window.location.href = '/api/payment?orderNo=' + orderNo;
+        }
+        
+
+        
+        // 确认收货
+        function confirmReceipt(orderNo) {
+            if (confirm('确认已收到商品吗�?)) {
+                $.authAjax({
+                    url: '/api/order/confirm-receipt',
+                    type: 'POST',
+                    data: { orderNo: orderNo },
+                    success: function(data) {
+                        if (data.code === 200) {
+                            alert('收货成功');
+                            loadOrderDetail(orderNo);
+                        } else {
+                            alert('收货失败�? + data.message);
+                        }
+                    },
+                    error: function() {
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            }
+        }
+        
+        // 显示评价模态框
+        function showReviewModal(orderNo, orderItems) {
+            $('#reviewOrderNo').val(orderNo);
+            let reviewHtml = '';
+            
+            orderItems.forEach((item, index) => {
+                reviewHtml += `
+                <div class="review-item mb-4 p-3 border rounded">
+                    <div class="d-flex mb-3">
+                        <img src="${item.productImage}" alt="${item.productName}" class="product-image" style="width: 60px; height: 60px;">
+                        <div class="ml-3">
+                            <h6 class="product-name" style="margin-bottom: 0; max-width: 400px;">${item.productName}</h6>
+                            <p class="text-muted" style="margin-bottom: 0;">数量: ${item.quantity}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>评分�?/label>
+                        <div class="rating-stars" data-product-id="${item.productId}">
+                            ${generateStarRating(index, 5)}
+                        </div>
+                    </div>
+                    <div>
+                        <label>评价内容�?/label>
+                        <textarea class="form-control review-content" rows="3" placeholder="请输入评价内�?."></textarea>
+                    </div>
+                </div>`;
+            });
+            
+            $('#reviewItemsContainer').html(reviewHtml);
+            $('#reviewModal').modal('show');
+            
+            // 绑定星星点击事件
+            $('.rating-stars i').on('click', function() {
+                const index = $(this).index();
+                const starsContainer = $(this).parent();
+                updateStarRating(starsContainer, index + 1);
+            });
+        }
+        
+        // 生成星星评分HTML
+        function generateStarRating(index, maxRating) {
+            let starsHtml = '';
+            for (let i = 0; i < maxRating; i++) {
+                starsHtml += `<i class="fas fa-star text-warning" style="cursor: pointer; font-size: 20px; margin-right: 5px;"></i>`;
+            }
+            return starsHtml;
+        }
+        
+        // 更新星星评分
+        function updateStarRating(starsContainer, rating) {
+            const stars = starsContainer.find('i');
+            stars.removeClass('text-warning');
+            stars.addClass('text-secondary');
+            
+            for (let i = 0; i < rating; i++) {
+                stars.eq(i).removeClass('text-secondary');
+                stars.eq(i).addClass('text-warning');
+            }
+            
+            starsContainer.attr('data-rating', rating);
+        }
+        
+        // 提交评价
+        function submitReviews() {
+            showLoading();
+            const orderNo = $('#reviewOrderNo').val();
+            const reviews = [];
+            let isValid = true;
+            
+            // 收集评价数据
+            $('.review-item').each(function() {
+                const productId = $(this).find('.rating-stars').attr('data-product-id');
+                const rating = $(this).find('.rating-stars').attr('data-rating') || 5;
+                const content = $(this).find('.review-content').val().trim();
+                
+                if (!content) {
+                    isValid = false;
+                    alert('请填写所有商品的评价内容');
+                    return false;
+                }
+                
+                reviews.push({
+                    productId: productId,
+                    rating: parseInt(rating),
+                    content: content
+                });
+            });
+            
+            if (!isValid) {
+                return;
+            }
+            
+            // 提交评价到后�?
+            $.authAjax({
+                url: '/api/order/review',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    orderNo: orderNo,
+                    reviews: reviews
+                }),
+                success: function(data) {
+                    hideLoading();
+                    if (data.code === 200) {
+                        alert('评价提交成功�?);
+                        $('#reviewModal').modal('hide');
+                        // 可以选择重新加载订单详情或关闭页�?
+                    } else {
+                        alert('评价提交失败�? + (data.message || '未知错误'));
+                    }
+                },
+                error: function() {
+                    hideLoading();
+                    alert('缃戠粶閿欒锛岃绋嶅悗閲嶈�?);
+                }
+            });
+        }
+        
+
+    </script>
+    
+    <!-- 页脚 -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>关于我们</h4>
+                    <p>黑科易购是一家专注于电子产品销售的电商平台，提供优质的购物体验和完善的售后服务�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h4>快速链�?/h4>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/api/product/list">商品列表</a></li>
+                        <li><a href="/api/auth/login">登录</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h4>联系我们</h4>
+                    <p>客服电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>© 2024 黑科易购 版权所�?/p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

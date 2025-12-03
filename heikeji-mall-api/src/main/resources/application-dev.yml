@@ -1,0 +1,79 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 20
+
+spring:
+  # 服务注册与发现
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        group: DEFAULT_GROUP
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+    password: # 开发环境可以留空
+    timeout: 60000
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
+# 网关配置
+zuul:
+  routes:
+    user-service:
+      path: /user/**
+      serviceId: service-user
+    product-service:
+      path: /product/**
+      serviceId: service-product
+    order-service:
+      path: /order/**
+      serviceId: service-order
+    payment-service:
+      path: /payment/**
+      serviceId: service-payment
+    delivery-service:
+      path: /delivery/**
+      serviceId: service-delivery
+    takeout-service:
+      path: /takeout/**
+      serviceId: service-takeout
+    campus-service:
+      path: /campus/**
+      serviceId: service-campus
+    member-service:
+      path: /member/**
+      serviceId: service-member
+  prefix: /api/v1
+  sensitiveHeaders: # 允许传递所有头信息
+
+# 熔断配置
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 5000
+
+# Ribbon配置
+ribbon:
+  ReadTimeout: 5000
+  ConnectTimeout: 5000
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 1
+  eager-load:
+    enabled: true
+    clients: service-user,service-product,service-order,service-payment,service-delivery,service-takeout,service-campus,service-member

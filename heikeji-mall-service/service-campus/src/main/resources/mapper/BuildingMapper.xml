@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.campus.mapper.BuildingMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.campus.entity.Building">
+        <id column="id" property="id"/>
+        <result column="campus_id" property="campusId"/>
+        <result column="building_name" property="buildingName"/>
+        <result column="building_code" property="buildingCode"/>
+        <result column="status" property="status"/>
+        <result column="sort" property="sort"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 根据校区ID查询楼栋 -->
+    <select id="selectByCampusId" resultMap="BaseResultMap">
+        SELECT * FROM building WHERE campus_id = #{campusId} ORDER BY sort ASC, id ASC
+    </select>
+
+    <!-- 查询启用的楼栋 -->
+    <select id="selectEnabledBuildings" resultMap="BaseResultMap">
+        SELECT * FROM building WHERE status = 1 ORDER BY campus_id ASC, sort ASC, id ASC
+    </select>
+
+    <!-- 根据楼栋编码查询楼栋 -->
+    <select id="selectByBuildingCode" resultMap="BaseResultMap">
+        SELECT * FROM building WHERE building_code = #{buildingCode}
+    </select>
+
+</mapper>

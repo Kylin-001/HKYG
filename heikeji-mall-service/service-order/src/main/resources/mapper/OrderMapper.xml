@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.order.mapper.OrderMapper">
+
+    <!-- 根据订单号查询订单 -->
+    <select id="selectByOrderNo" resultType="com.heikeji.mall.order.entity.Order">
+        SELECT
+            id,
+            order_no AS orderNo,
+            user_id AS userId,
+            merchant_id AS merchantId,
+            order_type AS orderType,
+            total_amount AS totalAmount,
+            pay_amount AS payAmount,
+            freight_amount AS freightAmount,
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            receiver_address AS receiverAddress,
+            delivery_type AS deliveryType,
+            delivery_locker_code AS deliveryLockerCode,
+            delivery_special_place AS deliverySpecialPlace,
+            status,
+            pay_status AS payStatus,
+            pay_time AS payTime,
+            delivery_time AS deliveryTime,
+            complete_time AS completeTime,
+            remark,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM `order`
+        WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 根据用户ID查询订单列表 -->
+    <select id="selectByUserId" resultType="com.heikeji.mall.order.entity.Order">
+        SELECT
+            id,
+            order_no AS orderNo,
+            user_id AS userId,
+            merchant_id AS merchantId,
+            order_type AS orderType,
+            total_amount AS totalAmount,
+            pay_amount AS payAmount,
+            freight_amount AS freightAmount,
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            receiver_address AS receiverAddress,
+            delivery_type AS deliveryType,
+            delivery_locker_code AS deliveryLockerCode,
+            delivery_special_place AS deliverySpecialPlace,
+            status,
+            pay_status AS payStatus,
+            pay_time AS payTime,
+            delivery_time AS deliveryTime,
+            complete_time AS completeTime,
+            remark,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM `order`
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据商家ID查询订单列表 -->
+    <select id="selectByMerchantId" resultType="com.heikeji.mall.order.entity.Order">
+        SELECT
+            id,
+            order_no AS orderNo,
+            user_id AS userId,
+            merchant_id AS merchantId,
+            order_type AS orderType,
+            total_amount AS totalAmount,
+            pay_amount AS payAmount,
+            freight_amount AS freightAmount,
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            receiver_address AS receiverAddress,
+            delivery_type AS deliveryType,
+            delivery_locker_code AS deliveryLockerCode,
+            delivery_special_place AS deliverySpecialPlace,
+            status,
+            pay_status AS payStatus,
+            pay_time AS payTime,
+            delivery_time AS deliveryTime,
+            complete_time AS completeTime,
+            remark,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM `order`
+        WHERE merchant_id = #{merchantId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 更新订单状态 -->
+    <update id="updateOrderStatus">
+        UPDATE `order`
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 查询待处理订单 -->
+    <select id="selectPendingOrders" resultType="com.heikeji.mall.order.entity.Order">
+        SELECT
+            id,
+            order_no AS orderNo,
+            user_id AS userId,
+            merchant_id AS merchantId,
+            order_type AS orderType,
+            total_amount AS totalAmount,
+            pay_amount AS payAmount,
+            freight_amount AS freightAmount,
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            receiver_address AS receiverAddress,
+            delivery_type AS deliveryType,
+            delivery_locker_code AS deliveryLockerCode,
+            delivery_special_place AS deliverySpecialPlace,
+            status,
+            pay_status AS payStatus,
+            pay_time AS payTime,
+            delivery_time AS deliveryTime,
+            complete_time AS completeTime,
+            remark,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM `order`
+        WHERE status = #{status}
+        ORDER BY create_time ASC
+    </select>
+    
+    <!-- 原有方法保持兼容 -->
+    <select id="selectByStatus" resultType="com.heikeji.mall.order.entity.Order">
+        SELECT
+            id,
+            order_no AS orderNo,
+            user_id AS userId,
+            merchant_id AS merchantId,
+            order_type AS orderType,
+            total_amount AS totalAmount,
+            pay_amount AS payAmount,
+            freight_amount AS freightAmount,
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            receiver_address AS receiverAddress,
+            delivery_type AS deliveryType,
+            delivery_locker_code AS deliveryLockerCode,
+            delivery_special_place AS deliverySpecialPlace,
+            status,
+            pay_status AS payStatus,
+            pay_time AS payTime,
+            delivery_time AS deliveryTime,
+            complete_time AS completeTime,
+            remark,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM `order`
+        WHERE status = #{status}
+        ORDER BY create_time DESC
+    </select>
+    
+    <update id="updatePaymentInfo">
+        UPDATE `order`
+        SET payment_id = #{paymentId},
+            pay_time = NOW(),
+            status = 2,
+            pay_status = 1,
+            update_time = NOW()
+        WHERE id = #{orderId}
+    </update>
+    
+    <!-- 分页查询用户订单列表 -->
+    <select id="selectUserOrderListPage" resultType="com.heikeji.mall.order.entity.Order">
+        SELECT
+            id,
+            order_no AS orderNo,
+            user_id AS userId,
+            merchant_id AS merchantId,
+            order_type AS orderType,
+            total_amount AS totalAmount,
+            pay_amount AS payAmount,
+            freight_amount AS freightAmount,
+            address_id AS addressId,
+            receiver_name AS receiverName,
+            receiver_phone AS receiverPhone,
+            receiver_address AS receiverAddress,
+            delivery_type AS deliveryType,
+            delivery_locker_code AS deliveryLockerCode,
+            delivery_special_place AS deliverySpecialPlace,
+            status,
+            pay_status AS payStatus,
+            pay_time AS payTime,
+            delivery_time AS deliveryTime,
+            complete_time AS completeTime,
+            remark,
+            create_time AS createTime,
+            update_time AS updateTime
+        FROM `order`
+        WHERE user_id = #{userId}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+</mapper>

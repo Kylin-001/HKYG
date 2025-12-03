@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.user.mapper.DeliveryRequestMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.user.entity.DeliveryRequest">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="request_type" property="requestType" jdbcType="INTEGER"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="pickup_address" property="pickupAddress" jdbcType="VARCHAR"/>
+        <result column="pickup_code" property="pickupCode" jdbcType="VARCHAR"/>
+        <result column="delivery_address" property="deliveryAddress" jdbcType="VARCHAR"/>
+        <result column="reward_amount" property="rewardAmount" jdbcType="DECIMAL"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="accepter_id" property="accepterId" jdbcType="BIGINT"/>
+        <result column="accept_time" property="acceptTime" jdbcType="TIMESTAMP"/>
+        <result column="complete_time" property="completeTime" jdbcType="TIMESTAMP"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        id, user_id, request_type, title, description, pickup_address, pickup_code, delivery_address,
+        reward_amount, status, accepter_id, accept_time, complete_time, create_time, update_time
+    </sql>
+
+    <!-- 根据用户ID查询跑腿需求列表 -->
+    <select id="selectByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM delivery_request
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据状态查询跑腿需求列表 -->
+    <select id="selectByStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM delivery_request
+        WHERE status = #{status}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据接单者ID查询跑腿需求列表 -->
+    <select id="selectByAccepterId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM delivery_request
+        WHERE accepter_id = #{accepterId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 分页查询跑腿需求列表（包含用户信息） -->
+    <select id="selectListWithUserInfo" parameterType="map" resultMap="DeliveryRequestWithUserResultMap">
+        SELECT
+        dr.id, dr.user_id, dr.request_type, dr.title, dr.description, dr.pickup_address, dr.pickup_code,
+        dr.delivery_address, dr.reward_amount, dr.status, dr.accepter_id, dr.accept_time, dr.complete_time,
+        dr.create_time, dr.update_time,
+        u.username, u.nickname, u.phone
+        FROM delivery_request dr
+        LEFT JOIN `user` u ON dr.user_id = u.id
+        <where>
+            <if test="userId != null">
+                AND dr.user_id = #{userId}
+            </if>
+            <if test="status != null">
+                AND dr.status = #{status}
+            </if>
+            <if test="requestType != null">
+                AND dr.request_type = #{requestType}
+            </if>
+            <if test="accepterId != null">
+                AND dr.accepter_id = #{accepterId}
+            </if>
+        </where>
+        ORDER BY dr.create_time DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <!-- 查询跑腿需求总数（包含用户信息） -->
+    <select id="countWithUserInfo" parameterType="map" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM delivery_request dr
+        LEFT JOIN `user` u ON dr.user_id = u.id
+        <where>
+            <if test="userId != null">
+                AND dr.user_id = #{userId}
+            </if>
+            <if test="status != null">
+                AND dr.status = #{status}
+            </if>
+            <if test="requestType != null">
+                AND dr.request_type = #{requestType}
+            </if>
+            <if test="accepterId != null">
+                AND dr.accepter_id = #{accepterId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 跑腿需求与用户信息的关联结果映射 -->
+    <resultMap id="DeliveryRequestWithUserResultMap" type="com.heikeji.mall.user.entity.DeliveryRequest">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="request_type" property="requestType"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="pickup_address" property="pickupAddress"/>
+        <result column="pickup_code" property="pickupCode"/>
+        <result column="delivery_address" property="deliveryAddress"/>
+        <result column="reward_amount" property="rewardAmount"/>
+        <result column="status" property="status"/>
+        <result column="accepter_id" property="accepterId"/>
+        <result column="accept_time" property="acceptTime"/>
+        <result column="complete_time" property="completeTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <association property="requester" javaType="com.heikeji.mall.user.entity.User">
+            <id column="user_id" property="id"/>
+            <result column="username" property="studentNo"/>
+            <result column="nickname" property="nickname"/>
+            <result column="phone" property="phone"/>
+        </association>
+    </resultMap>
+
+</mapper>

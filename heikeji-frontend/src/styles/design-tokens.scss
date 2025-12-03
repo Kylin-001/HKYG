@@ -1,0 +1,285 @@
+// 设计令牌系统 (Design Tokens)
+// 视觉设计的基础系统，通过变量化的方式管理颜色、间距、字体等设计属性
+
+// 1. 颜色系统
+
+// 1.1 主色调
+// 主色系
+$color-primary: #1890ff;
+$color-primary-light: #40a9ff;
+$color-primary-dark: #096dd9;
+$color-primary-bg: #e6f7ff;
+
+// 辅助色系
+$color-success: #52c41a;
+$color-success-light: #73d13d;
+$color-success-dark: #389e0d;
+$color-success-bg: #f6ffed;
+
+$color-warning: #faad14;
+$color-warning-light: #ffc53d;
+$color-warning-dark: #d48806;
+$color-warning-bg: #fffbe6;
+
+$color-error: #ff4d4f;
+$color-error-light: #ff7875;
+$color-error-dark: #d32029;
+$color-error-bg: #fff2f0;
+
+$color-info: #1890ff;
+$color-info-light: #40a9ff;
+$color-info-dark: #096dd9;
+$color-info-bg: #e6f7ff;
+
+// 1.2 中性色系
+// 文字颜色
+$color-text-primary: rgba(0, 0, 0, 0.85);
+$color-text-secondary: rgba(0, 0, 0, 0.65);
+$color-text-disabled: rgba(0, 0, 0, 0.25);
+$color-text-placeholder: rgba(0, 0, 0, 0.25);
+
+// 边框颜色
+$color-border: #d9d9d9;
+$color-border-light: #f0f0f0;
+$color-border-dark: #8c8c8c;
+
+// 背景颜色
+$color-bg-base: #ffffff;
+$color-bg-container: #ffffff;
+$color-bg-elevated: #ffffff;
+$color-bg-layout: #f0f2f5;
+
+$color-bg-disabled: #f5f5f5;
+$color-bg-mask: rgba(0, 0, 0, 0.45);
+
+// 1.3 功能性颜色
+// 状态色
+$color-status-success: #52c41a;
+$color-status-warning: #faad14;
+$color-status-error: #ff4d4f;
+$color-status-processing: #1890ff;
+$color-status-default: #d9d9d9;
+
+// 链接色
+$color-link: #1890ff;
+$color-link-hover: #40a9ff;
+$color-link-active: #096dd9;
+$color-link-disabled: rgba(0, 0, 0, 0.25);
+
+// 2. 字体系统
+
+// 2.1 字体族
+$font-family-base:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+  sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+$font-family-monospace: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+
+// 2.2 字体大小
+$font-size-base: 14px;
+$font-size-sm: 12px;
+$font-size-lg: 16px;
+$font-size-xl: 20px;
+$font-size-xxl: 24px;
+$font-size-title: 32px;
+
+// 2.3 行高
+$line-height-base: 1.5715;
+$line-height-sm: 1.5;
+$line-height-lg: 1.6667;
+
+// 2.4 字重
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// 3. 间距系统
+
+// 3.1 基础间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-base: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+$spacing-xxxl: 64px;
+
+// 3.2 组件内间距
+// 组件内部元素间距
+$spacing-component-xs: 4px;
+$spacing-component-sm: 8px;
+$spacing-component-base: 16px;
+$spacing-component-lg: 24px;
+$spacing-component-xl: 32px;
+
+// 组件之间间距
+$spacing-between-xs: 8px;
+$spacing-between-sm: 12px;
+$spacing-between-base: 16px;
+$spacing-between-lg: 24px;
+$spacing-between-xl: 32px;
+
+// 4. 圆角系统
+
+// 4.1 基础圆角
+$border-radius-sm: 2px;
+$border-radius-base: 4px;
+$border-radius-lg: 8px;
+$border-radius-xl: 16px;
+$border-radius-circle: 50%;
+
+// 4.2 组件特定圆角
+$border-radius-button: $border-radius-base;
+$border-radius-card: $border-radius-lg;
+$border-radius-input: $border-radius-base;
+$border-radius-dropdown: $border-radius-base;
+
+// 5. 阴影系统
+
+// 5.1 投影层级
+$shadow-color: rgba(0, 0, 0, 0.15);
+
+// 阴影层级
+$shadow-card:
+  0 1px 2px -2px rgba(0, 0, 0, 0.16),
+  0 3px 6px 0 rgba(0, 0, 0, 0.12),
+  0 5px 12px 4px rgba(0, 0, 0, 0.09);
+$shadow-popup:
+  0 3px 6px -4px rgba(0, 0, 0, 0.12),
+  0 6px 16px 0 rgba(0, 0, 0, 0.08),
+  0 9px 28px 8px rgba(0, 0, 0, 0.05);
+$shadow-floating:
+  0 6px 16px -8px rgba(0, 0, 0, 0.08),
+  0 9px 28px 0 rgba(0, 0, 0, 0.05),
+  0 12px 48px 16px rgba(0, 0, 0, 0.03);
+
+// 5.2 组件阴影
+$shadow-elevation-1:
+  0 1px 2px 0 rgba(0, 0, 0, 0.05),
+  0 1px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px 0 rgba(0, 0, 0, 0.1);
+$shadow-elevation-2:
+  0 1px 3px 0 rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.1),
+  0 10px 20px -4px rgba(0, 0, 0, 0.1);
+$shadow-elevation-3:
+  0 4px 6px -2px rgba(0, 0, 0, 0.1),
+  0 10px 12px -4px rgba(0, 0, 0, 0.1),
+  0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+// 6. 边框系统
+
+// 6.1 边框样式
+$border-width-base: 1px;
+$border-width-lg: 2px;
+$border-style-base: solid;
+$border-color-base: $color-border;
+$border-color-light: $color-border-light;
+$border-color-dark: $color-border-dark;
+
+// 6.2 分隔线
+$divider-color: #f0f0f0;
+$divider-width: 1px;
+$divider-style: solid;
+
+// 7. 动画系统
+
+// 7.1 过渡时间
+$transition-duration-fast: 0.1s;
+$transition-duration-base: 0.2s;
+$transition-duration-slow: 0.3s;
+$transition-duration-slower: 0.5s;
+
+// 7.2 缓动函数
+$ease-in: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+$ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+$ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
+$ease-out-back: cubic-bezier(0.12, 0.4, 0.29, 1.46);
+$ease-in-back: cubic-bezier(0.71, -0.46, 0.88, 0.6);
+$ease-in-out-back: cubic-bezier(0.71, -0.46, 0.29, 1.46);
+
+// 7.3 动画常用组合
+$transition-fast: all $transition-duration-fast $ease-out;
+$transition-base: all $transition-duration-base $ease-in-out;
+$transition-slow: all $transition-duration-slow $ease-in-out;
+
+// 8. 断点系统
+
+// 8.1 响应式断点
+$screen-xs: 480px;
+$screen-sm: 576px;
+$screen-md: 768px;
+$screen-lg: 992px;
+$screen-xl: 1200px;
+$screen-xxl: 1600px;
+
+// 8.2 断点混合器
+@mixin mobile {
+  @media (max-width: #{$screen-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$screen-sm}) and (max-width: #{$screen-lg - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$screen-lg}) {
+    @content;
+  }
+}
+
+// 9. Z-Index 层级
+
+// 9.1 层级管理
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-toast: 1080;
+
+// 10. CSS 变量系统
+
+:root {
+  /* 颜色变量 */
+  --color-primary: #1890ff;
+  --color-success: #52c41a;
+  --color-warning: #faad14;
+  --color-error: #ff4d4f;
+
+  /* 文字变量 */
+  --font-size-base: 14px;
+  --line-height-base: 1.5715;
+
+  /* 间距变量 */
+  --spacing-base: 16px;
+  --spacing-sm: 8px;
+  --spacing-lg: 24px;
+
+  /* 圆角变量 */
+  --border-radius-base: 4px;
+
+  /* 阴影变量 */
+  --shadow-card:
+    0 1px 2px -2px rgba(0, 0, 0, 0.16), 0 3px 6px 0 rgba(0, 0, 0, 0.12),
+    0 5px 12px 4px rgba(0, 0, 0, 0.09);
+}
+
+[data-theme='dark'] {
+  --color-bg-base: #1f1f1f;
+  --color-text-primary: rgba(255, 255, 255, 0.85);
+  --color-border: #434343;
+}
+
+[data-theme='compact'] {
+  --font-size-base: 12px;
+  --spacing-base: 12px;
+  --border-radius-base: 2px;
+}

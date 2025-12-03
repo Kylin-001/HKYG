@@ -1,0 +1,60 @@
+<!-- pages/user/profile.wxml -->
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-info">
+      <image class="avatar" src="{{userInfo.avatarUrl || '/assets/images/default-avatar.png'}}" bindtap="onEditProfile"></image>
+      <view class="user-details" bindtap="onEditProfile">
+        <text class="nickname">{{userInfo.nickName || '黑科易购用户'}}</text>
+        <text class="student-info" wx:if="{{userInfo.studentId}}">学号：{{userInfo.studentId}}</text>
+        <text class="campus-info" wx:if="{{userInfo.campus}}">{{userInfo.campus}}</text>
+      </view>
+      <text class="edit-btn">编辑</text>
+    </view>
+  </view>
+
+  <!-- 统计信息 -->
+  <view class="stats-section">
+    <view class="stats-card" bindtap="onViewOrders" data-type="all">
+      <text class="stats-number">{{stats.totalOrders}}</text>
+      <text class="stats-label">全部订单</text>
+    </view>
+    <view class="stats-card" bindtap="onViewOrders" data-type="pending">
+      <text class="stats-number">{{stats.pendingOrders}}</text>
+      <text class="stats-label">进行中</text>
+    </view>
+    <view class="stats-card" bindtap="onViewOrders" data-type="completed">
+      <text class="stats-number">{{stats.completedOrders}}</text>
+      <text class="stats-label">已完成</text>
+    </view>
+    <view class="stats-card" bindtap="onViewOrders" data-type="wallet">
+      <text class="stats-number">¥{{stats.walletBalance}}</text>
+      <text class="stats-label">钱包余额</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-item" wx:for="{{menuItems}}" wx:key="id" data-id="{{item.id}}" data-url="{{item.url}}" bindtap="onMenuItemTap">
+      <view class="menu-left">
+        <text class="menu-icon">{{item.icon}}</text>
+        <text class="menu-name">{{item.name}}</text>
+      </view>
+      <text class="menu-arrow">></text>
+    </view>
+  </view>
+
+  <!-- 其他操作 -->
+  <view class="action-section">
+    <view class="action-item" bindtap="onClearCache">
+      <text class="action-icon">🗑️</text>
+      <text class="action-name">清除缓存</text>
+      <text class="action-arrow">></text>
+    </view>
+    <view class="action-item" bindtap="onLogout">
+      <text class="action-icon">🚪</text>
+      <text class="action-name">退出登录</text>
+      <text class="action-arrow">></text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,82 @@
+<!--index.wxml-->
+<view class="container page-container">
+  <!-- 顶部轮播图 -->
+  <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500">
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <image src="{{item.image}}" class="banner-image" mode="aspectFill" />
+    </swiper-item>
+  </swiper>
+
+  <!-- 快捷入口 -->
+  <view class="quick-entry card">
+    <view class="quick-entry-grid">
+      <view class="entry-item" wx:for="{{quickEntries}}" wx:key="id" bindtap="navigateToEntry" data-type="{{item.type}}">
+        <image src="{{item.icon}}" class="entry-icon" />
+        <text class="entry-text">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐商品 -->
+  <view class="recommended-section">
+    <view class="section-header">
+      <text class="section-title">推荐商品</text>
+      <text class="section-more" bindtap="viewMoreProducts">更多 ></text>
+    </view>
+    
+    <view class="product-grid">
+      <view class="product-item" wx:for="{{recommendedProducts}}" wx:key="id" bindtap="goToProductDetail" data-id="{{item.id}}">
+        <image src="{{item.image}}" class="product-image" mode="aspectFill" />
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-desc">{{item.description}}</text>
+          <view class="product-footer">
+            <text class="product-price">¥{{item.price}}</text>
+            <button class="add-cart-btn" size="mini" type="primary" bindtap="addToCart" data-product="{{item}}">+</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门商家 -->
+  <view class="hot-merchants-section">
+    <view class="section-header">
+      <text class="section-title">热门商家</text>
+      <text class="section-more" bindtap="viewMoreMerchants">更多 ></text>
+    </view>
+    
+    <scroll-view class="merchant-scroll" scroll-x="true">
+      <view class="merchant-list">
+        <view class="merchant-item" wx:for="{{hotMerchants}}" wx:key="id" bindtap="goToMerchant" data-id="{{item.id}}">
+          <image src="{{item.logo}}" class="merchant-logo" mode="aspectFill" />
+          <view class="merchant-info">
+            <text class="merchant-name">{{item.name}}</text>
+            <text class="merchant-rating">⭐ {{item.rating}}</text>
+            <text class="merchant-sales">月销{{item.monthlySales}}+</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 校园公告 -->
+  <view class="announcements-section card">
+    <view class="section-header">
+      <text class="section-title">校园公告</text>
+    </view>
+    
+    <view class="announcement-list">
+      <view class="announcement-item" wx:for="{{announcements}}" wx:key="id" bindtap="viewAnnouncement" data-id="{{item.id}}">
+        <view class="announcement-content">
+          <text class="announcement-title">{{item.title}}</text>
+          <text class="announcement-time">{{item.createTime}}</text>
+        </view>
+        <text class="announcement-arrow">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部空白区域 -->
+  <view class="bottom-space"></view>
+</view>

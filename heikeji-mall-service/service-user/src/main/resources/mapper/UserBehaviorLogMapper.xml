@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.user.mapper.UserBehaviorLogMapper">
+
+    <!-- 结果集映射 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.user.entity.UserBehaviorLog">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="action" property="action" jdbcType="VARCHAR"/>
+        <result column="module" property="module" jdbcType="VARCHAR"/>
+        <result column="metadata" property="metadata" jdbcType="VARCHAR"/>
+        <result column="client_info" property="clientInfo" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 基础SQL字段 -->
+    <sql id="Base_Column_List">
+        id, user_id, action, module, metadata, client_info, create_time
+    </sql>
+
+    <!-- 获取用户活跃度排行榜 -->
+    <select id="getTopUsersByActivity" resultType="map">
+        SELECT 
+            u.user_id AS userId,
+            u.nickname,
+            COUNT(*) AS actionCount,
+            COUNT(DISTINCT DATE(u.create_time)) AS activeDays,
+            MAX(u.create_time) AS lastActiveTime
+        FROM user_behavior_log u
+        WHERE u.create_time >= #{startTime}
+        GROUP BY u.user_id, u.nickname
+        ORDER BY actionCount DESC, activeDays DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取用户模块访问统计 -->
+    <select id="getUserModuleStats" resultType="map">
+        SELECT 
+            module,
+            COUNT(*) AS visitCount,
+            COUNT(DISTINCT DATE(create_time)) AS activeDays
+        FROM user_behavior_log
+        WHERE user_id = #{userId}
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        GROUP BY module
+        ORDER BY visitCount DESC
+    </select>
+
+    <!-- 获取用户行为趋势数据 -->
+    <select id="getUserBehaviorTrend" resultType="map">
+        SELECT 
+            DATE(create_time) AS date,
+            COUNT(*) AS actionCount,
+            COUNT(DISTINCT module) AS moduleCount,
+            COUNT(DISTINCT action) AS actionTypes
+        FROM user_behavior_log
+        WHERE user_id = #{userId}
+        AND create_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
+    <!-- 清理过期的行为日志 -->
+    <delete id="deleteExpiredLogs">
+        DELETE FROM user_behavior_log 
+        WHERE create_time &lt; #{expireDate}
+    </delete>
+
+</mapper>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建外卖订单 - 黑科易购</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* 鍔犺浇閬僵灞傛牱寮?*/
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        /* 椁愬巺鍗＄墖鏍峰�?*/
+        .restaurant-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .restaurant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .restaurant-card.selected {
+            border-color: #0d6efd;
+            background-color: #f8f9ff;
+        }
+        /* 鍟嗗搧鍒楄〃鏍峰紡 */
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .menu-item .item-info {
+            flex: 1;
+        }
+        .menu-item .item-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        .menu-item .item-price {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .menu-item .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        /* 璁㈠崟鎽樿鏍峰�?*/
+        .order-summary {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            position: sticky;
+            top: 1rem;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        .summary-total {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        /* 閰嶉€侀€夐」鏍峰紡 */
+        .delivery-options {
+            margin-bottom: 1.5rem;
+        }
+        .option-item {
+            margin-bottom: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">黑科易购</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/product-list.html">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">外卖服务</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/delivery-request-create.html">校园跑腿</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将通过JavaScript动态生�?-->
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区�?-->
+    <main class="container mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>创建外卖订单</h2>
+            <a href="/takeout-order-list.html" class="btn btn-outline-primary">我的外卖订单</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- 餐厅选择区域 -->
+                <div class="mb-5">
+                    <h3 class="mb-3">选择餐厅</h3>
+                    <div id="restaurantList">
+                        <!-- 餐厅列表将通过JavaScript动态加�?-->
+                        <div class="d-flex justify-content-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">加载�?..</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 菜单商品区域 -->
+                <div id="menuSection" class="mb-5" style="display: none;">
+                    <h3 class="mb-3" id="restaurantName">椁愬巺鑿滃崟</h3>
+                    <div id="menuItems">
+                        <!-- 鑿滃崟鍟嗗搧灏嗛€氳繃JavaScript鍔ㄦ€佸姞杞?-->
+                    </div>
+                </div>
+
+                <!-- 閰嶉€佷俊鎭尯�?--<div id="deliveryInfoSection" class="mb-5" style="display: none;">
+                    <h3 class="mb-3">閰嶉€佷俊鎭?/h3>
+                    <div class="bg-white p-4 rounded-lg border">
+                        <div class="delivery-options">
+                            <div class="option-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="methodLocker" value="LOCKER" checked onchange="updateDeliveryMethod()">
+                                    <label class="form-check-label" for="methodLocker">
+                                        澶栧崠鏌滆嚜鍙栵紙楼1.00�?                                    </label>
+                                </div>
+                                <div class="ms-5 mt-2 text-muted">
+                                    閫夋嫨闄勮繎鐨勫鍗栨煖锛屽鍗栭€佽揪鍚庤嚜琛屽墠寰€棰嗗�?
+                                </div>
+                            </div>
+                            <div class="option-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="methodSpecial" value="SPECIAL" onchange="updateDeliveryMethod()">
+                                    <label class="form-check-label" for="methodSpecial">
+                                        鎸囧畾鍦扮偣閰嶉€侊紙楼2.00�?                                    </label>
+                                </div>
+                                <div class="ms-5 mt-2 text-muted">
+                                    閫夋嫨鏍″洯鍐呮寚瀹氬湴鐐硅繘琛岄厤閫?                                </div>
+                            </div>
+                            <div class="option-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="methodDorm" value="DORM" onchange="updateDeliveryMethod()">
+                                    <label class="form-check-label" for="methodDorm">
+                                        瀵濆閰嶉€侊紙�?.00�?                                    </label>
+                                </div>
+                                <div class="ms-5 mt-2 text-muted">
+                                    澶栧崠鐩存帴閫佽揪瀵濆闂ㄥ彛
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="deliveryAddress" class="form-label">閫佽揪鍦板潃 *</label>
+                            <input type="text" id="deliveryAddress" class="form-control" placeholder="璇疯緭鍏ヨ缁嗙殑閫佽揪鍦板�? required>
+                            <div class="form-text">鏍规嵁閰嶉€佹柟寮忥紝璇锋彁渚涚浉搴旂殑璇︾粏鍦板潃淇℃�?/div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="deliveryTime" class="form-label">期望送达时间 *</label>
+                            <input type="datetime-local" id="deliveryTime" class="form-control" required>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="remark" class="form-label">备注（选填�?/label>
+                            <textarea id="remark" class="form-control" rows="3" placeholder="特殊要求或口味偏好等信息"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- 订单摘要区域 -->
+                <div class="order-summary">
+                    <h3 class="mb-4">订单摘要</h3>
+                    <div id="orderItemsSummary">
+                        <p class="text-center text-muted">请先选择餐厅并添加商�?/p>
+                    </div>
+                    <div id="orderPriceSummary" style="display: none;">
+                        <div class="summary-item">
+                            <span>商品总价�?/span>
+                            <span id="subtotalAmount">¥0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>配送费�?/span>
+                            <span id="deliveryFee">¥1.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>打包费：</span>
+                            <span id="packingFee">¥0.00</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>总计�?/span>
+                            <span id="totalAmount">¥0.00</span>
+                        </div>
+                        <button id="createOrderBtn" class="btn btn-primary w-100 mt-4" disabled onclick="createOrder()">
+                            提交订单
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购致力于为黑龙江科技大学的学生提供优质的校园生活服务，包括外卖、跑腿等多种功能�?/p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-dark">首页</a></li>
+                        <li><a href="/api/category/list" class="text-dark">商品分类</a></li>
+                        <li><a href="/api/order/list" class="text-dark">我的订单</a></li>
+                        <li><a href="/api/cart" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 鍔犺浇閬僵�?--<div id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">鍔犺浇涓?..</span>
+        </div>
+    </div>
+
+    <!-- 引入 jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <!-- 引入 Bootstrap JS -->
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入认证工具 -->
+    <script src="/js/auth-utils.js"></script>
+    <script>
+        // 鍏ㄥ眬鍙橀�?
+        let selectedRestaurant = null;
+        let orderItems = [];
+        let deliveryFeeMap = {
+            'LOCKER': 1.00,
+            'SPECIAL': 2.00,
+            'DORM': 3.00
+        };
+        
+        // 常量映射
+        const DELIVERY_TYPE_MAP = {
+            'LOCKER': 0,  // 外卖柜自�?
+            'SPECIAL': 1, // 特殊地点配�?
+            'DORM': 2     // 宿舍配�?
+        };
+        
+        // 更新用户菜单
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            const userInfo = authUtils.getUserInfo();
+            
+            if (userInfo) {
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            ${userInfo.username || '用户'}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/api/order/list">我的订单</a></li>
+                            <li><a class="dropdown-item" href="/api/takeout/order/list">我的外卖</a></li>
+                            <li><a class="dropdown-item" href="/api/delivery/request/list">我的跑腿</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">退出登�?/a></li>
+                        </ul>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/auth/login">登录</a>
+                    </li>
+                `);
+            }
+        }
+        
+        // 用户退�?
+        function logout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/api/auth/login';
+        }
+        
+        // 灏嗗墠绔厤閫佹柟寮忔槧灏勪负鍚庣闇€瑕佺殑鏁板瓧绫诲�?
+        function mapDeliveryMethod(method) {
+            return DELIVERY_TYPE_MAP[method] || 0;
+        }
+        
+        // 浠庡湴鍧€涓彁鍙栨ゼ鏍嬪彿
+        function extractBuildingNumber(address) {
+            // 绠€鍗曠殑姝ｅ垯鍖归厤锛屾彁鍙栫被浼?1鍙锋�?�?涓滃�?鍙锋�?涓殑鏁板瓧閮ㄥ�?
+            const match = address.match(/(?:涓滃尯|瑗垮尯|鍗楀尯|鍖楀�??(\d+)鍙锋�?/);
+            return match ? match[1] + '鍙锋�? : '';
+        }
+        
+        // 浠庡湴鍧€涓彁鍙栨埧闂村彿
+        function extractRoomNumber(address) {
+            // 绠€鍗曠殑姝ｅ垯鍖归厤锛屾彁鍙栫被浼?101"�?202瀵濆�?涓殑鏁板瓧閮ㄥ�?
+            const match = address.match(/(\d{3,4})(?:瀵濆�??/);
+            return match ? match[1] + '瀵濆�? : '';
+        }
+        
+        // 鏄剧ず鍔犺浇鐘舵�?        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+        
+        // 闅愯棌鍔犺浇鐘舵�?        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+        
+        // 鍔犺浇椁愬巺鍒楄�?
+        function loadRestaurants() {
+            $.authAjax({
+                url: '/api/takeout/restaurant/list',
+                method: 'GET',
+                success: function(response) {
+                    if (response.code === 200) {
+                        const restaurants = response.data;
+                        const restaurantListEl = $('#restaurantList');
+                        restaurantListEl.empty();
+                        
+                        restaurants.forEach(restaurant => {
+                            const card = $('<div>', {
+                                class: 'restaurant-card',
+                                html: `
+                                    <div class="d-flex justify-content-between">
+                                        <h4 class="mb-1">${restaurant.name}</h4>
+                                        <span class="text-sm bg-success text-white px-2 py-0.5 rounded">${restaurant.status === 'OPEN' ? '营业�? : '已打�?}</span>
+                                    </div>
+                                    <p class="text-muted mb-1">${restaurant.description}</p>
+                                    <div class="d-flex justify-content-between text-sm text-muted">
+                                        <span>评分�?{restaurant.rating || '暂无评分'}</span>
+                                        <span>起送价：�?{restaurant.minOrderAmount}</span>
+                                        <span>平均配送：${restaurant.avgDeliveryTime || 30}分钟</span>
+                                    </div>
+                                `,
+                                click: function() {
+                                    selectRestaurant(restaurant);
+                                }
+                            });
+                            restaurantListEl.append(card);
+                        });
+                    } else {
+                        $('#restaurantList').html('<p class="text-center text-danger">加载餐厅失败</p>');
+                    }
+                },
+                error: function() {
+                    $('#restaurantList').html('<p class="text-center text-danger">加载失败，请稍后重试</p>');
+                }
+            });
+        }
+        
+        // 选择餐厅
+        function selectRestaurant(restaurant) {
+            if (restaurant.status !== 'OPEN') {
+                alert('该餐厅已打烊');
+                return;
+            }
+            
+            // 更新选中状�?
+            $('.restaurant-card').removeClass('selected');
+            $(event.currentTarget).addClass('selected');
+            
+            selectedRestaurant = restaurant;
+            $('#restaurantName').text(restaurant.name + ' - 菜单');
+            
+            // 清空订单商品
+            orderItems = [];
+            updateOrderSummary();
+            
+            // 显示菜单区域
+            $('#menuSection').show();
+            loadMenuItems(restaurant.id);
+        }
+        
+        // 加载菜单商品
+        function loadMenuItems(restaurantId) {
+            const menuItemsEl = $('#menuItems');
+            menuItemsEl.html(`
+                <div class="d-flex justify-content-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载�?..</span>
+                    </div>
+                </div>
+            `);
+            
+            $.authAjax({
+                url: `/api/takeout/menu/list?restaurantId=${restaurantId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.code === 200) {
+                        const menuItems = response.data;
+                        menuItemsEl.empty();
+                        
+                        // 鎸夊垎绫荤粍缁囧晢鍝?                        const categories = {};
+                        menuItems.forEach(item => {
+                            if (!categories[item.category]) {
+                                categories[item.category] = [];
+                            }
+                            categories[item.category].push(item);
+                        });
+                        
+                        // 娓叉煋鍒嗙被鍜屽晢鍝?                        for (const category in categories) {
+                            const categorySection = $('<div>', {
+                                class: 'menu-section'
+                            });
+                            
+                            categorySection.append($('<h4>', {
+                                class: 'mb-3',
+                                text: category
+                            }));
+                            
+                            categories[category].forEach(item => {
+                                const itemEl = $('<div>', {
+                                    class: 'menu-item',
+                                    html: `
+                                        <div class="item-info">
+                                            <div class="item-name">${item.name}</div>
+                                            <div class="text-sm text-muted mb-1">${item.description}</div>
+                                            <div class="item-price">¥${item.price.toFixed(2)}</div>
+                                        </div>
+                                        <div class="item-controls">
+                                            <button class="btn btn-outline-danger btn-sm minus-btn" onclick="changeItemQuantity(${item.id}, -1)" disabled>-</button>
+                                            <span class="quantity text-center px-2" data-item-id="${item.id}">0</span>
+                                            <button class="btn btn-outline-primary btn-sm plus-btn" onclick="changeItemQuantity(${item.id}, 1)">+</button>
+                                        </div>
+                                    `
+                                });
+                                categorySection.append(itemEl);
+                            });
+                            
+                            menuItemsEl.append(categorySection);
+                        }
+                        
+                        // 显示配送信息区�?
+                        $('#deliveryInfoSection').show();
+                    } else {
+                        menuItemsEl.html('<p class="text-center text-danger">加载菜单失败</p>');
+                    }
+                },
+                error: function() {
+                    menuItemsEl.html('<p class="text-center text-danger">加载失败，请稍后重试</p>');
+                }
+            });
+        }
+        
+        // 更改商品数量
+        function changeItemQuantity(itemId, change) {
+            const quantityEl = $(`.quantity[data-item-id="${itemId}"]`);
+            const currentQuantity = parseInt(quantityEl.text());
+            let newQuantity = currentQuantity + change;
+            
+            if (newQuantity < 0) {
+                newQuantity = 0;
+            }
+            
+            quantityEl.text(newQuantity);
+            
+            // 更新按钮状�?
+            quantityEl.siblings('.minus-btn').prop('disabled', newQuantity <= 0);
+            
+            // 更新订单商品列表
+            const itemIndex = orderItems.findIndex(item => item.menuItemId === itemId);
+            
+            if (newQuantity > 0) {
+                const itemEl = quantityEl.closest('.menu-item');
+                const itemName = itemEl.find('.item-name').text();
+                const itemPrice = parseFloat(itemEl.find('.item-price').text().replace('¥', ''));
+                
+                if (itemIndex < 0) {
+                    orderItems.push({
+                        menuItemId: itemId,
+                        name: itemName,
+                        price: itemPrice,
+                        quantity: newQuantity
+                    });
+                } else {
+                    orderItems[itemIndex].quantity = newQuantity;
+                }
+            } else if (itemIndex >= 0) {
+                orderItems.splice(itemIndex, 1);
+            }
+            
+            // 更新订单摘要
+            updateOrderSummary();
+        }
+        
+        // 更新配送方�?
+        function updateDeliveryMethod() {
+            const selectedMethod = $('input[name="deliveryMethod"]:checked').val();
+            const fee = deliveryFeeMap[selectedMethod];
+            $('#deliveryFee').text(`¥${fee.toFixed(2)}`);
+            calculateTotalPrice();
+        }
+        
+        // 更新订单摘要
+        function updateOrderSummary() {
+            const summaryEl = $('#orderItemsSummary');
+            
+            if (orderItems.length === 0) {
+                summaryEl.html('<p class="text-center text-muted">暂无商品</p>');
+                $('#orderPriceSummary').hide();
+                $('#createOrderBtn').prop('disabled', true);
+            } else {
+                summaryEl.empty();
+                orderItems.forEach(item => {
+                    const itemEl = $('<div>', {
+                        class: 'summary-item',
+                        html: `
+                            <span class="text-sm">${item.name} x ${item.quantity}</span>
+                            <span class="text-sm">¥${(item.price * item.quantity).toFixed(2)}</span>
+                        `
+                    });
+                    summaryEl.append(itemEl);
+                });
+                
+                $('#orderPriceSummary').show();
+                calculateTotalPrice();
+                $('#createOrderBtn').prop('disabled', false);
+            }
+        }
+        
+        // 计算总价
+        function calculateTotalPrice() {
+            let subtotal = 0;
+            orderItems.forEach(item => {
+                subtotal += item.price * item.quantity;
+            });
+            
+            const deliveryFee = parseFloat($('#deliveryFee').text().replace('¥', ''));
+            // 简单计算打包费，每件商�?.5�?
+            const packingFee = orderItems.reduce((sum, item) => sum + (item.quantity * 0.5), 0);
+            
+            const total = subtotal + deliveryFee + packingFee;
+            
+            $('#subtotalAmount').text(`¥${subtotal.toFixed(2)}`);
+            $('#packingFee').text(`¥${packingFee.toFixed(2)}`);
+            $('#totalAmount').text(`¥${total.toFixed(2)}`);
+        }
+        
+        // 创建订单
+        function createOrder() {
+            // 验证表单
+            const deliveryAddress = $('#deliveryAddress').val().trim();
+            
+            if (!deliveryAddress) {
+                alert('请输入送达地址');
+                return;
+            }
+            
+            // 获取配送方�?
+            const deliveryMethod = $('input[name="deliveryMethod"]:checked').val();
+            
+            // 构建订单数据（对应TakeoutOrderDTO�?
+            const orderData = {
+                merchantId: selectedRestaurant.id,
+                deliveryType: mapDeliveryMethod(deliveryMethod),
+                // 根据配送方式设置相应字�?
+                deliveryLockerCode: deliveryMethod === 'LOCKER' ? deliveryAddress : null,
+                deliverySpecialPlace: deliveryMethod === 'SPECIAL' ? deliveryAddress : null,
+                deliveryDormBuilding: deliveryMethod === 'DORM' ? extractBuildingNumber(deliveryAddress) : null,
+                deliveryDormRoom: deliveryMethod === 'DORM' ? extractRoomNumber(deliveryAddress) : null,
+                receiverName: authUtils.getUserInfo().nickname || '用户',
+                receiverPhone: authUtils.getUserInfo().phone || '',
+                receiverAddress: deliveryAddress,
+                remark: $('#remark').val().trim(),
+                orderItems: orderItems.map(item => ({
+                    productId: item.menuItemId,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
+            };
+            
+            showLoading();
+            $.authAjax({
+                url: '/api/takeout/order/create',
+                method: 'POST',
+                data: JSON.stringify(orderData),
+                contentType: 'application/json',
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('订单创建成功�?);
+                        window.location.href = '/api/takeout/order/detail?orderNo=' + response.data;
+                    } else {
+                        alert('订单创建失败�? + response.msg);
+                    }
+                },
+                error: function() {
+                    alert('订单创建失败，请稍后重试');
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+        
+        // 设置默认期望送达时间（当前时间后30分钟�?
+        function setDefaultDeliveryTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 30);
+            const formattedDate = now.toISOString().slice(0, 16);
+            $('#deliveryTime').val(formattedDate);
+        }
+        
+        // 设置常用地址快捷选择
+        function setupQuickAddresses() {
+            const addressDiv = $('#deliveryAddress').parent();
+            const quickAddresses = [
+                '东区1号楼外卖�?,
+                '西区2号楼外卖�?,
+                '南区3号楼外卖�?,
+                '东区1号楼101宿舍',
+                '西区2号楼202宿舍'
+            ];
+            
+            let quickAddressHtml = '\n<div class="d-flex flex-wrap gap-2 mt-2">\n';
+            quickAddresses.forEach(addr => {
+                quickAddressHtml += `\n<button type="button" class="btn btn-outline-secondary btn-sm" onclick="$('#deliveryAddress').val('${addr}')">${addr}</button>\n`;
+            });
+            quickAddressHtml += '\n</div>\n';
+            addressDiv.append(quickAddressHtml);
+        }
+        
+        // 页面加载完成后初始化
+        $(document).ready(function() {
+            // 检查登录状�?
+            if (!authUtils.isLoggedIn()) {
+                alert('请先登录');
+                window.location.href = '/api/auth/login';
+                return;
+            }
+            
+            // 更新用户菜单
+            updateUserMenu();
+            
+            // 加载餐厅列表
+            loadRestaurants();
+            
+            // 设置默认送达时间
+            setDefaultDeliveryTime();
+            
+            // 设置常用地址快捷选择
+            setupQuickAddresses();
+        });
+    </script>
+</body>
+</html>

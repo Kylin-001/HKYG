@@ -1,0 +1,214 @@
+@use './variables.scss' as *;
+
+// 响应式断点工具类
+// 移动端优先设计
+
+// 超小屏幕 (手机，< 480px)
+@media (max-width: $screen-xs) {
+  // 全局样式调整
+  html {
+    font-size: 12px;
+  }
+
+  // 内容区域调整
+  .content-wrapper {
+    padding: $padding-sm !important;
+  }
+
+  // 表格响应式处理
+  .el-table {
+    font-size: $font-size-xs;
+    .el-table__header-wrapper,
+    .el-table__body-wrapper {
+      overflow-x: auto;
+    }
+  }
+
+  // 表单响应式
+  .el-form {
+    .el-form-item {
+      margin-bottom: $margin-base;
+      .el-form-item__label {
+        font-size: $font-size-xs;
+        padding-right: $padding-xs;
+      }
+    }
+  }
+
+  // 按钮响应式
+  .el-button {
+    padding: $padding-xs $padding-base;
+    font-size: $font-size-xs;
+  }
+
+  // 卡片响应式
+  .el-card {
+    margin-bottom: $margin-base;
+  }
+
+  // 输入框响应式
+  .el-input {
+    .el-input__inner {
+      font-size: $font-size-xs;
+      height: 32px;
+    }
+  }
+
+  // 侧边栏折叠状态固定
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 1000;
+    height: calc(100vh - #{$header-height});
+    &.sidebar-show {
+      transform: translateX(0);
+    }
+  }
+
+  // 移动端菜单按钮
+  .mobile-menu-btn {
+    display: block !important;
+  }
+
+  // 移动端适配的卡片布局
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $margin-base;
+  }
+}
+
+// 小屏幕 (平板，>= 480px && < 576px)
+@media (min-width: $screen-xs) and (max-width: $screen-sm) {
+  html {
+    font-size: 13px;
+  }
+
+  .content-wrapper {
+    padding: $padding-base !important;
+  }
+
+  .el-table {
+    font-size: $font-size-sm;
+  }
+
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// 平板设备 (>= 576px && < 768px)
+@media (min-width: $screen-sm) and (max-width: $screen-md) {
+  html {
+    font-size: 14px;
+  }
+
+  .content-wrapper {
+    padding: $padding-md !important;
+  }
+
+  .sidebar {
+    width: 180px;
+  }
+
+  .main-content {
+    margin-left: 180px;
+  }
+
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// 中等屏幕 (>= 768px && < 992px)
+@media (min-width: $screen-md) and (max-width: $screen-lg) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    margin-left: 200px;
+  }
+
+  .mobile-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// 大屏幕 (>= 992px && < 1200px)
+@media (min-width: $screen-lg) and (max-width: $screen-xl) {
+  .mobile-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// 超大屏幕 (>= 1200px)
+@media (min-width: $screen-xl) {
+  .mobile-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// 通用响应式工具类
+.responsive-hidden {
+  display: none;
+  @media (min-width: $screen-sm) {
+    display: block;
+  }
+}
+
+.responsive-show {
+  display: block;
+  @media (min-width: $screen-sm) {
+    display: none;
+  }
+}
+
+// 移动端优化的交互元素
+.mobile-friendly {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// 响应式表格容器
+.responsive-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+// 响应式图片
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+}
+
+// 移动端加载更多按钮
+.load-more-btn {
+  width: 100%;
+  text-align: center;
+  padding: $padding-base 0;
+  margin-top: $margin-lg;
+  background-color: $background-color;
+  border: 1px dashed $border-color;
+  border-radius: $border-radius-base;
+  cursor: pointer;
+  transition: all $transition-time;
+
+  &:hover {
+    background-color: $hover-background;
+    border-color: $primary;
+  }
+}
+
+// 移动端底部导航占位（如果需要）
+.mobile-nav-placeholder {
+  height: 0;
+  @media (max-width: $screen-sm) {
+    height: 50px;
+  }
+}

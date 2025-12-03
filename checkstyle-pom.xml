@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.heikeji.mall</groupId>
+    <artifactId>heikeji-checkstyle-config</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>黑科易购代码质量检查配置</name>
+
+    <build>
+        <plugins>
+            <!-- Checkstyle插件配置 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <configLocation>${project.basedir}/checkstyle.xml</configLocation>
+                    <headerLocation>${project.basedir}/header.txt</headerLocation>
+                    <propertyExpansion>checkstyle.header.file=${headerLocation}</propertyExpansion>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <violationSeverity>warning</violationSeverity>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <excludes>
+                        **/target/**,
+                        **/generated-sources/**,
+                        **/generated-test-sources/**,
+                        **/node_modules/**
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Spotbugs插件配置 -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.7.3.0</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <failOnError>true</failOnError>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- JaCoCo覆盖率插件配置 -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.10</version>
+                <configuration>
+                    <destFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</destFile>
+                    <dataFile>${project.build.directory}/coverage-reports/jacoco-unit.exec</dataFile>
+                    <outputDirectory>${project.build.directory}/coverage-reports</outputDirectory>
+                    <reportFormat>XML</reportFormat>
+                    <reportsDirectory>${project.build.directory}/coverage-reports</reportsDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>70%</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>60%</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!-- Checkstyle依赖 -->
+        <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>10.12.6</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

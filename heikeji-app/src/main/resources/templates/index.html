@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 黑科易购校园服务平台</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth-utils.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .carousel {
+            margin-bottom: 30px;
+        }
+        .carousel-item img {
+            max-height: 400px;
+            object-fit: cover;
+        }
+        .section-title {
+            margin: 30px 0;
+            font-weight: 600;
+            color: #333;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #4dabf7;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .card-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            height: 48px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .card-price {
+            color: #e74c3c;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 导航�?-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <h3 class="text-primary m-0">黑科易购</h3>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/product-list.html">商品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/takeout-order-create.html">外卖服务</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/delivery-request-create.html">校园跑腿</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="userMenu">
+                    <!-- 用户菜单将根据登录状态动态生�?-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login.html">登录</a>
+                    </li>
+                </ul>
+                <a class="nav-link ms-3" href="/api/cart">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.172l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 轮播�?-->
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="https://via.placeholder.com/1920x400/4dabf7/ffffff?text=欢迎来到黑科易购校园服务平台" class="d-block w-100" alt="校园服务平台">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>黑科易购校园服务平台</h5>
+                    <p>专注服务黑龙江科技大学师生，打造便捷校园生活</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/1920x400/20c997/ffffff?text=校园外卖服务" class="d-block w-100" alt="校园外卖">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>校园外卖服务</h5>
+                    <p>校内餐厅直送，准时快速，品质保障</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/1920x400/fa5252/ffffff?text=校园跑腿服务" class="d-block w-100" alt="校园跑腿">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>校园跑腿服务</h5>
+                    <p>快递代取、文件配送、校园代购，一应俱全</p>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- 商品推荐 -->
+    <div class="container">
+        <h2 class="section-title">热门推荐</h2>
+        <div class="row" id="hotProducts">
+            <!-- 热门推荐商品将通过JavaScript动态加�?-->
+        </div>
+
+        <!-- 更多商品推荐 -->
+        <h2 class="section-title">新品上架</h2>
+        <div class="row" id="newProducts">
+            <!-- 新品上架商品将通过JavaScript动态加�?-->
+        </div>
+    </div>
+
+    <!-- 加载遮罩�?-->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center; display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载�?.</span>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于我们</h5>
+                    <p>黑科易购校园服务平台专为黑龙江科技大学师生提供便捷服务，包括校内外卖、跑腿代购、学习用品等服务。</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链�?/h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-dark">首页</a></li>
+                        <li><a href="/product-list.html" class="text-dark">商品列表</a></li>
+                        <li><a href="/order-list.html" class="text-dark">我的订单</a></li>
+                        <li><a href="/cart.html" class="text-dark">购物�?/a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p>服务电话�?00-123-4567</p>
+                    <p>邮箱：service@heikeji.com</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <p>&copy; 2024 黑科易购. 保留所有权�?/p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 显示加载遮罩�?
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // 隐藏加载遮罩�?
+        function hideLoading() {
+            $('#loadingOverlay').css('display', 'none');
+        }
+
+        // 更新用户菜单
+        function updateUserMenu() {
+            const userMenu = $('#userMenu');
+            if (authUtils.isLoggedIn()) {
+                const username = authUtils.getUsername() || '用户';
+                userMenu.html(`
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ${username}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="/profile.html">个人中心</a>
+                            <a class="dropdown-item" href="/order-list.html">我的订单</a>
+                            <a class="dropdown-item" href="/takeout-order-list.html">我的外卖</a>
+                            <a class="dropdown-item" href="/delivery-request-list.html">我的跑腿</a>
+                            <a class="dropdown-item" href="/address-list.html">地址管理</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="handleLogout()">退出登�?/a>
+                        </div>
+                    </li>
+                `);
+            } else {
+                userMenu.html(`
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login.html">登录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register.html">注册</a>
+                    </li>
+                `);
+            }
+        }
+
+        // 用户退�?
+        function handleLogout() {
+            authUtils.logout();
+            updateUserMenu();
+            alert('已退出登�?);
+            window.location.href = '/index.html';
+        }
+
+        // 加载校园商品数据
+        function loadIndexData() {
+            showLoading();
+            $.ajax({
+                url: '/api/product/index-data',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.code === 200 && response.data) {
+                        // 渲染热门推荐商品
+                        const hotProducts = response.data.hotProducts || [];
+                        renderProducts(hotProducts, '#hotProducts');
+                        
+                        // 渲染新品上架商品
+                        const newProducts = response.data.newProducts || [];
+                        renderProducts(newProducts, '#newProducts');
+                    }
+                },
+                error: function() {
+                    // 使用校园特色模拟数据
+                    const mockHotProducts = [
+                        {id: 1, name: '学习用品套装', price: 29.90, imageUrl: 'https://via.placeholder.com/400x300/4dabf7/ffffff?text=学习用品套装'},
+                        {id: 2, name: '校园文创商品', price: 19.90, imageUrl: 'https://via.placeholder.com/400x300/4dabf7/ffffff?text=校园文创商品'},
+                        {id: 3, name: '黑科大纪念T恤', price: 49.90, imageUrl: 'https://via.placeholder.com/400x300/4dabf7/ffffff?text=黑科大纪念T恤'},
+                        {id: 4, name: '学生生活用品', price: 15.90, imageUrl: 'https://via.placeholder.com/400x300/4dabf7/ffffff?text=学生生活用品'}
+                    ];
+                    const mockNewProducts = [
+                        {id: 5, name: '冬季保暖用品', price: 39.90, imageUrl: 'https://via.placeholder.com/400x300/20c997/ffffff?text=冬季保暖用品'},
+                        {id: 6, name: '校园零食大礼包', price: 59.90, imageUrl: 'https://via.placeholder.com/400x300/20c997/ffffff?text=校园零食大礼包'},
+                        {id: 7, name: '运动健身用品', price: 89.90, imageUrl: 'https://via.placeholder.com/400x300/20c997/ffffff?text=运动健身用品'},
+                        {id: 8, name: '电子产品配件', price: 25.90, imageUrl: 'https://via.placeholder.com/400x300/20c997/ffffff?text=电子产品配件'}
+                    ];
+                    renderProducts(mockHotProducts, '#hotProducts');
+                    renderProducts(mockNewProducts, '#newProducts');
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+        
+        // 渲染商品列表
+        function renderProducts(products, containerId) {
+            if (!products || products.length === 0) {
+                return;
+            }
+            
+            let html = '';
+            products.forEach(product => {
+                html += `
+                <div class="col-md-3">
+                    <div class="card">
+                        <img src="${product.imageUrl || 'https://via.placeholder.com/400x300/f8f9fa/6c757d?text=商品图片'}" class="card-img-top" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-price">¥${product.price.toFixed(2)}</p>
+                            <a href="/product-detail.html?id=${product.id}" class="btn btn-primary w-100">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            $(containerId).html(html);
+        }
+
+        // 页面加载时更新用户菜单并加载首页数据
+        $(document).ready(function() {
+            updateUserMenu();
+            loadIndexData();
+        });
+    </script>
+</body>
+</html>

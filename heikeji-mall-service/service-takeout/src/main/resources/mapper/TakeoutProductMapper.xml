@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.takeout.mapper.TakeoutProductMapper">
+
+    <select id="selectByMerchantId" resultType="com.heikeji.mall.takeout.entity.TakeoutProduct">
+        SELECT * FROM takeout_product 
+        WHERE merchant_id = #{merchantId} 
+        AND status = 1 
+        ORDER BY sort ASC, sales DESC
+    </select>
+
+    <select id="selectByCategoryId" resultType="com.heikeji.mall.takeout.entity.TakeoutProduct">
+        SELECT * FROM takeout_product 
+        WHERE category_id = #{categoryId} 
+        AND status = 1 
+        ORDER BY sort ASC, sales DESC
+    </select>
+
+    <select id="selectRecommendedProducts" resultType="com.heikeji.mall.takeout.entity.TakeoutProduct">
+        SELECT * FROM takeout_product 
+        WHERE merchant_id = #{merchantId} 
+        AND is_recommended = 1 
+        AND status = 1 
+        ORDER BY sort ASC 
+        LIMIT #{limit}
+    </select>
+
+</mapper>

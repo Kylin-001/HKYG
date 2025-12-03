@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  # 禁用数据库配置
+  datasource:
+    enabled: false
+  
+  # 禁用安全配置
+  security:
+    enabled: false
+
+# 禁用其他不需要的自动配置
+mybatis-plus:
+  enabled: false
+
+# 禁用定时任务
+quartz:
+  enabled: false
+
+# 应用基本配置
+app:
+  name: heikeji-app-simple
+  version: 1.0.0

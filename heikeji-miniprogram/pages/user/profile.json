@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "个人中心",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f8f8f8",
+  "usingComponents": {
+    "user-card": "/components/common/user-card",
+    "stats-card": "/components/common/stats-card"
+  }
+}

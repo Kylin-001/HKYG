@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.heikeji</groupId>
+        <artifactId>heikeji-mall</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>heikeji-mall-service</artifactId>
+    <packaging>pom</packaging>
+    <name>业务服务模块</name>
+
+    <modules>
+        <module>service-user</module>
+        <module>service-product</module>
+        <module>service-order</module>
+        <module>service-delivery</module>
+        <module>service-takeout</module>
+        <module>service-payment</module>
+        <module>service-campus</module>
+        <module>service-secondhand</module>
+        <module>service-lostfound</module>
+    </modules>
+</project>
+
+
+

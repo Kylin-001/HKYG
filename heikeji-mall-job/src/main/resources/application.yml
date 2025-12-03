@@ -1,0 +1,57 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: heikeji-mall-job
+  
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 3000ms
+  
+  # Quartz配置
+  quartz:
+    # 任务存储方式：数据库存储
+    job-store-type: memory
+    # 定时任务启动时更新已存在的任务
+    overwrite-existing-jobs: true
+    # 线程池配置
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+
+# Eureka配置
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.cloud.client.ip-address}:${server.port}
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.heikeji: DEBUG
+  file:
+    name: logs/heikeji-mall-job.log
+    max-size: 100MB
+    max-history: 7
+
+# 自定义任务配置
+job:
+  # 订单自动取消配置（分钟）
+  orderAutoCancel: 30
+  # 订单自动确认收货配置（天）
+  orderAutoConfirm: 7
+  # 定时清理日志配置（天）
+  logCleanup: 30

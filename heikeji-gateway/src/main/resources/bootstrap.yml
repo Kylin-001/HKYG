@@ -1,0 +1,26 @@
+# 应用基础配置
+spring:
+  application:
+    name: heikeji-gateway
+  # 环境配置
+  profiles:
+    active: dev
+  # Nacos配置中心
+  cloud:
+    nacos:
+      config:
+        server-addr: localhost:8848
+        namespace: public
+        file-extension: yml
+        refresh-enabled: true
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+
+# 日志配置
+logging:
+  level:
+    com.heikeji.gateway: debug
+    org.springframework.cloud.gateway: debug

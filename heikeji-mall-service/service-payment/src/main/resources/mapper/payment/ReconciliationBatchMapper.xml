@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.payment.mapper.ReconciliationBatchMapper">
+
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.payment.entity.ReconciliationBatch">
+        <id column="id" property="id"/>
+        <result column="batch_no" property="batchNo"/>
+        <result column="reconciliation_date" property="reconciliationDate"/>
+        <result column="payment_type" property="paymentType"/>
+        <result column="system_transaction_count" property="systemTransactionCount"/>
+        <result column="system_total_amount" property="systemTotalAmount"/>
+        <result column="platform_transaction_count" property="platformTransactionCount"/>
+        <result column="platform_total_amount" property="platformTotalAmount"/>
+        <result column="success_count" property="successCount"/>
+        <result column="fail_count" property="failCount"/>
+        <result column="reconciliation_status" property="reconciliationStatus"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, batch_no, reconciliation_date, payment_type, system_transaction_count, 
+        system_total_amount, platform_transaction_count, platform_total_amount, 
+        success_count, fail_count, reconciliation_status, start_time, end_time, 
+        create_time, update_time
+    </sql>
+
+    <!-- 根据批次号查询 -->
+    <select id="selectByBatchNo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE
+        batch_no = #{batchNo}
+    </select>
+
+    <!-- 根据日期和支付方式查询 -->
+    <select id="selectByDateAndPaymentType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE
+        reconciliation_date = #{date}
+        AND payment_type = #{paymentType}
+    </select>
+
+    <!-- 根据日期范围查询 -->
+    <select id="selectByDateRange" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE
+        reconciliation_date >= #{startDate}
+        AND reconciliation_date <= #{endDate}
+        <if test="paymentType != null">
+            AND payment_type = #{paymentType}
+        </if>
+        <if test="status != null">
+            AND reconciliation_status = #{status}
+        </if>
+        ORDER BY
+        reconciliation_date DESC
+    </select>
+
+    <!-- 查询最近的批次 -->
+    <select id="selectLatest" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        <if test="paymentType != null">
+            WHERE payment_type = #{paymentType}
+        </if>
+        ORDER BY
+        create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询进行中的批次 -->
+    <select id="selectProcessing" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE
+        reconciliation_status = 1
+        <if test="paymentType != null">
+            AND payment_type = #{paymentType}
+        </if>
+        ORDER BY
+        create_time DESC
+    </select>
+
+    <!-- 更新批次状态 -->
+    <update id="updateStatus">
+        UPDATE reconciliation_batch
+        SET
+        reconciliation_status = #{status},
+        end_time = #{endTime},
+        update_time = #{updateTime}
+        WHERE
+        batch_no = #{batchNo}
+    </update>
+
+    <!-- 更新批次统计信息 -->
+    <update id="updateStatistics">
+        UPDATE reconciliation_batch
+        SET
+        success_count = #{successCount},
+        fail_count = #{failCount},
+        update_time = #{updateTime}
+        WHERE
+        batch_no = #{batchNo}
+    </update>
+
+    <!-- 统计批次信息 -->
+    <select id="countBatch" resultType="java.util.Map">
+        SELECT
+        COUNT(1) AS totalCount,
+        SUM(CASE WHEN reconciliation_status = 2 THEN 1 ELSE 0 END) AS completedCount,
+        SUM(CASE WHEN reconciliation_status = 3 THEN 1 ELSE 0 END) AS failedCount,
+        SUM(CASE WHEN reconciliation_status = 1 THEN 1 ELSE 0 END) AS processingCount
+        FROM
+        reconciliation_batch
+        WHERE 1=1
+        <if test="startDate != null">
+            AND reconciliation_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND reconciliation_date <= #{endDate}
+        </if>
+        <if test="paymentType != null">
+            AND payment_type = #{paymentType}
+        </if>
+    </select>
+
+    <!-- 删除指定日期之前的批次 -->
+    <delete id="deleteBeforeDate">
+        DELETE FROM reconciliation_batch
+        WHERE reconciliation_date < #{date}
+    </delete>
+
+    <!-- 分页查询批次 -->
+    <select id="selectByPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE 1=1
+        <if test="startDate != null">
+            AND reconciliation_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND reconciliation_date <= #{endDate}
+        </if>
+        <if test="paymentType != null">
+            AND payment_type = #{paymentType}
+        </if>
+        <if test="status != null">
+            AND reconciliation_status = #{status}
+        </if>
+        ORDER BY
+        create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询批次总数 -->
+    <select id="countTotal" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM reconciliation_batch
+        WHERE 1=1
+        <if test="startDate != null">
+            AND reconciliation_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND reconciliation_date <= #{endDate}
+        </if>
+        <if test="paymentType != null">
+            AND payment_type = #{paymentType}
+        </if>
+        <if test="status != null">
+            AND reconciliation_status = #{status}
+        </if>
+    </select>
+
+    <!-- 查询指定支付方式的最近成功批次 -->
+    <select id="selectLatestSuccess" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE
+        payment_type = #{paymentType}
+        AND reconciliation_status = 2
+        ORDER BY
+        reconciliation_date DESC
+        LIMIT 1
+    </select>
+
+    <!-- 查询特定日期的所有批次 -->
+    <select id="selectByDate" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        reconciliation_batch
+        WHERE
+        reconciliation_date = #{date}
+        ORDER BY
+        payment_type
+    </select>
+
+</mapper>
