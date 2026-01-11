@@ -1,0 +1,151 @@
+<!-- 外卖订单追踪页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left" bindtap="onBack">
+      <image src="/assets/icons/back.png" class="back-icon" mode="aspectFit"></image>
+    </view>
+    <text class="header-title">订单追踪</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 订单状态 -->
+  <view class="order-status">
+    <view class="status-circle" style="background-color: {{orderInfo.statusColor}}">
+      <image src="{{orderInfo.statusIcon}}" class="status-icon" mode="aspectFit"></image>
+    </view>
+    <text class="status-text">{{orderInfo.statusText}}</text>
+    <text class="status-desc">{{orderInfo.statusDesc}}</text>
+  </view>
+
+  <!-- 预计送达时间 -->
+  <view class="delivery-info" wx:if="{{orderInfo.estimatedDeliveryTime}}">
+    <view class="delivery-item">
+      <text class="delivery-label">预计送达时间</text>
+      <text class="delivery-value">{{orderInfo.estimatedDeliveryTime}}</text>
+    </view>
+    <view class="delivery-item">
+      <text class="delivery-label">当前进度</text>
+      <text class="delivery-value">{{orderInfo.deliveryProgress}}%</text>
+    </view>
+  </view>
+
+  <!-- 订单基本信息 -->
+  <view class="order-info">
+    <view class="info-item">
+      <text class="info-label">订单编号</text>
+      <text class="info-value">{{orderInfo.orderNo}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">下单时间</text>
+      <text class="info-value">{{orderInfo.createTime}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">商家</text>
+      <text class="info-value">{{orderInfo.merchantName}}</text>
+    </view>
+  </view>
+
+  <!-- 配送地址 -->
+  <view class="address-section">
+    <view class="section-title">配送地址</view>
+    <view class="address-content">
+      <view class="address-top">
+        <text class="address-name">{{orderInfo.receiverName}}</text>
+        <text class="address-phone">{{orderInfo.receiverPhone}}</text>
+      </view>
+      <text class="address-detail">{{orderInfo.deliveryAddress}}</text>
+    </view>
+  </view>
+
+  <!-- 骑手信息 -->
+  <view class="rider-section" wx:if="{{orderInfo.riderId}}">
+    <view class="section-title">配送骑手</view>
+    <view class="rider-content" bindtap="goToRiderDetail">
+      <image src="{{orderInfo.riderAvatar || '/assets/icons/default-avatar.png'}}" class="rider-avatar" mode="aspectFit"></image>
+      <view class="rider-info">
+        <text class="rider-name">{{orderInfo.riderName}}</text>
+        <text class="rider-rating">评分: {{orderInfo.riderRating || '暂无'}}</text>
+      </view>
+      <view class="rider-contact" bindtap="contactRider" catchtap="stopPropagation">
+        <image src="/assets/icons/phone.png" class="contact-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 配送进度 -->
+  <view class="progress-section">
+    <view class="section-title">配送进度</view>
+    
+    <!-- 进度条 -->
+    <view class="progress-bar">
+      <view class="progress-line" style="width: {{orderInfo.deliveryProgress}}%"></view>
+      <view class="progress-steps">
+        <!-- 订单已提交 -->
+        <view class="progress-step {{orderInfo.status >= 1 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">订单已提交</text>
+          <text class="step-time">{{orderInfo.createTime}}</text>
+        </view>
+        
+        <!-- 商家已接单 -->
+        <view class="progress-step {{orderInfo.status >= 2 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">商家已接单</text>
+          <text class="step-time">{{orderInfo.acceptTime || '等待商家接单...'}}</text>
+        </view>
+        
+        <!-- 正在配送 -->
+        <view class="progress-step {{orderInfo.status >= 3 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">正在配送</text>
+          <text class="step-time">{{orderInfo.deliveryStartTime || '等待配送...'}}</text>
+        </view>
+        
+        <!-- 订单已完成 -->
+        <view class="progress-step {{orderInfo.status >= 4 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">订单已完成</text>
+          <text class="step-time">{{orderInfo.completeTime || '未完成...'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单商品 -->
+  <view class="order-items">
+    <view class="section-title">订单商品</view>
+    <view class="items-list">
+      <view class="item" wx:for="{{orderInfo.items}}" wx:key="index">
+        <image src="{{item.image || '/assets/icons/default-dish.png'}}" class="item-image" mode="aspectFit"></image>
+        <view class="item-info">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-spec">{{item.spec || ''}}</text>
+          <view class="item-bottom">
+            <text class="item-price">¥{{item.price}}</text>
+            <text class="item-quantity">x{{item.quantity}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{orderInfo.status < 4}}">
+    <view class="bottom-content">
+      <text class="total-price">实付: ¥{{orderInfo.actualAmount}}</text>
+      <view class="action-buttons">
+        <view class="action-btn" bindtap="onCancelOrder" wx:if="{{orderInfo.status <= 2}}">取消订单</view>
+        <view class="action-btn primary" bindtap="onConfirmReceived" wx:if="{{orderInfo.status == 3}}">确认收货</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -67,14 +67,17 @@
         <div class="section">
           <h3 class="section-title">商品图片</h3>
           <div class="image-gallery">
-            <el-image
+            <LazyImage
               v-for="(image, index) in productDetail.images"
               :key="index"
               :src="image"
-              :preview-src-list="productDetail.images"
-              style="width: 150px; height: 150px; margin-right: 10px; margin-bottom: 10px"
+              :alt="`商品图片${index + 1}`"
+              :show-progress="true"
+              :show-loading="true"
+              :show-retry-button="true"
               fit="cover"
-            ></el-image>
+              class="gallery-image"
+            ></LazyImage>
           </div>
         </div>
 
@@ -127,6 +130,7 @@ import { getProductById, getProductOperationLogs } from '@/api/product'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import LazyImage from '@/components/ui/LazyImage.vue'
 
 // 定义类型
 interface ProductDetail {
@@ -270,6 +274,16 @@ onMounted(() => {
 <style scoped>
 .product-detail-container {
   padding: 20px;
+}
+
+// 商品图片样式
+.gallery-image {
+  width: 150px;
+  height: 150px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .section {

@@ -1,0 +1,429 @@
+<!-- 团长招募申请页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">团长招募申请</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 申请表单 -->
+  <form class="apply-form">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <text class="section-title">基本信息</text>
+      
+      <!-- 姓名 -->
+      <view class="form-item">
+        <text class="label required">姓名</text>
+        <input 
+          class="input" 
+          placeholder="请输入真实姓名" 
+          placeholder-class="placeholder" 
+          value="{{formData.name}}" 
+          bindinput="inputChange" 
+          data-field="name"
+        />
+        <text class="error" wx:if="{{errors.name}}">{{errors.name}}</text>
+      </view>
+      
+      <!-- 手机号 -->
+      <view class="form-item">
+        <text class="label required">手机号</text>
+        <input 
+          class="input" 
+          placeholder="请输入手机号" 
+          placeholder-class="placeholder" 
+          value="{{formData.phone}}" 
+          bindinput="inputChange" 
+          data-field="phone"
+          type="number"
+        />
+        <text class="error" wx:if="{{errors.phone}}">{{errors.phone}}</text>
+      </view>
+      
+      <!-- 邮箱 -->
+      <view class="form-item">
+        <text class="label">邮箱</text>
+        <input 
+          class="input" 
+          placeholder="请输入邮箱" 
+          placeholder-class="placeholder" 
+          value="{{formData.email}}" 
+          bindinput="inputChange" 
+          data-field="email"
+          type="text"
+        />
+      </view>
+      
+      <!-- 学生证号 -->
+      <view class="form-item">
+        <text class="label required">学生证号</text>
+        <input 
+          class="input" 
+          placeholder="请输入学生证号" 
+          placeholder-class="placeholder" 
+          value="{{formData.studentId}}" 
+          bindinput="inputChange" 
+          data-field="studentId"
+        />
+        <text class="error" wx:if="{{errors.studentId}}">{{errors.studentId}}</text>
+      </view>
+      
+      <!-- 学校 -->
+      <view class="form-item">
+        <text class="label required">学校</text>
+        <input 
+          class="input" 
+          placeholder="请输入学校名称" 
+          placeholder-class="placeholder" 
+          value="{{formData.school}}" 
+          bindinput="inputChange" 
+          data-field="school"
+        />
+        <text class="error" wx:if="{{errors.school}}">{{errors.school}}</text>
+      </view>
+      
+      <!-- 专业 -->
+      <view class="form-item">
+        <text class="label required">专业</text>
+        <input 
+          class="input" 
+          placeholder="请输入专业名称" 
+          placeholder-class="placeholder" 
+          value="{{formData.major}}" 
+          bindinput="inputChange" 
+          data-field="major"
+        />
+        <text class="error" wx:if="{{errors.major}}">{{errors.major}}</text>
+      </view>
+      
+      <!-- 年级 -->
+      <view class="form-item">
+        <text class="label required">年级</text>
+        <picker 
+          class="picker" 
+          range="{{gradeOptions}}" 
+          value="{{formData.grade}}" 
+          bindchange="selectGrade"
+        >
+          <view class="picker-content">
+            <text wx:if="{{formData.grade}}">{{formData.grade}}</text>
+            <text wx:else class="placeholder">请选择年级</text>
+          </view>
+        </picker>
+        <text class="error" wx:if="{{errors.grade}}">{{errors.grade}}</text>
+      </view>
+    </view>
+    
+    <!-- 团队信息 -->
+    <view class="form-section">
+      <text class="section-title">团队信息</text>
+      
+      <!-- 团队名称 -->
+      <view class="form-item">
+        <text class="label required">团队名称</text>
+        <input 
+          class="input" 
+          placeholder="请输入团队名称" 
+          placeholder-class="placeholder" 
+          value="{{formData.teamName}}" 
+          bindinput="inputChange" 
+          data-field="teamName"
+        />
+        <text class="error" wx:if="{{errors.teamName}}">{{errors.teamName}}</text>
+      </view>
+      
+      <!-- 团队人数 -->
+      <view class="form-item">
+        <text class="label required">团队人数</text>
+        <input 
+          class="input" 
+          placeholder="请输入团队人数" 
+          placeholder-class="placeholder" 
+          value="{{formData.teamSize}}" 
+          bindinput="inputChange" 
+          data-field="teamSize"
+          type="number"
+        />
+        <text class="error" wx:if="{{errors.teamSize}}">{{errors.teamSize}}</text>
+      </view>
+      
+      <!-- 团队描述 -->
+      <view class="form-item">
+        <text class="label">团队描述</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请简要描述您的团队" 
+          placeholder-class="placeholder" 
+          value="{{formData.teamDescription}}" 
+          bindinput="inputChange" 
+          data-field="teamDescription"
+          maxlength="200"
+        ></textarea>
+        <text class="count">{{formData.teamDescription.length}}/200</text>
+      </view>
+    </view>
+    
+    <!-- 经验信息 -->
+    <view class="form-section">
+      <text class="section-title">经验信息</text>
+      
+      <!-- 是否有相关经验 -->
+      <view class="form-item">
+        <text class="label">是否有相关经验</text>
+        <view class="switch-container">
+          <switch 
+            checked="{{formData.hasExperience}}" 
+            bindchange="toggleExperience"
+          />
+          <text class="switch-text">{{formData.hasExperience ? '是' : '否'}}</text>
+        </view>
+      </view>
+      
+      <!-- 经验描述 -->
+      <view class="form-item" wx:if="{{formData.hasExperience}}">
+        <text class="label">经验描述</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请描述您的相关经验" 
+          placeholder-class="placeholder" 
+          value="{{formData.experienceDescription}}" 
+          bindinput="inputChange" 
+          data-field="experienceDescription"
+          maxlength="300"
+        ></textarea>
+        <text class="count">{{formData.experienceDescription.length}}/300</text>
+      </view>
+    </view>
+    
+    <!-- 联系方式 -->
+    <view class="form-section">
+      <text class="section-title">联系方式</text>
+      
+      <!-- 微信号 -->
+      <view class="form-item">
+        <text class="label required">微信号</text>
+        <input 
+          class="input" 
+          placeholder="请输入微信号" 
+          placeholder-class="placeholder" 
+          value="{{formData.wechat}}" 
+          bindinput="inputChange" 
+          data-field="wechat"
+        />
+        <text class="error" wx:if="{{errors.wechat}}">{{errors.wechat}}</text>
+      </view>
+      
+      <!-- QQ号 -->
+      <view class="form-item">
+        <text class="label">QQ号</text>
+        <input 
+          class="input" 
+          placeholder="请输入QQ号" 
+          placeholder-class="placeholder" 
+          value="{{formData.qq}}" 
+          bindinput="inputChange" 
+          data-field="qq"
+          type="number"
+        />
+      </view>
+    </view>
+    
+    <!-- 其他信息 -->
+    <view class="form-section">
+      <text class="section-title">其他信息</text>
+      
+      <!-- 申请动机 -->
+      <view class="form-item">
+        <text class="label required">申请动机</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请说明您申请成为团长的动机" 
+          placeholder-class="placeholder" 
+          value="{{formData.motivation}}" 
+          bindinput="inputChange" 
+          data-field="motivation"
+          maxlength="300"
+        ></textarea>
+        <text class="count">{{formData.motivation.length}}/300</text>
+        <text class="error" wx:if="{{errors.motivation}}">{{errors.motivation}}</text>
+      </view>
+      
+      <!-- 期望收获 -->
+      <view class="form-item">
+        <text class="label">期望收获</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请说明您期望从团长工作中获得什么" 
+          placeholder-class="placeholder" 
+          value="{{formData.expectations}}" 
+          bindinput="inputChange" 
+          data-field="expectations"
+          maxlength="300"
+        ></textarea>
+        <text class="count">{{formData.expectations.length}}/300</text>
+      </view>
+    </view>
+    
+    <!-- 证明材料 -->
+    <view class="form-section">
+      <text class="section-title">证明材料</text>
+      
+      <!-- 身份证正面 -->
+      <view class="form-item">
+        <text class="label required">身份证正面</text>
+        <view class="upload-item">
+          <view class="upload-container" bindtap="uploadImage" data-type="idCardFront">
+            <image 
+              wx:if="{{imagePreview.idCardFront}}" 
+              src="{{imagePreview.idCardFront}}" 
+              class="uploaded-image" 
+              mode="aspectFill"
+            ></image>
+            <view wx:else class="upload-placeholder">
+              <image src="/assets/icons/upload.png" class="upload-icon" mode="aspectFit"></image>
+              <text class="upload-text">上传身份证正面</text>
+            </view>
+          </view>
+          <view 
+            wx:if="{{imagePreview.idCardFront}}" 
+            class="preview-btn" 
+            bindtap="previewImage" 
+            data-type="idCardFront"
+          >
+            <text>预览</text>
+          </view>
+          <view 
+            wx:if="{{imagePreview.idCardFront}}" 
+            class="delete-btn" 
+            bindtap="deleteImage" 
+            data-type="idCardFront"
+          >
+            <text>删除</text>
+          </view>
+        </view>
+        <text class="error" wx:if="{{errors.idCardFront}}">{{errors.idCardFront}}</text>
+      </view>
+      
+      <!-- 身份证反面 -->
+      <view class="form-item">
+        <text class="label required">身份证反面</text>
+        <view class="upload-item">
+          <view class="upload-container" bindtap="uploadImage" data-type="idCardBack">
+            <image 
+              wx:if="{{imagePreview.idCardBack}}" 
+              src="{{imagePreview.idCardBack}}" 
+              class="uploaded-image" 
+              mode="aspectFill"
+            ></image>
+            <view wx:else class="upload-placeholder">
+              <image src="/assets/icons/upload.png" class="upload-icon" mode="aspectFit"></image>
+              <text class="upload-text">上传身份证反面</text>
+            </view>
+          </view>
+          <view 
+            wx:if="{{imagePreview.idCardBack}}" 
+            class="preview-btn" 
+            bindtap="previewImage" 
+            data-type="idCardBack"
+          >
+            <text>预览</text>
+          </view>
+          <view 
+            wx:if="{{imagePreview.idCardBack}}" 
+            class="delete-btn" 
+            bindtap="deleteImage" 
+            data-type="idCardBack"
+          >
+            <text>删除</text>
+          </view>
+        </view>
+        <text class="error" wx:if="{{errors.idCardBack}}">{{errors.idCardBack}}</text>
+      </view>
+      
+      <!-- 学生证 -->
+      <view class="form-item">
+        <text class="label required">学生证</text>
+        <view class="upload-item">
+          <view class="upload-container" bindtap="uploadImage" data-type="studentCard">
+            <image 
+              wx:if="{{imagePreview.studentCard}}" 
+              src="{{imagePreview.studentCard}}" 
+              class="uploaded-image" 
+              mode="aspectFill"
+            ></image>
+            <view wx:else class="upload-placeholder">
+              <image src="/assets/icons/upload.png" class="upload-icon" mode="aspectFit"></image>
+              <text class="upload-text">上传学生证</text>
+            </view>
+          </view>
+          <view 
+            wx:if="{{imagePreview.studentCard}}" 
+            class="preview-btn" 
+            bindtap="previewImage" 
+            data-type="studentCard"
+          >
+            <text>预览</text>
+          </view>
+          <view 
+            wx:if="{{imagePreview.studentCard}}" 
+            class="delete-btn" 
+            bindtap="deleteImage" 
+            data-type="studentCard"
+          >
+            <text>删除</text>
+          </view>
+        </view>
+        <text class="error" wx:if="{{errors.studentCard}}">{{errors.studentCard}}</text>
+      </view>
+      
+      <!-- 其他证明材料 -->
+      <view class="form-item">
+        <text class="label">其他证明材料（最多5张）</text>
+        <view class="multiple-upload">
+          <!-- 已上传图片 -->
+          <block wx:for="{{imagePreview.otherCertificates}}" wx:key="*this" wx:for-index="index">
+            <view class="multiple-image-item">
+              <image 
+                src="{{item}}" 
+                class="multiple-image" 
+                mode="aspectFill"
+                bindtap="previewImage"
+                data-type="otherCertificates"
+                data-index="{{index}}"
+              ></image>
+              <view class="multiple-delete-btn" bindtap="deleteImage" data-type="otherCertificates" data-index="{{index}}">
+                <icon type="clear" size="20" color="#fff"></icon>
+              </view>
+            </view>
+          </block>
+          <!-- 添加图片按钮 -->
+          <view 
+            class="add-multiple-btn" 
+            bindtap="uploadImage" 
+            data-type="otherCertificates"
+            wx:if="{{imagePreview.otherCertificates.length < 5}}"
+          >
+            <image src="/assets/icons/add-image.png" class="add-icon" mode="aspectFit"></image>
+            <text class="add-text">添加图片</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+      <button 
+        class="submit-btn" 
+        bindtap="submitApply" 
+        loading="{{submitting}}"
+        disabled="{{submitting || uploading}}"
+      >
+        {{submitting ? '提交中...' : '提交申请'}}
+      </button>
+    </view>
+  </form>
+</view>

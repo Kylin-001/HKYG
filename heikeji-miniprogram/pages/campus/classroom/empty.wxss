@@ -1,0 +1,199 @@
+/* 空教室查询页面样式 */
+.page-container {
+  padding: 0 20rpx 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 90rpx;
+  padding: 0 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  flex: 1;
+  text-align: center;
+}
+
+.header-right {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+/* 查询条件样式 */
+.search-conditions {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.condition-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.condition-label {
+  font-size: 30rpx;
+  color: #333;
+  width: 120rpx;
+}
+
+.condition-value {
+  font-size: 28rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 20rpx 30rpx;
+  border-radius: 8rpx;
+  flex: 1;
+  text-align: right;
+  margin-left: 30rpx;
+}
+
+.picker {
+  flex: 1;
+  text-align: right;
+}
+
+.search-btn {
+  background-color: #3cc51f;
+  color: #fff;
+  font-size: 32rpx;
+  border-radius: 8rpx;
+  padding: 20rpx 0;
+  margin-top: 20rpx;
+}
+
+.search-btn:active {
+  background-color: #38b418;
+}
+
+/* 结果部分样式 */
+.result-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.result-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.result-count {
+  font-size: 28rpx;
+  color: #3cc51f;
+}
+
+/* 教室列表样式 */
+.classroom-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.classroom-item {
+  width: 48%;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.classroom-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.classroom-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.classroom-capacity {
+  font-size: 24rpx;
+  color: #666;
+  background-color: #e6f7ff;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+}
+
+.classroom-location {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.classroom-status {
+  font-size: 24rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.classroom-status.empty {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.classroom-status.occupied {
+  background-color: #fff1f0;
+  color: #ff4d4f;
+}
+
+/* 无结果样式 */
+.no-result {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+  width: 100%;
+}
+
+/* 加载中样式 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.loading text {
+  margin-top: 20rpx;
+  color: #666;
+  font-size: 28rpx;
+}

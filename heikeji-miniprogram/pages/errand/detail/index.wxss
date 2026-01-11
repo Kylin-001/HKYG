@@ -1,0 +1,396 @@
+/* 跑腿任务详情页样式 */
+.detail-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+}
+
+/* 状态头部 */
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  color: #fff;
+}
+
+.status-header.pending {
+  background: linear-gradient(135deg, #ff9500, #ffb347);
+}
+
+.status-header.in-progress {
+  background: linear-gradient(135deg, #007aff, #5ac8fa);
+}
+
+.status-header.completed {
+  background: linear-gradient(135deg, #3cc51f, #6cd673);
+}
+
+.status-icon image {
+  width: 60rpx;
+  height: 60rpx;
+  margin-right: 20rpx;
+}
+
+.status-text {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+/* 任务信息区块 */
+.task-info-section {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.task-type-badge {
+  display: inline-block;
+  padding: 6rpx 20rpx;
+  background-color: rgba(60, 197, 31, 0.1);
+  color: #3cc51f;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.task-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 15rpx;
+}
+
+.task-desc {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  display: block;
+}
+
+.urgency-info {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+  padding: 15rpx;
+  background-color: rgba(255, 59, 48, 0.1);
+  border-radius: 8rpx;
+}
+
+.urgency-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 15rpx;
+}
+
+.urgency-info text {
+  font-size: 26rpx;
+  color: #ff3b30;
+}
+
+/* 地点信息 */
+.location-section {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.location-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.location-marker {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.location-marker.pickup {
+  background-color: #007aff;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.location-marker.delivery {
+  background-color: #3cc51f;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.location-info {
+  flex: 1;
+}
+
+.location-label {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.location-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.location-action {
+  padding: 10rpx 30rpx;
+  border: 1rpx solid #3cc51f;
+  border-radius: 20rpx;
+  color: #3cc51f;
+  font-size: 26rpx;
+}
+
+.location-arrow {
+  display: flex;
+  justify-content: center;
+  padding: 10rpx 0;
+}
+
+.location-arrow image {
+  width: 40rpx;
+  height: 40rpx;
+  opacity: 0.5;
+}
+
+/* 价格信息 */
+.price-section {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.price-item.total {
+  margin-bottom: 0;
+}
+
+.price-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.price-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.price-value.bonus {
+  color: #ff3b30;
+}
+
+.price-value.total-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff3b30;
+}
+
+.price-divider {
+  height: 1rpx;
+  background-color: #eee;
+  margin: 15rpx 0;
+}
+
+/* 通用区块标题 */
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+/* 发布者/接单者信息 */
+.publisher-section, .runner-section {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.publisher-info, .runner-info {
+  display: flex;
+  align-items: center;
+}
+
+.publisher-avatar, .runner-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+
+.publisher-detail, .runner-detail {
+  flex: 1;
+}
+
+.publisher-name, .runner-name {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.publisher-stats, .runner-stats {
+  display: flex;
+  gap: 30rpx;
+}
+
+.publisher-stats text, .runner-stats text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.contact-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15rpx 30rpx;
+}
+
+.contact-btn image {
+  width: 40rpx;
+  height: 40rpx;
+  margin-bottom: 8rpx;
+}
+
+.contact-btn text {
+  font-size: 24rpx;
+  color: #3cc51f;
+}
+
+/* 时间线 */
+.timeline-section {
+  background-color: #fff;
+  padding: 30rpx;
+}
+
+.timeline {
+  padding-left: 30rpx;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 40rpx;
+  padding-bottom: 30rpx;
+  border-left: 2rpx solid #eee;
+}
+
+.timeline-item:last-child {
+  border-left: 2rpx solid transparent;
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -6rpx;
+  top: 0;
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background-color: #ddd;
+}
+
+.timeline-item.completed .timeline-dot {
+  background-color: #3cc51f;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-title {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.timeline-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 底部操作栏 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  background-color: #fff;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  z-index: 999;
+}
+
+.action-left {
+  display: flex;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 40rpx;
+}
+
+.action-item image {
+  width: 40rpx;
+  height: 40rpx;
+  margin-bottom: 5rpx;
+}
+
+.action-item text {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.action-right {
+  display: flex;
+  gap: 20rpx;
+}
+
+.cancel-btn, .claim-btn, .complete-btn {
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 40rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  color: #ff3b30;
+  border: 1rpx solid #ff3b30;
+}
+
+.claim-btn {
+  background-color: #3cc51f;
+  color: #fff;
+}
+
+.complete-btn {
+  background-color: #007aff;
+  color: #fff;
+}

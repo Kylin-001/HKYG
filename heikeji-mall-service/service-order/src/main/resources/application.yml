@@ -2,6 +2,19 @@ server:
   port: 8083
   servlet:
     context-path: /api
+  # Tomcat线程池配置
+  tomcat:
+    # 最大线程数
+    threads:
+      max: 200
+    # 核心线程数
+      min-spare: 50
+    # 连接超时时间（毫秒）
+    connection-timeout: 20000
+    # 最大连接数
+    max-connections: 800
+    # 等待队列大小
+    accept-count: 100
 
 spring:
   main:
@@ -9,17 +22,61 @@ spring:
     allow-bean-definition-overriding: true
   application:
     name: service-order
+  # 禁用Nacos服务发现和配置检查，避免启动错误
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        import-check:
+          enabled: false
+    compatibility-verifier:
+      enabled: false
   datasource:
-    url: jdbc:mysql://192.168.110.162:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
     username: root
     password: Mysql@8Root!2025
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # HikariCP连接池配置
+    hikari:
+      # 最小空闲连接数
+      minimum-idle: 10
+      # 最大连接数
+      maximum-pool-size: 50
+      # 连接超时时间（毫秒）
+      connection-timeout: 15000
+      # 空闲连接超时时间（毫秒）
+      idle-timeout: 900000
+      # 连接最大生命周期（毫秒）
+      max-lifetime: 1800000
+      # 连接测试语句
+      connection-test-query: SELECT 1
+      # 连接池名称
+      pool-name: ServiceOrderHikariCP
+      # 自动提交
+      auto-commit: true
+      # 等待连接可用的最大时间（毫秒）
+      validation-timeout: 5000
+      # 连接测试超时时间（毫秒）
+      login-timeout: 10
   # Redis配置
   redis:
     host: localhost
     port: 6379
-    password:
+    password: Redis@hkyg
     database: 0
+    timeout: 5000
+    # Redis连接池配置
+    lettuce:
+      pool:
+        # 最小空闲连接数
+        min-idle: 10
+        # 最大连接数
+        max-active: 50
+        # 最大阻塞等待时间（毫秒）
+        max-wait: 10000
+        # 最大空闲连接数
+        max-idle: 20
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -36,6 +93,18 @@ mybatis-plus:
 logging:
   level:
     com.heikeji.mall.order: debug
+    org.springframework.web: info
+    org.apache.http: info
+  # 日志格式配置，添加请求ID和响应时间
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [RequestID:%X{requestId}] %-5level %logger{50} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [RequestID:%X{requestId}] [ResponseTime:%X{responseTime}ms] %-5level %logger{50} - %msg%n'
+  # 日志文件配置
+  file:
+    name: logs/service-order.log
+    max-size: 10MB
+    max-history: 7
+    total-size-cap: 100MB
 
 # SpringDoc OpenAPI配置
 springdoc:

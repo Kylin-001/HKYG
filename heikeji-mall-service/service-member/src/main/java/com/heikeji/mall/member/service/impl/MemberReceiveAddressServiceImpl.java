@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member.service.impl;
+package com.heikeji.mall.member.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heikeji.mall.member.entity.MemberReceiveAddress;
@@ -32,7 +32,8 @@ public class MemberReceiveAddressServiceImpl extends ServiceImpl<MemberReceiveAd
     @Override
     @Transactional
     public boolean saveAddress(MemberReceiveAddress address) {
-        // 濡傛灉鏄粯璁ゅ湴鍧€锛屽厛灏嗙敤鎴峰叾浠栧湴鍧€璁句负闈為粯璁?        if (address.getDefaultStatus() == 1) {
+        // 如果是默认地址，先将用户其他地址设为非默认
+        if (address.getDefaultStatus() == 1) {
             updateOtherAddressesNotDefault(address.getUserId());
         }
         return save(address);
@@ -41,7 +42,8 @@ public class MemberReceiveAddressServiceImpl extends ServiceImpl<MemberReceiveAd
     @Override
     @Transactional
     public boolean updateAddress(MemberReceiveAddress address) {
-        // 濡傛灉鏄粯璁ゅ湴鍧€锛屽厛灏嗙敤鎴峰叾浠栧湴鍧€璁句负闈為粯璁?        if (address.getDefaultStatus() == 1) {
+        // 如果是默认地址，先将用户其他地址设为非默认
+        if (address.getDefaultStatus() == 1) {
             updateOtherAddressesNotDefault(address.getUserId());
         }
         return updateById(address);
@@ -49,7 +51,7 @@ public class MemberReceiveAddressServiceImpl extends ServiceImpl<MemberReceiveAd
 
     @Override
     public boolean deleteAddress(Long id, Long userId) {
-        // 纭繚鍙兘鍒犻櫎鑷繁鐨勫湴鍧€
+        // 确保只能删除自己的地址
         MemberReceiveAddress address = getById(id);
         if (address != null && address.getUserId().equals(userId)) {
             return removeById(id);
@@ -60,10 +62,13 @@ public class MemberReceiveAddressServiceImpl extends ServiceImpl<MemberReceiveAd
     @Override
     @Transactional
     public boolean setDefaultAddress(Long id, Long userId) {
-        // 纭繚鍙兘璁剧疆鑷繁鐨勫湴鍧€涓洪粯璁?        MemberReceiveAddress address = getById(id);
+        // 确保只能设置自己的地址为默认
+        MemberReceiveAddress address = getById(id);
         if (address != null && address.getUserId().equals(userId)) {
-            // 灏嗗叾浠栧湴鍧€璁句负闈為粯璁?            updateOtherAddressesNotDefault(userId);
-            // 璁剧疆褰撳墠鍦板潃涓洪粯璁?            address.setDefaultStatus(1);
+            // 将其他地址设为非默认
+            updateOtherAddressesNotDefault(userId);
+            // 设置当前地址为默认
+            address.setDefaultStatus(1);
             return updateById(address);
         }
         return false;

@@ -1,9 +1,15 @@
 <!--index.wxml-->
 <view class="container page-container">
+  <!-- 加载动画 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+  
   <!-- 顶部轮播图 -->
   <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500">
     <swiper-item wx:for="{{banners}}" wx:key="id">
-      <image src="{{item.image}}" class="banner-image" mode="aspectFill" />
+      <image src="{{item.image}}" class="banner-image" mode="aspectFill" lazy-load="true" />
     </swiper-item>
   </swiper>
 
@@ -11,7 +17,7 @@
   <view class="quick-entry card">
     <view class="quick-entry-grid">
       <view class="entry-item" wx:for="{{quickEntries}}" wx:key="id" bindtap="navigateToEntry" data-type="{{item.type}}">
-        <image src="{{item.icon}}" class="entry-icon" />
+        <image src="{{item.icon}}" class="entry-icon" lazy-load="true" />
         <text class="entry-text">{{item.name}}</text>
       </view>
     </view>
@@ -26,6 +32,28 @@
     
     <view class="product-grid">
       <view class="product-item" wx:for="{{recommendedProducts}}" wx:key="id" bindtap="goToProductDetail" data-id="{{item.id}}">
+        <image src="{{item.image}}" class="product-image" mode="aspectFill" lazy-load="true" />
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-desc">{{item.description}}</text>
+          <view class="product-footer">
+            <text class="product-price">¥{{item.price}}</text>
+            <button class="add-cart-btn" size="mini" type="primary" bindtap="addToCart" data-product="{{item}}">+</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 个性化推荐商品 -->
+  <view class="recommended-section" wx:if="{{personalizedProducts.length > 0}}">
+    <view class="section-header">
+      <text class="section-title recommended">为你推荐</text>
+      <text class="section-more" bindtap="viewMoreProducts">更多 ></text>
+    </view>
+    
+    <view class="product-grid">
+      <view class="product-item" wx:for="{{personalizedProducts}}" wx:key="id" bindtap="goToProductDetail" data-id="{{item.id}}">
         <image src="{{item.image}}" class="product-image" mode="aspectFill" />
         <view class="product-info">
           <text class="product-name">{{item.name}}</text>
@@ -49,6 +77,27 @@
     <scroll-view class="merchant-scroll" scroll-x="true">
       <view class="merchant-list">
         <view class="merchant-item" wx:for="{{hotMerchants}}" wx:key="id" bindtap="goToMerchant" data-id="{{item.id}}">
+          <image src="{{item.logo}}" class="merchant-logo" mode="aspectFill" lazy-load="true" />
+          <view class="merchant-info">
+            <text class="merchant-name">{{item.name}}</text>
+            <text class="merchant-rating">⭐ {{item.rating}}</text>
+            <text class="merchant-sales">月销{{item.monthlySales}}+</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 个性化推荐商家 -->
+  <view class="hot-merchants-section" wx:if="{{personalizedMerchants.length > 0}}">
+    <view class="section-header">
+      <text class="section-title recommended">猜你喜欢</text>
+      <text class="section-more" bindtap="viewMoreMerchants">更多 ></text>
+    </view>
+    
+    <scroll-view class="merchant-scroll" scroll-x="true">
+      <view class="merchant-list">
+        <view class="merchant-item" wx:for="{{personalizedMerchants}}" wx:key="id" bindtap="goToMerchant" data-id="{{item.id}}">
           <image src="{{item.logo}}" class="merchant-logo" mode="aspectFill" />
           <view class="merchant-info">
             <text class="merchant-name">{{item.name}}</text>

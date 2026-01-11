@@ -39,17 +39,28 @@ public class DashboardController {
     public R<Map<String, Object>> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
         
-        // 获取用户统计
+        // 获取用户统计数据
         R<Integer> userCountResult = userFeignClient.getUserCount();
-        if (userCountResult.isSuccess()) {
-            stats.put("userCount", userCountResult.getData());
+        stats.put("userCount", userCountResult.getData() != null ? userCountResult.getData() : 0);
+        
+        // 获取订单统计数据
+        R<Map<String, Object>> orderStatsResult = orderFeignClient.getOrderStats();
+        if (orderStatsResult.getData() != null) {
+            Map<String, Object> orderStats = orderStatsResult.getData();
+            stats.put("orderCount", orderStats.getOrDefault("totalOrderCount", 0));
+            stats.put("totalSales", orderStats.getOrDefault("totalSalesAmount", 0));
+            stats.put("pendingOrders", orderStats.getOrDefault("pendingOrderCount", 0));
+            stats.put("completedOrders", orderStats.getOrDefault("completedOrderCount", 0));
         }
         
-        // 获取订单统计
-        R<Map<String, Object>> orderStatsResult = orderFeignClient.getOrderStats();
-        if (orderStatsResult.isSuccess()) {
-            stats.putAll(orderStatsResult.getData());
-        }
+        // 获取商品统计数据
+        R<Integer> productCountResult = productFeignClient.getProductCount();
+        stats.put("productCount", productCountResult.getData() != null ? productCountResult.getData() : 0);
+        
+        // 更多统计数据可以在此处添加
+        stats.put("activeUsers", 0); // 活跃用户数
+        stats.put("newUsersToday", 0); // 今日新增用户
+        stats.put("salesToday", 0); // 今日销售额
         
         return R.success(stats);
     }

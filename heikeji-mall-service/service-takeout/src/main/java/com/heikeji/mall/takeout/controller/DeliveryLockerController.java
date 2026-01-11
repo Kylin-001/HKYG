@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 外卖柜控制器
@@ -83,4 +84,75 @@ public class DeliveryLockerController {
         boolean result = deliveryLockerService.update(locker);
         return R.success(result);
     }
+
+    /**
+     * 删除外卖柜（管理员功能）
+     */
+    @DeleteMapping("/{id}")
+    @ApiOperation("删除外卖柜")
+    public R<Boolean> deleteLocker(@PathVariable Long id) {
+        boolean result = deliveryLockerService.delete(id);
+        return R.success(result);
+    }
+
+    /**
+     * 批量删除外卖柜（管理员功能）
+     */
+    @DeleteMapping("/batch")
+    @ApiOperation("批量删除外卖柜")
+    public R<Boolean> batchDeleteLockers(@RequestBody List<Long> ids) {
+        boolean result = deliveryLockerService.batchDelete(ids);
+        return R.success(result);
+    }
+
+    /**
+     * 更新外卖柜状态（管理员功能）
+     */
+    @PutMapping("/{id}/status")
+    @ApiOperation("更新外卖柜状态")
+    public R<Boolean> updateLockerStatus(@PathVariable Long id, @RequestParam Integer status) {
+        boolean result = deliveryLockerService.updateStatus(id, status);
+        return R.success(result);
+    }
+
+    /**
+     * 根据ID获取外卖柜详情
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据ID获取外卖柜详情")
+    public R<DeliveryLocker> getLockerById(@PathVariable Long id) {
+        DeliveryLocker locker = deliveryLockerService.getById(id);
+        return R.success(locker);
+    }
+
+    /**
+     * 根据校区获取外卖柜
+     */
+    @GetMapping("/campus")
+    @ApiOperation("根据校区获取外卖柜")
+    public R<List<DeliveryLocker>> getLockersByCampus(@RequestParam String campusArea) {
+        List<DeliveryLocker> lockers = deliveryLockerService.getByCampusArea(campusArea);
+        return R.success(lockers);
+    }
+
+    /**
+     * 获取外卖柜统计信息
+     */
+    @GetMapping("/stats")
+    @ApiOperation("获取外卖柜统计信息")
+    public R<Map<String, Object>> getLockerStats() {
+        Map<String, Object> stats = deliveryLockerService.getLockerStats();
+        return R.success(stats);
+    }
+
+    /**
+     * 批量更新外卖柜状态（管理员功能）
+     */
+    @PutMapping("/batch/status")
+    @ApiOperation("批量更新外卖柜状态")
+    public R<Boolean> batchUpdateLockerStatus(@RequestParam List<Long> ids, @RequestParam Integer status) {
+        boolean result = deliveryLockerService.batchUpdateStatus(ids, status);
+        return R.success(result);
+    }
+
 }

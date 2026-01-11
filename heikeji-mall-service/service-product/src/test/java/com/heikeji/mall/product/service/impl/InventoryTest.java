@@ -32,6 +32,8 @@ public class InventoryTest {
         testProduct.setStock(100); // 可用库存
         testProduct.setLockedStock(20); // 锁定库存
         testProduct.setVersion(1);
+        testProduct.setStatus(1); // 已上架
+        testProduct.setDelFlag(0); // 未删除
     }
 
     @Test

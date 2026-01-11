@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
-    private static final int MAX_CATEGORY_LEVEL = 3; // 最大分类层级
-
     @Autowired
     private CategoryMapper categoryMapper;
 
@@ -40,37 +38,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<Category> getCategoriesBySort() {
         return categoryMapper.selectOrderBySort();
-    }
-
-    @Override
-    @CacheEvict(value = {"category"}, allEntries = true)
-    public Boolean enableCategory(Long categoryId) {
-        Category category = this.getById(categoryId);
-        if (category != null) {
-            category.setStatus(1);
-            return this.updateById(category);
-        }
-        return false;
-    }
-
-    @Override
-    @CacheEvict(value = {"category"}, allEntries = true)
-    public Boolean disableCategory(Long categoryId) {
-        // 检查是否有启用状态的子分类
-        List<Category> subCategories = this.getSubCategoriesRecursive(categoryId);
-        for (Category subCategory : subCategories) {
-            if (subCategory.getStatus() == 1) {
-                // 存在启用状态的子分类，不允许禁用
-                return false;
-            }
-        }
-        
-        Category category = this.getById(categoryId);
-        if (category != null) {
-            category.setStatus(0);
-            return this.updateById(category);
-        }
-        return false;
     }
     
     @Override
@@ -119,9 +86,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             return new ArrayList<>();
         }
         // 确保返回的是正确的树形结构
-        return buildCategoryTree(enabledCategories.stream()
-                .filter(cat -> cat.getStatus() == 1)
-                .collect(Collectors.toList()));
+        return buildCategoryTree(enabledCategories);
     }
     
     @Override
@@ -152,46 +117,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             path.add(currentCategory);
         }
         return path;
-    }
-    
-    /**
-     * 检查分类层级是否合法
-     * @param parentId 父分类ID
-     * @return 是否合法
-     */
-    public boolean checkCategoryLevel(Long parentId) {
-        if (parentId == null || parentId == 0) {
-            // 顶级分类，层级为1
-            return true;
-        }
-        
-        Category parentCategory = getById(parentId);
-        if (parentCategory == null) {
-            return false;
-        }
-        
-        // 检查父分类的层级
-        int parentLevel = parentCategory.getLevel() == null ? 0 : parentCategory.getLevel();
-        return parentLevel < MAX_CATEGORY_LEVEL;
-    }
-    
-    /**
-     * 计算分类层级
-     * @param parentId 父分类ID
-     * @return 分类层级
-     */
-    public int calculateCategoryLevel(Long parentId) {
-        if (parentId == null || parentId == 0) {
-            return 1;
-        }
-        
-        Category parentCategory = getById(parentId);
-        if (parentCategory == null) {
-            return 1; // 默认顶级分类
-        }
-        
-        int parentLevel = parentCategory.getLevel() == null ? 0 : parentCategory.getLevel();
-        return parentLevel + 1;
     }
     
     /**
@@ -253,20 +178,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Transactional
     @CacheEvict(value = {"category"}, allEntries = true)
     public boolean save(Category category) {
-        // 检查分类层级
-        if (!checkCategoryLevel(category.getParentId())) {
-            throw new RuntimeException("分类层级超过最大限制（" + MAX_CATEGORY_LEVEL + "级）");
-        }
-        
-        // 计算层级
-        category.setLevel(calculateCategoryLevel(category.getParentId()));
-        
         // 设置默认值
         if (category.getSortOrder() == null) {
             category.setSortOrder(0);
-        }
-        if (category.getStatus() == null) {
-            category.setStatus(1); // 默认启用
         }
         
         return super.save(category);
@@ -276,23 +190,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Transactional
     @CacheEvict(value = {"category"}, allEntries = true)
     public boolean updateById(Category category) {
-        // 如果修改了父分类，需要重新计算层级
+        // 如果修改了父分类，检查不能将分类设置为其子分类的子分类（避免循环引用）
         if (category.getParentId() != null) {
-            // 检查不能将分类设置为其子分类的子分类（避免循环引用）
             List<Category> subCategories = getSubCategoriesRecursive(category.getId());
             for (Category subCategory : subCategories) {
                 if (subCategory.getId().equals(category.getParentId())) {
                     throw new RuntimeException("不能将分类设置为其子分类的子分类");
                 }
             }
-            
-            // 检查分类层级
-            if (!checkCategoryLevel(category.getParentId())) {
-                throw new RuntimeException("分类层级超过最大限制（" + MAX_CATEGORY_LEVEL + "级）");
-            }
-            
-            // 计算层级
-            category.setLevel(calculateCategoryLevel(category.getParentId()));
         }
         
         return super.updateById(category);

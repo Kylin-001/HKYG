@@ -48,7 +48,7 @@
         :table-height="450"
         @search="handleSearch"
       >
-        <template v-slot:status-render="{ row, value }">
+        <template v-slot:status-render="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'warning'">
             {{ row.status === 1 ? '启用' : '禁用' }}
           </el-tag>
@@ -68,17 +68,17 @@
         :row-height="60"
         :table-height="450"
       >
-        <template v-slot:avatar-render="{ row, value }">
+        <template v-slot:avatar-render="{ row }">
           <el-avatar :size="40" :src="row.avatar">
             {{ row.name.charAt(0) }}
           </el-avatar>
         </template>
 
-        <template v-slot:department-render="{ row, value }">
+        <template v-slot:department-render="{ row }">
           <el-tag type="info">{{ row.department }}</el-tag>
         </template>
 
-        <template v-slot:progress-render="{ row, value }">
+        <template v-slot:progress-render="{ row }">
           <el-progress
             :percentage="row.progress"
             :status="row.progress === 100 ? 'success' : ''"
@@ -86,7 +86,7 @@
           />
         </template>
 
-        <template v-slot:level-render="{ row, value }">
+        <template v-slot:level-render="{ row }">
           <el-rate v-model="row.level" disabled show-score text-color="#99A9BF" />
         </template>
       </virtual-table>
@@ -612,6 +612,10 @@ function deleteItem(row: any) {
 // 批量操作
 function batchDelete() {
   ElMessage.warning('批量删除')
+}
+
+function batchExport() {
+  ElMessage.warning('批量导出')
 }
 
 // 性能测试

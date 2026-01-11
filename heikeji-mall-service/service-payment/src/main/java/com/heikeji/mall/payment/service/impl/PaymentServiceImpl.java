@@ -7,16 +7,20 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heikeji.mall.payment.entity.Payment;
+import com.heikeji.mall.payment.entity.vo.PaymentVO;
 import com.heikeji.mall.payment.mapper.PaymentMapper;
 import com.heikeji.mall.payment.messaging.PaymentMessageProducer;
 import com.heikeji.mall.payment.service.PaymentService;
 import com.heikeji.mall.payment.service.RiskControlService;
 import com.heikeji.mall.payment.service.impl.PaymentStrategyFactory;
+import org.springframework.beans.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +79,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
      * 生成支付订单号
      */
     @Override
+    @CacheEvict(value = {"paymentCache"}, allEntries = true)
     public Payment createPayment(Long orderId, String orderNo, BigDecimal amount, Integer paymentType) {
         // 1. 检查是否支持该支付类型
         if (!paymentStrategyFactory.supportsPaymentType(paymentType)) {
@@ -300,6 +305,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
      * 查询支付状态
      */
     @Override
+    @Cacheable(value = "paymentCache", key = "'payment_status_' + #orderNo", unless = "#result == null")
     public Integer queryPaymentStatus(String orderNo) {
         Payment payment = paymentMapper.selectByOrderNo(orderNo);
         if (payment == null) {
@@ -352,6 +358,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
      * 退款
      */
     @Override
+    @CacheEvict(value = {"paymentCache"}, allEntries = true)
     public boolean refund(String orderNo, BigDecimal refundAmount) {
         // 1. 非事务性查询订单
         Payment payment = paymentMapper.selectByOrderNo(orderNo);
@@ -418,6 +425,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
      * 根据订单号查询支付记录
      */
     @Override
+    @Cacheable(value = "paymentCache", key = "'payment_' + #orderNo", unless = "#result == null")
     public Payment getByOrderNo(String orderNo) {
         return paymentMapper.selectByOrderNo(orderNo);
     }
@@ -427,6 +435,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"paymentCache"}, allEntries = true)
     public boolean balancePay(Long paymentId) {
         // 1. 验证支付记录
         Payment payment = this.getById(paymentId);
@@ -609,8 +618,16 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
         
         Page<Payment> result = this.page(paymentPage, queryWrapper);
         
+        // 将Payment实体列表转换为PaymentVO列表
+        List<PaymentVO> paymentVOList = new ArrayList<>();
+        for (Payment payment : result.getRecords()) {
+            PaymentVO paymentVO = new PaymentVO();
+            BeanUtils.copyProperties(payment, paymentVO);
+            paymentVOList.add(paymentVO);
+        }
+        
         Map<String, Object> response = new HashMap<>();
-        response.put("records", result.getRecords());
+        response.put("records", paymentVOList);
         response.put("total", result.getTotal());
         response.put("pages", result.getPages());
         response.put("current", result.getCurrent());

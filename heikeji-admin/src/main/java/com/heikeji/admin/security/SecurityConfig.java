@@ -57,9 +57,9 @@ public class SecurityConfig {
             // 允许匿名访问的接口和其他权限配置
             .authorizeHttpRequests(auth -> auth
                 // 允许匿名访问的接口
-                .requestMatchers("/api/auth/login", "/api/auth/captcha", "/api/auth/logout").permitAll()
+                .antMatchers("/api/auth/login", "/api/auth/captcha", "/api/auth/logout").permitAll()
                 // 允许静态资源
-                .requestMatchers("/doc.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                .antMatchers("/doc.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
             );

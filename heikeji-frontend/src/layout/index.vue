@@ -17,22 +17,23 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppStore } from '@/store/modules/app'
 import Navbar from './components/Navbar.vue'
 import Sidebar from './components/Sidebar.vue'
 import AppMain from './components/AppMain.vue'
 
-const store = useStore()
+const appStore = useAppStore()
 
 // 计算属性
-const sidebar = computed(() => store.getters['sidebar'])
-const device = computed(() => store.getters['device'])
-const fixedHeader = computed(() => store.getters['fixedHeader'])
-const showLogo = computed(() => store.getters['showLogo'])
+const sidebar = computed(() => appStore.sidebar)
+const device = computed(() => appStore.device)
+// 暂时使用默认值，后续可以添加到app store中
+const fixedHeader = computed(() => true)
+const showLogo = computed(() => true)
 
 // 方法
 const handleClickOutside = () => {
-  store.dispatch('app/closeSideBar', { withoutAnimation: false })
+  appStore.closeSidebar(false)
 }
 </script>
 

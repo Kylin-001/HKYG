@@ -1,0 +1,83 @@
+<!-- 快递柜详情页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left" bindtap="onBack">
+      <image src="/assets/icons/back.png" class="back-icon" mode="aspectFit"></image>
+    </view>
+    <text class="header-title">快递柜详情</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 快递柜基本信息 -->
+  <view class="locker-info">
+    <view class="name-section">
+      <text class="locker-name">{{locker.name}}</text>
+      <view class="status-badge status-{{locker.statusClass}}">
+        {{locker.statusText}}
+      </view>
+    </view>
+    
+    <view class="location-section">
+      <image src="/assets/icons/location.png" class="location-icon" mode="aspectFit"></image>
+      <text class="location-text">{{locker.location}}</text>
+    </view>
+    
+    <view class="stats-section">
+      <view class="stat-item">
+        <text class="stat-label">可用格口</text>
+        <text class="stat-value">{{locker.availableSlots}}</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-label">总格口数</text>
+        <text class="stat-value">{{locker.totalSlots}}</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-label">使用率</text>
+        <text class="stat-value">{{locker.usageRate}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快递柜位置地图 -->
+  <view class="map-section">
+    <text class="section-title">位置地图</text>
+    <view class="map-container">
+      <image src="{{locker.mapImage || '/assets/images/map-placeholder.png'}}" class="map-image" mode="aspectFill"></image>
+      <view class="location-marker"></view>
+    </view>
+    <button class="navigation-btn" bindtap="navigateToLocation">
+      <image src="/assets/icons/navigation.png" class="btn-icon" mode="aspectFit"></image>
+      <text class="btn-text">导航到这里</text>
+    </button>
+  </view>
+
+  <!-- 格口类型分布 -->
+  <view class="slots-section">
+    <text class="section-title">格口类型分布</text>
+    <view class="slots-grid">
+      <block wx:for="{{locker.slotTypes}}" wx:key="type">
+        <view class="slot-type-item">
+          <text class="slot-type">{{item.type}}</text>
+          <text class="slot-count">{{item.available}}/{{item.total}}</text>
+          <progress 
+            percent="{{item.usageRate}}" 
+            stroke-width="6" 
+            activeColor="#4caf50" 
+            backgroundColor="#e0e0e0"
+          />
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button class="action-btn" bindtap="createTask" type="primary">
+      <image src="/assets/icons/add.png" class="btn-icon" mode="aspectFit"></image>
+      <text class="btn-text">发布代取任务</text>
+    </button>
+  </view>
+</view>

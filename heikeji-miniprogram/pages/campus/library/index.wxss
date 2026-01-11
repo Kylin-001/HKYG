@@ -1,0 +1,261 @@
+/* 图书馆首页样式 */
+
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  background-color: #fff;
+  padding: 0 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn {
+  padding: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.more-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 服务分类 */
+.service-categories {
+  display: flex;
+  background-color: #fff;
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 25%;
+  padding: 20px 0;
+  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.category-item:nth-child(4n) {
+  border-right: none;
+}
+
+.category-item:nth-last-child(-n+4) {
+  border-bottom: none;
+}
+
+.category-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+}
+
+.category-name {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 模块 */
+.section {
+  background-color: #fff;
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.more {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+/* 最近借阅 */
+.borrow-list {
+  padding: 10px 0;
+}
+
+.borrow-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.borrow-item:last-child {
+  border-bottom: none;
+}
+
+.book-title {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.borrow-time,
+.return-time {
+  font-size: 14px;
+  color: #999;
+  display: block;
+  margin-bottom: 3px;
+}
+
+/* 座位统计 */
+.seat-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #999;
+}
+
+.reserve-btn {
+  margin: 0 20px 20px;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #3cc51f;
+  color: #fff;
+  border: none;
+  outline: none;
+}
+
+/* 公告列表 */
+.announcement-list {
+  padding: 10px 0;
+}
+
+.announcement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.announcement-item:last-child {
+  border-bottom: none;
+}
+
+.announcement-title {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.announcement-time {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 适配不同屏幕尺寸 */
+@media (max-width: 375px) {
+  .category-item {
+    padding: 15px 0;
+  }
+  
+  .category-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .category-name {
+    font-size: 13px;
+  }
+  
+  .section-header {
+    padding: 12px 16px;
+  }
+  
+  .borrow-item,
+  .announcement-item {
+    padding: 12px 16px;
+  }
+  
+  .book-title,
+  .announcement-title {
+    font-size: 15px;
+  }
+  
+  .stat-value {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .service-categories {
+    margin: 15px;
+  }
+  
+  .section {
+    margin: 15px;
+  }
+  
+  .category-item {
+    width: 12.5%;
+    padding: 25px 0;
+  }
+  
+  .category-item:nth-child(8n) {
+    border-right: none;
+  }
+  
+  .category-item:nth-last-child(-n+8) {
+    border-bottom: none;
+  }
+}

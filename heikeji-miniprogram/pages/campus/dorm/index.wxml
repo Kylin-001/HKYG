@@ -1,0 +1,80 @@
+<!-- 宿舍服务页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">宿舍服务</text>
+    <view class="header-right">
+      <image src="/assets/icons/more.png" class="more-icon" mode="aspectFit" bindtap="onMore"></image>
+    </view>
+  </view>
+
+  <!-- 服务分类 -->
+  <view class="service-categories">
+    <view class="category-item" bindtap="onServiceClick" data-type="repair">
+      <image src="/assets/icons/repair.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">维修报修</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="complaint">
+      <image src="/assets/icons/complaint.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">投诉建议</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="visit">
+      <image src="/assets/icons/visit.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">访客登记</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="laundry">
+      <image src="/assets/icons/laundry.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">洗衣机</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="electricity">
+      <image src="/assets/icons/electricity.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">电费查询</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="water">
+      <image src="/assets/icons/water.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">水费查询</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="dorm-info">
+      <image src="/assets/icons/dorm-info.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">宿舍信息</text>
+    </view>
+    <view class="category-item" bindtap="onServiceClick" data-type="rules">
+      <image src="/assets/icons/rules.png" class="category-icon" mode="aspectFit"></image>
+      <text class="category-name">宿舍规定</text>
+    </view>
+  </view>
+
+  <!-- 最近报修 -->
+  <view class="section" wx:if="{{recentRepairs.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">最近报修</text>
+      <text class="more" bindtap="navigateToRepairList">查看更多</text>
+    </view>
+    <view class="repair-list">
+      <view class="repair-item" wx:for="{{recentRepairs}}" wx:key="id" bindtap="navigateToRepairDetail" data-id="{{item.id}}">
+        <view class="repair-info">
+          <text class="repair-title">{{item.title}}</text>
+          <text class="repair-status {{item.status}}">{{item.statusText}}</text>
+        </view>
+        <view class="repair-time">{{item.createTime}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 宿舍公告 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">宿舍公告</text>
+      <text class="more" bindtap="navigateToDormAnnouncements">查看更多</text>
+    </view>
+    <view class="announcement-list">
+      <view class="announcement-item" wx:for="{{dormAnnouncements}}" wx:key="id" bindtap="navigateToAnnouncementDetail" data-id="{{item.id}}">
+        <text class="announcement-title">{{item.title}}</text>
+        <text class="announcement-time">{{item.createTime}}</text>
+      </view>
+    </view>
+  </view>
+</view>

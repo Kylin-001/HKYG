@@ -124,7 +124,7 @@
 <script setup lang="ts">
 // 导入Vue 3 API
 import { ref, reactive, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useSystemStore } from '@/store/modules/system'
 import { ElMessage } from 'element-plus'
 // 导入日志工具
 import logger from '@/utils/logger'
@@ -148,8 +148,8 @@ interface SearchForm {
   actionType: string
 }
 
-// Vuex store
-const store = useStore()
+// Pinia store
+const systemStore = useSystemStore()
 
 // 响应式数据
 const logList = ref<Log[]>([])
@@ -167,7 +167,6 @@ const detailData = ref<Log>({} as Log)
 // 获取日志列表
 const fetchLogList = async () => {
   try {
-    store.dispatch('setLoading', true)
     const params = {
       page: currentPage.value,
       pageSize: pageSize.value,
@@ -176,15 +175,13 @@ const fetchLogList = async () => {
       startDate: dateRange.value && dateRange.value.length === 2 ? dateRange.value[0] : '',
       endDate: dateRange.value && dateRange.value.length === 2 ? dateRange.value[1] : '',
     }
-    const result = await store.dispatch('getLogList', params)
-    logList.value = result.list || []
+    const result = await systemStore.getLogList(params)
+    logList.value = result.data || []
     total.value = result.total || 0
     ElMessage.success('日志列表加载成功')
   } catch (error) {
     ElMessage.error('获取日志列表失败')
     logger.error('获取日志列表失败', error)
-  } finally {
-    store.dispatch('setLoading', false)
   }
 }
 

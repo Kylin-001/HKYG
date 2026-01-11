@@ -35,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RedisUtils redisUtils;
 
-    @Autowired
+    @Autowired(required = false)
     private MemberFeignService memberFeignService;
 
     @Override

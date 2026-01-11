@@ -59,11 +59,11 @@ public class SecurityConfig {
             // 配置请求授权规则
             .authorizeHttpRequests(authorize -> authorize
                 // 允许公开访问的路径
-                .requestMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .antMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 允许健康检查路径
-                .requestMatchers("/actuator/**").permitAll()
+                .antMatchers("/actuator/**").permitAll()
                 // 允许OPTIONS请求
-                .requestMatchers("/", "/favicon.ico", "/*.html", "/*.js", "/*.css").permitAll()
+                .antMatchers("/", "/favicon.ico", "/*.html", "/*.js", "/*.css").permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
             )

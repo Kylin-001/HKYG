@@ -1,0 +1,89 @@
+<!-- pages/user/address-edit.wxml -->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="header-left" bindtap="onBack">返回</text>
+    <text class="page-title">{{mode === 'add' ? '新增地址' : '编辑地址'}}</text>
+    <text class="header-right" bindtap="onSave">保存</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <form class="address-form" bindsubmit="onSubmit">
+    <!-- 联系人信息 -->
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label required">收货人</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入收货人姓名" 
+          name="name" 
+          value="{{formData.name}}" 
+          bindinput="onInputChange" 
+          data-field="name"
+        />
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label required">手机号</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入手机号" 
+          name="phone" 
+          type="number" 
+          value="{{formData.phone}}" 
+          bindinput="onInputChange" 
+          data-field="phone"
+        />
+      </view>
+    </view>
+
+    <!-- 所在地区 -->
+    <view class="form-section">
+      <view class="form-item area-item" bindtap="onChooseArea">
+        <text class="form-label required">所在地区</text>
+        <view class="area-choose">
+          <text class="area-text" wx:if="{{formData.province && formData.city && formData.district}}">
+            {{formData.province}} {{formData.city}} {{formData.district}}
+          </text>
+          <text class="area-placeholder" wx:else>
+            请选择省市区
+          </text>
+          <text class="area-arrow">></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 详细地址 -->
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label required">详细地址</text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入详细地址，如街道、门牌号、小区等" 
+          name="address" 
+          value="{{formData.address}}" 
+          bindinput="onTextareaChange" 
+          data-field="address"
+          auto-height
+        ></textarea>
+      </view>
+    </view>
+
+    <!-- 设为默认地址 -->
+    <view class="form-section">
+      <view class="form-item checkbox-item" bindtap="onToggleDefault">
+        <text class="form-label">默认地址</text>
+        <view class="checkbox-wrapper">
+          <view class="checkbox {{formData.isDefault ? 'checked' : ''}}">
+            <text class="checkbox-icon" wx:if="{{formData.isDefault}}">✓</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button class="submit-btn" form-type="submit" type="primary" size="default">
+      {{mode === 'add' ? '新增地址' : '保存修改'}}
+    </button>
+  </form>
+</view>

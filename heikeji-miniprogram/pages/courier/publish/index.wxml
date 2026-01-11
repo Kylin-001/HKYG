@@ -1,0 +1,183 @@
+<!-- 快递代取发布页面 -->
+<view class="publish-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="header-left" bindtap="onBack">返回</text>
+    <text class="page-title">发布快递代取</text>
+    <text class="publish-btn" bindtap="onPublish">发布</text>
+  </view>
+
+  <!-- 发布表单 -->
+  <form class="publish-form" bindsubmit="onSubmit">
+    <!-- 快递公司选择 -->
+    <view class="form-section">
+      <view class="section-title">快递公司 <text class="required">*</text></view>
+      <view class="express-company-selector" bindtap="showExpressCompanyPicker">
+        <input 
+          type="text" 
+          placeholder="请选择快递公司" 
+          name="expressCompany" 
+          value="{{formData.expressCompany}}" 
+          disabled
+        />
+        <image src="/assets/icons/arrow-down.png" mode="aspectFit" class="arrow-icon" />
+      </view>
+    </view>
+
+    <!-- 快递单号 -->
+    <view class="form-section">
+      <view class="section-title">快递单号 <text class="required">*</text></view>
+      <input 
+        type="text" 
+        placeholder="请输入快递单号" 
+        name="trackingNumber" 
+        value="{{formData.trackingNumber}}" 
+        bindinput="onInputChange" 
+        data-field="trackingNumber"
+      />
+    </view>
+
+    <!-- 快递柜选择 -->
+    <view class="form-section">
+      <view class="section-title">快递柜 <text class="required">*</text></view>
+      <view class="locker-selector" bindtap="showLockerPicker">
+        <input 
+          type="text" 
+          placeholder="请选择快递柜" 
+          name="lockerId" 
+          value="{{formData.lockerName}}" 
+          disabled
+        />
+        <image src="/assets/icons/arrow-down.png" mode="aspectFit" class="arrow-icon" />
+      </view>
+    </view>
+
+    <!-- 取件码 -->
+    <view class="form-section">
+      <view class="section-title">取件码 <text class="required">*</text></view>
+      <input 
+        type="text" 
+        placeholder="请输入取件码，如：1234-5678" 
+        name="pickupCode" 
+        value="{{formData.pickupCode}}" 
+        bindinput="onInputChange" 
+        data-field="pickupCode"
+      />
+    </view>
+
+    <!-- 配送地址 -->
+    <view class="form-section">
+      <view class="section-title">配送地址 <text class="required">*</text></view>
+      <view class="address-input" bindtap="chooseLocation">
+        <image src="/assets/icons/location.png" mode="aspectFit" class="input-icon" />
+        <input 
+          type="text" 
+          placeholder="请选择配送地址" 
+          name="deliveryLocation" 
+          value="{{formData.deliveryLocation}}" 
+          disabled
+        />
+        <image src="/assets/icons/arrow-right.png" mode="aspectFit" class="arrow-icon" />
+      </view>
+    </view>
+
+    <!-- 代取费用 -->
+    <view class="form-section">
+      <view class="section-title">代取费用 <text class="required">*</text></view>
+      <view class="price-input-container">
+        <span class="price-unit">¥</span>
+        <input 
+          type="digit" 
+          placeholder="0.00" 
+          name="price" 
+          value="{{formData.price}}" 
+          bindinput="onInputChange" 
+          data-field="price"
+          class="price-input"
+        />
+      </view>
+      <view class="price-suggestions">
+        <view class="suggestion-item" bindtap="setPrice" data-price="2">¥2</view>
+        <view class="suggestion-item" bindtap="setPrice" data-price="3">¥3</view>
+        <view class="suggestion-item" bindtap="setPrice" data-price="5">¥5</view>
+        <view class="suggestion-item" bindtap="setPrice" data-price="10">¥10</view>
+      </view>
+    </view>
+
+    <!-- 联系电话 -->
+    <view class="form-section">
+      <view class="section-title">联系电话 <text class="required">*</text></view>
+      <input 
+        type="number" 
+        placeholder="请输入您的联系电话" 
+        name="phone" 
+        value="{{formData.phone}}" 
+        bindinput="onInputChange" 
+        data-field="phone"
+        maxlength="11"
+      />
+    </view>
+
+    <!-- 备注信息 -->
+    <view class="form-section">
+      <view class="section-title">备注</view>
+      <textarea 
+        placeholder="其他补充说明（选填）" 
+        name="remark" 
+        value="{{formData.remark}}" 
+        bindinput="onTextareaChange" 
+        data-field="remark"
+        maxlength="200"
+        auto-height
+      ></textarea>
+      <text class="char-count">{{formData.remark.length}}/200</text>
+    </view>
+
+    <!-- 紧急程度 -->
+    <view class="form-section">
+      <view class="section-title">紧急程度</view>
+      <view class="urgency-options">
+        <view class="urgency-item {{formData.urgency === 'normal' ? 'selected' : ''}}" 
+              bindtap="setUrgency" 
+              data-urgency="normal">
+          <text>普通</text>
+          <text class="urgency-desc">2小时内完成</text>
+        </view>
+        <view class="urgency-item {{formData.urgency === 'urgent' ? 'selected' : ''}}" 
+              bindtap="setUrgency" 
+              data-urgency="urgent">
+          <text>加急</text>
+          <text class="urgency-desc">1小时内完成</text>
+        </view>
+        <view class="urgency-item {{formData.urgency === 'very-urgent' ? 'selected' : ''}}" 
+              bindtap="setUrgency" 
+              data-urgency="very-urgent">
+          <text>特急</text>
+          <text class="urgency-desc">30分钟内完成</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+      <button class="submit-btn" type="primary" form-type="submit">发布任务</button>
+    </view>
+  </form>
+
+  <!-- 快递公司选择器 -->
+  <picker 
+    hidden="{{!showExpressCompanyPicker}}" 
+    range="{{expressCompanies}}" 
+    bindchange="onExpressCompanyChange"
+    bindcancel="hideExpressCompanyPicker"
+  ></picker>
+
+  <!-- 快递柜选择器 -->
+  <picker 
+    hidden="{{!showLockerPicker}}" 
+    range="{{lockers}}" 
+    range-key="name" 
+    bindchange="onLockerChange"
+    bindcancel="hideLockerPicker"
+  ></picker>
+</view>

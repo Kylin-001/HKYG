@@ -8,7 +8,7 @@ export const productRoutes = [
     name: 'Product',
     meta: {
       title: '商品管理',
-      icon: 'el-icon-goods',
+      icon: 'Goods',
     },
     children: [
       {
@@ -17,7 +17,7 @@ export const productRoutes = [
         component: () => import('@/views/product/list'),
         meta: {
           title: '商品列表',
-          icon: 'el-icon-s-grid',
+          icon: 'Grid',
         },
       },
       {
@@ -26,7 +26,7 @@ export const productRoutes = [
         component: () => import('@/views/product/add'),
         meta: {
           title: '添加商品',
-          icon: 'el-icon-circle-plus-outline',
+          icon: 'CirclePlus',
         },
       },
       {
@@ -44,7 +44,7 @@ export const productRoutes = [
         component: () => import('@/views/product/category'),
         meta: {
           title: '商品分类',
-          icon: 'el-icon-folder',
+          icon: 'Folder',
         },
       },
       {
@@ -53,7 +53,7 @@ export const productRoutes = [
         component: () => import('@/views/product/brand'),
         meta: {
           title: '品牌管理',
-          icon: 'el-icon-shopping-bag-1',
+          icon: 'ShoppingBag',
         },
       },
     ],

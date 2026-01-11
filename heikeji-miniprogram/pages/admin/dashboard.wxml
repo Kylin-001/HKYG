@@ -1,0 +1,188 @@
+<!-- 数据统计页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <text class="title">数据统计</text>
+    <view class="header-right">
+      <image 
+        src="/assets/icons/refresh.png" 
+        class="refresh-icon" 
+        mode="aspectFit"
+        bindtap="refreshData"
+      ></image>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 统计内容 -->
+  <view wx:else class="dashboard-content">
+    <!-- 时间范围选择 -->
+    <view class="time-range-container">
+      <view 
+        class="time-range-item {{timeRange === 'week' ? 'active' : ''}}" 
+        bindtap="switchTimeRange" 
+        data-range="week"
+      >
+        <text>本周</text>
+      </view>
+      <view 
+        class="time-range-item {{timeRange === 'month' ? 'active' : ''}}" 
+        bindtap="switchTimeRange" 
+        data-range="month"
+      >
+        <text>本月</text>
+      </view>
+      <view 
+        class="time-range-item {{timeRange === 'quarter' ? 'active' : ''}}" 
+        bindtap="switchTimeRange" 
+        data-range="quarter"
+      >
+        <text>本季度</text>
+      </view>
+      <view 
+        class="time-range-item {{timeRange === 'year' ? 'active' : ''}}" 
+        bindtap="switchTimeRange" 
+        data-range="year"
+      >
+        <text>本年</text>
+      </view>
+    </view>
+
+    <!-- 关键指标 -->
+    <view class="metrics-container">
+      <view class="metric-card" bindtap="viewOrders">
+        <view class="metric-content">
+          <text class="metric-label">总订单数</text>
+          <text class="metric-value">{{statistics.totalOrders}}</text>
+          <view class="metric-trend">
+            <text class="trend-arrow">↑</text>
+            <text class="trend-text">12.5%</text>
+          </view>
+        </view>
+        <image src="/assets/icons/order-icon.png" class="metric-icon" mode="aspectFit"></image>
+      </view>
+      
+      <view class="metric-card" bindtap="viewUsers">
+        <view class="metric-content">
+          <text class="metric-label">总用户数</text>
+          <text class="metric-value">{{statistics.totalUsers}}</text>
+          <view class="metric-trend">
+            <text class="trend-arrow">↑</text>
+            <text class="trend-text">8.3%</text>
+          </view>
+        </view>
+        <image src="/assets/icons/user-icon.png" class="metric-icon" mode="aspectFit"></image>
+      </view>
+      
+      <view class="metric-card" bindtap="viewProducts">
+        <view class="metric-content">
+          <text class="metric-label">总商品数</text>
+          <text class="metric-value">{{statistics.totalProducts}}</text>
+          <view class="metric-trend">
+            <text class="trend-arrow">↑</text>
+            <text class="trend-text">5.2%</text>
+          </view>
+        </view>
+        <image src="/assets/icons/product-icon.png" class="metric-icon" mode="aspectFit"></image>
+      </view>
+      
+      <view class="metric-card">
+        <view class="metric-content">
+          <text class="metric-label">总销售额</text>
+          <text class="metric-value">¥{{statistics.totalRevenue.toFixed(2)}}</text>
+          <view class="metric-trend">
+            <text class="trend-arrow">↑</text>
+            <text class="trend-text">15.8%</text>
+          </view>
+        </view>
+        <image src="/assets/icons/revenue-icon.png" class="metric-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+
+    <!-- 订单趋势 -->
+    <view class="chart-section">
+      <view class="section-header">
+        <text class="section-title">订单趋势</text>
+        <text class="section-subtitle">订单数量及销售额变化</text>
+      </view>
+      <view class="chart-container">
+        <!-- 模拟图表 -->
+        <view class="mock-chart">
+          <view class="chart-title">订单数量</view>
+          <view class="chart-bars">
+            <block wx:for="{{orderTrend}}" wx:key="date">
+              <view class="chart-bar-item">
+                <view class="bar-date">{{item.date}}</view>
+                <view class="bar-container">
+                  <view class="bar" style="height: {{(item.count / 400) * 100}}%"></view>
+                  <text class="bar-value">{{item.count}}</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用户趋势 -->
+    <view class="chart-section">
+      <view class="section-header">
+        <text class="section-title">用户趋势</text>
+        <text class="section-subtitle">新增用户及活跃用户变化</text>
+      </view>
+      <view class="chart-container">
+        <!-- 模拟图表 -->
+        <view class="mock-chart">
+          <view class="chart-title">用户增长</view>
+          <view class="chart-lines">
+            <block wx:for="{{userTrend}}" wx:key="date">
+              <view class="chart-line-item">
+                <view class="line-date">{{item.date}}</view>
+                <view class="line-container">
+                  <view class="line-dot new-users"></view>
+                  <view class="line-dot active-users"></view>
+                </view>
+              </view>
+            </block>
+            <view class="line-legend">
+              <view class="legend-item">
+                <view class="legend-dot new-users"></view>
+                <text>新增用户</text>
+              </view>
+              <view class="legend-item">
+                <view class="legend-dot active-users"></view>
+                <text>活跃用户</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品销量排名 -->
+    <view class="ranking-section">
+      <view class="section-header">
+        <text class="section-title">商品销量排名</text>
+        <text class="section-subtitle">销量TOP5商品</text>
+      </view>
+      <view class="ranking-list">
+        <block wx:for="{{productSales}}" wx:key="id" wx:for-index="index">
+          <view class="ranking-item" bindtap="viewProductDetail" data-id="{{item.id}}">
+            <view class="ranking-rank">{{index + 1}}</view>
+            <view class="ranking-info">
+              <text class="ranking-name">{{item.name}}</text>
+              <text class="ranking-sales">销量: {{item.sales}} | 销售额: ¥{{item.revenue.toFixed(2)}}</text>
+            </view>
+            <view class="ranking-arrow">
+              <icon type="right" size="16"></icon>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

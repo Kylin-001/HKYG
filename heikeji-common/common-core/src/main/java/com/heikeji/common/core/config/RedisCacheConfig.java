@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableCaching
-@ConditionalOnProperty(name = "spring.redis.host", havingValue = "localhost", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true", matchIfMissing = true)
 public class RedisCacheConfig {
 
     /**

@@ -1,0 +1,105 @@
+<view class="book-detail-container">
+  <!-- 加载提示 -->
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 图书详情内容 -->
+  <view wx:else class="book-content">
+    <!-- 图书封面和基本信息 -->
+    <view class="book-header">
+      <view class="book-cover">
+        <image 
+          src="{{bookDetail.coverUrl || '/assets/images/default-book.png'}}" 
+          mode="aspectFill"
+          binderror="onImageError"
+        ></image>
+      </view>
+      <view class="book-basic-info">
+        <view class="book-title">{{bookDetail.title}}</view>
+        <view class="book-author">
+          <text class="label">作者：</text>
+          <text>{{bookDetail.author}}</text>
+        </view>
+        <view class="book-publisher">
+          <text class="label">出版社：</text>
+          <text>{{bookDetail.publisher}}</text>
+        </view>
+        <view class="book-publish-date">
+          <text class="label">出版日期：</text>
+          <text>{{bookDetail.publishDate}}</text>
+        </view>
+        <view class="book-isbn">
+          <text class="label">ISBN：</text>
+          <text>{{bookDetail.isbn}}</text>
+        </view>
+        <view class="book-status">
+          <text class="label">馆藏状态：</text>
+          <text class="{{borrowStatus.canBorrow ? 'status-available' : 'status-borrowed'}}">
+            {{borrowStatus.message}}
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 图书详细信息 -->
+    <view class="book-detail-section">
+      <view class="section-title">图书详情</view>
+      <view class="book-description">{{bookDetail.description || '暂无详细介绍'}}</view>
+    </view>
+
+    <!-- 图书分类和标签 -->
+    <view class="book-detail-section">
+      <view class="section-title">分类与标签</view>
+      <view class="book-tags">
+        <view class="tag" wx:for="{{bookDetail.tags || []}}" wx:key="*this">
+          {{item}}
+        </view>
+        <view class="tag" wx:if="{{!bookDetail.tags || bookDetail.tags.length === 0}}">
+          暂无标签
+        </view>
+      </view>
+    </view>
+
+    <!-- 馆藏信息 -->
+    <view class="book-detail-section">
+      <view class="section-title">馆藏信息</view>
+      <view class="collection-info">
+        <view class="info-item">
+          <text class="label">总馆藏：</text>
+          <text>{{bookDetail.totalCopies}}本</text>
+        </view>
+        <view class="info-item">
+          <text class="label">可借：</text>
+          <text>{{bookDetail.availableCopies}}本</text>
+        </view>
+        <view class="info-item">
+          <text class="label">已借：</text>
+          <text>{{bookDetail.totalCopies - bookDetail.availableCopies}}本</text>
+        </view>
+        <view class="info-item">
+          <text class="label">借阅次数：</text>
+          <text>{{bookDetail.borrowCount}}次</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button 
+        class="btn btn-borrow {{!borrowStatus.canBorrow ? 'btn-disabled' : ''}}"
+        disabled="{{!borrowStatus.canBorrow}}"
+        bindtap="borrowBook"
+      >
+        立即借阅
+      </button>
+      <button 
+        class="btn btn-reserve"
+        bindtap="reserveBook"
+      >
+        预约
+      </button>
+    </view>
+  </view>
+</view>

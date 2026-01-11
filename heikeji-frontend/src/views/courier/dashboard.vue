@@ -261,20 +261,14 @@
 // 导入日志工具
 import logger from '@/utils/logger'
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useCourierStore } from '@/store/modules/courier'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-// TypeScript接口定义
-interface CourierInfo {
-  id: string
-  name: string
-  avatar: string
-  onlineStatus: 'online' | 'offline'
-  joinDate: string
-  rating: number
-}
+const store = useCourierStore()
+const router = useRouter()
 
+// TypeScript接口定义
 interface Order {
   id: string
   orderNo: string
@@ -285,6 +279,7 @@ interface Order {
   distance: number
   estimatedTime: string
   status: 'pending' | 'accepted' | 'picking' | 'delivering' | 'completed' | 'cancelled'
+  deliveryTime?: string
 }
 
 interface Stats {
@@ -296,19 +291,6 @@ interface Stats {
   monthIncome: number
   totalDeliveries: number
 }
-
-interface DashboardData {
-  todayDeliveries: number
-  pendingOrders: number
-  todayIncome: number
-  serviceRating: number
-  weekIncome: number
-  monthIncome: number
-  totalDeliveries: number
-}
-
-const store = useStore()
-const router = useRouter()
 
 // 响应式数据
 const loading = ref(false)
@@ -345,11 +327,10 @@ const chartOption = reactive({
   ],
 })
 
-// 从Vuex获取状态
-const courierInfo = computed<CourierInfo>(() => store.getters['courier/courierInfo'])
-const dashboardData = computed<DashboardData | null>(() => store.getters['courier/dashboardData'])
-
 // 计算属性
+const courierInfo = computed(() => store.courierInfo)
+const dashboardData = computed(() => store.dashboardData)
+
 const stats = computed<Stats>(() => {
   return (
     dashboardData.value || {
@@ -371,11 +352,11 @@ onMounted(() => {
 })
 
 // 方法
-const getDashboardData = () => store.dispatch('courier/getDashboardData')
+const getDashboardData = () => store.getDashboardData()
 const updateStatus = (status: 'online' | 'offline') =>
-  store.dispatch('courier/updateStatus', status)
-const getOrders = () => store.dispatch('courier/getOrders')
-const acceptOrderAction = (orderId: string) => store.dispatch('courier/acceptOrder', orderId)
+  store.updateStatus(status)
+const getOrders = () => store.getOrders()
+const acceptOrderAction = (orderId: string) => store.acceptOrder(orderId)
 
 // 初始化数据
 const initData = async () => {

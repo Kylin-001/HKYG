@@ -1,0 +1,154 @@
+<!-- 跑腿任务发布页 -->
+<view class="request-container">
+  <form bindsubmit="submitForm">
+    <!-- 任务类型 -->
+    <view class="form-section">
+      <view class="section-title">任务类型</view>
+      <view class="type-grid">
+        <view class="type-item {{formData.type === 'delivery' ? 'selected' : ''}}" 
+              bindtap="selectType" 
+              data-type="delivery">
+          <image src="/assets/icons/courier.png" mode="aspectFit" class="type-icon" />
+          <text>代取快递</text>
+        </view>
+        <view class="type-item {{formData.type === 'purchase' ? 'selected' : ''}}" 
+              bindtap="selectType" 
+              data-type="purchase">
+          <image src="/assets/icons/purchase.png" mode="aspectFit" class="type-icon" />
+          <text>代购</text>
+        </view>
+        <view class="type-item {{formData.type === 'help' ? 'selected' : ''}}" 
+              bindtap="selectType" 
+              data-type="help">
+          <image src="/assets/icons/help.png" mode="aspectFit" class="type-icon" />
+          <text>帮帮忙</text>
+        </view>
+        <view class="type-item {{formData.type === 'other' ? 'selected' : ''}}" 
+              bindtap="selectType" 
+              data-type="other">
+          <image src="/assets/icons/other.png" mode="aspectFit" class="type-icon" />
+          <text>其他</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 任务标题 -->
+    <view class="form-section">
+      <view class="section-title">任务标题 <text class="required">*</text></view>
+      <input type="text" 
+             name="title" 
+             placeholder="简短描述您的任务" 
+             value="{{formData.title}}"
+             bindinput="onTitleInput"
+             maxlength="30" />
+      <text class="char-count">{{formData.title.length}}/30</text>
+    </view>
+
+    <!-- 任务描述 -->
+    <view class="form-section">
+      <view class="section-title">任务详情 <text class="required">*</text></view>
+      <textarea name="description" 
+                placeholder="详细描述任务要求，如：取件码、联系方式、具体要求等" 
+                value="{{formData.description}}"
+                bindinput="onDescInput"
+                maxlength="200"
+                auto-height />
+      <text class="char-count">{{formData.description.length}}/200</text>
+    </view>
+
+    <!-- 取件地点 -->
+    <view class="form-section">
+      <view class="section-title">取件地点 <text class="required">*</text></view>
+      <view class="location-input" bindtap="chooseLocation" data-field="pickup">
+        <image src="/assets/icons/location.png" mode="aspectFit" class="input-icon" />
+        <text class="{{formData.pickupLocation ? '' : 'placeholder'}}">
+          {{formData.pickupLocation || '点击选择取件地点'}}
+        </text>
+        <image src="/assets/icons/arrow-right.png" mode="aspectFit" class="arrow-icon" />
+      </view>
+    </view>
+
+    <!-- 送达地点 -->
+    <view class="form-section">
+      <view class="section-title">送达地点 <text class="required">*</text></view>
+      <view class="location-input" bindtap="chooseLocation" data-field="delivery">
+        <image src="/assets/icons/location.png" mode="aspectFit" class="input-icon" />
+        <text class="{{formData.deliveryLocation ? '' : 'placeholder'}}">
+          {{formData.deliveryLocation || '点击选择送达地点'}}
+        </text>
+        <image src="/assets/icons/arrow-right.png" mode="aspectFit" class="arrow-icon" />
+      </view>
+    </view>
+
+    <!-- 任务价格 -->
+    <view class="form-section">
+      <view class="section-title">跑腿费 <text class="required">*</text> <text class="price-tip">(元)</text></view>
+      <view class="price-input">
+        <text class="yen">¥</text>
+        <input type="digit" 
+               name="price" 
+               placeholder="0.00" 
+               value="{{formData.price}}"
+               bindinput="onPriceInput" />
+      </view>
+      <view class="price-suggestions">
+        <view class="suggestion-item" bindtap="setPrice" data-price="2">¥2</view>
+        <view class="suggestion-item" bindtap="setPrice" data-price="3">¥3</view>
+        <view class="suggestion-item" bindtap="setPrice" data-price="5">¥5</view>
+        <view class="suggestion-item" bindtap="setPrice" data-price="10">¥10</view>
+      </view>
+    </view>
+
+    <!-- 联系电话 -->
+    <view class="form-section">
+      <view class="section-title">联系电话 <text class="required">*</text></view>
+      <input type="number" 
+             name="phone" 
+             placeholder="请输入您的手机号" 
+             value="{{formData.phone}}"
+             bindinput="onPhoneInput"
+             maxlength="11" />
+    </view>
+
+    <!-- 备注信息 -->
+    <view class="form-section">
+      <view class="section-title">备注</view>
+      <input type="text" 
+             name="remark" 
+             placeholder="其他补充说明（选填）" 
+             value="{{formData.remark}}"
+             bindinput="onRemarkInput"
+             maxlength="50" />
+    </view>
+
+    <!-- 紧急程度 -->
+    <view class="form-section">
+      <view class="section-title">紧急程度</view>
+      <view class="urgency-options">
+        <view class="urgency-item {{formData.urgency === 'normal' ? 'selected' : ''}}" 
+              bindtap="setUrgency" 
+              data-urgency="normal">
+          <text>普通</text>
+          <text class="urgency-desc">2小时内完成</text>
+        </view>
+        <view class="urgency-item {{formData.urgency === 'urgent' ? 'selected' : ''}}" 
+              bindtap="setUrgency" 
+              data-urgency="urgent">
+          <text>加急</text>
+          <text class="urgency-desc">1小时内完成</text>
+        </view>
+        <view class="urgency-item {{formData.urgency === 'very-urgent' ? 'selected' : ''}}" 
+              bindtap="setUrgency" 
+              data-urgency="very-urgent">
+          <text>特急</text>
+          <text class="urgency-desc">30分钟内完成</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+      <button class="submit-btn" bindtap="submitForm">发布任务</button>
+    </view>
+  </form>
+</view>

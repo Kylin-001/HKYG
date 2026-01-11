@@ -1,0 +1,218 @@
+/* 跑腿任务发布页样式 */
+.request-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.form-section {
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.required {
+  color: #ff3b30;
+  margin-left: 5rpx;
+}
+
+.price-tip {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: normal;
+  margin-left: 10rpx;
+}
+
+/* 任务类型 */
+.type-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.type-item {
+  width: 140rpx;
+  height: 140rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #eee;
+  border-radius: 12rpx;
+  transition: all 0.3s;
+}
+
+.type-item.selected {
+  border-color: #3cc51f;
+  background-color: rgba(60, 197, 31, 0.05);
+}
+
+.type-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 10rpx;
+}
+
+.type-item text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.type-item.selected text {
+  color: #3cc51f;
+}
+
+/* 输入框样式 */
+input, textarea {
+  width: 100%;
+  font-size: 28rpx;
+  color: #333;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #eee;
+  background-color: transparent;
+}
+
+textarea {
+  min-height: 150rpx;
+}
+
+.placeholder {
+  color: #bbb;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* 地点选择 */
+.location-input {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.input-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+
+.location-input text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.arrow-icon {
+  width: 20rpx;
+  height: 20rpx;
+  opacity: 0.5;
+}
+
+/* 价格输入 */
+.price-input {
+  display: flex;
+  align-items: center;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.yen {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff3b30;
+  margin-right: 10rpx;
+}
+
+.price-input input {
+  flex: 1;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff3b30;
+  border: none;
+}
+
+.price-suggestions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.suggestion-item {
+  padding: 10rpx 30rpx;
+  background-color: #f5f5f5;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 紧急程度 */
+.urgency-options {
+  display: flex;
+  gap: 20rpx;
+}
+
+.urgency-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  border: 2rpx solid #eee;
+  border-radius: 12rpx;
+  transition: all 0.3s;
+}
+
+.urgency-item.selected {
+  border-color: #3cc51f;
+  background-color: rgba(60, 197, 31, 0.05);
+}
+
+.urgency-item text:first-child {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.urgency-desc {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.urgency-item.selected text:first-child {
+  color: #3cc51f;
+}
+
+/* 提交按钮 */
+.submit-section {
+  padding: 30rpx;
+}
+
+.submit-btn {
+  width: 100%;
+  height: 90rpx;
+  line-height: 90rpx;
+  background-color: #3cc51f;
+  color: #fff;
+  border: none;
+  border-radius: 45rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.submit-btn:disabled {
+  background-color: #ccc;
+  color: #999;
+}

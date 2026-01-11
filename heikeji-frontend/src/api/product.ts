@@ -133,4 +133,41 @@ export const productApi = {
    */
   searchProducts: (params: { keyword: string; page?: number; limit?: number }) =>
     request.get('/api/product/search', params),
+
+  /**
+   * 获取品牌列表
+   * @param params 查询参数
+   */
+  getBrands: (params: any) => request.get('/api/brand/list', params),
+
+  /**
+   * 创建品牌
+   * @param data 品牌数据
+   */
+  createBrand: (data: any) => request.post('/api/brand', data),
+
+  /**
+   * 更新品牌
+   * @param data 品牌数据
+   */
+  updateBrand: (data: any) => request.put('/api/brand', data),
+
+  /**
+   * 删除品牌
+   * @param brandId 品牌ID
+   */
+  deleteBrand: (brandId: string) => request.delete(`/api/brand/${brandId}`),
+
+  /**
+   * 更新品牌状态
+   * @param data 状态数据
+   */
+  updateBrandStatus: (data: { id: string; status: boolean }) =>
+    request.put('/api/brand/status', data),
+
+  /**
+   * 上传品牌Logo
+   * @param formData 图片文件
+   */
+  uploadBrandLogo: (formData: FormData) => request.upload('/api/brand/upload/logo', formData),
 }

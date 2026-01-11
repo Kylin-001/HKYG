@@ -2,10 +2,16 @@
 
 <template>
   <div id="app">
+    <!-- 无障碍支持：跳过导航链接 -->
+    <a href="#main-content" class="skip-link">跳过导航，直接进入内容</a>
+    
     <!-- 登录页面路由视图 -->
     <router-view v-if="!isLoggedIn" key="login"></router-view>
 
-    <!-- 主应用布局 -->
+    <!-- App端布局 -->
+    <AppLayoutApp v-else-if="isAppRoute" />
+
+    <!-- PC端主应用布局 -->
     <AppLayout
       v-else
       :collapsed="collapsed"
@@ -21,55 +27,63 @@
 
       <!-- 主内容区域 -->
       <template #main-content>
-        <!-- 页面过渡动画 -->
-        <transition name="fade-transform" mode="out-in">
-          <router-view :key="routeKey" v-slot="{ Component }">
-            <keep-alive :include="cachedComponentList">
-              <component :is="Component" />
-            </keep-alive>
-          </router-view>
-        </transition>
+        <div id="main-content" tabindex="-1">
+          <!-- 页面过渡动画 -->
+          <PageTransition type="slide" :duration="300" direction="left" :route="route">
+            <router-view :key="routeKey" v-slot="{ Component }">
+              <keep-alive :include="cachedComponentList">
+                <component :is="Component" />
+              </keep-alive>
+            </router-view>
+          </PageTransition>
+        </div>
       </template>
     </AppLayout>
 
     <!-- 移动端侧边栏遮罩层 -->
-    <div v-if="showMobile && collapsed" class="sidebar-mask" @click="toggleMobileMenu"></div>
+    <div
+      v-if="showMobile && collapsed && !isAppRoute"
+      class="sidebar-mask"
+      @click="toggleMobileMenu"
+    ></div>
 
-    <!-- 性能监控仪表板 (仅在开发环境显示) -->
-    <div v-if="showPerformanceMonitor" class="performance-monitor">
-      <h3>性能监控</h3>
-      <div class="metric">
-        <span>内存使用:</span>
-        <span>{{ (performanceData.usedJSHeapSize / 1024 / 1024).toFixed(2) }} MB</span>
-      </div>
-      <div class="metric">
-        <span>DOM节点:</span>
-        <span>{{ performanceData.domNodes }}</span>
-      </div>
-    </div>
+    <!-- 性能监控组件 -->
+    <PerformanceMonitor
+      :enabled="true"
+      :sample-rate="1.0"
+      :show-panel="isLoggedIn"
+      :auto-expand="false"
+      :monitor-resources="true"
+      :monitor-requests="true"
+      :monitor-user-actions="true"
+      :monitor-errors="true"
+      :report-interval="30000"
+      @performance-data="handlePerformanceData"
+      @error="handlePerformanceError"
+      @request-finished="handleRequestFinished"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useUserStore } from '@/store/modules/user'
+import { usePermissionStore } from '@/store/modules/permission'
+import { useThemeStore } from '@/store/modules/theme'
 import AppLayout from '@/layout/AppLayout.vue'
+import AppLayoutApp from '@/layout/AppLayoutApp.vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import PerformanceMonitor from '@/components/business/PerformanceMonitor.vue'
+import PageTransition from '@/components/ui/PageTransition.vue'
 import { debounce } from '@/utils/common'
 import logger from '@/utils/logger'
-import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 定义TypeScript接口
 interface BreadcrumbItem {
   path: string
   name: string
   icon: string
-}
-
-interface PerformanceData {
-  usedJSHeapSize: number
-  domNodes: number
 }
 
 interface PerformanceHelper {
@@ -85,13 +99,12 @@ declare global {
   }
 }
 
-// 定义组件名称
-const name = 'App'
-
 // 路由和状态管理
 const router = useRouter()
 const route = useRoute()
-const store = useStore()
+const userStore = useUserStore()
+const permissionStore = usePermissionStore()
+const themeStore = useThemeStore()
 
 // 布局状态
 const collapsed = ref(false)
@@ -100,34 +113,24 @@ const showMobile = ref(false)
 // 子菜单状态
 const submenuOpenStatus = reactive<Record<string, boolean>>({})
 
-// 组件缓存
-const cachedComponentSet = new Set(['UserProfile', 'ProductList'])
-const cachedComponentList = ref(['UserProfile', 'ProductList'])
-
-// 性能监控数据
-const performanceData = reactive<PerformanceData>({
-  usedJSHeapSize: 0,
-  domNodes: 0,
-})
-const showPerformanceMonitor = ref(false)
-let performanceTimer: number | null = null
+// 组件缓存 - 基于路由元信息的动态缓存配置
+const cachedComponentSet = ref(new Set(['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList']))
+const cachedComponentList = ref(['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList'])
 
 // 响应式断点
 const breakpoints = {
   mobile: 768,
 }
 
-// 从Vuex获取状态
-const userInfo = computed(() => store.getters['user/userInfo'])
-const token = computed(() => store.getters['user/token'])
-const routes = computed(() => store.getters['permission/routes'])
-const permissionRoutes = computed(() => store.getters['permission/permissionRoutes'])
+// 从Pinia获取状态
+const token = computed(() => userStore.token)
+const permissionRoutes = computed(() => permissionStore.routes)
 
 // 登录状态
 const isLoggedIn = computed(() => !!token.value)
 
-// 用户名
-const username = computed(() => userInfo.value?.username || '')
+// 是否为App端路由
+const isAppRoute = computed(() => route.path.startsWith('/app'))
 
 // 路由唯一标识，用于页面切换
 const routeKey = computed(() => route.fullPath)
@@ -160,7 +163,7 @@ let debouncedResizeHandler: ((this: Window, ev: UIEvent) => void) | null = null
 // 路由变化监听
 watch(
   route,
-  (to, from) => {
+  to => {
     // 关闭移动端菜单
     showMobile.value = false
 
@@ -169,6 +172,9 @@ watch(
 
     // 更新页面标题
     updatePageTitle()
+
+    // 根据路由元信息更新组件缓存
+    updateComponentCache(to)
   },
   { deep: true }
 )
@@ -189,10 +195,10 @@ watch(collapsed, newVal => {
 const initializeUser = async () => {
   try {
     // 获取用户信息
-    await store.dispatch('user/getUserInfo')
+    await userStore.getUserInfoAction()
 
     // 获取权限路由
-    await store.dispatch('permission/getPermissionRoutes')
+    await permissionStore.generateRoutes()
 
     logger.info('用户信息和权限初始化完成')
   } catch (error: any) {
@@ -200,30 +206,23 @@ const initializeUser = async () => {
 
     // 如果token无效，清除登录状态
     if (error.code === 401 || error.status === 401) {
-      store.dispatch('user/logout')
+      userStore.logoutAction()
       router.push('/login')
     }
   }
 }
 
 /**
- * 初始化性能辅助函数
+ * 更新组件缓存列表
+ * @param route 当前路由对象
  */
-const initializePerformanceHelpers = () => {
-  // 在全局对象上挂载性能监控函数
-  if (process.env.NODE_ENV === 'development') {
-    window.performanceHelper = {
-      showPerformanceMonitor: () => {
-        showPerformanceMonitor.value = !showPerformanceMonitor.value
-      },
-      clearCache: () => {
-        cachedComponentSet.clear()
-        cachedComponentList.value = []
-        logger.info('组件缓存已清空')
-      },
-      toggleCollapsed: () => {
-        collapsed.value = !collapsed.value
-      },
+const updateComponentCache = (route: any) => {
+  // 如果路由配置了keepAlive，则自动添加到缓存列表
+  if (route.meta?.keepAlive && route.name) {
+    if (!cachedComponentSet.value.has(route.name as string)) {
+      cachedComponentSet.value.add(route.name as string)
+      cachedComponentList.value = Array.from(cachedComponentSet.value)
+      localStorage.setItem('cachedComponents', JSON.stringify(cachedComponentList.value))
     }
   }
 }
@@ -237,44 +236,19 @@ const initializeCache = () => {
   if (cached) {
     try {
       const cachedList = JSON.parse(cached)
-      cachedComponentSet.clear()
-      cachedList.forEach((item: string) => cachedComponentSet.add(item))
+      cachedComponentSet.value.clear()
+      cachedList.forEach((item: string) => cachedComponentSet.value.add(item))
       cachedComponentList.value = cachedList
     } catch (error) {
       logger.error('恢复缓存状态失败:', error)
     }
+  } else {
+    // 默认缓存常用组件
+    const defaultCache = ['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList']
+    cachedComponentSet.value = new Set(defaultCache)
+    cachedComponentList.value = defaultCache
+    localStorage.setItem('cachedComponents', JSON.stringify(defaultCache))
   }
-}
-
-/**
- * 启动性能监控
- */
-const startPerformanceMonitoring = () => {
-  if (process.env.NODE_ENV === 'development') {
-    performanceTimer = window.setInterval(() => {
-      updatePerformanceData()
-    }, 5000)
-  }
-}
-
-/**
- * 停止性能监控
- */
-const stopPerformanceMonitoring = () => {
-  if (performanceTimer) {
-    clearInterval(performanceTimer)
-    performanceTimer = null
-  }
-}
-
-/**
- * 更新性能数据
- */
-const updatePerformanceData = () => {
-  if (performance.memory) {
-    performanceData.usedJSHeapSize = performance.memory.usedJSHeapSize
-  }
-  performanceData.domNodes = document.querySelectorAll('*').length
 }
 
 /**
@@ -328,30 +302,35 @@ const toggleMobileMenu = () => {
 }
 
 /**
- * 切换侧边栏折叠状态
+ * 处理性能监控数据
  */
-const toggleSidebar = () => {
-  collapsed.value = !collapsed.value
+const handlePerformanceData = (data: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    logger.info('性能监控数据:', data)
+    // 可以在这里添加性能数据上报逻辑
+  }
 }
 
 /**
- * 退出登录
+ * 处理性能监控错误
  */
-const handleLogout = () => {
-  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(() => {
-      store.dispatch('user/logout')
-      ElMessage.success('退出成功')
-      router.push('/login')
-    })
-    .catch(() => {
-      // 用户取消退出
-    })
+const handlePerformanceError = (error: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    logger.error('性能监控错误:', error)
+  }
 }
+
+/**
+ * 处理请求完成事件
+ */
+const handleRequestFinished = (request: any) => {
+  if (process.env.NODE_ENV === 'development' && request.status >= 400) {
+    logger.warn('请求失败:', request)
+  }
+}
+
+// 导入图片预加载工具
+import { preloadVisibleImages } from '@/utils/image-preloader'
 
 // 组件挂载
 onMounted(async () => {
@@ -370,11 +349,18 @@ onMounted(async () => {
   // 初始化组件缓存
   initializeCache()
 
-  // 初始化性能辅助函数
-  initializePerformanceHelpers()
+  // 初始化主题
+  themeStore.loadTheme()
 
-  // 监听性能指标变化
-  startPerformanceMonitoring()
+  // 预加载可见区域的图片
+  preloadVisibleImages({
+    priority: 'high',
+    onAllComplete: () => {
+      if (import.meta.env.MODE === 'development') {
+        logger.log('可见区域图片预加载完成')
+      }
+    }
+  })
 })
 
 // 组件卸载前清理
@@ -383,7 +369,6 @@ onBeforeUnmount(() => {
   if (debouncedResizeHandler) {
     window.removeEventListener('resize', debouncedResizeHandler)
   }
-  stopPerformanceMonitoring()
 })
 </script>
 
@@ -410,38 +395,6 @@ onBeforeUnmount(() => {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 99;
   transition: opacity 0.3s;
-}
-
-// 性能监控仪表板
-.performance-monitor {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  min-width: 200px;
-
-  h3 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    color: #333;
-  }
-
-  .metric {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 12px;
-    color: #666;
-
-    span:last-child {
-      font-weight: 500;
-      color: #333;
-    }
-  }
 }
 
 // 页面过渡动画

@@ -285,782 +285,674 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ElMessage, ElConfirm, ElNotification } from 'element-plus'
 import logger from '@/utils/logger'
-import { getOrderDetail } from '@/api/order'
-import { mapState, mapActions, mapGetters } from 'vuex'
 import * as paymentSecurity from '@/utils/payment-security'
 import notificationService from '@/utils/notification-service'
+import { usePaymentStore } from '@/store/modules/payment'
+import { useOrderStore } from '@/store/modules/order'
 
-export default {
-  name: 'OrderPayment',
-  data() {
-    return {
-      loading: true,
-      paymentLoading: false,
-      orderInfo: null,
-      orderId: '',
-      payConfirmVisible: false,
-      payResultVisible: false,
-      paySuccess: false,
-      payErrorMessage: '',
-      paymentFailureType: [], // 支付失败类型，用于显示不同的错误原因和解决方案
-      paymentPollingInterval: null,
-      pollingController: null,
-      countdown: 0,
-      countdownTimer: null,
-      showPaymentPassword: false,
-      paymentPassword: '',
-      // 安全相关状态
-      securityWarnings: [],
-      isEnvironmentSecure: true,
-      securityCheckResult: null,
-      riskAssessmentResult: null,
-      isPasswordVerified: false,
-    }
-  },
-  computed: {
-    ...mapState('payment', [
-      'paymentMethods',
-      'selectedMethod',
-      'paymentStatus',
-      'security',
-      'riskLevel',
-      'isPaymentLocked',
-      'lockReason',
-    ]),
-    ...mapGetters(['userBalance']),
-    ...mapGetters('payment', [
-      'availablePaymentMethods',
-      'isBalanceSufficient',
-      'formattedBalance',
-      'needPaymentPassword',
-      'riskAdvice',
-      'securityWarnings',
-    ]),
+// 初始化store
+const paymentStore = usePaymentStore()
+const orderStore = useOrderStore()
+const router = useRouter()
+const route = useRoute()
 
-    // 获取订单支付类型
-    orderType() {
-      return this.orderInfo?.orderType || 'normal'
-    },
+// 状态定义
+const loading = ref(true)
+const paymentLoading = ref(false)
+const orderInfo = ref<any>(null)
+const orderId = ref('')
+const payConfirmVisible = ref(false)
+const payResultVisible = ref(false)
+const paySuccess = ref(false)
+const payErrorMessage = ref('')
+const paymentFailureType = ref<string[]>([]) // 支付失败类型，用于显示不同的错误原因和解决方案
+const paymentPollingInterval = ref<number | null>(null)
+const pollingController = ref<(() => void) | null>(null)
+const countdown = ref(0)
+const countdownTimer = ref<number | null>(null)
+const showPaymentPassword = ref(false)
+const paymentPassword = ref('')
+// 安全相关状态
+const securityWarnings = ref<string[]>([])
+const isEnvironmentSecure = ref(true)
+const securityCheckResult = ref<any>(null)
+const riskAssessmentResult = ref<any>(null)
+const isPasswordVerified = ref(false)
 
-    // 获取订单实付金额
-    orderAmount() {
-      return this.orderInfo?.actualAmount || 0
-    },
+// 计算属性
+const paymentMethods = computed(() => paymentStore.paymentMethods)
+const selectedMethod = computed(() => paymentStore.selectedMethod)
+const security = computed(() => paymentStore.security)
+const riskLevel = computed(() => paymentStore.riskLevel)
+const isPaymentLocked = computed(() => paymentStore.isPaymentLocked)
+const lockReason = computed(() => paymentStore.lockReason)
+const userBalance = computed(() => paymentStore.userBalance)
+const isBalanceSufficient = computed(() => paymentStore.isBalanceSufficient)
+const needPaymentPassword = computed(() => paymentStore.needPaymentPassword)
+const riskAdvice = computed(() => paymentStore.riskAdvice)
 
-    // 余额是否足够
-    balanceEnough() {
-      return this.isBalanceSufficient(this.orderAmount)
-    },
+// 获取订单实付金额
+const orderAmount = computed(() => orderInfo.value?.actualAmount || 0)
 
-    // 获取可用支付方式列表
-    availableMethods() {
-      return this.availablePaymentMethods(this.orderType, this.orderAmount)
-    },
+// 余额是否足够
+const balanceEnough = computed(() => {
+  return isBalanceSufficient.value(orderAmount.value)
+})
 
-    // 支付处理中
-    isProcessing() {
-      return this.paymentStatus.loading
-    },
+// 是否需要安全验证
+const needSecurityVerification = computed(() => {
+  // 高风险支付或大额支付需要验证
+  return (
+    riskLevel.value === 'HIGH' ||
+    (riskLevel.value === 'MEDIUM' && orderAmount.value > 1000) ||
+    (selectedMethod.value === 'BALANCE' && orderAmount.value > 500)
+  )
+})
 
-    // 是否需要安全验证
-    needSecurityVerification() {
-      // 高风险支付或大额支付需要验证
-      return (
-        this.riskLevel === 'HIGH' ||
-        (this.riskLevel === 'MEDIUM' && this.orderAmount > 1000) ||
-        (this.selectedMethod === 'BALANCE' && this.orderAmount > 500)
-      )
-    },
+// 格式化后的倒计时
+const formattedCountdown = computed(() => {
+  return formatCountdown()
+})
 
-    // 格式化后的倒计时
-    formattedCountdown() {
-      return this.formatCountdown()
-    },
+// 倒计时是否即将结束（低于5分钟）
+const isCountdownWarning = computed(() => {
+  return countdown.value > 0 && countdown.value < 300
+})
 
-    // 倒计时是否即将结束（低于5分钟）
-    isCountdownWarning() {
-      return this.countdown > 0 && this.countdown < 300
-    },
-  },
+// 获取订单详情和用户信息
+async function fetchOrderAndUserInfo() {
+  loading.value = true
+  try {
+    // 获取订单详情
+    const fetchedOrderInfo = await orderStore.fetchOrderDetail(orderId.value)
+    orderInfo.value = fetchedOrderInfo
 
-  mounted() {
-    // 获取订单ID
-    this.orderId = this.$route.params.id || this.$route.query.id
-    if (this.orderId) {
-      // 执行环境安全检测
-      this.performEnvironmentSecurityCheck()
-
-      // 加载订单信息和用户余额
-      this.fetchOrderAndUserInfo()
-    } else {
-      this.loading = false
-    }
-  },
-
-  beforeDestroy() {
-    // 清除轮询
-    if (this.paymentPollingInterval) {
-      clearInterval(this.paymentPollingInterval)
+    // 检查订单状态
+    if (fetchedOrderInfo.orderStatus !== 1) {
+      ElMessage.warning('该订单状态不允许支付')
+      router.push(`/order/detail/${orderId.value}`)
+      return
     }
 
-    // 停止轮询控制器
-    this.stopPolling()
+    // 获取用户余额
+    await paymentStore.getUserBalance()
 
-    // 停止倒计时
-    this.stopCountdown()
-
-    // 重置支付状态
-    this.resetPaymentStatus()
-  },
-
-  methods: {
-    ...mapActions('payment', [
-      'getPaymentMethods',
-      'setSelectedMethod',
-      'getUserBalance',
-      'createPaymentOrder',
-      'executeBalancePayment',
-      'startPaymentPolling',
-      'resetPaymentStatus',
-      'clearPaymentCache',
-      'getPaymentRemainingTime',
-      // 安全相关actions
-      'recordSecurityCheck',
-      'verifyUserPaymentPassword',
-      'performPaymentRiskAssessment',
-      'lockPayment',
-      'unlockPayment',
-      'createPaymentOrder',
-      'executeBalancePayment',
-    ]),
-
-    // 获取订单详情和用户信息
-    async fetchOrderAndUserInfo() {
-      this.loading = true
-      try {
-        // 获取订单详情
-        this.orderInfo = await this.$store.dispatch('order/getOrderDetail', this.orderId)
-
-        // 检查订单状态
-        if (this.orderInfo.orderStatus !== 1) {
-          this.$message.warning('该订单状态不允许支付')
-          this.$router.push(`/order/detail/${this.orderId}`)
-          return
-        }
-
-        // 获取用户余额
-        await this.getUserBalance()
-
-        // 初始化支付方式
-        await this.getPaymentMethods(this.orderType)
-
-        // 计算倒计时
-        this.calculateCountdown()
-        this.startCountdown()
-
-        // 如果余额不足，默认不选中余额支付
-        if (!this.balanceEnough && this.selectedMethod === 'BALANCE') {
-          this.setSelectedMethod('WECHAT_PAY')
-        }
-      } catch (error) {
-        logger.error('获取订单信息失败', error)
-        this.$message.error('获取订单信息失败')
-        this.orderInfo = null
-      } finally {
-        this.loading = false
-      }
-    },
+    // 初始化支付方式
+    await paymentStore.getPaymentMethods(fetchedOrderInfo.orderType || 'normal')
 
     // 计算倒计时
-    calculateCountdown() {
-      if (!this.orderInfo || this.orderInfo.orderStatus !== 1) return
+    calculateCountdown()
+    startCountdown()
 
-      this.countdown = this.getPaymentRemainingTime(this.orderInfo)
+    // 如果余额不足，默认不选中余额支付
+    if (!balanceEnough.value && selectedMethod.value === 'BALANCE') {
+      paymentStore.setSelectedMethod('WECHAT_PAY')
+    }
+  } catch (error) {
+    logger.error('获取订单信息失败', error)
+    ElMessage.error('获取订单信息失败')
+    orderInfo.value = null
+  } finally {
+    loading.value = false
+  }
+}
 
-      if (this.countdown <= 0) {
-        this.countdown = 0
-        this.$message.warning('订单支付超时')
-        this.$router.push(`/order/detail/${this.orderId}`)
-      }
-    },
+// 计算倒计时
+function calculateCountdown() {
+  if (!orderInfo.value || orderInfo.value.orderStatus !== 1) return
 
-    // 开始倒计时
-    startCountdown() {
-      this.stopCountdown()
+  countdown.value = paymentStore.getPaymentRemainingTime(orderInfo.value)
 
-      this.countdownTimer = setInterval(() => {
-        if (this.countdown <= 0) {
-          this.stopCountdown()
-          this.$message.warning('订单支付超时')
-          this.$router.push(`/order/detail/${this.orderId}`)
-          return
-        }
-        this.countdown--
-      }, 1000)
-    },
+  if (countdown.value <= 0) {
+    countdown.value = 0
+    ElMessage.warning('订单支付超时')
+    router.push(`/order/detail/${orderId.value}`)
+  }
+}
 
-    // 停止倒计时
-    stopCountdown() {
-      if (this.countdownTimer) {
-        clearInterval(this.countdownTimer)
-        this.countdownTimer = null
-      }
-    },
+// 开始倒计时
+function startCountdown() {
+  stopCountdown()
 
-    // 停止轮询
-    stopPolling() {
-      if (this.pollingController) {
-        this.pollingController()
-        this.pollingController = null
-      }
-    },
+  countdownTimer.value = window.setInterval(() => {
+    if (countdown.value <= 0) {
+      stopCountdown()
+      ElMessage.warning('订单支付超时')
+      router.push(`/order/detail/${orderId.value}`)
+      return
+    }
+    countdown.value--
+  }, 1000)
+}
 
-    // 处理支付按钮点击
-    handlePay() {
-      // 检查余额是否足够
-      if (this.selectedMethod === 'BALANCE' && !this.balanceEnough) {
-        this.$message.error('余额不足，请选择其他支付方式或充值')
-        return
-      }
+// 停止倒计时
+function stopCountdown() {
+  if (countdownTimer.value) {
+    clearInterval(countdownTimer.value)
+    countdownTimer.value = null
+  }
+}
 
-      // 余额支付且需要支付密码
-      if (this.selectedMethod === 'BALANCE' && this.needPaymentPassword) {
-        this.showPaymentPassword = true
+// 停止轮询
+function stopPolling() {
+  if (pollingController.value) {
+    pollingController.value()
+    pollingController.value = null
+  }
+}
+
+// 处理支付按钮点击
+function handlePay() {
+  // 检查余额是否足够
+  if (selectedMethod.value === 'BALANCE' && !balanceEnough.value) {
+    ElMessage.error('余额不足，请选择其他支付方式或充值')
+    return
+  }
+
+  // 余额支付且需要支付密码
+  if (selectedMethod.value === 'BALANCE' && needPaymentPassword.value) {
+    showPaymentPassword.value = true
+  } else {
+    // 显示确认对话框
+    payConfirmVisible.value = true
+  }
+}
+
+// 确认支付
+function confirmPayment() {
+  // 检查支付是否被锁定
+  if (isPaymentLocked.value) {
+    ElMessage.error(lockReason.value || '当前支付已被系统锁定，请联系客服')
+    return
+  }
+
+  // 检查是否选择了支付方式
+  if (!selectedMethod.value) {
+    ElMessage.error('请选择支付方式')
+    return
+  }
+
+  // 执行风险评估
+  performRiskAssessment()
+    .then(assessmentResult => {
+      riskAssessmentResult.value = assessmentResult
+
+      // 高风险支付需要额外确认
+      if (assessmentResult.level === 'HIGH') {
+        // 发送支付风险警告通知
+        notificationService.sendPaymentRiskAlert({
+          orderId: orderId.value,
+          amount: orderAmount.value,
+          riskLevel: 'high',
+          riskFactors: assessmentResult.factors || [],
+        })
+
+        ElConfirm('系统检测到当前支付存在较高风险，是否继续？', '风险提示', {
+          confirmButtonText: '继续支付',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(() => {
+            proceedWithPayment()
+          })
+          .catch(() => {
+            ElMessage.info('支付已取消')
+          })
       } else {
-        // 显示确认对话框
-        this.payConfirmVisible = true
+        // 普通风险直接继续支付流程
+        proceedWithPayment()
       }
-    },
+    })
+    .catch(error => {
+      logger.error('风险评估失败:', error)
+      // 风险评估失败仍允许支付，但显示警告
+      ElNotification.warning({
+        title: '提示',
+        message: '风险评估暂时不可用，建议谨慎操作',
+        duration: 3000,
+      })
 
-    // 确认支付
-    confirmPayment() {
-      // 检查支付是否被锁定
-      if (this.isPaymentLocked) {
-        this.$message.error(this.lockReason || '当前支付已被系统锁定，请联系客服')
-        return
+      // 发送风险评估失败通知
+      notificationService.sendPaymentRiskAlert({
+        orderId: orderId.value,
+        amount: orderAmount.value,
+        riskLevel: 'unknown',
+        error: error instanceof Error ? error.message : '风险评估失败',
+      })
+
+      proceedWithPayment()
+    })
+}
+
+// 执行风险评估
+function performRiskAssessment() {
+  return new Promise((resolve, reject) => {
+    try {
+      // 收集支付环境信息
+      const paymentContext = {
+        orderId: orderId.value,
+        amount: orderAmount.value,
+        paymentMethod: selectedMethod.value,
+        browserInfo: navigator.userAgent,
+        timestamp: Date.now(),
+        ip: securityCheckResult.value?.clientIp,
       }
 
-      // 检查是否选择了支付方式
-      if (!this.selectedMethod) {
-        this.$message.error('请选择支付方式')
-        return
-      }
+      // 调用store进行风险评估
+      paymentStore
+        .performPaymentRiskAssessment(paymentContext)
+        .then(result => {
+          resolve(result)
 
-      // 执行风险评估
-      this.performRiskAssessment()
-        .then(assessmentResult => {
-          this.riskAssessmentResult = assessmentResult
-
-          // 高风险支付需要额外确认
-          if (assessmentResult.level === 'HIGH') {
-            // 发送支付风险警告通知
-            notificationService.sendPaymentRiskAlert({
-              orderId: this.orderId,
-              amount: this.orderAmount,
-              riskLevel: 'high',
-              riskFactors: assessmentResult.factors || [],
-            })
-
-            this.$confirm('系统检测到当前支付存在较高风险，是否继续？', '风险提示', {
-              confirmButtonText: '继续支付',
-              cancelButtonText: '取消',
-              type: 'warning',
-            })
-              .then(() => {
-                this.proceedWithPayment()
-              })
-              .catch(() => {
-                this.$message.info('支付已取消')
-              })
-          } else {
-            // 普通风险直接继续支付流程
-            this.proceedWithPayment()
+          // 记录风险评估日志
+          if (result.level !== 'LOW') {
+            logger.warn('支付风险评估结果:', result)
           }
         })
         .catch(error => {
-          logger.error('风险评估失败:', error)
-          // 风险评估失败仍允许支付，但显示警告
-          this.$notify.warning({
-            title: '提示',
-            message: '风险评估暂时不可用，建议谨慎操作',
-            duration: 3000,
-          })
-
-          // 发送风险评估失败通知
-          notificationService.sendPaymentRiskAlert({
-            orderId: this.orderId,
-            amount: this.orderAmount,
-            riskLevel: 'unknown',
-            error: error.message,
-          })
-
-          this.proceedWithPayment()
-        })
-    },
-
-    // 执行风险评估
-    performRiskAssessment() {
-      return new Promise((resolve, reject) => {
-        try {
-          // 收集支付环境信息
-          const paymentContext = {
-            orderId: this.orderId,
-            amount: this.orderAmount,
-            paymentMethod: this.selectedMethod,
-            browserInfo: navigator.userAgent,
-            timestamp: Date.now(),
-            ip: this.securityCheckResult?.clientIp,
-          }
-
-          // 调用store进行风险评估
-          this.performPaymentRiskAssessment(paymentContext)
-            .then(result => {
-              resolve(result)
-
-              // 记录风险评估日志
-              if (result.level !== 'LOW') {
-                logger.warn('支付风险评估结果:', result)
-              }
-            })
-            .catch(error => {
-              reject(error)
-            })
-        } catch (error) {
           reject(error)
+        })
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
+// 继续支付流程
+function proceedWithPayment() {
+  // 检查是否需要支付密码
+  if (
+    (needPaymentPassword.value && selectedMethod.value === 'BALANCE') ||
+    (needSecurityVerification.value && !isPasswordVerified.value)
+  ) {
+    showPaymentPassword.value = true
+    return
+  }
+
+  payConfirmVisible.value = false
+  paymentLoading.value = true
+  showPaymentPassword.value = false
+
+  // 发送支付开始通知
+  notificationService.sendPaymentInitiatedNotification({
+    orderId: orderId.value,
+    amount: orderAmount.value,
+    paymentMethod: getSelectedMethodName(),
+    timestamp: new Date(),
+  })
+
+  // 生成安全签名
+  const paymentParams = {
+    orderId: orderId.value,
+    amount: orderAmount.value,
+    paymentMethod: selectedMethod.value,
+    timestamp: Date.now(),
+    securityToken: security.value?.token || '',
+    riskLevel: riskAssessmentResult.value?.level || 'UNKNOWN',
+    paymentPassword: paymentPassword.value,
+  }
+
+  // 清空支付密码
+  paymentPassword.value = ''
+
+  // 对支付参数进行签名
+  try {
+    paymentParams.signature = paymentSecurity.generatePaymentSignature(paymentParams)
+  } catch (error) {
+    logger.error('生成支付签名失败:', error)
+    paymentLoading.value = false
+    paySuccess.value = false
+    payErrorMessage.value = '系统安全验证失败，请稍后重试'
+    payResultVisible.value = true
+    return
+  }
+
+  // 根据支付方式调用对应的API
+  processPayment(paymentParams)
+}
+
+// 获取选中的支付方式名称
+function getSelectedMethodName() {
+  return getPaymentMethodName(selectedMethod.value)
+}
+
+// 处理支付
+async function processPayment(paymentParams: any) {
+  try {
+    let paymentResult
+
+    switch (selectedMethod.value) {
+      case 'WECHAT_PAY':
+      case 'ALIPAY':
+        // 创建支付订单
+        paymentResult = await paymentStore.createPaymentOrder(paymentParams)
+
+        // 根据支付平台处理跳转
+        if (paymentResult) {
+          // 这里根据后端返回的支付链接或表单进行跳转
+          if (paymentResult.paymentUrl) {
+            // 跳转到支付平台
+            window.location.href = paymentResult.paymentUrl
+            // 开始轮询支付结果
+            startMonitoringPaymentStatus()
+          } else if (paymentResult.payForm) {
+            // 处理表单提交
+            submitPaymentForm(paymentResult.payForm)
+          }
         }
-      })
-    },
+        break
 
-    // 继续支付流程
-    proceedWithPayment() {
-      // 检查是否需要支付密码
-      if (
-        (this.needPaymentPassword && this.selectedMethod === 'BALANCE') ||
-        (this.needSecurityVerification && !this.isPasswordVerified)
-      ) {
-        this.showPaymentPassword = true
-        return
-      }
-
-      this.payConfirmVisible = false
-      this.paymentLoading = true
-      this.showPaymentPassword = false
-
-      // 发送支付开始通知
-      notificationService.sendPaymentInitiatedNotification({
-        orderId: this.orderId,
-        amount: this.orderAmount,
-        paymentMethod: this.getSelectedMethodName(),
-        timestamp: new Date(),
-      })
-
-      // 生成安全签名
-      const paymentParams = {
-        orderId: this.orderId,
-        amount: this.orderAmount,
-        paymentMethod: this.selectedMethod,
-        timestamp: Date.now(),
-        securityToken: this.security?.token || '',
-        riskLevel: this.riskAssessmentResult?.level || 'UNKNOWN',
-        paymentPassword: this.paymentPassword,
-      }
-
-      // 清空支付密码
-      this.paymentPassword = ''
-
-      // 对支付参数进行签名
-      try {
-        paymentParams.signature = paymentSecurity.generatePaymentSignature(paymentParams)
-      } catch (error) {
-        logger.error('生成支付签名失败:', error)
-        this.paymentLoading = false
-        this.paySuccess = false
-        this.payErrorMessage = '系统安全验证失败，请稍后重试'
-        this.payResultVisible = true
-        return
-      }
-
-      // 根据支付方式调用对应的API
-      this.processPayment(paymentParams)
-    },
-
-    // 获取选中的支付方式名称
-    getSelectedMethodName() {
-      return this.getPaymentMethodName(this.selectedMethod)
-    },
-
-    // 处理支付
-    async processPayment(paymentParams) {
-      try {
-        let paymentResult
-
-        switch (this.selectedMethod) {
-          case 'WECHAT_PAY':
-          case 'ALIPAY':
-            // 创建支付订单
-            paymentResult = await this.createPaymentOrder(paymentParams)
-
-            // 根据支付平台处理跳转
-            if (paymentResult) {
-              // 这里根据后端返回的支付链接或表单进行跳转
-              if (paymentResult.paymentUrl) {
-                // 跳转到支付平台
-                window.location.href = paymentResult.paymentUrl
-                // 开始轮询支付结果
-                this.startMonitoringPaymentStatus()
-              } else if (paymentResult.payForm) {
-                // 处理表单提交
-                this.submitPaymentForm(paymentResult.payForm)
-              }
-            }
-            break
-
-          case 'BALANCE':
-            // 余额支付
-            if (!this.balanceEnough) {
-              this.paymentLoading = false
-              this.paySuccess = false
-              this.payErrorMessage = '账户余额不足'
-              this.paymentFailureType = ['balance']
-              this.payResultVisible = true
-              return
-            }
-
-            const balanceResult = await this.executeBalancePayment(paymentParams)
-
-            if (balanceResult && balanceResult.success) {
-              this.paySuccess = true
-              this.paymentFailureType = []
-              this.payResultVisible = true
-              // 更新订单状态
-              await this.fetchOrderAndUserInfo()
-
-              this.$notify.success({
-                title: '支付成功',
-                message: '您的订单已支付成功',
-                duration: 3000,
-              })
-            } else {
-              this.paySuccess = false
-              this.payErrorMessage = balanceResult?.message || '余额支付失败'
-              this.analyzePaymentError(balanceResult?.message)
-              this.payResultVisible = true
-            }
-            break
-        }
-      } catch (error) {
-        logger.error('创建支付订单失败', error)
-        this.paySuccess = false
-        this.payErrorMessage = error.message || '支付过程中出现错误'
-        this.analyzePaymentError(error.message)
-        this.payResultVisible = true
-      } finally {
-        this.paymentLoading = false
-      }
-    },
-
-    // 开始监控支付状态
-    startMonitoringPaymentStatus() {
-      this.stopPolling()
-
-      // 使用vuex中的轮询方法
-      this.pollingController = this.startPaymentPolling({
-        orderId: this.orderId,
-        callback: this.handlePollingResult,
-      })
-    },
-
-    // 处理轮询结果
-    handlePollingResult(result) {
-      if (result.success) {
-        this.paySuccess = true
-        this.paymentFailureType = []
-        this.payResultVisible = true
-        // 更新订单状态
-        this.fetchOrderAndUserInfo()
-      } else if (result.timeout) {
-        this.paySuccess = false
-        this.payErrorMessage = result.message || '支付超时'
-        this.paymentFailureType = ['timeout']
-        this.payResultVisible = true
-      } else {
-        this.paySuccess = false
-        this.payErrorMessage = result.error || '支付失败'
-        // 分析错误类型
-        this.analyzePaymentError(result.error)
-        this.payResultVisible = true
-      }
-    },
-
-    // 分析支付错误类型
-    analyzePaymentError(errorMessage) {
-      this.paymentFailureType = []
-
-      if (!errorMessage) return
-
-      const lowerCaseError = errorMessage.toLowerCase()
-
-      // 根据错误信息关键词判断失败类型
-      if (lowerCaseError.includes('网络') || lowerCaseError.includes('network')) {
-        this.paymentFailureType.push('network')
-      }
-      if (lowerCaseError.includes('余额') || lowerCaseError.includes('balance')) {
-        this.paymentFailureType.push('balance')
-      }
-      if (lowerCaseError.includes('超时') || lowerCaseError.includes('timeout')) {
-        this.paymentFailureType.push('timeout')
-      }
-      if (lowerCaseError.includes('系统') || lowerCaseError.includes('system')) {
-        this.paymentFailureType.push('system')
-      }
-      if (lowerCaseError.includes('安全') || lowerCaseError.includes('security')) {
-        this.paymentFailureType.push('security')
-      }
-    },
-
-    // 切换支付方式
-    switchPaymentMethod() {
-      this.payResultVisible = false
-      // 根据当前选中的支付方式，推荐切换到另一种
-      if (this.selectedMethod === 'WECHAT_PAY') {
-        this.setSelectedMethod('ALIPAY')
-      } else if (this.selectedMethod === 'ALIPAY') {
-        this.setSelectedMethod('WECHAT_PAY')
-      }
-
-      this.$message.info('已为您切换支付方式，请重新支付')
-      this.payConfirmVisible = true
-    },
-
-    // 联系客服
-    contactCustomerService() {
-      // 调用通知服务的客服联系方法
-      notificationService.sendServiceContactNotification({
-        userId: this.$store.getters.userId,
-        orderId: this.orderId,
-        reason: '支付失败需要协助',
-        contactType: 'payment_failure',
-      })
-
-      this.$message.success('客服人员将尽快与您联系，请保持通讯畅通')
-      // 这里可以添加跳转到在线客服的逻辑
-      this.$router.push('/user/service')
-    },
-
-    // 检查账户状态
-    checkAccountStatus() {
-      this.payResultVisible = false
-      this.$router.push('/user/account')
-    },
-
-    // 提交支付表单
-    submitPaymentForm(payForm) {
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = payForm.action
-
-      // 添加表单字段
-      for (const key in payForm.params) {
-        if (payForm.params.hasOwnProperty(key)) {
-          const input = document.createElement('input')
-          input.type = 'hidden'
-          input.name = key
-          input.value = payForm.params[key]
-          form.appendChild(input)
-        }
-      }
-
-      // 添加到文档并提交
-      document.body.appendChild(form)
-      form.submit()
-      // 移除表单
-      setTimeout(() => {
-        document.body.removeChild(form)
-      }, 100)
-    },
-
-    // 重试支付
-    retryPayment() {
-      this.payResultVisible = false
-      this.resetPaymentStatus()
-      this.clearPaymentCache(this.orderId)
-      // 重新开始支付流程
-      this.payConfirmVisible = true
-    },
-
-    // 格式化倒计时
-    formatCountdown() {
-      const minutes = Math.floor(this.countdown / 60)
-      const seconds = this.countdown % 60
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    },
-
-    // 复制订单号
-    copyOrderNo() {
-      if (!this.orderInfo?.orderNo) return
-
-      const textArea = document.createElement('textarea')
-      textArea.value = this.orderInfo.orderNo
-      textArea.style.position = 'fixed'
-      textArea.style.left = '-999999px'
-      textArea.style.top = '-999999px'
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-
-      try {
-        document.execCommand('copy')
-        this.$message.success('订单号已复制')
-      } catch (err) {
-        this.$message.error('复制失败')
-      } finally {
-        document.body.removeChild(textArea)
-      }
-    },
-
-    // 执行环境安全检测
-    performEnvironmentSecurityCheck() {
-      try {
-        // 使用安全工具检测环境
-        this.securityCheckResult = paymentSecurity.checkEnvironmentSecurity()
-        this.isEnvironmentSecure = this.securityCheckResult.secure
-
-        // 收集安全警告
-        if (this.securityCheckResult.warnings && this.securityCheckResult.warnings.length > 0) {
-          this.securityWarnings = this.securityCheckResult.warnings
-          logger.warn('支付环境存在安全风险:', this.securityWarnings)
-
-          // 显示安全警告提示
-          this.$notify.warning({
-            title: '安全提示',
-            message: '当前支付环境存在风险，建议在安全网络下进行支付操作',
-            duration: 5000,
-          })
-        }
-
-        // 调用store记录安全检测结果
-        this.recordSecurityCheck(this.securityCheckResult)
-      } catch (error) {
-        logger.error('环境安全检测失败:', error)
-      }
-    },
-
-    // 验证支付密码
-    verifyPaymentPassword() {
-      return new Promise((resolve, reject) => {
-        if (!this.paymentPassword) {
-          this.$message.error('请输入支付密码')
-          reject(new Error('支付密码不能为空'))
+      case 'BALANCE': {
+        // 余额支付
+        if (!balanceEnough.value) {
+          paymentLoading.value = false
+          paySuccess.value = false
+          payErrorMessage.value = '账户余额不足'
+          paymentFailureType.value = ['balance']
+          payResultVisible.value = true
           return
         }
 
-        try {
-          // 使用安全工具对密码进行加密处理
-          const encryptedPassword = paymentSecurity.encryptPassword(this.paymentPassword)
+        const balanceResult = await paymentStore.executeBalancePayment(paymentParams)
 
-          // 调用store验证支付密码
-          this.verifyUserPaymentPassword({
-            password: encryptedPassword,
-            orderId: this.orderId,
+        if (balanceResult && balanceResult.success) {
+          paySuccess.value = true
+          paymentFailureType.value = []
+          payResultVisible.value = true
+          // 更新订单状态
+          await fetchOrderAndUserInfo()
+
+          ElNotification.success({
+            title: '支付成功',
+            message: '您的订单已支付成功',
+            duration: 3000,
           })
-            .then(result => {
-              if (result.success) {
-                this.isPasswordVerified = true
-                this.$message.success('支付密码验证成功')
-                resolve(true)
-              } else {
-                this.isPasswordVerified = false
-                this.$message.error(result.message || '支付密码验证失败')
-                reject(new Error(result.message || '支付密码验证失败'))
-              }
-            })
-            .catch(error => {
-              this.isPasswordVerified = false
-              this.$message.error('支付密码验证失败')
-              reject(error)
-            })
-        } catch (error) {
-          logger.error('支付密码处理失败:', error)
-          this.$message.error('系统错误，请稍后再试')
-          reject(error)
-        } finally {
-          // 清空密码输入
-          this.paymentPassword = ''
+        } else {
+          paySuccess.value = false
+          payErrorMessage.value = balanceResult?.message || '余额支付失败'
+          analyzePaymentError(balanceResult?.message)
+          payResultVisible.value = true
         }
-      })
-    },
-
-    // 查看订单
-    handleViewOrder() {
-      this.payResultVisible = false
-      this.$router.push(`/order/detail/${this.orderId}`)
-    },
-
-    // 返回订单详情
-    handleBack() {
-      this.$router.push(`/order/detail/${this.orderId}`)
-    },
-
-    // 获取支付方式名称
-    getPaymentMethodName(method) {
-      // 优先从vuex中获取支付方式信息
-      const paymentMethod = this.paymentMethods.find(m => m.code === method)
-      if (paymentMethod) {
-        return paymentMethod.name
+        break
       }
-
-      // 备用映射
-      const methodMap = {
-        WECHAT_PAY: '微信支付',
-        ALIPAY: '支付宝',
-        BALANCE: '余额支付',
-      }
-      return methodMap[method] || method
-    },
-
-    // 获取订单状态文本
-    getStatusText(status) {
-      const statusMap = {
-        1: '待支付',
-        2: '待发货',
-        3: '待收货',
-        4: '已完成',
-        5: '已取消',
-        6: '退款中',
-        7: '已退款',
-      }
-      return statusMap[status] || '未知状态'
-    },
-
-    // 获取订单状态标签类型
-    getStatusType(status) {
-      const typeMap = {
-        1: 'warning',
-        2: 'info',
-        3: 'primary',
-        4: 'success',
-        5: 'danger',
-        6: 'warning',
-        7: 'danger',
-      }
-      return typeMap[status] || 'info'
-    },
-
-    // 格式化日期时间
-    formatDateTime(date) {
-      if (!date) return '--'
-      const d = new Date(date)
-      const year = d.getFullYear()
-      const month = String(d.getMonth() + 1).padStart(2, '0')
-      const day = String(d.getDate()).padStart(2, '0')
-      const hour = String(d.getHours()).padStart(2, '0')
-      const minute = String(d.getMinutes()).padStart(2, '0')
-      return `${year}-${month}-${day} ${hour}:${minute}`
-    },
-  },
+    }
+  } catch (error) {
+    logger.error('创建支付订单失败', error)
+    paySuccess.value = false
+    payErrorMessage.value = error instanceof Error ? error.message : '支付过程中出现错误'
+    analyzePaymentError(error instanceof Error ? error.message : '')
+    payResultVisible.value = true
+  } finally {
+    paymentLoading.value = false
+  }
 }
+
+// 开始监控支付状态
+function startMonitoringPaymentStatus() {
+  stopPolling()
+
+  // 使用pinia中的轮询方法
+  pollingController.value = paymentStore.startPaymentPolling({
+    orderId: orderId.value,
+    callback: handlePollingResult,
+  })
+}
+
+// 处理轮询结果
+function handlePollingResult(result: any) {
+  if (result.success) {
+    paySuccess.value = true
+    paymentFailureType.value = []
+    payResultVisible.value = true
+    // 更新订单状态
+    fetchOrderAndUserInfo()
+  } else if (result.timeout) {
+    paySuccess.value = false
+    payErrorMessage.value = result.message || '支付超时'
+    paymentFailureType.value = ['timeout']
+    payResultVisible.value = true
+  } else {
+    paySuccess.value = false
+    payErrorMessage.value = result.error || '支付失败'
+    // 分析错误类型
+    analyzePaymentError(result.error)
+    payResultVisible.value = true
+  }
+}
+
+// 分析支付错误类型
+function analyzePaymentError(errorMessage: string) {
+  paymentFailureType.value = []
+
+  if (!errorMessage) return
+
+  const lowerCaseError = errorMessage.toLowerCase()
+
+  // 根据错误信息关键词判断失败类型
+  if (lowerCaseError.includes('网络') || lowerCaseError.includes('network')) {
+    paymentFailureType.value.push('network')
+  }
+  if (lowerCaseError.includes('余额') || lowerCaseError.includes('balance')) {
+    paymentFailureType.value.push('balance')
+  }
+  if (lowerCaseError.includes('超时') || lowerCaseError.includes('timeout')) {
+    paymentFailureType.value.push('timeout')
+  }
+  if (lowerCaseError.includes('系统') || lowerCaseError.includes('system')) {
+    paymentFailureType.value.push('system')
+  }
+  if (lowerCaseError.includes('安全') || lowerCaseError.includes('security')) {
+    paymentFailureType.value.push('security')
+  }
+}
+
+// 切换支付方式
+function switchPaymentMethod() {
+  payResultVisible.value = false
+  // 根据当前选中的支付方式，推荐切换到另一种
+  if (selectedMethod.value === 'WECHAT_PAY') {
+    paymentStore.setSelectedMethod('ALIPAY')
+  } else if (selectedMethod.value === 'ALIPAY') {
+    paymentStore.setSelectedMethod('WECHAT_PAY')
+  }
+
+  ElMessage.info('已为您切换支付方式，请重新支付')
+  payConfirmVisible.value = true
+}
+
+// 联系客服
+function contactCustomerService() {
+  // 调用通知服务的客服联系方法
+  notificationService.sendServiceContactNotification({
+    userId: '', // 需要从用户store获取
+    orderId: orderId.value,
+    reason: '支付失败需要协助',
+    contactType: 'payment_failure',
+  })
+
+  ElMessage.success('客服人员将尽快与您联系，请保持通讯畅通')
+  // 这里可以添加跳转到在线客服的逻辑
+  router.push('/user/service')
+}
+
+// 检查账户状态
+function checkAccountStatus() {
+  payResultVisible.value = false
+  router.push('/user/account')
+}
+
+// 提交支付表单
+function submitPaymentForm(payForm: any) {
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = payForm.action
+
+  // 添加表单字段
+  for (const key in payForm.params) {
+    if (Object.prototype.hasOwnProperty.call(payForm.params, key)) {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = key
+      input.value = payForm.params[key]
+      form.appendChild(input)
+    }
+  }
+
+  // 添加到文档并提交
+  document.body.appendChild(form)
+  form.submit()
+  // 移除表单
+  setTimeout(() => {
+    document.body.removeChild(form)
+  }, 100)
+}
+
+// 重试支付
+function retryPayment() {
+  payResultVisible.value = false
+  paymentStore.resetPaymentStatus()
+  paymentStore.clearPaymentCache(orderId.value)
+  // 重新开始支付流程
+  payConfirmVisible.value = true
+}
+
+// 格式化倒计时
+function formatCountdown() {
+  const minutes = Math.floor(countdown.value / 60)
+  const seconds = countdown.value % 60
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
+
+// 执行环境安全检测
+function performEnvironmentSecurityCheck() {
+  try {
+    // 使用安全工具检测环境
+    securityCheckResult.value = paymentSecurity.checkEnvironmentSecurity()
+    isEnvironmentSecure.value = securityCheckResult.value.secure
+
+    // 收集安全警告
+    if (securityCheckResult.value.warnings && securityCheckResult.value.warnings.length > 0) {
+      securityWarnings.value = securityCheckResult.value.warnings
+      logger.warn('支付环境存在安全风险:', securityWarnings.value)
+
+      // 显示安全警告提示
+      ElNotification.warning({
+        title: '安全提示',
+        message: '当前支付环境存在风险，建议在安全网络下进行支付操作',
+        duration: 5000,
+      })
+    }
+
+    // 调用store记录安全检测结果
+    paymentStore.recordSecurityCheck(securityCheckResult.value)
+  } catch (error) {
+    logger.error('环境安全检测失败:', error)
+  }
+}
+
+// 查看订单
+function handleViewOrder() {
+  payResultVisible.value = false
+  router.push(`/order/detail/${orderId.value}`)
+}
+
+// 返回订单详情
+function handleBack() {
+  router.push(`/order/detail/${orderId.value}`)
+}
+
+// 获取支付方式名称
+function getPaymentMethodName(method: string) {
+  // 优先从pinia中获取支付方式信息
+  const paymentMethod = paymentMethods.value.find(m => m.code === method)
+  if (paymentMethod) {
+    return paymentMethod.name
+  }
+
+  // 备用映射
+  const methodMap: Record<string, string> = {
+    WECHAT_PAY: '微信支付',
+    ALIPAY: '支付宝',
+    BALANCE: '余额支付',
+  }
+  return methodMap[method] || method
+}
+
+// 获取订单状态文本
+function getStatusText(status: number) {
+  const statusMap: Record<number, string> = {
+    1: '待支付',
+    2: '待发货',
+    3: '待收货',
+    4: '已完成',
+    5: '已取消',
+    6: '退款中',
+    7: '已退款',
+  }
+  return statusMap[status] || '未知状态'
+}
+
+// 获取订单状态标签类型
+function getStatusType(status: number) {
+  const typeMap: Record<number, string> = {
+    1: 'warning',
+    2: 'info',
+    3: 'primary',
+    4: 'success',
+    5: 'danger',
+    6: 'warning',
+    7: 'danger',
+  }
+  return typeMap[status] || 'info'
+}
+
+// 格式化日期时间
+function formatDateTime(date: string) {
+  if (!date) return '--'
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hour = String(d.getHours()).padStart(2, '0')
+  const minute = String(d.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
+// 生命周期钩子
+onMounted(() => {
+  // 获取订单ID
+  orderId.value = (route.params.id as string) || (route.query.id as string)
+  if (orderId.value) {
+    // 执行环境安全检测
+    performEnvironmentSecurityCheck()
+
+    // 加载订单信息和用户余额
+    fetchOrderAndUserInfo()
+  } else {
+    loading.value = false
+  }
+})
+
+onBeforeUnmount(() => {
+  // 清除轮询
+  if (paymentPollingInterval.value) {
+    clearInterval(paymentPollingInterval.value)
+  }
+
+  // 停止轮询控制器
+  stopPolling()
+
+  // 停止倒计时
+  stopCountdown()
+
+  // 重置支付状态
+  paymentStore.resetPaymentStatus()
+})
 </script>
 
 <style scoped>

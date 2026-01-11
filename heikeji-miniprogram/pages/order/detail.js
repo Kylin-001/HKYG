@@ -189,6 +189,11 @@ Page({
         // 重新加载订单状态
         setTimeout(() => {
           this.loadOrderDetail();
+          // 通知订单列表页面支付成功，刷新订单列表
+          const eventChannel = this.getOpenerEventChannel();
+          if (eventChannel) {
+            eventChannel.emit('paymentSuccess', { orderId: this.data.orderId });
+          }
         }, 1000);
       })
       .catch(err => {

@@ -1,0 +1,91 @@
+server:
+  port: 8004
+
+spring:
+  application:
+    name: heikeji-mall-service-payment
+  datasource:
+    url: jdbc:mysql://192.168.110.162:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: Mysql@8Root!2025
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  # RabbitMQ配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # 消息确认配置
+    publisher-confirms: true
+    publisher-returns: true
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        max-attempts: 3
+        initial-interval: 1000ms
+        max-interval: 10000ms
+        multiplier: 2.0
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 5
+        max-concurrency: 10
+        prefetch: 10
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000ms
+          max-interval: 10000ms
+          multiplier: 2.0
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.heikeji.mall.payment.entity
+  global-config:
+    db-config:
+      id-type: auto
+      field-strategy: NOT_EMPTY
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 微信支付配置
+wx:
+  pay:
+    appId: wx_appid_here  # 实际应用中替换为真实的appId
+    mchId: mch_id_here    # 实际应用中替换为真实的商户号
+    mchKey: mch_key_here  # 实际应用中替换为真实的商户密钥
+    apiV3Key: api_v3_key_here  # 实际应用中替换为真实的API V3密钥
+    notifyUrl: http://your-domain/api/payment/notify/wechat  # 支付结果通知地址
+    refundNotifyUrl: http://your-domain/api/payment/refund/notify/wechat  # 退款结果通知地址
+    certPath: classpath:cert/apiclient_cert.p12  # 证书路径
+    privateCertPath: classpath:cert/apiclient_key.pem  # 私钥证书路径
+    publicCertPath: classpath:cert/apiclient_cert.pem  # 公钥证书路径
+    keyPath: classpath:cert/apiclient_cert.p12  # API证书路径
+
+# RabbitMQ队列配置
+rabbitmq:
+  queue:
+    payment:
+      success: payment.success.queue
+      failed: payment.failed.queue
+      refund:
+        success: payment.refund.success.queue
+        failed: payment.refund.failed.queue
+  exchange:
+    payment: payment.topic.exchange
+    payment.dlx: payment.dlx.exchange
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.heikeji.mall.payment: DEBUG
+    org.springframework.web: INFO
+    com.github.binarywang.wxpay: DEBUG

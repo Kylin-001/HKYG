@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import java.util.Date;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,22 +13,17 @@ import java.util.List;
  */
 @Data
 @TableName("category")
-public class Category {
+public class Category implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     @TableId(type = IdType.AUTO)
     private Long id;
     private String name;
-    private String icon;
-    private Integer sortOrder;
-    private Integer status;
-    private Date createTime;
-    private Date updateTime;
-    private Integer delFlag;
     
     // 父分类ID，0表示顶级分类
     private Long parentId;
     
-    // 分类层级，从1开始
-    private Integer level;
+    private Integer sortOrder;
     
     // 子分类列表，非数据库字段
     @TableField(exist = false)

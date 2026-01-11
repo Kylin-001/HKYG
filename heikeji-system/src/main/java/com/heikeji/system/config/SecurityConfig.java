@@ -1,7 +1,7 @@
 package com.heikeji.system.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.heikeji.system.filter.JwtAuthenticationFilter;
+import com.heikeji.common.core.security.JwtAuthenticationFilter;
 import com.heikeji.common.api.Result;
 import com.heikeji.common.api.ResultCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -35,7 +35,7 @@ import java.io.PrintWriter;
  * @author zhangkaiyuan
  * @date 2024-11-20
  */
-@Configuration
+@Configuration(value = "systemSecurityConfig")
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
@@ -49,7 +49,7 @@ public class SecurityConfig {
     /**
      * 密码编码器
      */
-    @Bean
+    @Bean(name = "systemPasswordEncoder")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -57,7 +57,7 @@ public class SecurityConfig {
     /**
      * 认证提供器
      */
-    @Bean
+    @Bean(name = "systemAuthenticationProvider")
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
@@ -68,7 +68,7 @@ public class SecurityConfig {
     /**
      * 认证管理器
      */
-    @Bean
+    @Bean(name = "systemAuthenticationManager")
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
@@ -76,7 +76,7 @@ public class SecurityConfig {
     /**
      * 安全过滤器链配置
      */
-    @Bean
+    @Bean(name = "systemSecurityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             // 关闭CSRF
@@ -86,7 +86,7 @@ public class SecurityConfig {
             // 配置请求授权
             .authorizeHttpRequests(auth -> auth
                 // 允许匿名访问的接口
-                .requestMatchers("/api/system/auth/**", 
+                .antMatchers("/api/system/auth/**", 
                                "/api/system/captcha/**",
                                "/api/health/**",
                                "/swagger-ui/**",
@@ -102,7 +102,7 @@ public class SecurityConfig {
                 // 未授权处理
                 .accessDeniedHandler(accessDeniedHandler()))
             // 添加JWT过滤器
-            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(systemJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -110,7 +110,7 @@ public class SecurityConfig {
     /**
      * 未认证处理
      */
-    @Bean
+    @Bean(name = "systemAuthenticationEntryPoint")
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return new AuthenticationEntryPoint() {
             @Override
@@ -128,7 +128,7 @@ public class SecurityConfig {
     /**
      * 未授权处理
      */
-    @Bean
+    @Bean(name = "systemAccessDeniedHandler")
     public AccessDeniedHandler accessDeniedHandler() {
         return new AccessDeniedHandler() {
             @Override
@@ -146,8 +146,8 @@ public class SecurityConfig {
     /**
      * JWT认证过滤器
      */
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+    @Bean(name = "systemJwtAuthenticationFilter")
+    public JwtAuthenticationFilter systemJwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
 }

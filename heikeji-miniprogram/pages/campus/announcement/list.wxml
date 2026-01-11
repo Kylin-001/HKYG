@@ -1,0 +1,46 @@
+<!-- 校园公告列表页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">校园公告</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input" bindtap="onSearch">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit"></image>
+      <text class="placeholder">搜索公告...</text>
+    </view>
+  </view>
+
+  <!-- 公告列表 -->
+  <view class="announcement-list">
+    <view class="announcement-item" wx:for="{{announcements}}" wx:key="id" bindtap="navigateToAnnouncementDetail" data-id="{{item.id}}">
+      <!-- 公告标题和摘要 -->
+      <view class="announcement-content">
+        <text class="announcement-title">{{item.title}}</text>
+        <text class="announcement-summary">{{item.summary}}</text>
+      </view>
+      <!-- 公告信息 -->
+      <view class="announcement-info">
+        <text class="announcement-source">{{item.source}}</text>
+        <text class="announcement-time">{{item.createTime}}</text>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore}}">
+      <loading wx:if="{{isLoading}}"></loading>
+      <text wx:else class="load-more-text" bindtap="loadMore">点击加载更多</text>
+    </view>
+
+    <!-- 无数据提示 -->
+    <view class="no-data" wx:if="{{announcements.length === 0 && !isLoading}}">
+      <text>暂无公告</text>
+    </view>
+  </view>
+</view>

@@ -42,10 +42,10 @@ async function runTests() {
   console.log('========== 开始测试增强型DOM加载逻辑 ==========\n')
 
   // 测试结果统计
-  const totalTests = testCases.length;
+  const totalTests = testCases.length
   let passedTests = 0
   let failedTests = 0
-  const results = [];
+  const results = []
 
   for (const testCase of testCases) {
     console.log(`📋 正在测试: ${testCase.name}`)
@@ -112,6 +112,7 @@ async function runTests() {
       null,
       2
     )
+  )
 
   console.log(`\n详细测试报告已保存至: ${reportPath}`)
 }
@@ -124,7 +125,7 @@ function makeRequest(url) {
         const { statusCode } = res
         const contentType = res.headers['content-type'] || ''
 
-      let error;
+        let error
         if (statusCode !== 200) {
           error = new Error(`请求失败，状态码: ${statusCode}`)
         } else if (contentType && !/^(text\/html|application\/javascript)/i.test(contentType)) {
@@ -142,7 +143,7 @@ function makeRequest(url) {
           rawData += chunk
         })
 
-      res.on('end', () => {
+        res.on('end', () => {
           resolve({
             statusCode,
             contentType,

@@ -486,7 +486,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { useCampusStore } from '@/store/modules/campus'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import logger from '@/utils/logger'
 
@@ -577,13 +577,13 @@ interface Locker {
   remark?: string
 }
 
-// 获取Vuex store
-const store = useStore()
+// 获取Pinia store
+const campusStore = useCampusStore()
 
-// 从Vuex获取状态
-const lockerList = computed(() => store.state.campus.lockerList)
-const lockerTotal = computed(() => store.state.campus.lockerTotal)
-const campusList = computed(() => store.state.campus.campusList)
+// 从Pinia获取状态
+const lockerList = computed(() => campusStore.lockerList)
+const lockerTotal = computed(() => campusStore.lockerTotal)
+const campusList = computed(() => campusStore.campusList)
 const buildingList = computed(() => store.state.campus.buildingList)
 
 // 响应式数据
@@ -697,13 +697,13 @@ const formFilteredBuildings = computed(() => {
 })
 
 // Vuex actions
-const getLockers = (params: any) => store.dispatch('campus/getLockers', params)
-const addNewLocker = (params: any) => store.dispatch('campus/addNewLocker', params)
-const updateExistingLocker = (params: any) => store.dispatch('campus/updateExistingLocker', params)
+const getLockers = (params: any) => campusStore.getLockers(params)
+const addNewLocker = (params: any) => campusStore.addNewLocker(params)
+const updateExistingLocker = (params: any) => campusStore.updateExistingLocker(params)
 const updateLockerEnabledStatus = (params: any) =>
-  store.dispatch('campus/updateLockerEnabledStatus', params)
-const getCampuses = () => store.dispatch('campus/getCampuses')
-const getBuildings = () => store.dispatch('campus/getBuildings')
+  campusStore.updateLockerEnabledStatus(params.id, params.status)
+const getCampuses = () => campusStore.getCampuses()
+const getBuildings = (params: any) => campusStore.getBuildings(params)
 
 // 生命周期钩子
 onMounted(() => {

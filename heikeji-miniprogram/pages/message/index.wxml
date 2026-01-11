@@ -1,0 +1,94 @@
+<!-- 消息列表页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onShareAppMessage">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">消息中心</text>
+    <view class="header-right">
+      <view class="action-btn" bindtap="markAllAsRead" wx:if="{{unreadCount > 0}}">
+        <icon type="success" size="22"></icon>
+      </view>
+      <view class="action-btn" bindtap="showClearConfirm">
+        <icon type="clear" size="22"></icon>
+      </view>
+    </view>
+  </view>
+
+  <!-- 消息分类 -->
+  <view class="category-container">
+    <view 
+      wx:for="{{categories}}" 
+      wx:key="id" 
+      class="category-item {{currentCategory === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onCategoryChange"
+    >
+      <text>{{item.name}}</text>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <view class="message-list">
+    <!-- 空状态 -->
+    <view wx:if="{{isEmpty}}" class="empty-state">
+      <icon type="info" size="60" color="#c8c9cc"></icon>
+      <text class="empty-text">暂无消息</text>
+      <text class="empty-subtext">有新消息时会显示在这里</text>
+    </view>
+    
+    <!-- 消息列表 -->
+    <view wx:else>
+      <view 
+        wx:for="{{messageList}}" 
+        wx:key="id" 
+        class="message-item"
+        data-id="{{item.id}}"
+        bindtap="viewMessageDetail"
+      >
+        <!-- 消息图标 -->
+        <view class="message-icon {{item.type}}">
+          <icon 
+            type="{{item.type === 'system' ? 'warn' : item.type === 'order' ? 'success' : item.type === 'service' ? 'info' : 'waiting'}}" 
+            size="20" 
+          ></icon>
+        </view>
+        
+        <!-- 消息内容 -->
+        <view class="message-content">
+          <text class="message-title">{{item.title}}</text>
+          <text class="message-text">{{item.content}}</text>
+          <text class="message-time">{{item.createTime}}</text>
+        </view>
+        
+        <!-- 未读标记 -->
+        <view wx:if="{{item.status === 'unread'}}" class="unread-badge"></view>
+        
+        <!-- 删除按钮 -->
+        <view class="delete-btn" bindtap="deleteMessage" data-id="{{item.id}}">
+          <icon type="clear" size="18" color="#999"></icon>
+        </view>
+      </view>
+      
+      <!-- 加载更多 -->
+      <view wx:if="{{loading}}" class="loading-more">
+        <text>加载中...</text>
+      </view>
+      <view wx:elif="{{!hasMore}}" class="loading-more">
+        <text>没有更多消息了</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 清空消息确认弹窗 -->
+  <view wx:if="{{showClearConfirm}}" class="mask" bindtap="closeClearConfirm"></view>
+  <view wx:if="{{showClearConfirm}}" class="clear-confirm">
+    <text class="confirm-title">确认清空</text>
+    <text class="confirm-content">确定要清空所有消息吗？此操作不可恢复。</text>
+    <view class="confirm-buttons">
+      <view class="confirm-btn cancel" bindtap="closeClearConfirm">取消</view>
+      <view class="confirm-btn confirm" bindtap="confirmClearMessages">确定</view>
+    </view>
+  </view>
+</view>

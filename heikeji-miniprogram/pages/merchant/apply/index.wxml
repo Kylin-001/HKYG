@@ -1,0 +1,293 @@
+<!-- 商家入驻申请页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">商家入驻申请</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 上传组件模板 -->
+  <template name="uploadComponent">
+    <view class="upload-item">
+      <view class="upload-container" bindtap="uploadImage" data-type="{{type}}">
+        <image 
+          wx:if="{{imagePreview[type]}}" 
+          src="{{imagePreview[type]}}" 
+          class="uploaded-image" 
+          mode="aspectFill"
+        ></image>
+        <view wx:else class="upload-placeholder">
+          <image src="/assets/icons/upload.png" class="upload-icon" mode="aspectFit"></image>
+          <text class="upload-text">{{uploadText}}</text>
+        </view>
+      </view>
+      <view 
+        wx:if="{{imagePreview[type]}}" 
+        class="preview-btn" 
+        bindtap="previewImage" 
+        data-type="{{type}}"
+      >
+        <text>预览</text>
+      </view>
+      <view 
+        wx:if="{{imagePreview[type]}}" 
+        class="delete-btn" 
+        bindtap="deleteImage" 
+        data-type="{{type}}"
+      >
+        <text>删除</text>
+      </view>
+      <text class="error" wx:if="{{errors[type]}}">{{errors[type]}}</text>
+    </view>
+  </template>
+
+  <!-- 申请表单 -->
+  <form class="apply-form">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <text class="section-title">基本信息</text>
+      
+      <!-- 商家名称 -->
+      <view class="form-item">
+        <text class="label required">商家名称</text>
+        <input 
+          class="input" 
+          placeholder="请输入商家名称" 
+          placeholder-class="placeholder" 
+          value="{{formData.merchantName}}" 
+          bindinput="inputChange" 
+          data-field="merchantName"
+        />
+        <text class="error" wx:if="{{errors.merchantName}}">{{errors.merchantName}}</text>
+      </view>
+      
+      <!-- 商家类型 -->
+      <view class="form-item">
+        <text class="label required">商家类型</text>
+        <picker 
+          class="picker" 
+          range="{{merchantTypes}}" 
+          range-key="label" 
+          value="{{formData.merchantType}}" 
+          bindchange="selectMerchantType"
+        >
+          <view class="picker-content">
+            <text wx:if="{{formData.merchantType}}">{{merchantTypes.find(item => item.value === formData.merchantType).label}}</text>
+            <text wx:else class="placeholder">请选择商家类型</text>
+          </view>
+        </picker>
+        <text class="error" wx:if="{{errors.merchantType}}">{{errors.merchantType}}</text>
+      </view>
+      
+      <!-- 营业执照 -->
+      <view class="form-item">
+        <text class="label required">营业执照</text>
+        <template is="uploadComponent" data="{{type: 'businessLicense', uploadText: '上传营业执照', imagePreview, errors}}" />
+      </view>
+      
+      <!-- 营业执照注册号 -->
+      <view class="form-item">
+        <text class="label required">营业执照注册号</text>
+        <input 
+          class="input" 
+          placeholder="请输入营业执照注册号" 
+          placeholder-class="placeholder" 
+          value="{{formData.licenseNo}}" 
+          bindinput="inputChange" 
+          data-field="licenseNo"
+        />
+        <text class="error" wx:if="{{errors.licenseNo}}">{{errors.licenseNo}}</text>
+      </view>
+      
+      <!-- 法定代表人 -->
+      <view class="form-item">
+        <text class="label required">法定代表人</text>
+        <input 
+          class="input" 
+          placeholder="请输入法定代表人姓名" 
+          placeholder-class="placeholder" 
+          value="{{formData.legalPerson}}" 
+          bindinput="inputChange" 
+          data-field="legalPerson"
+        />
+        <text class="error" wx:if="{{errors.legalPerson}}">{{errors.legalPerson}}</text>
+      </view>
+      
+      <!-- 法定代表人身份证号 -->
+      <view class="form-item">
+        <text class="label required">法定代表人身份证号</text>
+        <input 
+          class="input" 
+          placeholder="请输入法定代表人身份证号" 
+          placeholder-class="placeholder" 
+          value="{{formData.idCard}}" 
+          bindinput="inputChange" 
+          data-field="idCard"
+        />
+        <text class="error" wx:if="{{errors.idCard}}">{{errors.idCard}}</text>
+      </view>
+      
+      <!-- 联系电话 -->
+      <view class="form-item">
+        <text class="label required">联系电话</text>
+        <input 
+          class="input" 
+          placeholder="请输入联系电话" 
+          placeholder-class="placeholder" 
+          value="{{formData.phone}}" 
+          bindinput="inputChange" 
+          data-field="phone"
+          type="number"
+        />
+        <text class="error" wx:if="{{errors.phone}}">{{errors.phone}}</text>
+      </view>
+      
+      <!-- 邮箱 -->
+      <view class="form-item">
+        <text class="label">邮箱</text>
+        <input 
+          class="input" 
+          placeholder="请输入邮箱" 
+          placeholder-class="placeholder" 
+          value="{{formData.email}}" 
+          bindinput="inputChange" 
+          data-field="email"
+          type="text"
+        />
+      </view>
+    </view>
+    
+    <!-- 地址信息 -->
+    <view class="form-section">
+      <text class="section-title">地址信息</text>
+      
+      <!-- 省市区 -->
+      <view class="form-item">
+        <text class="label required">省市区</text>
+        <picker 
+          class="picker" 
+          mode="region" 
+          value="{{regions}}" 
+          bindchange="regionChange"
+        >
+          <view class="picker-content">
+            <text wx:if="{{formData.province && formData.province !== '请选择'}}" class="region-text">
+              {{formData.province}} {{formData.city}} {{formData.district}}
+            </text>
+            <text wx:else class="placeholder">请选择省市区</text>
+          </view>
+        </picker>
+        <text class="error" wx:if="{{errors.province}}">{{errors.province}}</text>
+      </view>
+      
+      <!-- 详细地址 -->
+      <view class="form-item">
+        <text class="label required">详细地址</text>
+        <input 
+          class="input" 
+          placeholder="请输入详细地址" 
+          placeholder-class="placeholder" 
+          value="{{formData.addressDetail}}" 
+          bindinput="inputChange" 
+          data-field="addressDetail"
+        />
+        <text class="error" wx:if="{{errors.addressDetail}}">{{errors.addressDetail}}</text>
+      </view>
+    </view>
+    
+    <!-- 联系人信息 -->
+    <view class="form-section">
+      <text class="section-title">联系人信息</text>
+      
+      <!-- 联系人姓名 -->
+      <view class="form-item">
+        <text class="label required">联系人姓名</text>
+        <input 
+          class="input" 
+          placeholder="请输入联系人姓名" 
+          placeholder-class="placeholder" 
+          value="{{formData.contactName}}" 
+          bindinput="inputChange" 
+          data-field="contactName"
+        />
+        <text class="error" wx:if="{{errors.contactName}}">{{errors.contactName}}</text>
+      </view>
+      
+      <!-- 联系人电话 -->
+      <view class="form-item">
+        <text class="label required">联系人电话</text>
+        <input 
+          class="input" 
+          placeholder="请输入联系人电话" 
+          placeholder-class="placeholder" 
+          value="{{formData.contactPhone}}" 
+          bindinput="inputChange" 
+          data-field="contactPhone"
+          type="number"
+        />
+        <text class="error" wx:if="{{errors.contactPhone}}">{{errors.contactPhone}}</text>
+      </view>
+      
+      <!-- 联系人邮箱 -->
+      <view class="form-item">
+        <text class="label">联系人邮箱</text>
+        <input 
+          class="input" 
+          placeholder="请输入联系人邮箱" 
+          placeholder-class="placeholder" 
+          value="{{formData.contactEmail}}" 
+          bindinput="inputChange" 
+          data-field="contactEmail"
+          type="text"
+        />
+      </view>
+    </view>
+    
+    <!-- 其他信息 -->
+    <view class="form-section">
+      <text class="section-title">其他信息</text>
+      
+      <!-- 商家描述 -->
+      <view class="form-item">
+        <text class="label">商家描述</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请输入商家描述" 
+          placeholder-class="placeholder" 
+          value="{{formData.description}}" 
+          bindinput="inputChange" 
+          data-field="description"
+          maxlength="500"
+        ></textarea>
+        <text class="count">{{formData.description.length}}/500</text>
+      </view>
+      
+      <!-- 商家Logo -->
+      <view class="form-item">
+        <text class="label">商家Logo</text>
+        <template is="uploadComponent" data="{{type: 'logo', uploadText: '上传商家Logo', imagePreview, errors}}" />
+      </view>
+      
+      <!-- 商家封面 -->
+      <view class="form-item">
+        <text class="label">商家封面</text>
+        <template is="uploadComponent" data="{{type: 'coverImage', uploadText: '上传商家封面', imagePreview, errors}}" />
+      </view>
+    </view>
+    
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+      <button 
+        class="submit-btn" 
+        bindtap="submitApply" 
+        loading="{{submitting}}"
+        disabled="{{submitting || uploading}}"
+      >
+        {{submitting ? '提交中...' : '提交申请'}}
+      </button>
+    </view>
+  </form>
+</view>

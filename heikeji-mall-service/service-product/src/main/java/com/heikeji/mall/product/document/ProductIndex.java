@@ -42,25 +42,25 @@ public class ProductIndex {
     @Field(type = FieldType.Keyword, index = false)
     private String images;
 
-    @Field(type = FieldType.Double)
+    @Field(type = FieldType.Keyword) // 改为Keyword避免精度丢失
     private BigDecimal price;
 
-    @Field(type = FieldType.Double)
+    @Field(type = FieldType.Keyword) // 改为Keyword避免精度丢失
     private BigDecimal originalPrice;
 
-    @Field(type = FieldType.Integer)
+    @Field(type = FieldType.Integer, index = true) // 添加索引，方便按库存过滤
     private Integer stock;
 
-    @Field(type = FieldType.Integer)
+    @Field(type = FieldType.Integer, index = false) // 锁定库存不需要搜索，不建索引
     private Integer lockedStock;
 
-    @Field(type = FieldType.Integer)
+    @Field(type = FieldType.Integer, index = true) // 添加索引，方便按销量排序和搜索
     private Integer sales;
 
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String detail;
 
-    @Field(type = FieldType.Integer)
+    @Field(type = FieldType.Integer, index = true) // 添加索引，方便按状态过滤
     private Integer status;
 
     @Field(type = FieldType.Integer)
@@ -77,6 +77,18 @@ public class ProductIndex {
 
     @Field(type = FieldType.Integer)
     private Integer version;
+    
+    /**
+     * 是否新品
+     */
+    @Field(type = FieldType.Integer, index = true)
+    private Integer isNew;
+    
+    /**
+     * 是否推荐
+     */
+    @Field(type = FieldType.Integer, index = true)
+    private Integer isRecommend;
 
     // Convert from Product entity to ProductIndex
     public static ProductIndex fromProduct(Product product) {
@@ -100,6 +112,8 @@ public class ProductIndex {
         index.setUpdateTime(product.getUpdateTime());
         index.setDelFlag(product.getDelFlag());
         index.setVersion(product.getVersion());
+        index.setIsNew(product.getIsNew());
+        index.setIsRecommend(product.getIsRecommend());
         return index;
     }
 }

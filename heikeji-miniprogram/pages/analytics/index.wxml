@@ -1,0 +1,110 @@
+<!-- 数据分析页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">数据分析</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 用户统计概览 -->
+  <view class="stats-overview">
+    <view class="stat-card">
+      <text class="stat-value">{{consumptionStats.totalAmount || '0.00'}}</text>
+      <text class="stat-label">总消费(元)</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{orderStats.totalOrders || 0}}</text>
+      <text class="stat-label">总订单</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{orderStats.completedOrders || 0}}</text>
+      <text class="stat-label">完成订单</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{preferences.categories && preferences.categories.length || 0}}</text>
+      <text class="stat-label">偏好分类</text>
+    </view>
+  </view>
+
+  <!-- 消费统计 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">消费统计</text>
+    </view>
+    <view class="chart-container">
+      <text class="chart-placeholder">消费趋势图表</text>
+    </view>
+    <view class="stat-details">
+      <view class="detail-item">
+        <text class="detail-label">月均消费</text>
+        <text class="detail-value">¥{{consumptionStats.monthlyAvg || '0.00'}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">最高单笔</text>
+        <text class="detail-value">¥{{consumptionStats.maxOrder || '0.00'}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">最常消费</text>
+        <text class="detail-value">{{consumptionStats.favoriteMerchant || '暂无'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单统计 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">订单统计</text>
+    </view>
+    <view class="chart-container">
+      <text class="chart-placeholder">订单类型分布</text>
+    </view>
+    <view class="stat-details">
+      <view class="detail-item">
+        <text class="detail-label">外卖订单</text>
+        <text class="detail-value">{{orderStats.takeoutOrders || 0}}单</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">商品订单</text>
+        <text class="detail-value">{{orderStats.productOrders || 0}}单</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">跑腿订单</text>
+        <text class="detail-value">{{orderStats.errandOrders || 0}}单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 偏好标签 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">我的偏好</text>
+    </view>
+    <view class="preference-tags">
+      <view class="tag-item" wx:for="{{preferences.categories || []}}" wx:key="index">
+        <text class="tag-text">{{item}}</text>
+      </view>
+      <view class="tag-item" wx:if="{{(!preferences.categories || preferences.categories.length === 0)}}">
+        <text class="tag-text">暂无偏好数据</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门推荐 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">热门推荐</text>
+    </view>
+    <view class="recommended-products">
+      <view class="product-item" wx:for="{{recommendedProducts}}" wx:key="id" bindtap="goToProductDetail" data-id="{{item.id}}">
+        <image src="{{item.image}}" class="product-image" mode="aspectFill" />
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-price">¥{{item.price}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

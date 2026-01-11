@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member.mapper;
+package com.heikeji.mall.member.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.heikeji.mall.member.entity.MemberReceiveAddress;

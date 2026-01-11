@@ -1,0 +1,37 @@
+<!-- 消息详情页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">消息详情</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 消息内容 -->
+  <view class="message-detail" wx:if="{{!loading}}">
+    <!-- 消息标题 -->
+    <view class="message-header">
+      <text class="message-title">{{messageDetail.title}}</text>
+      <text class="message-time">{{messageDetail.createTime}}</text>
+    </view>
+    
+    <!-- 消息正文 -->
+    <view class="message-content">
+      <text class="content-text">{{messageDetail.content}}</text>
+    </view>
+    
+    <!-- 消息类型标签 -->
+    <view class="message-footer">
+      <view class="type-tag {{messageDetail.type}}">
+        <text>{{messageDetail.type === 'system' ? '系统通知' : messageDetail.type === 'order' ? '订单消息' : messageDetail.type === 'service' ? '服务消息' : '活动消息'}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view wx:elif="{{loading}}" class="loading-container">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

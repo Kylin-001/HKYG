@@ -1,16 +1,19 @@
 package com.heikeji.mall.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heikeji.common.core.exception.BaseException;
 import com.heikeji.mall.product.document.ProductIndex;
+import com.heikeji.mall.product.dto.ProductDetailVO;
+import com.heikeji.mall.product.dto.ProductListVO;
 import com.heikeji.mall.product.entity.Product;
 import com.heikeji.mall.product.mapper.ProductMapper;
 import com.heikeji.mall.product.service.ProductService;
 import com.heikeji.mall.product.service.ProductViewHistoryService;
 import com.heikeji.mall.product.service.ProductElasticsearchService;
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,22 +44,69 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     private ProductElasticsearchService productElasticsearchService;
 
     @Override
-    @Cacheable(value = "productCache", key = "#productId", unless = "#result == null")
+    @Cacheable(value = "productCache", key = "'product_' + #productId", unless = "#result == null", cacheManager = "cacheManager")
     public Product getById(Long productId) {
         log.info("从数据库获取商品信息，商品ID: {}", productId);
         Product product = super.getById(productId);
-        if (product == null || product.getDelFlag() == 1) {
+        if (product == null || (product.getDelFlag() != null && product.getDelFlag() == 1)) {
             throw new BaseException("商品不存在");
         }
-        if (product.getStatus() != 1) {
+        if (product.getStatus() == null || product.getStatus() != 1) {
             throw new BaseException("商品已下架");
         }
         return product;
     }
+    
+    /**
+     * 将Product转换为ProductListVO
+     */
+    private ProductListVO convertToProductListVO(Product product) {
+        ProductListVO vo = new ProductListVO();
+        vo.setId(product.getId());
+        vo.setMerchantId(product.getMerchantId());
+        vo.setCategoryId(product.getCategoryId());
+        vo.setName(product.getName());
+        vo.setSubtitle(product.getSubtitle());
+        vo.setMainImage(product.getMainImage());
+        vo.setPrice(product.getPrice());
+        vo.setOriginalPrice(product.getOriginalPrice());
+        vo.setStock(product.getStock());
+        vo.setSales(product.getSales());
+        vo.setStatus(product.getStatus());
+        vo.setIsNew(product.getIsNew());
+        vo.setIsRecommend(product.getIsRecommend());
+        return vo;
+    }
+    
+    /**
+     * 将Product转换为ProductDetailVO
+     */
+    private ProductDetailVO convertToProductDetailVO(Product product) {
+        ProductDetailVO vo = new ProductDetailVO();
+        vo.setId(product.getId());
+        vo.setMerchantId(product.getMerchantId());
+        vo.setCategoryId(product.getCategoryId());
+        vo.setName(product.getName());
+        vo.setSubtitle(product.getSubtitle());
+        vo.setMainImage(product.getMainImage());
+        vo.setImages(product.getImages());
+        vo.setPrice(product.getPrice());
+        vo.setOriginalPrice(product.getOriginalPrice());
+        vo.setStock(product.getStock());
+        vo.setLockedStock(product.getLockedStock());
+        vo.setSales(product.getSales());
+        vo.setDetail(product.getDetail());
+        vo.setStatus(product.getStatus());
+        vo.setIsNew(product.getIsNew());
+        vo.setIsRecommend(product.getIsRecommend());
+        vo.setCreateTime(product.getCreateTime());
+        vo.setUpdateTime(product.getUpdateTime());
+        return vo;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "productCache", allEntries = true)
+    @CacheEvict(value = "productCache", allEntries = true) // 新增商品时清除所有缓存，因为可能影响热门商品等列表
     public boolean save(Product product) {
         boolean result = super.save(product);
         
@@ -72,7 +122,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "productCache", allEntries = true)
+    @CacheEvict(value = "productCache", key = "'product_' + #product.id")
     public boolean updateById(Product product) {
         boolean result = super.updateById(product);
         
@@ -88,7 +138,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "productCache", allEntries = true)
+    @CacheEvict(value = "productCache", key = "'product_' + #product.id")
     public boolean removeById(Product product) {
         // 逻辑删除商品
         product.setDelFlag(1);
@@ -128,7 +178,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
-    @Cacheable(value = "productCache", key = "#productIds", unless = "#result == null or #result.isEmpty()")
+    @Cacheable(value = "productCache", key = "'product_ids_' + #productIds.toString().replaceAll('\\s', '')", unless = "#result == null or #result.isEmpty()")
     public List<Product> getByIds(List<Long> productIds) {
         if (productIds == null || productIds.isEmpty()) {
             return null;
@@ -139,7 +189,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         List<Product> products = this.listByIds(productIds);
         
         // 过滤出有效的商品（未删除且已上架）
-        products.removeIf(product -> product == null || product.getDelFlag() == 1 || product.getStatus() != 1);
+        products.removeIf(product -> product == null || (product.getDelFlag() != null && product.getDelFlag() == 1) || (product.getStatus() != null && product.getStatus() != 1));
         
         return products;
     }
@@ -275,19 +325,17 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         wrapper.eq("del_flag", 0)
                .eq("status", 1);
         
-        // 获取热门推荐商品（按销量降序）
+        // 获取热门商品（按销量降序）
         QueryWrapper<Product> hotWrapper = new QueryWrapper<Product>();
-        hotWrapper.eq("del_flag", 0)
-                 .eq("status", 1)
-                 .orderByDesc("sales")
+        hotWrapper.eq("status", 1)
+                 .orderByDesc("sales_count")
                  .last("LIMIT " + limit);
         List<Product> hotProducts = this.list(hotWrapper);
         
         // 获取新上架商品（按创建时间降序）
         QueryWrapper<Product> newWrapper = new QueryWrapper<Product>();
-        newWrapper.eq("del_flag", 0)
-                 .eq("status", 1)
-                 .orderByDesc("create_time")
+        newWrapper.eq("status", 1)
+                 .orderByDesc("created_at")
                  .last("LIMIT " + limit);
         List<Product> newProducts = this.list(newWrapper);
         
@@ -298,9 +346,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
+    @Cacheable(value = "productCache", key = "'page_' + #page.getCurrent() + '_' + #page.getSize() + '_' + #product.toString().replaceAll('\\s', '')", unless = "#result == null")
     public Page<Product> pageProduct(Page<Product> page, Product product) {
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
-        wrapper.eq("del_flag", 0);
         
         if (product != null) {
             if (product.getMerchantId() != null) {
@@ -322,10 +370,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
 
     @Override
+    @Cacheable(value = "productCache", key = "'merchant_' + #merchantId", unless = "#result == null or #result.isEmpty()")
     public List<Product> getByMerchantId(Long merchantId) {
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
         wrapper.eq("merchant_id", merchantId)
-               .eq("del_flag", 0)
                .eq("status", 1)
                .orderByDesc("update_time");
         return this.list(wrapper);
@@ -336,9 +384,8 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     public List<Product> getByCategoryId(Long categoryId) {
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
         wrapper.eq("category_id", categoryId)
-               .eq("del_flag", 0)
                .eq("status", 1)
-               .orderByDesc("sales");
+               .orderByDesc("sales_count");
         return this.list(wrapper);
     }
 
@@ -371,7 +418,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
     
     @Override
-    @Cacheable(value = "product", key = "'search_'+#page.current+'_'+#page.size+'_'+#searchDTO.hashCode()")
+    @Cacheable(value = "productCache", key = "'search_'+#page.current+'_'+#page.size+'_'+#searchDTO.hashCode()")
     public Page<Product> advancedSearch(Page<Product> page, com.heikeji.mall.product.dto.ProductSearchDTO searchDTO) {
         try {
             log.info("使用Elasticsearch进行商品搜索，条件：{}", searchDTO);
@@ -388,25 +435,25 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     }
     
     @Override
-    @Cacheable(value = "product", key = "'category_children_'+#categoryId")
+    @Cacheable(value = "productCache", key = "'category_children_'+#categoryId")
     public List<Product> getByCategoryAndChildren(Long categoryId) {
         return this.getBaseMapper().selectByCategoryAndChildren(categoryId);
     }
     
     @Override
-    @Cacheable(value = "product", key = "'hot_list_'+#limit")
+    @Cacheable(value = "productCache", key = "'hot_list_'+#limit")
     public List<Product> getHotProductList(Integer limit) {
         return this.getBaseMapper().selectHotProducts(limit);
     }
     
     @Override
-    @Cacheable(value = "product", key = "'new_list_'+#limit")
+    @Cacheable(value = "productCache", key = "'new_list_'+#limit")
     public List<Product> getNewProductList(Integer limit) {
         return this.getBaseMapper().selectNewProducts(limit);
     }
     
     @Override
-    @Cacheable(value = "product", key = "'recommend_list_'+#limit")
+    @Cacheable(value = "productCache", key = "'recommend_list_'+#limit")
     public List<Product> getRecommendProductList(Integer limit) {
         return this.getBaseMapper().selectRecommendProducts(limit);
     }
@@ -498,5 +545,64 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             // 发生异常时返回通用推荐
             return getRecommendProductList(limit);
         }
+    }
+    
+    @Override
+    public Integer getProductCount() {
+        // 查询未删除的商品总数
+        return Math.toIntExact(count(new LambdaQueryWrapper<Product>().eq(Product::getDelFlag, 0)));
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "productCache", allEntries = true)
+    public Boolean setAlertStock(Long productId, Integer alertStock) {
+        Product product = this.getById(productId);
+        if (product == null || product.getDelFlag() == 1) {
+            throw new RuntimeException("商品不存在");
+        }
+        
+        product.setAlertStock(alertStock);
+        boolean result = this.updateById(product);
+        log.info("设置商品库存预警阈值，商品ID：{}，预警阈值：{}", productId, alertStock);
+        return result;
+    }
+    
+    @Override
+    public List<Product> getAlertStockProducts() {
+        // 查询库存不足的商品（库存 <= 预警阈值且状态为已上架）
+        return this.list(new LambdaQueryWrapper<Product>()
+                .eq(Product::getDelFlag, 0)
+                .eq(Product::getStatus, 1)
+                .ge(Product::getAlertStock, 0)
+                .apply("stock <= alert_stock")
+                .orderByAsc(Product::getStock));
+    }
+    
+    @Override
+    public Boolean checkAlertStock(Long productId) {
+        Product product = this.getById(productId);
+        if (product == null || product.getDelFlag() == 1) {
+            throw new RuntimeException("商品不存在");
+        }
+        
+        // 检查库存是否低于预警阈值
+        boolean needAlert = product.getAlertStock() != null 
+                && product.getAlertStock() > 0 
+                && product.getStock() <= product.getAlertStock();
+        log.info("检查商品库存预警，商品ID：{}，库存：{}，预警阈值：{}，需要预警：{}", 
+                productId, product.getStock(), product.getAlertStock(), needAlert);
+        return needAlert;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "productCache", allEntries = true)
+    public void batchDeleteByIds(List<Long> ids) {
+        Product product = new Product();
+        product.setDelFlag(1);
+        product.setUpdateTime(new Date());
+        this.update(product, new QueryWrapper<Product>().in("id", ids));
+        log.info("批量删除商品成功，商品ID列表：{}，共删除{}条记录", ids, ids.size());
     }
 }

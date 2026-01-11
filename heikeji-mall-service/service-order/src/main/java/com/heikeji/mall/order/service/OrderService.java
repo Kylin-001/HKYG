@@ -5,6 +5,7 @@ import com.heikeji.mall.order.domain.vo.OrderDetailVO;
 import com.heikeji.mall.order.domain.vo.OrderListVO;
 import com.heikeji.mall.order.entity.Order;
 import com.heikeji.mall.order.entity.OrderItem;
+import java.math.BigDecimal;
 import java.util.Date;
 import com.heikeji.mall.takeout.dto.CreateTakeoutOrderDTO;
 
@@ -181,4 +182,169 @@ public interface OrderService extends IService<Order> {
      * @return 确认收货的订单数量
      */
     int autoConfirmReceivedOrders();
+    
+    /**
+     * 申请退款
+     * @param orderNo 订单号
+     * @param userId 用户ID
+     * @param refundReason 退款原因
+     * @param refundAmount 退款金额
+     * @return 是否申请成功
+     */
+    Boolean applyRefund(String orderNo, Long userId, String refundReason, BigDecimal refundAmount);
+    
+    /**
+     * 处理退款申请
+     * @param orderNo 订单号
+     * @param status 处理状态
+     * @param handler 处理人
+     * @return 是否处理成功
+     */
+    Boolean processRefund(String orderNo, Integer status, String handler);
+    
+    /**
+     * 获取退款中的订单
+     * @return 退款中订单列表
+     */
+    List<Order> getRefundingOrders();
+    
+    /**
+     * 退款成功后的订单处理
+     * @param orderNo 订单号
+     * @param refundTradeNo 退款交易号
+     * @param refundTime 退款时间
+     * @return 是否处理成功
+     */
+    Boolean processRefundSuccess(String orderNo, String refundTradeNo, Date refundTime);
+    
+    /**
+     * 退款失败后的订单处理
+     * @param orderNo 订单号
+     * @param failReason 失败原因
+     * @return 是否处理成功
+     */
+    Boolean processRefundFail(String orderNo, String failReason);
+    
+    /**
+     * 获取订单的退款日志
+     * @param orderId 订单ID
+     * @return 退款日志列表
+     */
+    List<Map<String, Object>> getOrderRefundLogs(Long orderId);
+    
+    /**
+     * 获取订单的退款日志
+     * @param orderNo 订单号
+     * @return 退款日志列表
+     */
+    List<Map<String, Object>> getOrderRefundLogsByOrderNo(String orderNo);
+    
+    /**
+     * 获取退款统计数据
+     * @return 退款统计数据
+     */
+    Map<String, Object> getRefundStatistics();
+    
+    /**
+     * 获取退款原因分布
+     * @return 退款原因分布列表
+     */
+    List<Map<String, Object>> getRefundReasonDistribution();
+    
+    /**
+     * 获取退款状态分布
+     * @return 退款状态分布列表
+     */
+    List<Map<String, Object>> getRefundStatusDistribution();
+    
+    /**
+     * 获取退款金额区间分布
+     * @return 退款金额区间分布列表
+     */
+    List<Map<String, Object>> getRefundAmountRangeDistribution();
+    
+    /**
+     * 按时间范围获取退款统计数据
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 退款统计数据
+     */
+    Map<String, Object> getRefundStatisticsByTimeRange(Date startTime, Date endTime);
+    
+    /**
+     * 获取订单统计数据
+     * @return 订单统计数据
+     */
+    Map<String, Object> getOrderStatistics();
+    
+    /**
+     * 按时间范围获取订单统计数据
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 订单统计数据
+     */
+    Map<String, Object> getOrderStatisticsByTimeRange(Date startTime, Date endTime);
+    
+    /**
+     * 获取订单状态分布
+     * @return 订单状态分布列表
+     */
+    List<Map<String, Object>> getOrderStatusDistribution();
+    
+    /**
+     * 获取订单金额区间分布
+     * @return 订单金额区间分布列表
+     */
+    List<Map<String, Object>> getOrderAmountRangeDistribution();
+    
+    /**
+     * 获取订单趋势数据
+     * @param type 时间类型：day, week, month
+     * @param count 数量
+     * @return 订单趋势数据列表
+     */
+    List<Map<String, Object>> getOrderTrend(String type, Integer count);
+    
+    /**
+     * 获取热门商品订单统计
+     * @param limit 数量限制
+     * @return 热门商品订单统计列表
+     */
+    List<Map<String, Object>> getHotProductsOrderStatistics(Integer limit);
+    
+    /**
+     * 获取用户订单统计
+     * @param userId 用户ID
+     * @return 用户订单统计数据
+     */
+    Map<String, Object> getUserOrderStatistics(Long userId);
+    
+    /**
+     * 智能分配订单给商家
+     * @param order 订单对象
+     * @return 是否分配成功
+     */
+    Boolean intelligentAssignOrder(Order order);
+    
+    /**
+     * 根据订单ID分配订单
+     * @param orderId 订单ID
+     * @return 是否分配成功
+     */
+    Boolean assignOrderById(Long orderId);
+    
+    /**
+     * 获取商家当前订单负载
+     * @param merchantId 商家ID
+     * @return 商家当前订单负载
+     */
+    Integer getMerchantOrderLoad(Long merchantId);
+    
+    /**
+     * 获取推荐的商家列表
+     * @param order 订单对象
+     * @param limit 数量限制
+     * @return 推荐商家列表
+     */
+    List<Map<String, Object>> getRecommendedMerchants(Order order, Integer limit);
 }

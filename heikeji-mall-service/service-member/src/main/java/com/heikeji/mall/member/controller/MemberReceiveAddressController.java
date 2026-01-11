@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member.controller;
+package com.heikeji.mall.member.controller;
 
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.member.entity.MemberReceiveAddress;
@@ -40,7 +40,7 @@ public class MemberReceiveAddressController {
     public R<MemberReceiveAddress> getAddressDetail(@PathVariable Long id) {
         MemberReceiveAddress address = memberReceiveAddressService.getById(id);
         if (address == null) {
-            return R.error("鍦板潃涓嶅瓨鍦?);
+            return R.error("地址不存在");
         }
         return R.success(address);
     }

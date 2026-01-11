@@ -1,0 +1,82 @@
+<!-- 空教室查询页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">空教室查询</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 查询条件 -->
+  <view class="search-conditions">
+    <!-- 日期选择 -->
+    <view class="condition-item">
+      <text class="condition-label">日期</text>
+      <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+        <view class="condition-value">{{selectedDate}}</view>
+      </picker>
+    </view>
+
+    <!-- 时间段选择 -->
+    <view class="condition-item">
+      <text class="condition-label">时间段</text>
+      <picker range="{{timeRanges}}" value="{{selectedTimeIndex}}" bindchange="onTimeChange">
+        <view class="condition-value">{{timeRanges[selectedTimeIndex]}}</view>
+      </picker>
+    </view>
+
+    <!-- 教学楼选择 -->
+    <view class="condition-item">
+      <text class="condition-label">教学楼</text>
+      <picker range="{{buildings}}" value="{{selectedBuildingIndex}}" bindchange="onBuildingChange">
+        <view class="condition-value">{{buildings[selectedBuildingIndex]}}</view>
+      </picker>
+    </view>
+
+    <!-- 楼层选择 -->
+    <view class="condition-item">
+      <text class="condition-label">楼层</text>
+      <picker range="{{floors}}" value="{{selectedFloorIndex}}" bindchange="onFloorChange">
+        <view class="condition-value">{{selectedFloorIndex > 0 ? floors[selectedFloorIndex] : '全部楼层'}}</view>
+      </picker>
+    </view>
+
+    <!-- 查询按钮 -->
+    <button class="search-btn" bindtap="searchEmptyClassrooms">查询空教室</button>
+  </view>
+
+  <!-- 查询结果 -->
+  <view class="result-section">
+    <view class="result-header">
+      <text class="result-title">查询结果</text>
+      <text class="result-count">{{classrooms.length}}间空教室</text>
+    </view>
+
+    <!-- 教室列表 -->
+    <view class="classroom-list">
+      <view class="classroom-item" wx:for="{{classrooms}}" wx:key="id" bindtap="navigateToClassroomDetail" data-id="{{item.id}}">
+        <view class="classroom-info">
+          <text class="classroom-name">{{item.name}}</text>
+          <text class="classroom-capacity">{{item.capacity}}人</text>
+        </view>
+        <view class="classroom-location">
+          <text>{{item.building}} {{item.floor}}层</text>
+        </view>
+        <view class="classroom-status empty">空教室</view>
+      </view>
+      
+      <!-- 无结果提示 -->
+      <view class="no-result" wx:if="{{classrooms.length === 0 && !isLoading}}">
+        <text>当前条件下没有找到空教室</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <loading></loading>
+    <text>正在查询...</text>
+  </view>
+</view>

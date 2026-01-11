@@ -1,0 +1,149 @@
+<!-- pages/forum/index.wxml -->
+<view class="forum-container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrap {{showSearch ? 'active' : ''}}">
+      <image class="search-icon" src="/assets/icons/search.png" mode="aspectFit"></image>
+      <input 
+        class="search-input" 
+        placeholder="搜索帖子..." 
+        value="{{searchKeyword}}" 
+        bindinput="onSearchInput" 
+        bindconfirm="onSearch"
+        focus="{{showSearch}}"
+      ></input>
+      <image class="close-icon" src="/assets/icons/close.png" mode="aspectFit" bindtap="toggleSearch"></image>
+    </view>
+    <view class="search-btn" bindtap="toggleSearch" wx:if="{{!showSearch}}">
+      <image class="search-btn-icon" src="/assets/icons/search.png" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 分类导航 -->
+  <scroll-view class="category-scroll" scroll-x>
+    <view class="category-item {{selectedCategory === 0 ? 'active' : ''}}" data-id="0" bindtap="onCategoryChange">
+      全部
+    </view>
+    <view 
+      class="category-item {{selectedCategory === item.id ? 'active' : ''}}" 
+      wx:for="{{categories}}" 
+      wx:key="id" 
+      data-id="{{item.id}}" 
+      bindtap="onCategoryChange"
+    >
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <!-- 标签切换 -->
+  <view class="tab-bar">
+    <view 
+      class="tab-item {{selectedTab === item.id ? 'active' : ''}}" 
+      wx:for="{{tabBar}}" 
+      wx:key="id" 
+      data-id="{{item.id}}" 
+      bindtap="onTabChange"
+    >
+      {{item.name}}
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view 
+    class="content-scroll" 
+    scroll-y 
+    bindscrolltolower="onReachBottom"
+    refresher-enabled="true"
+    refresher-triggered="{{refreshing}}"
+    refresher-background="#f5f5f5"
+    refresher-default-style="black"
+  >
+    <!-- 热门帖子 -->
+    <view class="hot-posts" wx:if="{{selectedTab === 'all'}}">
+      <view class="section-title">
+        <text class="title-text">热门推荐</text>
+        <text class="more-text">查看更多</text>
+      </view>
+      <view class="hot-posts-list">
+        <view 
+          class="hot-post-item" 
+          wx:for="{{hotPosts}}" 
+          wx:key="id" 
+          data-id="{{item.id}}" 
+          bindtap="onHotPostTap"
+        >
+          <text class="hot-post-title">{{item.title}}</text>
+          <view class="hot-post-meta">
+            <text class="author">{{item.author}}</text>
+            <view class="stats">
+              <image class="stat-icon" src="/assets/icons/like.png" mode="aspectFit"></image>
+              <text class="stat-text">{{item.likeCount}}</text>
+              <image class="stat-icon" src="/assets/icons/comment.png" mode="aspectFit"></image>
+              <text class="stat-text">{{item.commentCount}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 帖子列表 -->
+    <view class="post-list">
+      <view 
+        class="post-item" 
+        wx:for="{{postList}}" 
+        wx:key="id" 
+        data-id="{{item.id}}" 
+        bindtap="onPostTap"
+      >
+        <view class="post-header">
+          <image class="avatar" src="{{item.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFit"></image>
+          <view class="author-info">
+            <text class="author-name">{{item.author}}</text>
+            <text class="post-time">{{item.createTime}}</text>
+          </view>
+        </view>
+        <view class="post-content">
+          <text class="post-title">{{item.title}}</text>
+          <text class="post-excerpt">{{item.content}}</text>
+        </view>
+        <view class="post-footer">
+          <view class="post-stats">
+            <view class="stat-item">
+              <image class="stat-icon" src="/assets/icons/eye.png" mode="aspectFit"></image>
+              <text class="stat-text">{{item.viewCount || 0}}</text>
+            </view>
+            <view class="stat-item">
+              <image class="stat-icon" src="/assets/icons/like.png" mode="aspectFit"></image>
+              <text class="stat-text">{{item.likeCount || 0}}</text>
+            </view>
+            <view class="stat-item">
+              <image class="stat-icon" src="/assets/icons/comment.png" mode="aspectFit"></image>
+              <text class="stat-text">{{item.commentCount || 0}}</text>
+            </view>
+            <view class="stat-item">
+              <image class="stat-icon" src="/assets/icons/favorite.png" mode="aspectFit"></image>
+              <text class="stat-text">{{item.favoriteCount || 0}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="loading-more" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+    <view class="no-more" wx:if="{{!hasMore && postList.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+    <view class="empty" wx:if="{{!loading && postList.length === 0}}">
+      <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无帖子</text>
+    </view>
+  </scroll-view>
+
+  <!-- 发布按钮 -->
+  <view class="publish-btn" bindtap="onPublish">
+    <image class="publish-icon" src="/assets/icons/add.png" mode="aspectFit"></image>
+  </view>
+</view>

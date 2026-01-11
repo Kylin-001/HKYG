@@ -144,4 +144,120 @@ public class OrderController {
             return R.error("确认收货失败");
         }
     }
+    
+    /**
+     * 获取订单统计数据
+     */
+    @GetMapping("/statistics")
+    public R<?> getOrderStatistics() {
+        try {
+            // 调用服务层方法获取订单统计数据
+            Map<String, Object> statistics = orderService.getOrderStatistics();
+            return R.success(statistics);
+        } catch (Exception e) {
+            log.error("获取订单统计数据失败", e);
+            return R.error("获取订单统计数据失败");
+        }
+    }
+    
+    /**
+     * 按时间范围获取订单统计数据
+     */
+    @GetMapping("/statistics/time-range")
+    public R<?> getOrderStatisticsByTimeRange(
+            @RequestParam String startTime,
+            @RequestParam String endTime) {
+        try {
+            // 解析时间参数
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date startDate = sdf.parse(startTime);
+            java.util.Date endDate = sdf.parse(endTime);
+            
+            // 调用服务层方法获取时间范围内的订单统计数据
+            Map<String, Object> statistics = orderService.getOrderStatisticsByTimeRange(startDate, endDate);
+            return R.success(statistics);
+        } catch (Exception e) {
+            log.error("获取时间范围内订单统计数据失败", e);
+            return R.error("获取时间范围内订单统计数据失败");
+        }
+    }
+    
+    /**
+     * 获取订单状态分布
+     */
+    @GetMapping("/statistics/status-distribution")
+    public R<?> getOrderStatusDistribution() {
+        try {
+            // 调用服务层方法获取订单状态分布
+            java.util.List<java.util.Map<String, Object>> distribution = orderService.getOrderStatusDistribution();
+            return R.success(distribution);
+        } catch (Exception e) {
+            log.error("获取订单状态分布失败", e);
+            return R.error("获取订单状态分布失败");
+        }
+    }
+    
+    /**
+     * 获取订单金额区间分布
+     */
+    @GetMapping("/statistics/amount-range-distribution")
+    public R<?> getOrderAmountRangeDistribution() {
+        try {
+            // 调用服务层方法获取订单金额区间分布
+            java.util.List<java.util.Map<String, Object>> distribution = orderService.getOrderAmountRangeDistribution();
+            return R.success(distribution);
+        } catch (Exception e) {
+            log.error("获取订单金额区间分布失败", e);
+            return R.error("获取订单金额区间分布失败");
+        }
+    }
+    
+    /**
+     * 获取订单趋势数据
+     */
+    @GetMapping("/statistics/trend")
+    public R<?> getOrderTrend(
+            @RequestParam(defaultValue = "day") String type,
+            @RequestParam(defaultValue = "7") Integer count) {
+        try {
+            // 调用服务层方法获取订单趋势数据
+            java.util.List<java.util.Map<String, Object>> trend = orderService.getOrderTrend(type, count);
+            return R.success(trend);
+        } catch (Exception e) {
+            log.error("获取订单趋势数据失败", e);
+            return R.error("获取订单趋势数据失败");
+        }
+    }
+    
+    /**
+     * 获取热门商品订单统计
+     */
+    @GetMapping("/statistics/hot-products")
+    public R<?> getHotProductsOrderStatistics(
+            @RequestParam(defaultValue = "10") Integer limit) {
+        try {
+            // 调用服务层方法获取热门商品订单统计
+            java.util.List<java.util.Map<String, Object>> hotProducts = orderService.getHotProductsOrderStatistics(limit);
+            return R.success(hotProducts);
+        } catch (Exception e) {
+            log.error("获取热门商品订单统计失败", e);
+            return R.error("获取热门商品订单统计失败");
+        }
+    }
+    
+    /**
+     * 获取用户订单统计
+     */
+    @GetMapping("/statistics/user")
+    public R<?> getUserOrderStatistics(
+            @RequestParam Long userId) {
+        try {
+            // 调用服务层方法获取用户订单统计
+            Map<String, Object> statistics = orderService.getUserOrderStatistics(userId);
+            return R.success(statistics);
+        } catch (Exception e) {
+            log.error("获取用户订单统计失败", e);
+            return R.error("获取用户订单统计失败");
+        }
+    }
 }

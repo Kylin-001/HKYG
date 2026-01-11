@@ -1,0 +1,98 @@
+<!-- 图书搜索页面 -->
+<view class="book-search-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-container">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit"></image>
+      <input 
+        class="search-input" 
+        placeholder="搜索图书名称、作者或ISBN" 
+        placeholder-class="placeholder-text"
+        value="{{searchKeyword}}"
+        bindinput="onInput"
+        bindconfirm="onSearch"
+      ></input>
+      <view class="clear-btn" wx:if="{{searchKeyword}}" bindtap="clearSearch">
+        <image src="/assets/icons/clear.png" class="clear-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+    <text class="search-btn" bindtap="onSearch">搜索</text>
+  </view>
+
+  <!-- 搜索历史 -->
+  <view class="search-history" wx:if="{{searchHistory.length > 0 && !isSearching}}">
+    <view class="history-header">
+      <text class="history-title">搜索历史</text>
+      <text class="clear-history" bindtap="clearHistory">清空历史</text>
+    </view>
+    <view class="history-list">
+      <view class="history-item" wx:for="{{searchHistory}}" wx:key="index" bindtap="searchByHistory" data-keyword="{{item}}">
+        {{item}}
+        <image src="/assets/icons/delete.png" class="delete-icon" mode="aspectFit" bindtap="deleteHistoryItem" data-index="{{index}}"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门搜索 -->
+  <view class="hot-search" wx:if="{{!isSearching}}">
+    <text class="hot-title">热门搜索</text>
+    <view class="hot-list">
+      <view class="hot-item" wx:for="{{hotSearchList}}" wx:key="index" bindtap="searchByHot" data-keyword="{{item}}">
+        {{item}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-result" wx:if="{{isSearching || searchResult.length > 0}}">
+    <view class="result-header" wx:if="{{searchResult.length > 0}}">
+      <text class="result-count">找到 {{searchResult.length}} 本相关图书</text>
+    </view>
+    
+    <!-- 搜索结果列表 -->
+    <view class="book-list">
+      <view 
+        class="book-item" 
+        wx:for="{{searchResult}}" 
+        wx:key="id" 
+        bindtap="navigateToBookDetail" 
+        data-id="{{item.id}}"
+      >
+        <image class="book-cover" src="{{item.cover || '/assets/icons/book-placeholder.png'}}" mode="aspectFill"></image>
+        <view class="book-info">
+          <text class="book-title">{{item.title}}</text>
+          <text class="book-author">作者：{{item.author}}</text>
+          <text class="book-publisher">出版社：{{item.publisher}}</text>
+          <text class="book-isbn">ISBN：{{item.isbn}}</text>
+          <view class="book-status">
+            <text class="status-tag {{item.available ? 'available' : 'unavailable'}}">
+              {{item.available ? '可借阅' : '已借出'}}
+            </text>
+            <text class="available-count" wx:if="{{item.availableCount}}">
+              可借：{{item.availableCount}} / {{item.totalCount}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 空结果 -->
+    <view class="empty-result" wx:if="{{isSearching && searchResult.length === 0}}">
+      <image src="/assets/icons/empty.png" class="empty-icon" mode="aspectFit"></image>
+      <text class="empty-text">未找到相关图书</text>
+      <text class="empty-hint">请尝试其他关键词</text>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore}}">
+      <text class="load-text" bindtap="loadMore">加载更多</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <view class="loading-content">
+      <text class="loading-text">搜索中...</text>
+    </view>
+  </view>
+</view>

@@ -66,6 +66,20 @@ const computedBreadcrumbs = computed<BreadcrumbItem[]>(() => {
   }))
 })
 
+// 获取面包屑数据
+const getBreadcrumb = () => {
+  // 只需要获取匹配的路由信息
+  let matched = route.matched as RouteMatched[]
+  // 移除主布局路由
+  matched = matched.filter(item => item.name && !item.hidden)
+  const first = matched[0]
+  // 如果是首页直接返回首页
+  if (first && first.path !== '/') {
+    matched = [{ path: '/', meta: { title: '首页', icon: 'el-icon-s-home' } }].concat(matched)
+  }
+  levelList.value = matched
+}
+
 // 监听路由变化
 watch(
   () => route,
@@ -80,26 +94,16 @@ watch(
   () => props.breadcrumbs,
   newVal => {
     // 优化：只有当面包屑变化时才更新
-    if (JSON.stringify(newVal) !== JSON.stringify(lastBreadcrumbs.value)) {
-      lastBreadcrumbs.value = JSON.parse(JSON.stringify(newVal)) as BreadcrumbItem[]
+    const newValString = JSON.stringify(newVal)
+    const lastValString = JSON.stringify(lastBreadcrumbs.value)
+
+    if (newValString !== lastValString) {
+      // 只有当newVal不是undefined时才进行JSON解析
+      lastBreadcrumbs.value = newVal ? (JSON.parse(newValString) as BreadcrumbItem[]) : null
     }
   },
   { immediate: true, deep: true }
 )
-
-// 获取面包屑数据
-const getBreadcrumb = () => {
-  // 只需要获取匹配的路由信息
-  let matched = route.matched as RouteMatched[]
-  // 移除主布局路由
-  matched = matched.filter(item => item.name && !item.hidden)
-  const first = matched[0]
-  // 如果是首页直接返回首页
-  if (first && first.path !== '/') {
-    matched = [{ path: '/', meta: { title: '首页', icon: 'el-icon-s-home' } }].concat(matched)
-  }
-  levelList.value = matched
-}
 </script>
 
 <style lang="scss" scoped>

@@ -289,9 +289,9 @@
 // 导入必要的API和类型
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { FormInstance, FormRules } from 'element-plus'
+import { useMarketingStore } from '@/store/modules/marketing'
 
 // 导入日志工具
 import logger from '@/utils/logger'
@@ -395,7 +395,7 @@ const processFormRef = ref<FormInstance | null>(null)
 
 // 路由和状态管理
 const router = useRouter()
-const store = useStore()
+const marketingStore = useMarketingStore()
 
 // 生命周期钩子
 onMounted(() => {
@@ -423,7 +423,7 @@ async function fetchRefundList() {
       }
     })
 
-    const response = await store.dispatch('marketing/getRefunds', params)
+    const response = await marketingStore.getRefunds(params)
     if (response && response.success) {
       refundList.value = response.data.list || []
       pagination.total = response.data.total || 0
@@ -463,7 +463,7 @@ async function viewRefundDetail(id: string) {
   detailDialogVisible.value = true
   detailLoading.value = true
   try {
-    const response = await store.dispatch('marketing/getRefundDetail', { id })
+    const response = await marketingStore.getRefundDetail(id)
     if (response && response.success) {
       refundDetail.value = response.data
     }
@@ -507,7 +507,7 @@ async function confirmProcess() {
           type: processType.value,
           remark: processForm.remark,
         }
-        const response = await store.dispatch('marketing/processRefund', params)
+        const response = await marketingStore.processRefund(params)
         if (response && response.success) {
           ElMessage.success(processType.value === 1 ? '退款处理成功' : '已拒绝退款')
           processDialogVisible.value = false

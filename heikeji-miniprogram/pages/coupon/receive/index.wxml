@@ -1,0 +1,92 @@
+<!-- 优惠券领取页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">领取优惠券</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 页面标题和描述 -->
+  <view class="page-header">
+    <text class="header-title">优惠券中心</text>
+    <text class="header-desc">领取心仪的优惠券，享受更多优惠</text>
+  </view>
+
+  <!-- 可领取优惠券列表 -->
+  <view class="coupon-list">
+    <!-- 空状态 -->
+    <view wx:if="{{isEmpty}}" class="empty-state">
+      <icon type="info" size="60" color="#c8c9cc"></icon>
+      <text class="empty-text">暂无可领取的优惠券</text>
+      <navigator url="/pages/index/index" class="empty-action">
+        <text class="action-text">去购物</text>
+      </navigator>
+    </view>
+    
+    <!-- 优惠券列表 -->
+    <view wx:else>
+      <view 
+        wx:for="{{receivableCoupons}}" 
+        wx:key="id"
+        class="coupon-item"
+        data-id="{{item.id}}"
+        data-index="{{index}}"
+        bindtap="viewCouponDetail"
+      >
+        <!-- 优惠券左侧金额区域 -->
+        <view class="coupon-left">
+          <view class="amount-container">
+            <text class="currency-symbol">¥</text>
+            <text class="amount">{{item.amount}}</text>
+          </view>
+          <text class="amount-desc">{{item.type === 'discount' ? '折扣券' : '满减券'}}</text>
+        </view>
+        
+        <!-- 优惠券右侧信息区域 -->
+        <view class="coupon-right">
+          <!-- 优惠券名称和描述 -->
+          <text class="coupon-name">{{item.name}}</text>
+          <text class="coupon-desc">{{item.description}}</text>
+          
+          <!-- 使用条件 -->
+          <view class="coupon-conditions">
+            <text wx:if="{{item.minAmount}}" class="condition">满{{item.minAmount}}元可用</text>
+            <text wx:if="{{item.orderType}}" class="condition">{{item.orderType === 'takeout' ? '外卖' : item.orderType === 'product' ? '商品' : item.orderType === 'errand' ? '跑腿' : '全品类'}}可用</text>
+          </view>
+          
+          <!-- 有效期 -->
+          <view class="coupon-expire">
+            <text class="expire-label">有效期：</text>
+            <text class="expire-date">{{item.startTime}}至{{item.endTime}}</text>
+          </view>
+        </view>
+        
+        <!-- 领取按钮 -->
+        <view class="coupon-action">
+          <button 
+            class="receive-btn {{item.received ? 'received' : item.receiving ? 'receiving' : ''}}"
+            bindtap="receiveCoupon"
+            data-id="{{item.id}}"
+            data-index="{{index}}"
+            disabled="{{item.received || item.receiving}}"
+          >
+            <text wx:if="{{item.received}}">已领取</text>
+            <text wx:elif="{{item.receiving}}">领取中</text>
+            <text wx:else>立即领取</text>
+          </button>
+        </view>
+      </view>
+      
+      <!-- 加载更多 -->
+      <view wx:if="{{loading}}" class="loading-more">
+        <text>加载中...</text>
+      </view>
+      <view wx:elif="{{!hasMore}}" class="loading-more">
+        <text>没有更多优惠券了</text>
+      </view>
+    </view>
+  </view>
+</view>

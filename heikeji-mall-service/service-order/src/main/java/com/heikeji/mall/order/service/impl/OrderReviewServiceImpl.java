@@ -8,8 +8,10 @@ import com.heikeji.mall.order.constant.OrderConstant;
 import com.heikeji.mall.order.domain.dto.OrderReviewDTO;
 import com.heikeji.mall.order.domain.vo.OrderReviewVO;
 import com.heikeji.mall.order.entity.Order;
+import com.heikeji.mall.order.entity.OrderItem;
 import com.heikeji.mall.order.entity.OrderReview;
 import com.heikeji.mall.order.mapper.OrderMapper;
+import com.heikeji.mall.order.mapper.OrderItemMapper;
 import com.heikeji.mall.order.mapper.OrderReviewMapper;
 import com.heikeji.mall.order.service.OrderReviewService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,9 @@ public class OrderReviewServiceImpl extends ServiceImpl<OrderReviewMapper, Order
     
     @Autowired
     private OrderMapper orderMapper;
+    
+    @Autowired
+    private OrderItemMapper orderItemMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -142,6 +147,75 @@ public class OrderReviewServiceImpl extends ServiceImpl<OrderReviewMapper, Order
     }
 
     @Override
+    public List<Map<String, Object>> getRatingDistributionByProductId(Long productId) {
+        // 使用MyBatis Plus的分组查询
+        QueryWrapper<OrderReview> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("product_id", productId);
+        queryWrapper.select("rating", "COUNT(*) AS count");
+        queryWrapper.groupBy("rating");
+        queryWrapper.orderByAsc("rating");
+        
+        List<Map<String, Object>> distribution = orderReviewMapper.selectMaps(queryWrapper);
+        
+        // 确保返回所有评分等级（1-5星），即使没有评价
+        Map<Integer, Integer> ratingMap = new HashMap<>();
+        for (int i = 1; i <= 5; i++) {
+            ratingMap.put(i, 0);
+        }
+        
+        // 填充实际统计数据
+        for (Map<String, Object> item : distribution) {
+            Integer rating = ((Number) item.get("rating")).intValue();
+            Integer count = ((Number) item.get("count")).intValue();
+            ratingMap.put(rating, count);
+        }
+        
+        // 转换为需要的格式
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : ratingMap.entrySet()) {
+            Map<String, Object> ratingItem = new HashMap<>();
+            ratingItem.put("rating", entry.getKey());
+            ratingItem.put("count", entry.getValue());
+            result.add(ratingItem);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public Double getPositiveRatingRateByProductId(Long productId) {
+        // 统计总评价数
+        Integer totalCount = this.getReviewCountByProductId(productId);
+        if (totalCount == 0) {
+            return 0.0;
+        }
+        
+        // 统计好评数（4-5星）
+        QueryWrapper<OrderReview> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("product_id", productId);
+        queryWrapper.ge("rating", 4);
+        Integer positiveCount = Math.toIntExact(orderReviewMapper.selectCount(queryWrapper));
+        
+        // 计算好评率（保留两位小数）
+        return Math.round(((double) positiveCount / totalCount) * 10000) / 100.0;
+    }
+    
+    @Override
+    public Integer getTotalLikeCountByProductId(Long productId) {
+        // 统计商品总点赞数量
+        QueryWrapper<OrderReview> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("product_id", productId);
+        queryWrapper.select("SUM(like_count) AS total_like_count");
+        
+        Map<String, Object> result = orderReviewMapper.selectMaps(queryWrapper).get(0);
+        if (result != null && result.get("total_like_count") != null) {
+            return ((Number) result.get("total_like_count")).intValue();
+        }
+        
+        return 0;
+    }
+
+    @Override
     public Boolean isOrderReviewed(String orderNo) {
         // 修复类型转换：selectCount可能返回Long
         Long count = orderReviewMapper.selectCount(
@@ -165,13 +239,36 @@ public class OrderReviewServiceImpl extends ServiceImpl<OrderReviewMapper, Order
         }
         
         // 验证订单状态是否为已完成
-        if (!order.getStatus().equals(4)) { // 使用硬编码的状态值替代不存在的常量
-            throw new RuntimeException("只有已完成的订单才能评价");
+        if (!order.getStatus().equals(OrderConstant.ORDER_STATUS_COMPLETED)) { // 使用正确的常量
+            throw new RuntimeException("只有已完成的订单才能评价"); // 使用标准RuntimeException替代BaseException
         }
         
-        // 这里应该查询order_item表获取商品ID列表
-        // 由于没有OrderItemMapper的具体实现，暂时返回空列表
-        return Collections.emptyList();
+        // 查询订单中的所有商品
+        List<OrderItem> orderItems = orderItemMapper.selectByOrderNo(orderNo);
+        
+        if (orderItems == null || orderItems.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        // 提取所有商品ID
+        List<Long> allProductIds = orderItems.stream()
+                .map(OrderItem::getProductId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        // 查询已经评价过的商品ID
+        List<OrderReview> existingReviews = orderReviewMapper.selectList(new QueryWrapper<OrderReview>()
+                .eq("order_no", orderNo)
+                .eq("user_id", userId));
+        
+        Set<Long> reviewedProductIds = existingReviews.stream()
+                .map(OrderReview::getProductId)
+                .collect(Collectors.toSet());
+        
+        // 过滤出可评价的商品ID（即尚未评价的商品）
+        return allProductIds.stream()
+                .filter(productId -> !reviewedProductIds.contains(productId))
+                .collect(Collectors.toList());
     }
     
     /**

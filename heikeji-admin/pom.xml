@@ -34,8 +34,8 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -51,12 +51,18 @@
             <groupId>com.heikeji</groupId>
             <artifactId>heikeji-system</artifactId>
             <version>1.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.heikeji</groupId>
-                    <artifactId>heikeji-system</artifactId>
-                </exclusion>
-            </exclusions>
+        </dependency>
+        <!-- Spring Cloud OpenFeign 依赖 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>3.1.8</version>
+        </dependency>
+        <!-- Spring Cloud LoadBalancer 依赖 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+            <version>3.1.8</version>
         </dependency>
 
     </dependencies>

@@ -106,7 +106,7 @@
 <script setup lang="ts">
 // 导入必要的API和类型
 import { ref, reactive, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useProductStore } from '@/store/modules/product'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { FormInstance, FormRules } from 'element-plus'
 
@@ -165,7 +165,7 @@ const rules = reactive<FormRules>({
 const formDataRef = ref<FormInstance | null>(null)
 
 // 状态管理
-const store = useStore()
+const productStore = useProductStore()
 
 // 生命周期钩子
 onMounted(() => {
@@ -177,13 +177,10 @@ async function fetchBrandList() {
   try {
     loading.value = true
     // 使用真实API调用
-    const response = await store.dispatch('product/getBrands', {
-      currentPage: currentPage.value,
-      pageSize: pageSize.value,
-    })
+    const response = await productStore.getBrands(currentPage.value, pageSize.value)
 
-    brandList.value = response.data.records || []
-    total.value = response.data.total || 0
+    brandList.value = productStore.brands || []
+    total.value = productStore.brandTotal || 0
   } catch (error) {
     logger.error('获取品牌列表失败', error)
     ElMessage.error('获取品牌列表失败')
@@ -224,7 +221,7 @@ async function handleUploadSuccess(response: any, file: File) {
     formData.append('file', file)
     formData.append('type', 'brand')
 
-    const uploadResponse = await store.dispatch('product/uploadBrandLogo', formData)
+    const uploadResponse = await productStore.uploadBrandLogo(formData)
     formData.logo = uploadResponse.data.url
 
     ElMessage.success('上传成功')
@@ -266,11 +263,11 @@ async function handleSubmit() {
 
     if (formData.id) {
       // 编辑操作
-      await store.dispatch('product/updateBrand', formData)
+      await productStore.updateBrand(formData)
       ElMessage.success('编辑成功')
     } else {
       // 添加操作
-      await store.dispatch('product/createBrand', formData)
+      await productStore.createBrand(formData)
       ElMessage.success('添加成功')
     }
 
@@ -288,10 +285,7 @@ async function handleSubmit() {
 // 处理状态改变
 async function handleStatusChange(row: Brand) {
   try {
-    await store.dispatch('product/updateBrandStatus', {
-      id: row.id,
-      status: !row.status,
-    })
+    await productStore.updateBrandStatus(row.id, !row.status)
     row.status = !row.status
     ElMessage.success(`状态已更新为${row.status ? '启用' : '禁用'}`)
   } catch (error) {
@@ -309,7 +303,7 @@ async function handleDelete(row: Brand) {
       type: 'warning',
     })
 
-    await store.dispatch('product/deleteBrand', row.id)
+    await productStore.deleteBrand(row.id)
     ElMessage.success('删除成功')
 
     // 刷新列表

@@ -138,17 +138,19 @@
           ></el-input>
         </el-form-item>
       </el-form>
-      <div #footer class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleSubmit">确定</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useStore } from 'vuex'
+import { useCampusStore } from '@/store/modules/campus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 定义类型
@@ -191,8 +193,8 @@ interface BuildingForm {
   remark?: string
 }
 
-// 初始化 Store
-const store = useStore()
+// 初始化 Pinia Store
+const campusStore = useCampusStore()
 
 // 响应式数据
 const loading = ref(false)
@@ -237,24 +239,24 @@ const rules = {
 }
 
 // 从 store 获取状态
-const buildingList = computed(() => store.state.campus.buildingList || [])
-const buildingTotal = computed(() => store.state.campus.buildingTotal || 0)
-const campusList = computed(() => store.state.campus.campusList || [])
+const buildingList = computed(() => campusStore.buildingList || [])
+const buildingTotal = computed(() => campusStore.buildingTotal || 0)
+const campusList = computed(() => campusStore.campusList || [])
 const total = computed(() => buildingTotal.value)
 
 // 从 store 获取 actions
-const getBuildings = (params: any) => store.dispatch('campus/getBuildings', params)
+const getBuildings = (params: any) => campusStore.getBuildings(params)
 async function addNewBuilding(params: any) {
-  return store.dispatch('campus/addNewBuilding', params)
+  return campusStore.addNewBuilding(params)
 }
 async function updateExistingBuilding(params: any) {
-  return store.dispatch('campus/updateExistingBuilding', params)
+  return campusStore.updateExistingBuilding(params)
 }
 async function updateBuildingEnabledStatus(params: any) {
-  return store.dispatch('campus/updateBuildingEnabledStatus', params)
+  return campusStore.updateBuildingEnabledStatus(params.id, params.status)
 }
 async function getCampuses() {
-  return store.dispatch('campus/getCampuses')
+  return campusStore.getCampuses()
 }
 
 // 加载数据

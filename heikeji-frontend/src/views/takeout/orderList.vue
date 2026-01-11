@@ -239,9 +239,9 @@
 <script setup lang="ts">
 // 导入Vue 3组合式API
 import { ref, reactive, onMounted } from 'vue'
-import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox, ElPrompt, ElAlert } from 'element-plus'
 import logger from '@/utils/logger'
+import { useTakeoutStore } from '@/store/modules/takeout'
 
 // 定义类型
 interface SearchForm {
@@ -324,8 +324,8 @@ const detailDialogVisible = ref(false)
 const currentOrder = ref<Order | null>(null)
 const selectedRows = ref<Order[]>([])
 
-// Vuex Store
-const store = useStore()
+// Pinia Store
+const takeoutStore = useTakeoutStore()
 
 // 获取状态文本
 const getStatusText = (status: string): string => {
@@ -381,7 +381,7 @@ const handleExport = async () => {
         : null,
     }
 
-    await store.dispatch('takeout/exportOrders', params)
+    await takeoutStore.exportOrders(params)
     ElMessage.success('订单导出成功')
   } catch (error) {
     logger.error('导出订单失败', error)
@@ -394,7 +394,7 @@ const handleExport = async () => {
 // 查看订单详情
 const handleDetail = async (row: Order) => {
   try {
-    const orderDetail = await store.dispatch('takeout/getOrderDetail', row.id)
+    const orderDetail = await takeoutStore.fetchOrderDetail(row.id)
     currentOrder.value = orderDetail.data
     detailDialogVisible.value = true
   } catch (error) {
@@ -413,7 +413,7 @@ const handleAssignDelivery = async (row: Order) => {
       inputErrorMessage: '配送员ID格式不正确',
     })
 
-    await store.dispatch('takeout/assignDelivery', {
+    await takeoutStore.assignDelivery({
       orderId: row.id,
       deliveryUserId: result.value,
     })
@@ -431,7 +431,7 @@ const handleAssignDelivery = async (row: Order) => {
 // 追踪配送
 const handleTrackDelivery = async (row: Order) => {
   try {
-    const trackingInfo = await store.dispatch('takeout/trackDelivery', row.id)
+    const trackingInfo = await takeoutStore.trackDelivery(row.id)
     const { data } = trackingInfo
 
     ElAlert.alert(
@@ -476,7 +476,7 @@ const handleCurrentChange = (val: number) => {
 // 获取统计数据
 const fetchStats = async () => {
   try {
-    const statsResponse = await store.dispatch('takeout/getOrderStats')
+    const statsResponse = await takeoutStore.fetchOrderStats()
     Object.assign(stats, statsResponse.data)
   } catch (error) {
     logger.error('获取统计数据失败', error)
@@ -502,7 +502,7 @@ const fetchData = async () => {
       delete params.dateRange
     }
 
-    const response = await store.dispatch('takeout/getOrderList', params)
+    const response = await takeoutStore.fetchOrderList(params)
 
     tableData.value = response.data.records || []
     pagination.total = response.data.total || 0

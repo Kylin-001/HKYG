@@ -98,9 +98,9 @@
     <!-- 状态统计面板 -->
     <div class="status-panel">
       <el-card>
-        <div #header>
+        <template #header>
           <span>实时统计</span>
-        </div>
+        </template>
         <div class="stats-grid">
           <div class="stat-card" v-for="stat in statusStats" :key="stat.key">
             <div class="stat-icon" :class="stat.color">

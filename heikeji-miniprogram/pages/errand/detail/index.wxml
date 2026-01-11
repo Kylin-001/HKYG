@@ -1,0 +1,156 @@
+<!-- 跑腿任务详情页 -->
+<view class="detail-container">
+  <!-- 任务状态头部 -->
+  <view class="status-header {{task.statusClass}}">
+    <view class="status-icon">
+      <image wx:if="{{task.status === 1}}" src="/assets/icons/pending.png" mode="aspectFit" />
+      <image wx:elif="{{task.status === 2}}" src="/assets/icons/in-progress.png" mode="aspectFit" />
+      <image wx:else src="/assets/icons/completed.png" mode="aspectFit" />
+    </view>
+    <text class="status-text">{{task.statusText}}</text>
+  </view>
+
+  <!-- 任务基本信息 -->
+  <view class="task-info-section">
+    <view class="task-type-badge">{{task.typeName}}</view>
+    <text class="task-title">{{task.title}}</text>
+    <text class="task-desc">{{task.description}}</text>
+
+    <view class="urgency-info" wx:if="{{task.urgency && task.urgency !== 'normal'}}">
+      <image src="/assets/icons/urgent.png" mode="aspectFit" class="urgency-icon" />
+      <text>{{task.urgencyText}}</text>
+    </view>
+  </view>
+
+  <!-- 地点信息 -->
+  <view class="location-section">
+    <view class="location-item">
+      <view class="location-marker pickup">
+        <text>取</text>
+      </view>
+      <view class="location-info">
+        <text class="location-label">取件地点</text>
+        <text class="location-text">{{task.pickupLocation}}</text>
+      </view>
+      <view class="location-action" bindtap="openMap" data-type="pickup">
+        <text>导航</text>
+      </view>
+    </view>
+
+    <view class="location-arrow">
+      <image src="/assets/icons/arrow-down.png" mode="aspectFit" />
+    </view>
+
+    <view class="location-item">
+      <view class="location-marker delivery">
+        <text>送</text>
+      </view>
+      <view class="location-info">
+        <text class="location-label">送达地点</text>
+        <text class="location-text">{{task.deliveryLocation}}</text>
+      </view>
+      <view class="location-action" bindtap="openMap" data-type="delivery">
+        <text>导航</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 价格信息 -->
+  <view class="price-section">
+    <view class="price-item">
+      <text class="price-label">跑腿费</text>
+      <text class="price-value">¥{{task.price}}</text>
+    </view>
+    <view class="price-item" wx:if="{{task.rewardBonus}}">
+      <text class="price-label">小费奖励</text>
+      <text class="price-value bonus">+¥{{task.rewardBonus}}</text>
+    </view>
+    <view class="price-divider"></view>
+    <view class="price-item total">
+      <text class="price-label">总金额</text>
+      <text class="price-value total-value">¥{{task.totalPrice}}</text>
+    </view>
+  </view>
+
+  <!-- 发布者信息 -->
+  <view class="publisher-section">
+    <view class="section-title">发布者信息</view>
+    <view class="publisher-info">
+      <image src="{{task.publisherAvatar || '/assets/icons/user-default.png'}}" mode="aspectFill" class="publisher-avatar" />
+      <view class="publisher-detail">
+        <text class="publisher-name">{{task.publisherName}}</text>
+        <view class="publisher-stats">
+          <text>发单 {{task.publisherTaskCount}} 次</text>
+          <text>好评率 {{task.publisherRating}}%</text>
+        </view>
+      </view>
+      <view class="contact-btn" bindtap="contactPublisher">
+        <image src="/assets/icons/phone.png" mode="aspectFit" />
+        <text>联系</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 接单者信息 -->
+  <view class="runner-section" wx:if="{{task.runnerInfo}}">
+    <view class="section-title">接单者</view>
+    <view class="runner-info">
+      <image src="{{task.runnerInfo.avatar || '/assets/icons/user-default.png'}}" mode="aspectFill" class="runner-avatar" />
+      <view class="runner-detail">
+        <text class="runner-name">{{task.runnerInfo.name}}</text>
+        <view class="runner-stats">
+          <text>接单 {{task.runnerInfo.taskCount}} 次</text>
+          <text>好评率 {{task.runnerInfo.rating}}%</text>
+        </view>
+      </view>
+      <view class="contact-btn" bindtap="contactRunner">
+        <image src="/assets/icons/phone.png" mode="aspectFit" />
+        <text>联系</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 任务时间线 -->
+  <view class="timeline-section">
+    <view class="section-title">任务进度</view>
+    <view class="timeline">
+      <view class="timeline-item completed">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <text class="timeline-title">任务发布</text>
+          <text class="timeline-time">{{task.createTime}}</text>
+        </view>
+      </view>
+      <view class="timeline-item {{task.status >= 2 ? 'completed' : ''}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <text class="timeline-title">有人接单</text>
+          <text class="timeline-time">{{task.claimTime || '--'}}</text>
+        </view>
+      </view>
+      <view class="timeline-item {{task.status >= 3 ? 'completed' : ''}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <text class="timeline-title">任务完成</text>
+          <text class="timeline-time">{{task.completeTime || '--'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions" wx:if="{{task.status < 4}}">
+    <view class="action-left">
+      <view class="action-item" bindtap="shareTask">
+        <image src="/assets/icons/share.png" mode="aspectFit" />
+        <text>分享</text>
+      </view>
+    </view>
+    <view class="action-right">
+      <button class="cancel-btn" wx:if="{{task.status === 1 && task.isPublisher}}" bindtap="cancelTask">取消任务</button>
+      <button class="claim-btn" wx:if="{{task.status === 1 && !task.isPublisher && !task.hasClaimed}}" bindtap="claimTask">接单</button>
+      <button class="complete-btn" wx:if="{{task.status === 2 && task.hasClaimed}}" bindtap="completeTask">确认完成</button>
+      <button class="cancel-btn" wx:if="{{task.status === 2 && task.hasClaimed}}" bindtap="abandonTask">放弃任务</button>
+    </view>
+  </view>
+</view>

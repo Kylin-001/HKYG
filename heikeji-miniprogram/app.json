@@ -1,1 +1,191 @@
-{"pages": ["pages/index/index", "pages/takeout/index", "pages/errand/index", "pages/product/list", "pages/user/profile", "pages/user/login", "pages/cart/index", "pages/order/list", "pages/order/detail", "pages/product/detail", "pages/takeout/merchant", "pages/takeout/cart", "pages/takeout/checkout", "pages/errand/request", "pages/campus/index", "pages/user/address", "pages/user/orders"], "window": {"backgroundTextStyle": "light", "navigationBarBackgroundColor": "#fff", "navigationBarTitleText": "黑科易购", "navigationBarTextStyle": "black", "enablePullDownRefresh": true}, "tabBar": {"color": "#666666", "selectedColor": "#3cc51f", "borderStyle": "black", "backgroundColor": "#ffffff", "list": [{"pagePath": "pages/index/index", "iconPath": "assets/icons/home.png", "selectedIconPath": "assets/icons/home-active.png", "text": "首页"}, {"pagePath": "pages/takeout/index", "iconPath": "assets/icons/takeout.png", "selectedIconPath": "assets/icons/takeout-active.png", "text": "外卖"}, {"pagePath": "pages/errand/index", "iconPath": "assets/icons/errand.png", "selectedIconPath": "assets/icons/errand-active.png", "text": "跑腿"}, {"pagePath": "pages/user/profile", "iconPath": "assets/icons/user.png", "selectedIconPath": "assets/icons/user-active.png", "text": "我的"}]}, "networkTimeout": {"request": 10000, "uploadFile": 10000}, "debug": false, "permission": {"scope.userLocation": {"desc": "您的位置信息将用于小程序位置接口的效果展示"}}, "requiredBackgroundModes": ["audio"], "plugins": {}, "sitemapLocation": "sitemap.json"}
+{
+  "pages": [
+    "pages/index/index",
+    "pages/takeout/index",
+    "pages/errand/index",
+    "pages/user/profile",
+    "pages/cart/index"
+  ],
+  "subpackages": [
+    {
+      "root": "pages/user",
+      "pages": [
+        "login",
+        "address",
+        "orders",
+        "points"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/order",
+      "pages": [
+        "list",
+        "detail",
+        "confirm/index",
+        "evaluate"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/takeout",
+      "pages": [
+        "merchant",
+        "cart",
+        "checkout"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/errand",
+      "pages": [
+        "request",
+        "detail"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/campus",
+      "pages": [
+        "index",
+        "classroom/empty",
+        "classroom/detail",
+        "announcement/list",
+        "announcement/detail",
+        "search/index",
+        "map/index",
+        "dorm/index",
+        "library/index",
+        "library/seat-reservation",
+        "library/book-search",
+        "library/book-detail"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/courier",
+      "pages": [
+        "index",
+        "publish/index",
+        "detail/index",
+        "rate/index",
+        "locker/index"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/product",
+      "pages": [
+        "list/index",
+        "detail/index"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/message",
+      "pages": [
+        "index",
+        "detail"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/coupon",
+      "pages": [
+        "list/index"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/admin",
+      "pages": [
+        "dashboard"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/forum",
+      "pages": [
+        "index",
+        "detail/index",
+        "publish/index",
+        "search/index"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/activity",
+      "pages": [
+        "list/index",
+        "detail/index"
+      ],
+      "independent": false
+    },
+    {
+      "root": "pages/analytics",
+      "pages": [
+        "index"
+      ],
+      "independent": false
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "黑科易购",
+    "navigationBarTextStyle": "black",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#3cc51f",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/takeout/index",
+        "iconPath": "assets/icons/takeout.png",
+        "selectedIconPath": "assets/icons/takeout-active.png",
+        "text": "外卖"
+      },
+      {
+        "pagePath": "pages/errand/index",
+        "iconPath": "assets/icons/errand.png",
+        "selectedIconPath": "assets/icons/errand-active.png",
+        "text": "跑腿"
+      },
+      {
+        "pagePath": "pages/user/profile",
+        "iconPath": "assets/icons/user.png",
+        "selectedIconPath": "assets/icons/user-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 10000,
+    "uploadFile": 10000
+  },
+  "debug": false,
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "requiredBackgroundModes": ["audio"],
+  "plugins": {},
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "useExtendedLib": {
+    "weui": true
+  },
+  "rendererOptions": {
+    "ignoreElements": ["script"]
+  }
+}

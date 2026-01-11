@@ -162,7 +162,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useCampusStore } from '@/store/modules/campus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 定义接口
@@ -208,13 +208,13 @@ interface StationForm {
   remark: string
 }
 
-// Vuex store
-const store = useStore()
+// Pinia store
+const campusStore = useCampusStore()
 
 // 从store获取数据
-const stationList = computed<Station[]>(() => store.state.campus.stationList || [])
-const stationTotal = computed<number>(() => store.state.campus.stationTotal || 0)
-const campusList = computed<Campus[]>(() => store.state.campus.campusList || [])
+const stationList = computed<Station[]>(() => campusStore.siteList || [])
+const stationTotal = computed<number>(() => campusStore.siteTotal || 0)
+const campusList = computed<Campus[]>(() => campusStore.campusList || [])
 
 // 响应式数据
 const loading = ref(false)
@@ -283,23 +283,23 @@ const getStationTypeTagType = (type: number): string => {
 
 // 异步操作函数
 const getStations = async (params: any) => {
-  await store.dispatch('campus/getStations', params)
+  await campusStore.getSites(params)
 }
 
 const addNewStation = async (params: any) => {
-  await store.dispatch('campus/addNewStation', params)
+  await campusStore.addNewSite(params)
 }
 
 const updateExistingStation = async (params: any) => {
-  await store.dispatch('campus/updateExistingStation', params)
+  await campusStore.updateExistingSite(params)
 }
 
 const updateStationEnabledStatus = async (params: any) => {
-  await store.dispatch('campus/updateStationEnabledStatus', params)
+  await campusStore.updateCampusEnabledStatus(params.id, params.status)
 }
 
 const getCampuses = async () => {
-  await store.dispatch('campus/getCampuses')
+  await campusStore.getCampuses()
 }
 
 // 数据加载函数

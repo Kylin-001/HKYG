@@ -1,0 +1,114 @@
+<!-- 订单结算页 -->
+<view class="checkout-container">
+  <!-- 配送地址 -->
+  <view class="address-section" bindtap="chooseAddress">
+    <image src="/assets/icons/location.png" mode="aspectFit" class="address-icon" />
+    <view class="address-info" wx:if="{{selectedAddress}}">
+      <view class="address-header">
+        <text class="address-name">{{selectedAddress.name}}</text>
+        <text class="address-phone">{{selectedAddress.phone}}</text>
+      </view>
+      <text class="address-detail">{{selectedAddress.province}}{{selectedAddress.city}}{{selectedAddress.district}}{{selectedAddress.detail}}</text>
+    </view>
+    <view class="address-info" wx:else>
+      <text class="no-address-text">请选择配送地址</text>
+    </view>
+    <image src="/assets/icons/arrow-right.png" mode="aspectFit" class="arrow-right-icon" />
+  </view>
+
+  <!-- 商品清单 -->
+  <view class="order-section">
+    <view class="section-header">
+      <text class="section-title">商品清单</text>
+    </view>
+    <view class="order-items">
+      <view class="order-item" wx:for="{{cart}}" wx:key="id">
+        <image src="{{item.imageUrl || '/assets/icons/dish-default.png'}}" mode="aspectFill" class="order-item-image" />
+        <view class="order-item-info">
+          <text class="order-item-name">{{item.name}}</text>
+          <view class="order-item-footer">
+            <text class="order-item-price">¥{{item.price}}</text>
+            <text class="order-item-quantity">x{{item.quantity}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 配送方式 -->
+  <view class="delivery-section">
+    <view class="section-header">
+      <text class="section-title">配送方式</text>
+    </view>
+    <view class="delivery-options">
+      <view class="delivery-option {{selectedDelivery == 'normal' ? 'selected' : ''}}" bindtap="selectDelivery" data-type="normal">
+        <text class="delivery-type">普通配送</text>
+        <text class="delivery-fee">配送费 ¥{{deliveryFee}}</text>
+        <image src="{{selectedDelivery == 'normal' ? '/assets/icons/selected.png' : '/assets/icons/unselected.png'}}" mode="aspectFit" class="radio-icon" />
+      </view>
+      <view class="delivery-option {{selectedDelivery == 'fast' ? 'selected' : ''}}" bindtap="selectDelivery" data-type="fast">
+        <text class="delivery-type">快速配送</text>
+        <text class="delivery-fee">配送费 ¥{{fastDeliveryFee}}</text>
+        <image src="{{selectedDelivery == 'fast' ? '/assets/icons/selected.png' : '/assets/icons/unselected.png'}}" mode="aspectFit" class="radio-icon" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付方式 -->
+  <view class="payment-section">
+    <view class="section-header">
+      <text class="section-title">支付方式</text>
+    </view>
+    <view class="payment-options">
+      <view class="payment-option {{selectedPayment == 'wechat' ? 'selected' : ''}}" bindtap="selectPayment" data-type="wechat">
+        <image src="/assets/icons/wechat-pay.png" mode="aspectFit" class="payment-icon" />
+        <text class="payment-type">微信支付</text>
+        <image src="{{selectedPayment == 'wechat' ? '/assets/icons/selected.png' : '/assets/icons/unselected.png'}}" mode="aspectFit" class="radio-icon" />
+      </view>
+      <view class="payment-option {{selectedPayment == 'balance' ? 'selected' : ''}}" bindtap="selectPayment" data-type="balance">
+        <image src="/assets/icons/balance-pay.png" mode="aspectFit" class="payment-icon" />
+        <text class="payment-type">余额支付</text>
+        <image src="{{selectedPayment == 'balance' ? '/assets/icons/selected.png' : '/assets/icons/unselected.png'}}" mode="aspectFit" class="radio-icon" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单备注 -->
+  <view class="remark-section">
+    <view class="section-header">
+      <text class="section-title">订单备注</text>
+    </view>
+    <input type="text" placeholder="请输入备注信息" bindinput="onRemarkInput" value="{{remark}}" class="remark-input" />
+  </view>
+
+  <!-- 价格明细 -->
+  <view class="price-section">
+    <view class="price-item">
+      <text class="price-label">商品总价</text>
+      <text class="price-value">¥{{goodsTotal}}</text>
+    </view>
+    <view class="price-item">
+      <text class="price-label">配送费</text>
+      <text class="price-value">¥{{selectedDelivery == 'normal' ? deliveryFee : fastDeliveryFee}}</text>
+    </view>
+    <view class="price-item" wx:if="{{couponDiscount > 0}}">
+      <text class="price-label">优惠券</text>
+      <text class="price-value discount">-¥{{couponDiscount}}</text>
+    </view>
+    <view class="price-item total">
+      <text class="price-label total-label">实付金额</text>
+      <text class="price-value total-value">¥{{actualTotal}}</text>
+    </view>
+  </view>
+
+  <!-- 提交订单按钮 -->
+  <view class="submit-section">
+    <view class="total-amount">
+      <text class="total-label">总计：</text>
+      <text class="total-price">¥{{actualTotal}}</text>
+    </view>
+    <button class="submit-btn" bindtap="submitOrder" disabled="{{!selectedAddress || cart.length == 0}}">
+      提交订单
+    </button>
+  </view>
+</view>

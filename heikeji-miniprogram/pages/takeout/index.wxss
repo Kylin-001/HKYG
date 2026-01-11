@@ -1,0 +1,166 @@
+/* 外卖首页样式 */
+.takeout-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 搜索栏 */
+.search-bar {
+  display: flex;
+  padding: 10rpx 20rpx;
+  background-color: #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  align-items: center;
+}
+
+.search-bar input {
+  flex: 1;
+  height: 60rpx;
+  background-color: #f0f0f0;
+  border-radius: 30rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+}
+
+.search-btn {
+  margin-left: 10rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  padding: 0 20rpx;
+  background-color: #3cc51f;
+  color: #fff;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+/* 分类导航 */
+.category-scroll {
+  display: flex;
+  padding: 20rpx 0;
+  background-color: #fff;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 20rpx;
+  padding: 10rpx 0;
+}
+
+.category-item.active {
+  color: #3cc51f;
+}
+
+.category-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.category-item text {
+  font-size: 24rpx;
+}
+
+/* 商家列表 */
+.merchant-list {
+  flex: 1;
+  padding: 10rpx;
+}
+
+.merchant-item {
+  display: flex;
+  background-color: #fff;
+  border-radius: 10rpx;
+  margin-bottom: 10rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 5rpx rgba(0, 0, 0, 0.1);
+}
+
+.merchant-image {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 8rpx;
+  margin-right: 20rpx;
+}
+
+.merchant-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.merchant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.merchant-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.merchant-rating {
+  font-size: 28rpx;
+  color: #ff9500;
+}
+
+.merchant-desc {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.merchant-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 10rpx;
+}
+
+.merchant-meta text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.merchant-status {
+  display: flex;
+}
+
+.status-open {
+  font-size: 24rpx;
+  color: #3cc51f;
+  padding: 4rpx 12rpx;
+  background-color: rgba(60, 197, 31, 0.1);
+  border-radius: 12rpx;
+}
+
+.status-closed {
+  font-size: 24rpx;
+  color: #ff3b30;
+  padding: 4rpx 12rpx;
+  background-color: rgba(255, 59, 48, 0.1);
+  border-radius: 12rpx;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 20rpx 0;
+  color: #999;
+  font-size: 26rpx;
+}

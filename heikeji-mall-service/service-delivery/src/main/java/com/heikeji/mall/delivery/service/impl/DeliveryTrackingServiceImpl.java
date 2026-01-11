@@ -7,9 +7,11 @@ import com.heikeji.mall.delivery.entity.DeliveryOrder;
 import com.heikeji.mall.delivery.entity.DeliveryTracking;
 import com.heikeji.mall.delivery.entity.DeliveryUser;
 import com.heikeji.mall.delivery.mapper.DeliveryTrackingMapper;
+import com.heikeji.mall.delivery.service.DeliveryEventService;
 import com.heikeji.mall.delivery.service.DeliveryOrderService;
 import com.heikeji.mall.delivery.service.DeliveryTrackingService;
 import com.heikeji.mall.delivery.service.DeliveryUserService;
+import com.heikeji.mall.delivery.vo.DeliveryEventVO;
 import com.heikeji.mall.delivery.vo.DeliveryTrackingVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,9 @@ public class DeliveryTrackingServiceImpl extends ServiceImpl<DeliveryTrackingMap
     
     @Autowired
     private DeliveryUserService deliveryUserService;
+    
+    @Autowired
+    private DeliveryEventService deliveryEventService;
 
     @Override
     @Transactional
@@ -130,9 +135,34 @@ public class DeliveryTrackingServiceImpl extends ServiceImpl<DeliveryTrackingMap
     @Override
     @Transactional
     public boolean addTrackingEvent(Long orderId, Integer eventType, String eventDesc) {
-        // 在实际应用中，这里应该将事件记录到数据库
-        // 这里简单返回成功，表示事件已记录
-        return true;
+        // 查找跟踪记录获取配送员ID
+        DeliveryTracking tracking = deliveryTrackingMapper.selectByOrderId(orderId);
+        if (tracking == null) {
+            return false;
+        }
+        
+        // 根据事件类型记录相应的配送事件
+        switch (eventType) {
+            case 1: // 订单创建
+                return deliveryEventService.recordOrderCreateEvent(orderId, eventDesc);
+            case 2: // 配送员接单
+                return deliveryEventService.recordOrderAcceptEvent(orderId, tracking.getDeliveryUserId(), eventDesc);
+            case 3: // 开始配送
+                return deliveryEventService.recordStartDeliveryEvent(orderId, tracking.getDeliveryUserId(), eventDesc);
+            case 4: // 完成配送
+                return deliveryEventService.recordCompleteDeliveryEvent(orderId, tracking.getDeliveryUserId(), eventDesc);
+            case 5: // 订单取消
+                return deliveryEventService.recordOrderCancelEvent(orderId, tracking.getDeliveryUserId(), eventDesc);
+            case 6: // 位置更新
+                return deliveryEventService.recordLocationUpdateEvent(orderId, tracking.getDeliveryUserId(), 
+                        tracking.getLongitude(), tracking.getLatitude(), eventDesc);
+            case 7: // 配送延迟
+                return deliveryEventService.recordDelayEvent(orderId, tracking.getDeliveryUserId(), eventDesc);
+            case 8: // 异常事件
+                return deliveryEventService.recordExceptionEvent(orderId, tracking.getDeliveryUserId(), eventDesc);
+            default:
+                return false;
+        }
     }
     
     /**
@@ -155,11 +185,37 @@ public class DeliveryTrackingServiceImpl extends ServiceImpl<DeliveryTrackingMap
     }
     
     /**
-     * 获取配送事件列表（模拟实现）
+     * 获取配送事件列表
      */
     private List<DeliveryTrackingVO.DeliveryEvent> getDeliveryEvents(Long orderId) {
+        // 从数据库获取真实的配送事件
+        List<DeliveryEventVO> eventVOs = deliveryEventService.getEventVOsByOrderId(orderId);
         List<DeliveryTrackingVO.DeliveryEvent> events = new ArrayList<>();
         
+        // 将DeliveryEventVO转换为DeliveryTrackingVO.DeliveryEvent
+        for (DeliveryEventVO eventVO : eventVOs) {
+            DeliveryTrackingVO.DeliveryEvent event = new DeliveryTrackingVO.DeliveryEvent();
+            event.setEventType(eventVO.getEventType());
+            event.setEventDesc(eventVO.getEventDesc());
+            event.setEventTime(eventVO.getEventTime());
+            events.add(event);
+        }
+        
+        // 如果没有事件记录，尝试从订单信息生成基本事件
+        if (events.isEmpty()) {
+            generateBasicEvents(orderId, events);
+        }
+        
+        // 按时间排序
+        events.sort(Comparator.comparing(DeliveryTrackingVO.DeliveryEvent::getEventTime));
+        
+        return events;
+    }
+    
+    /**
+     * 从订单信息生成基本事件
+     */
+    private void generateBasicEvents(Long orderId, List<DeliveryTrackingVO.DeliveryEvent> events) {
         // 查询订单信息获取时间点
         DeliveryOrder order = deliveryOrderService.getById(orderId);
         if (order != null) {
@@ -208,10 +264,5 @@ public class DeliveryTrackingServiceImpl extends ServiceImpl<DeliveryTrackingMap
                 events.add(cancelEvent);
             }
         }
-        
-        // 按时间排序
-        events.sort(Comparator.comparing(DeliveryTrackingVO.DeliveryEvent::getEventTime));
-        
-        return events;
     }
 }

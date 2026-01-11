@@ -4,10 +4,13 @@ server:
 spring:
   application:
     name: heikeji-system
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.110.162:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: Mysql@8Root!2025
     druid:
@@ -23,7 +26,7 @@ spring:
       test-on-return: false
       pool-prepared-statements: true
       max-pool-prepared-statement-per-connection-size: 20
-      filters: stat,wall,log4j
+      filters: stat,wall
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   redis:
     host: localhost
@@ -36,17 +39,13 @@ spring:
         max-wait: -1
         max-idle: 5
         min-idle: 0
-  # Nacos配置
+  # 禁用Nacos配置
   cloud:
     nacos:
-      discovery:
-        server-addr: localhost:8848
-        namespace: public
       config:
-        server-addr: localhost:8848
-        namespace: public
-        file-extension: yml
-        refresh-enabled: true
+        enabled: false
+      discovery:
+        enabled: false
 
 # JWT配置
 jwt:

@@ -1,0 +1,47 @@
+<!-- 购物车页面 -->
+<view class="cart-container">
+  <!-- 购物车为空时显示 -->
+  <view class="empty-cart" wx:if="{{cartList.length === 0}}">
+    <image src="/assets/icons/empty-cart.png" class="empty-icon"></image>
+    <text class="empty-text">购物车是空的</text>
+    <navigator url="/pages/product/list/index" class="go-shopping-btn">去购物</navigator>
+  </view>
+
+  <!-- 购物车列表 -->
+  <view class="cart-list" wx:else>
+    <!-- 购物车商品项 -->
+    <view class="cart-item" wx:for="{{cartList}}" wx:key="id">
+      <!-- 商品图片 -->
+      <image class="product-image" src="{{item.product.images[0] || '/assets/images/default-product.png'}}"></image>
+      
+      <!-- 商品信息 -->
+      <view class="product-info">
+        <view class="product-name">{{item.product.name}}</view>
+        <view class="product-description">{{item.product.description}}</view>
+        <view class="product-price">¥{{item.product.price}}</view>
+        
+        <!-- 数量控制 -->
+        <view class="quantity-control">
+          <view class="quantity-btn" bindtap="decreaseQuantity" data-id="{{item.id}}" data-stock="{{item.product.stock}}">-</view>
+          <view class="quantity">{{item.quantity}}</view>
+          <view class="quantity-btn" bindtap="increaseQuantity" data-id="{{item.id}}" data-stock="{{item.product.stock}}">+</view>
+        </view>
+        
+        <!-- 删除按钮 -->
+        <view class="delete-btn" bindtap="deleteCartItem" data-id="{{item.id}}">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="cart-footer" wx:if="{{cartList.length > 0}}">
+    <view class="total-price">
+      <text class="total-label">合计：</text>
+      <text class="total-amount">¥{{totalPrice}}</text>
+    </view>
+    <view class="footer-buttons">
+      <view class="clear-cart-btn" bindtap="clearCart">清空购物车</view>
+      <view class="checkout-btn" bindtap="onCheckout">去结算</view>
+    </view>
+  </view>
+</view>

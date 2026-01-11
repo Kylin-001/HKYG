@@ -2,8 +2,8 @@ package com.heikeji.common.core.validation.validator;
 
 import com.heikeji.common.core.validation.annotation.StudentNo;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 /**

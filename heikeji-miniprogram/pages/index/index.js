@@ -1,20 +1,28 @@
 // pages/index/index.js
+const { request } = require('../../utils/request');
+const analyticsApi = require('../../api/analytics');
+
 Page({
   data: {
     banners: [],
     quickEntries: [
-      { id: 1, type: 'takeout', name: '外卖订餐', icon: '/assets/images/takeout-icon.png' },
-      { id: 2, type: 'errand', name: '校园跑腿', icon: '/assets/images/errand-icon.png' },
-      { id: 3, type: 'product', name: '商品商城', icon: '/assets/images/mall-icon.png' },
-      { id: 4, type: 'courier', name: '快递代取', icon: '/assets/images/courier-icon.png' },
-      { id: 5, type: 'campus', name: '校园服务', icon: '/assets/images/campus-icon.png' },
-      { id: 6, type: 'coupon', name: '优惠活动', icon: '/assets/images/coupon-icon.png' },
-      { id: 7, type: 'wallet', name: '我的钱包', icon: '/assets/images/wallet-icon.png' },
-      { id: 8, type: 'more', name: '更多', icon: '/assets/images/more-icon.png' }
+      { id: 1, type: 'takeout', name: '外卖订餐', icon: '/assets/icons/takeout.png' },
+      { id: 2, type: 'errand', name: '校园跑腿', icon: '/assets/icons/errand.png' },
+      { id: 3, type: 'product', name: '商品商城', icon: '/assets/icons/product.png' },
+      { id: 4, type: 'courier', name: '快递代取', icon: '/assets/icons/courier.png' },
+      { id: 5, type: 'campus', name: '校园服务', icon: '/assets/icons/campus.png' },
+      { id: 6, type: 'coupon', name: '优惠活动', icon: '/assets/icons/coupon.png' },
+      { id: 7, type: 'wallet', name: '我的钱包', icon: '/assets/icons/wallet.png' },
+      { id: 8, type: 'more', name: '更多', icon: '/assets/icons/more.png' }
     ],
     recommendedProducts: [],
+    personalizedProducts: [], // 个性化推荐商品
     hotMerchants: [],
-    announcements: []
+    personalizedMerchants: [], // 个性化推荐商家
+    announcements: [],
+    isDataLoaded: false, // 数据加载标记，防止重复加载
+    isLoading: true, // 页面加载状态
+    needLogin: false // 是否需要登录
   },
 
   onLoad: function (options) {
@@ -26,12 +34,14 @@ Page({
   },
 
   onShow: function () {
-    // 每次显示时刷新数据
-    this.loadHomePageData();
+    // 只有在数据未加载时才刷新，避免重复请求
+    if (!this.data.isDataLoaded) {
+      this.loadHomePageData();
+    }
   },
 
   onPullDownRefresh: function () {
-    this.loadHomePageData().then(() => {
+    this.loadHomePageData(true).then(() => {
       wx.stopPullDownRefresh();
     });
   },
@@ -42,68 +52,93 @@ Page({
   checkLoginStatus: function() {
     const app = getApp();
     if (!app.globalData.token) {
-      // 如果没有token，跳转到登录页
-      wx.navigateTo({
-        url: '/pages/user/login'
+      // 静默登录，不强制跳转
+      app.silentLogin().then(() => {
+        console.log('静默登录成功');
+      }).catch(err => {
+        console.log('静默登录失败:', err);
+        // 静默登录失败后，在需要时再提示登录
+        this.setData({ needLogin: true });
       });
     }
   },
 
   /**
    * 加载首页数据
+   * @param {boolean} forceRefresh 是否强制刷新，不使用缓存
    */
-  loadHomePageData: function() {
+  loadHomePageData: function(forceRefresh = false) {
+    this.setData({ isLoading: true });
+    // 优先加载核心数据
     return Promise.all([
-      this.loadBanners(),
-      this.loadRecommendedProducts(),
-      this.loadHotMerchants(),
-      this.loadAnnouncements()
-    ]);
+      this.loadBanners(forceRefresh),
+      this.loadRecommendedProducts(forceRefresh),
+      this.loadHotMerchants(forceRefresh),
+      this.loadAnnouncements(forceRefresh)
+    ]).then(() => {
+      this.setData({ 
+        isDataLoaded: true,
+        isLoading: false 
+      });
+      // 核心数据加载完成后，延迟加载个性化推荐数据，提高初始加载速度
+      this.loadPersonalizedData(forceRefresh);
+    }).catch(() => {
+      this.setData({ 
+        isLoading: false 
+      });
+    });
+  },
+
+  /**
+   * 加载个性化推荐数据
+   * @param {boolean} forceRefresh 是否强制刷新
+   */
+  loadPersonalizedData: function(forceRefresh = false) {
+    // 使用setTimeout延迟加载，避免影响核心数据的渲染
+    setTimeout(() => {
+      Promise.all([
+        this.loadPersonalizedProducts(forceRefresh),
+        this.loadPersonalizedMerchants(forceRefresh)
+      ]);
+    }, 500);
   },
 
   /**
    * 加载轮播图
+   * @param {boolean} forceRefresh 是否强制刷新
    */
-  loadBanners: function() {
-    return new Promise((resolve) => {
-      wx.request({
-        url: getApp().globalData.baseUrl + '/miniprogram/banners',
-        method: 'GET',
-        success: (res) => {
-          if (res.statusCode === 200 && res.data.code === 200) {
-            this.setData({ banners: res.data.data });
-          }
-          resolve();
-        },
-        fail: () => {
-          // 默认轮播图
-          this.setData({
-            banners: [
-              { id: 1, image: '/assets/images/banner1.jpg' },
-              { id: 2, image: '/assets/images/banner2.jpg' },
-              { id: 3, image: '/assets/images/banner3.jpg' }
-            ]
-          });
-          resolve();
-        }
+  loadBanners: function(forceRefresh = false) {
+    return request({
+      url: '/miniprogram/banners',
+      method: 'GET',
+      cache: !forceRefresh,
+      loading: false
+    }).then(res => {
+      this.setData({ banners: res.data || [] });
+    }).catch(err => {
+      this.setData({
+        banners: [
+          { id: 1, image: '/assets/images/banner1.jpg' },
+          { id: 2, image: '/assets/images/banner2.jpg' },
+          { id: 3, image: '/assets/images/banner3.jpg' }
+        ]
       });
     });
   },
 
   /**
    * 加载推荐商品
+   * @param {boolean} forceRefresh 是否强制刷新
    */
-  loadRecommendedProducts: function() {
-    const { request } = require('../../utils/request');
-    
+  loadRecommendedProducts: function(forceRefresh = false) {
     return request({
       url: '/product/recommended',
       method: 'GET',
+      cache: !forceRefresh,
       loading: false
     }).then(res => {
       this.setData({ recommendedProducts: res.data || [] });
     }).catch(err => {
-      console.log('加载推荐商品失败:', err);
       this.setData({ 
         recommendedProducts: [
           { id: 1, name: '商品1', description: '商品描述', price: '19.9', image: '/assets/images/product1.jpg' },
@@ -116,19 +151,35 @@ Page({
   },
 
   /**
-   * 加载热门商家
+   * 加载个性化推荐商品
+   * @param {boolean} forceRefresh 是否强制刷新
    */
-  loadHotMerchants: function() {
-    const { request } = require('../../utils/request');
-    
+  loadPersonalizedProducts: function(forceRefresh = false) {
+    return analyticsApi.getRecommendedProducts({
+      page: 1,
+      pageSize: 4,
+      cache: !forceRefresh
+    }).then(res => {
+      this.setData({ personalizedProducts: res.data || [] });
+    }).catch(err => {
+      // 如果个性化推荐失败，不显示该模块
+      this.setData({ personalizedProducts: [] });
+    });
+  },
+
+  /**
+   * 加载热门商家
+   * @param {boolean} forceRefresh 是否强制刷新
+   */
+  loadHotMerchants: function(forceRefresh = false) {
     return request({
       url: '/merchant/hot',
       method: 'GET',
+      cache: !forceRefresh,
       loading: false
     }).then(res => {
       this.setData({ hotMerchants: res.data || [] });
     }).catch(err => {
-      console.log('加载热门商家失败:', err);
       this.setData({ 
         hotMerchants: [
           { id: 1, name: '商家1', rating: '4.5', monthlySales: 1000, logo: '/assets/images/merchant1.jpg' },
@@ -140,19 +191,36 @@ Page({
   },
 
   /**
-   * 加载校园公告
+   * 加载个性化推荐商家
+   * @param {boolean} forceRefresh 是否强制刷新
    */
-  loadAnnouncements: function() {
-    const { request } = require('../../utils/request');
-    
+  loadPersonalizedMerchants: function(forceRefresh = false) {
+    return analyticsApi.getRecommendedMerchants({
+      page: 1,
+      pageSize: 3,
+      cache: !forceRefresh
+    }).then(res => {
+      this.setData({ personalizedMerchants: res.data || [] });
+    }).catch(err => {
+      console.log('加载个性化推荐商家失败:', err);
+      // 如果个性化推荐失败，不显示该模块
+      this.setData({ personalizedMerchants: [] });
+    });
+  },
+
+  /**
+   * 加载校园公告
+   * @param {boolean} forceRefresh 是否强制刷新
+   */
+  loadAnnouncements: function(forceRefresh = false) {
     return request({
       url: '/announcement/list',
       method: 'GET',
+      cache: !forceRefresh,
       loading: false
     }).then(res => {
       this.setData({ announcements: res.data || [] });
     }).catch(err => {
-      console.log('加载公告失败:', err);
       this.setData({ 
         announcements: [
           { id: 1, title: '校园通知1', createTime: '2024-01-01' },
@@ -172,42 +240,43 @@ Page({
     switch(type) {
       case 'takeout':
         wx.switchTab({
-          url: '/pages/takeout/takeout'
+          url: '/pages/takeout/index'
         });
         break;
       case 'errand':
-        wx.navigateTo({
-          url: '/pages/errand/errand'
+        wx.switchTab({
+          url: '/pages/errand/index'
         });
         break;
       case 'product':
-        wx.switchTab({
-          url: '/pages/product/product'
+        wx.navigateTo({
+          url: '/pages/product/list/index'
         });
         break;
       case 'courier':
         wx.navigateTo({
-          url: '/pages/courier/courier'
+          url: '/pages/courier/index'
         });
         break;
       case 'campus':
         wx.navigateTo({
-          url: '/pages/campus/campus'
+          url: '/pages/campus/index'
         });
         break;
       case 'coupon':
         wx.navigateTo({
-          url: '/pages/coupon/coupon'
+          url: '/pages/coupon/list/index'
         });
         break;
       case 'wallet':
         wx.navigateTo({
-          url: '/pages/wallet/wallet'
+          url: '/pages/user/profile'
         });
         break;
       case 'more':
-        wx.navigateTo({
-          url: '/pages/more/more'
+        wx.showToast({
+          title: '功能开发中',
+          icon: 'none'
         });
         break;
       default:
@@ -222,8 +291,8 @@ Page({
    * 查看更多商品
    */
   viewMoreProducts: function() {
-    wx.switchTab({
-      url: '/pages/product/product'
+    wx.navigateTo({
+      url: '/pages/product/list/index'
     });
   },
 
@@ -232,7 +301,7 @@ Page({
    */
   viewMoreMerchants: function() {
     wx.navigateTo({
-      url: '/pages/merchant/list'
+      url: '/pages/merchant/list/index'
     });
   },
 
@@ -242,7 +311,7 @@ Page({
   goToProductDetail: function(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/product/detail?id=${id}`
+      url: `/pages/product/detail/index?id=${id}`
     });
   },
 
@@ -252,7 +321,7 @@ Page({
   goToMerchant: function(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/merchant/detail?id=${id}`
+      url: `/pages/merchant/detail/index?id=${id}`
     });
   },
 
@@ -262,7 +331,7 @@ Page({
   viewAnnouncement: function(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/announcement/detail?id=${id}`
+      url: `/pages/announcement/detail/index?id=${id}`
     });
   },
 
@@ -276,11 +345,19 @@ Page({
     const app = getApp();
     
     // 添加到全局购物车
-    app.addToCart(product);
+    app.addToCart('product', {
+      productId: product.id,
+      specId: product.specId || 1,
+      quantity: 1,
+      name: product.name,
+      price: product.price,
+      image: product.image
+    });
     
     wx.showToast({
       title: '已添加到购物车',
-      icon: 'success'
+      icon: 'success',
+      duration: 1000
     });
   }
 });

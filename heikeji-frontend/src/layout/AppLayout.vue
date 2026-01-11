@@ -37,13 +37,15 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useStore } from 'pinia'
 import HeaderBar from './components/HeaderBar.vue'
-import SideBar from './components/SideBar.vue'
-import MainContent from './components/MainContent.vue'
+import SideBar from './components/Sidebar.vue'
+import MainContent from './components/AppMain.vue'
 import logger from '@/utils/logger'
 import { logout } from '@/api/login'
 import { ElMessage } from 'element-plus'
+// 导入具体的store hooks
+import { useUserStore } from '@/store/modules/user'
+import { usePermissionStore } from '@/store/modules/permission'
 
 // 组件名称
 const name = 'AppLayout'
@@ -63,17 +65,17 @@ const performanceData = reactive({
 // 路由和状态管理
 const router = useRouter()
 const route = useRoute()
-const store = useStore()
+// 使用具体的store hooks
+const userStore = useUserStore()
+const permissionStore = usePermissionStore()
 
 // 计算属性
 const username = computed(() => {
-  const userStore = store as any
-  return userStore.state?.user?.username || ''
+  return userStore.userInfo?.username || ''
 })
 
 const permissionRoutes = computed(() => {
-  const userStore = store as any
-  return userStore.getters?.permission_routes || []
+  return permissionStore.routes || []
 })
 
 const breadcrumbList = computed(() => {
@@ -133,9 +135,8 @@ const updateComponentCache = (route: any) => {
 // 初始化用户信息
 const initUserInfo = async () => {
   try {
-    const userStore = store as any
-    if (!userStore.getters?.username) {
-      await userStore.dispatch('getCurrentUser')
+    if (!userStore.userInfo) {
+      await userStore.getUserInfoAction()
     }
   } catch (error) {
     logger.error('获取用户信息失败:', error)
@@ -245,9 +246,7 @@ const handleCommand = async (command: string) => {
 const handleLogout = async () => {
   try {
     ElMessage.success('正在退出登录...')
-    await logout()
-    const userStore = store as any
-    await userStore.dispatch('logout')
+    await userStore.logoutAction()
     router.push('/login')
   } catch (error) {
     logger.error('退出登录失败:', error)

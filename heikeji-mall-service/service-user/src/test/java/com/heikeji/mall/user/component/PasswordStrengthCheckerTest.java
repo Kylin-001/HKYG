@@ -1,10 +1,9 @@
 package com.heikeji.mall.user.component;
 
-import com.heikeji.mall.user.config.UserSecurityConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,12 +13,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author heikeji
  * @date 2024-12-19
  */
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class PasswordStrengthCheckerTest {
 
-    @Autowired
     private PasswordStrengthChecker passwordStrengthChecker;
+    
+    @BeforeEach
+    void setUp() {
+        passwordStrengthChecker = new PasswordStrengthChecker();
+    }
 
     @Test
     public void testEmptyPassword() {

@@ -53,8 +53,20 @@ interface DashboardState {
 // 创建并导出dashboard store
 export const useDashboardStore = defineStore('dashboard', () => {
   // 状态定义
-  const dashboardData = ref<DashboardData>({})
-  const systemHealth = ref<SystemHealth>({})
+  const dashboardData = ref<DashboardData>({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalMerchants: 0,
+    totalRevenue: 0,
+    dailyActiveUsers: 0,
+    dailyOrders: 0
+  })
+  const systemHealth = ref<SystemHealth>({
+    cpuUsage: 0,
+    memoryUsage: 0,
+    diskUsage: 0,
+    uptime: 0
+  })
   const salesTrend = ref<SalesTrendItem[]>([])
   const orderCategory = ref<OrderCategoryItem[]>([])
   const latestOrders = ref<any[]>([])
@@ -182,8 +194,20 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
   // 重置状态
   function resetState() {
-    dashboardData.value = {}
-    systemHealth.value = {}
+    dashboardData.value = {
+      totalUsers: 0,
+      totalOrders: 0,
+      totalMerchants: 0,
+      totalRevenue: 0,
+      dailyActiveUsers: 0,
+      dailyOrders: 0
+    }
+    systemHealth.value = {
+      cpuUsage: 0,
+      memoryUsage: 0,
+      diskUsage: 0,
+      uptime: 0
+    }
     salesTrend.value = []
     orderCategory.value = []
     latestOrders.value = []

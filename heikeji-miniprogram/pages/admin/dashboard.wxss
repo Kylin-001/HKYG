@@ -1,0 +1,409 @@
+/* 数据统计页面样式 */
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 32rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.refresh-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-left: 20rpx;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 统计内容 */
+.dashboard-content {
+  padding: 20rpx;
+}
+
+/* 时间范围选择 */
+.time-range-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.time-range-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.time-range-item.active {
+  background-color: #1989fa;
+  color: #fff;
+}
+
+/* 关键指标 */
+.metrics-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.metric-card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metric-card:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 5rpx rgba(0, 0, 0, 0.05);
+}
+
+.metric-content {
+  flex: 1;
+}
+
+.metric-label {
+  display: block;
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.metric-value {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.metric-trend {
+  display: flex;
+  align-items: center;
+}
+
+.trend-arrow {
+  font-size: 24rpx;
+  color: #07c160;
+  margin-right: 4rpx;
+}
+
+.trend-text {
+  font-size: 24rpx;
+  color: #07c160;
+}
+
+.metric-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-left: 20rpx;
+}
+
+/* 图表区域 */
+.chart-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.chart-container {
+  height: 300rpx;
+  position: relative;
+}
+
+/* 模拟图表 */
+.mock-chart {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-title {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+/* 柱状图 */
+.chart-bars {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 250rpx;
+  padding: 0 20rpx;
+}
+
+.chart-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.bar-date {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 40rpx;
+}
+
+.bar {
+  width: 100%;
+  background-color: #1989fa;
+  border-radius: 4rpx 4rpx 0 0;
+  transition: height 0.5s ease;
+}
+
+.bar-value {
+  font-size: 22rpx;
+  color: #666;
+  margin-top: 8rpx;
+}
+
+/* 折线图 */
+.chart-lines {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 250rpx;
+  padding: 0 20rpx;
+  position: relative;
+}
+
+.chart-line-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.line-date {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.line-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  position: relative;
+}
+
+.line-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+.line-dot.new-users {
+  background-color: #1989fa;
+  bottom: 60rpx;
+}
+
+.line-dot.active-users {
+  background-color: #07c160;
+  bottom: 120rpx;
+}
+
+.line-legend {
+  display: flex;
+  justify-content: center;
+  gap: 40rpx;
+  margin-top: 20rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.legend-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+}
+
+.legend-dot.new-users {
+  background-color: #1989fa;
+}
+
+.legend-dot.active-users {
+  background-color: #07c160;
+}
+
+/* 排名区域 */
+.ranking-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.ranking-list {
+  margin-top: 20rpx;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: background-color 0.3s ease;
+}
+
+.ranking-item:last-child {
+  border-bottom: none;
+}
+
+.ranking-item:active {
+  background-color: #f5f5f5;
+}
+
+.ranking-rank {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  background-color: #1989fa;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+}
+
+.ranking-item:nth-child(2) .ranking-rank {
+  background-color: #f7ba1e;
+}
+
+.ranking-item:nth-child(3) .ranking-rank {
+  background-color: #fa8c16;
+}
+
+.ranking-info {
+  flex: 1;
+}
+
+.ranking-name {
+  display: block;
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.ranking-sales {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.ranking-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40rpx;
+  height: 40rpx;
+  color: #999;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .metrics-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-bars {
+    padding: 0 10rpx;
+  }
+  
+  .bar-container {
+    max-width: 30rpx;
+  }
+}

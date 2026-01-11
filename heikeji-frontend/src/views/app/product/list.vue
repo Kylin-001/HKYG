@@ -56,7 +56,7 @@
       >
         <div class="product-image">
           <img
-            :src="product.mainImage || '/static/images/default-product.png'"
+            v-lazy="product.mainImage || '/static/images/default-product.png'"
             :alt="product.name"
           />
         </div>
@@ -95,6 +95,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getProductList } from '@/api/app/product'
 
 // 定义类型
 interface Product {
@@ -140,30 +141,44 @@ const sortOptions: SortOption[] = [
 ]
 
 // 加载商品列表
-const loadProducts = () => {
+const loadProducts = async () => {
   loading.value = true
 
-  // 模拟API请求
-  setTimeout(() => {
-    const mockProducts: Product[] = []
-    const startIndex = (currentPage.value - 1) * pageSize.value
+  try {
+    // 调用真实API获取商品列表
+    const response = await getProductList({
+      page: currentPage.value,
+      pageSize: pageSize.value,
+      sortBy: getSortField(currentSort.value),
+      order: getSortOrder(currentSort.value),
+    })
 
-    // 生成模拟数据
-    for (let i = 0; i < pageSize.value; i++) {
-      const id = startIndex + i + 1
-      mockProducts.push({
-        id,
-        name: `高品质数码商品 ${id} - 最新科技产品，品质保证`,
-        price: (Math.random() * 1500 + 100).toFixed(2),
-        salesCount: Math.floor(Math.random() * 2000),
-        mainImage: `https://picsum.photos/id/${id % 100}/300/300`,
-      })
-    }
-
-    products.value = mockProducts
-    totalCount.value = 120 // 模拟总数据量
+    // 处理API返回数据
+    products.value = response.data.list || []
+    totalCount.value = response.data.total || 0
+  } catch (error) {
+    console.error('加载商品列表失败:', error)
+  } finally {
     loading.value = false
-  }, 800)
+  }
+}
+
+// 获取排序字段
+const getSortField = (sortType: string): string => {
+  switch (sortType) {
+    case 'sales':
+      return 'sales'
+    case 'price_asc':
+    case 'price_desc':
+      return 'price'
+    default:
+      return 'default'
+  }
+}
+
+// 获取排序方向
+const getSortOrder = (sortType: string): string => {
+  return sortType === 'price_desc' ? 'desc' : 'asc'
 }
 
 // 切换标签

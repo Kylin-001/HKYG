@@ -11,13 +11,16 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * JWT工具类
@@ -30,6 +33,15 @@ import java.util.Map;
 public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    
+    // Redis中令牌黑名单的前缀
+    private static final String TOKEN_BLACKLIST_PREFIX = "jwt:blacklist:";
+    
+    // 从Redis中获取令牌的TTL（过期时间）前缀
+    private static final String TOKEN_TTL_PREFIX = "jwt:ttl:";
+    
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${jwt.secret:heikeji-mall-secret-key-2024-black-technology-university-campus-mall-system}")
     private String jwtSecret;
@@ -50,14 +62,30 @@ public class JwtUtils {
      * 生成Token
      * @param userId 用户ID
      * @param username 用户名
+     * @param additionalClaims 额外的自定义声明
      * @return Token字符串
      */
-    public String generateToken(String userId, String username) {
+    public String generateToken(String userId, String username, Map<String, Object> additionalClaims) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("username", username);
         
+        // 添加额外的自定义声明
+        if (additionalClaims != null && !additionalClaims.isEmpty()) {
+            claims.putAll(additionalClaims);
+        }
+        
         return generateToken(claims, jwtExpiration);
+    }
+    
+    /**
+     * 生成Token
+     * @param userId 用户ID
+     * @param username 用户名
+     * @return Token字符串
+     */
+    public String generateToken(String userId, String username) {
+        return generateToken(userId, username, null);
     }
     
     /**
@@ -139,6 +167,21 @@ public class JwtUtils {
     }
     
     /**
+     * 获取Token的剩余有效期（毫秒）
+     * @param token Token字符串
+     * @return 剩余有效期（毫秒）
+     */
+    public long getRemainingExpiration(String token) {
+        try {
+            Date expiration = getExpirationDateFromToken(token);
+            return expiration.getTime() - new Date().getTime();
+        } catch (ExpiredJwtException e) {
+            logger.warn("Token已过期: {}", e.getMessage());
+            return 0;
+        }
+    }
+    
+    /**
      * 检查Token是否过期
      * @param token Token字符串
      * @return 是否已过期
@@ -154,12 +197,50 @@ public class JwtUtils {
     }
     
     /**
+     * 检查Token是否在黑名单中
+     * @param token Token字符串
+     * @return 是否在黑名单中
+     */
+    public boolean isTokenInBlacklist(String token) {
+        String blacklistKey = TOKEN_BLACKLIST_PREFIX + token;
+        return Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey));
+    }
+    
+    /**
+     * 将Token加入黑名单
+     * @param token Token字符串
+     */
+    public void addTokenToBlacklist(String token) {
+        try {
+            // 获取Token剩余有效期
+            long remainingExpiration = getRemainingExpiration(token);
+            
+            if (remainingExpiration > 0) {
+                // 如果Token还有效，将其加入黑名单并设置过期时间
+                String blacklistKey = TOKEN_BLACKLIST_PREFIX + token;
+                redisTemplate.opsForValue().set(blacklistKey, "1", remainingExpiration, TimeUnit.MILLISECONDS);
+                logger.info("Token已加入黑名单: {}, 剩余有效期: {}ms", token, remainingExpiration);
+            } else {
+                logger.info("Token已过期，无需加入黑名单: {}", token);
+            }
+        } catch (Exception e) {
+            logger.error("将Token加入黑名单失败: {}", e.getMessage());
+        }
+    }
+    
+    /**
      * 验证Token是否有效
      * @param token Token字符串
      * @return 是否有效
      */
     public boolean validateToken(String token) {
         try {
+            // 检查Token是否在黑名单中
+            if (isTokenInBlacklist(token)) {
+                logger.warn("Token已被列入黑名单: {}", token);
+                return false;
+            }
+            
             extractClaims(token);
             return !isTokenExpired(token);
         } catch (SignatureException e) {
@@ -188,16 +269,51 @@ public class JwtUtils {
         return null;
     }
 
-
     /**
      * 刷新Token
-     * @param token 原Token
+     * @param refreshToken 刷新Token
      * @return 新Token
      */
-    public String refreshToken(String token) {
-        Claims claims = extractClaims(token);
+    public String refreshToken(String refreshToken) {
+        // 验证刷新Token是否有效
+        if (!validateToken(refreshToken)) {
+            logger.error("刷新Token无效: {}", refreshToken);
+            throw new RuntimeException("无效的刷新Token");
+        }
+        
+        // 检查是否为刷新Token
+        Claims claims = extractClaims(refreshToken);
+        Boolean isRefreshToken = claims.get("refresh", Boolean.class);
+        if (isRefreshToken == null || !isRefreshToken) {
+            logger.error("不是有效的刷新Token: {}", refreshToken);
+            throw new RuntimeException("无效的刷新Token");
+        }
+        
         String userId = claims.get("userId", String.class);
         String username = claims.get("username", String.class);
+        
+        // 生成新的访问Token
         return generateToken(userId, username);
+    }
+    
+    /**
+     * 清理过期的令牌
+     */
+    public void cleanExpiredTokens() {
+        // Redis会自动清理过期的键，无需手动清理
+        logger.info("已触发过期令牌清理（Redis自动清理）");
+    }
+    
+    /**
+     * 获取Token黑名单大小
+     * @return 黑名单大小
+     */
+    public long getBlacklistSize() {
+        try {
+            return redisTemplate.keys(TOKEN_BLACKLIST_PREFIX + "*").size();
+        } catch (Exception e) {
+            logger.error("获取Token黑名单大小失败: {}", e.getMessage());
+            return 0;
+        }
     }
 }

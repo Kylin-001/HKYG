@@ -6,21 +6,25 @@ server:
 spring:
   application:
     name: service-secondhand
+  # 禁用Nacos服务发现和配置检查，避免启动错误
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
-        namespace: dev
+        enabled: false
+      config:
+        import-check:
+          enabled: false
+        enabled: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456
+    password: Mysql@8Root!2025
     type: com.alibaba.druid.pool.DruidDataSource
   redis:
     host: localhost
     port: 6379
-    password: 
+    password: Redis@hkyg
     database: 0
 
 mybatis-plus:

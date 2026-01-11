@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member;
+package com.heikeji.mall.member;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

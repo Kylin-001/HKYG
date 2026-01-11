@@ -1,0 +1,250 @@
+/* 宿舍服务页面样式 */
+
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  background-color: #fff;
+  padding: 0 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn {
+  padding: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.more-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 服务分类 */
+.service-categories {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: #fff;
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 25%;
+  padding: 20px 0;
+  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.category-item:nth-child(4n) {
+  border-right: none;
+}
+
+.category-item:nth-last-child(-n+4) {
+  border-bottom: none;
+}
+
+.category-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+}
+
+.category-name {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 模块 */
+.section {
+  background-color: #fff;
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.more {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+/* 最近报修 */
+.repair-list {
+  padding: 10px 0;
+}
+
+.repair-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.repair-item:last-child {
+  border-bottom: none;
+}
+
+.repair-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.repair-title {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.repair-status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.repair-status.pending {
+  background-color: #fff2f0;
+  color: #ff4d4f;
+}
+
+.repair-status.processing {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.repair-status.completed {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.repair-status.cancelled {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+.repair-time {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 公告列表 */
+.announcement-list {
+  padding: 10px 0;
+}
+
+.announcement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.announcement-item:last-child {
+  border-bottom: none;
+}
+
+.announcement-title {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.announcement-time {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 适配不同屏幕尺寸 */
+@media (max-width: 375px) {
+  .category-item {
+    padding: 15px 0;
+  }
+  
+  .category-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .category-name {
+    font-size: 13px;
+  }
+  
+  .section-header {
+    padding: 12px 16px;
+  }
+  
+  .repair-item,
+  .announcement-item {
+    padding: 12px 16px;
+  }
+  
+  .repair-title,
+  .announcement-title {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .service-categories {
+    margin: 15px;
+  }
+  
+  .section {
+    margin: 15px;
+  }
+  
+  .category-item {
+    width: 12.5%;
+    padding: 25px 0;
+  }
+  
+  .category-item:nth-child(8n) {
+    border-right: none;
+  }
+  
+  .category-item:nth-last-child(-n+8) {
+    border-bottom: none;
+  }
+}

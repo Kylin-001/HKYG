@@ -49,12 +49,25 @@ interface ProductCategory {
   children?: ProductCategory[]
 }
 
+// 商品品牌接口定义
+interface ProductBrand {
+  id: string
+  name: string
+  logo: string
+  description: string
+  sort: number
+  status: boolean
+  createTime: string
+}
+
 // 定义product store的状态类型
 interface ProductState {
   products: Product[]
   currentProduct: Product | null
   categories: ProductCategory[]
+  brands: ProductBrand[]
   total: number
+  brandTotal: number
   loading: boolean
   error: string | null
   filterParams: {
@@ -73,7 +86,9 @@ export const useProductStore = defineStore('product', () => {
   const products = ref<Product[]>([])
   const currentProduct = ref<Product | null>(null)
   const categories = ref<ProductCategory[]>([])
+  const brands = ref<ProductBrand[]>([])
   const total = ref(0)
+  const brandTotal = ref(0)
   const loading = ref(false)
   const error = ref<string | null>(null)
   const filterParams = ref({
@@ -216,7 +231,7 @@ export const useProductStore = defineStore('product', () => {
       error.value = null
 
       const res = await productApi.getProductCategories()
-      categories.value = res.data
+      categories.value = res.data || []
 
       return res
     } catch (err) {
@@ -245,11 +260,150 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
+  // 方法 - 获取品牌列表
+  async function getBrands(page: number = 1, pageSize: number = 10) {
+    try {
+      loading.value = true
+      error.value = null
+
+      const params = {
+        page,
+        pageSize,
+      }
+
+      const res = await productApi.getBrands(params)
+      brands.value = res.data.records
+      brandTotal.value = res.data.total
+
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取品牌列表失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 方法 - 创建品牌
+  async function createBrand(brandData: Partial<ProductBrand>) {
+    try {
+      loading.value = true
+      error.value = null
+
+      const res = await productApi.createBrand(brandData)
+      ElMessage.success('创建品牌成功')
+
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '创建品牌失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 方法 - 更新品牌
+  async function updateBrand(brandData: Partial<ProductBrand>) {
+    try {
+      loading.value = true
+      error.value = null
+
+      const res = await productApi.updateBrand(brandData)
+      ElMessage.success('更新品牌成功')
+
+      // 更新本地数据
+      const index = brands.value.findIndex(b => b.id === brandData.id)
+      if (index !== -1) {
+        brands.value[index] = { ...brands.value[index], ...brandData }
+      }
+
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '更新品牌失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 方法 - 更新品牌状态
+  async function updateBrandStatus(id: string, status: boolean) {
+    try {
+      loading.value = true
+      error.value = null
+
+      const res = await productApi.updateBrandStatus({ id, status })
+      ElMessage.success(`品牌状态已更新为${status ? '启用' : '禁用'}`)
+
+      // 更新本地数据
+      const index = brands.value.findIndex(b => b.id === id)
+      if (index !== -1) {
+        brands.value[index].status = status
+      }
+
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '更新品牌状态失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 方法 - 删除品牌
+  async function deleteBrand(id: string) {
+    try {
+      loading.value = true
+      error.value = null
+
+      const res = await productApi.deleteBrand(id)
+      ElMessage.success('删除品牌成功')
+
+      // 更新本地数据
+      brands.value = brands.value.filter(b => b.id !== id)
+      brandTotal.value--
+
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '删除品牌失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 方法 - 上传品牌Logo
+  async function uploadBrandLogo(formData: FormData) {
+    try {
+      loading.value = true
+      error.value = null
+
+      const res = await productApi.uploadBrandLogo(formData)
+      ElMessage.success('上传Logo成功')
+
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '上传Logo失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 方法 - 重置商品状态
   function resetProductState() {
     products.value = []
     currentProduct.value = null
+    categories.value = []
+    brands.value = []
     total.value = 0
+    brandTotal.value = 0
     error.value = null
     resetFilterParams()
   }
@@ -260,7 +414,9 @@ export const useProductStore = defineStore('product', () => {
     products,
     currentProduct,
     categories,
+    brands,
     total,
+    brandTotal,
     loading,
     error,
     filterParams,
@@ -279,5 +435,11 @@ export const useProductStore = defineStore('product', () => {
     setFilterParams,
     resetFilterParams,
     resetProductState,
+    getBrands,
+    createBrand,
+    updateBrand,
+    updateBrandStatus,
+    deleteBrand,
+    uploadBrandLogo,
   }
 })

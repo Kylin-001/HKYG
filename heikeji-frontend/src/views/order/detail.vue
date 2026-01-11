@@ -401,7 +401,7 @@
 // 导入必要的API和类型
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useOrderStore } from '@/store/modules/order'
 import { ElMessage, ElMessageBox, ElPrompt } from 'element-plus'
 import { FormInstance } from 'element-plus'
 
@@ -503,7 +503,7 @@ const actionFormRef = ref<FormInstance | null>(null)
 // 路由和状态管理
 const route = useRoute()
 const router = useRouter()
-const store = useStore()
+const orderStore = useOrderStore()
 
 // 表单规则
 const actionFormRules = reactive({
@@ -528,7 +528,7 @@ onMounted(() => {
 async function fetchOrderDetail() {
   loading.value = true
   try {
-    orderInfo.value = await store.dispatch('order/getOrderDetail', orderId.value)
+    orderInfo.value = await orderStore.fetchOrderDetail(orderId.value)
     // 根据订单状态设置可用操作
     setOrderActions()
   } catch (error) {
@@ -824,7 +824,7 @@ async function handleCancelOrder() {
   })
     .then(async () => {
       try {
-        await store.dispatch('order/cancelOrder', orderId.value)
+        await orderStore.handleCancelOrder(orderId.value)
         if (orderInfo.value) {
           orderInfo.value.orderStatus = 5
         }
@@ -855,7 +855,7 @@ function handleShipOrder() {
   })
     .then(async ({ value }) => {
       try {
-        await store.dispatch('order/shipOrder', {
+        await orderStore.handleShipOrder(orderId.value, {
           orderId: orderId.value,
           trackingNumber: value.trim(),
         })
@@ -884,7 +884,7 @@ function handleShipOrder() {
 async function handleViewLogistics() {
   logisticsDialogVisible.value = true
   try {
-    logisticsDetails.value = await store.dispatch('order/getLogisticsDetail', orderId.value)
+    logisticsDetails.value = await orderStore.fetchLogisticsDetail(orderId.value)
   } catch (error) {
     logger.error('获取物流详情失败', error)
     ElMessage.error('获取物流详情失败')
@@ -900,7 +900,7 @@ async function handleConfirmReceive() {
   })
     .then(async () => {
       try {
-        await store.dispatch('order/confirmReceive', orderId.value)
+        await orderStore.handleConfirmReceive(orderId.value)
         if (orderInfo.value) {
           orderInfo.value.orderStatus = 4
           orderInfo.value.completeTime = new Date().toISOString()
@@ -979,19 +979,13 @@ async function confirmOrderAction() {
     if (valid) {
       try {
         if (currentActionType.value === 'refund') {
-          await store.dispatch('order/agreeRefund', {
-            orderId: orderId.value,
-            reason: actionForm.reason,
-          })
+          await orderStore.handleAgreeRefund(orderId.value, actionForm.reason)
           if (orderInfo.value) {
             orderInfo.value.orderStatus = 7
           }
           ElMessage.success('退款处理成功')
         } else if (currentActionType.value === 'rejectRefund') {
-          await store.dispatch('order/rejectRefund', {
-            orderId: orderId.value,
-            reason: actionForm.reason,
-          })
+          await orderStore.handleRejectRefund(orderId.value, actionForm.reason)
           if (orderInfo.value) {
             orderInfo.value.orderStatus = 3
           }
@@ -1041,7 +1035,7 @@ async function handleExport() {
   exportLoading.value = true
   try {
     // 模拟导出操作
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => void setTimeout(resolve, 1000))
     // 在实际项目中，这里应该调用后端API导出订单数据
     ElMessage.success('订单已导出')
   } catch (error) {

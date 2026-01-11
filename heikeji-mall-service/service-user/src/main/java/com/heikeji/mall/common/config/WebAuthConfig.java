@@ -99,13 +99,13 @@ public class WebAuthConfig {
                 // 配置请求授权
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许所有OPTIONS请求
-                        .requestMatchers("/api/**", "/user/**").permitAll()
+                        .antMatchers("/api/**", "/user/**").permitAll()
                         // 允许登录注册接口
-                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
+                        .antMatchers("/api/user/login", "/api/user/register").permitAll()
                         // 允许获取验证码接口
-                        .requestMatchers("/api/common/captcha").permitAll()
+                        .antMatchers("/api/common/captcha").permitAll()
                         // 允许静态资源
-                        .requestMatchers("/static/**", "/favicon.ico").permitAll()
+                        .antMatchers("/static/**", "/favicon.ico").permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated()
                 )

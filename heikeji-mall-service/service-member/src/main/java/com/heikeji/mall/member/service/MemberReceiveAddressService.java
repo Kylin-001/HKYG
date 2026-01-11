@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member.service;
+package com.heikeji.mall.member.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.heikeji.mall.member.entity.MemberReceiveAddress;

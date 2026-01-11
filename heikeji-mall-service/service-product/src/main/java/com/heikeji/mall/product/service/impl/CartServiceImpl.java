@@ -198,8 +198,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
     }
     
     /**
-     * 添加商品到购物车（兼容旧接口）
+     * 添加商品到购物车
      */
+    @Override
     public Cart addToCart(Long userId, Long productId, Integer quantity) {
         Cart cart = new Cart();
         cart.setUserId(userId);

@@ -62,7 +62,7 @@
             <!-- 商家图片 -->
             <div class="merchant-image">
               <img
-                :src="merchant.image || '/static/images/default-merchant.jpg'"
+                v-lazy="merchant.image || '/static/images/default-merchant.jpg'"
                 :alt="merchant.name"
               />
               <div class="merchant-badges">
@@ -132,166 +132,144 @@
   </div>
 </template>
 
-<script>
-// 导入日志工具
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import logger from '@/utils/logger'
-// 导入Vuex状态管理
-import { mapState } from 'vuex'
+import { useCartStore } from '@/store/modules/cart'
 
-export default {
-  name: 'MerchantList',
-  data() {
-    return {
-      // 搜索表单
-      searchForm: {
-        keyword: '',
-        category: '',
-        sortBy: 'comprehensive',
-      },
+// 获取 Pinia store 实例
+const cartStore = useCartStore()
+const router = useRouter()
 
-      // 商家列表
-      merchantList: [],
+// 搜索表单
+const searchForm = ref({
+  keyword: '',
+  category: '',
+  sortBy: 'comprehensive',
+})
 
-      // 加载状态
-      loading: false,
-      loadingMore: false,
+// 商家列表
+const merchantList = ref<any[]>([])
 
-      // 分页
-      pagination: {
-        pageNum: 1,
-        pageSize: 12,
-        total: 0,
-      },
+// 加载状态
+const loading = ref(false)
+const loadingMore = ref(false)
 
-      // 是否有更多
-      hasMore: true,
+// 分页
+const pagination = ref({
+  pageNum: 1,
+  pageSize: 12,
+  total: 0,
+})
 
-      // 购物车商品数量
-      cartItemCount: 0,
+// 是否有更多
+const hasMore = ref(true)
+
+// 从 Pinia 获取购物车商品数量
+const cartCount = computed(() => cartStore.totalCount)
+const cartItemCount = computed(() => cartCount.value)
+
+// 获取商家列表
+const fetchMerchants = async () => {
+  loading.value = true
+  try {
+    // 模拟 API 调用
+    const mockMerchants = generateMockMerchants()
+
+    if (pagination.value.pageNum === 1) {
+      merchantList.value = mockMerchants
+    } else {
+      merchantList.value.push(...mockMerchants)
     }
-  },
 
-  computed: {
-    // 从 Vuex 获取购物车商品数量
-    ...mapState('cart', {
-      cartCount: 'totalCount',
-    }),
-  },
-
-  mounted() {
-    this.fetchMerchants()
-    this.updateCartCount()
-  },
-
-  methods: {
-    // 获取商家列表
-    async fetchMerchants() {
-      this.loading = true
-      try {
-        // 模拟 API 调用
-        const mockMerchants = this.generateMockMerchants()
-
-        if (this.pagination.pageNum === 1) {
-          this.merchantList = mockMerchants
-        } else {
-          this.merchantList.push(...mockMerchants)
-        }
-
-        this.pagination.total = 50 // 模拟总数据量
-        this.hasMore = this.merchantList.length < this.pagination.total
-      } catch (error) {
-        this.$message.error('获取商家列表失败')
-        logger.error('获取商家列表失败', error)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    // 搜索商家
-    handleSearch() {
-      this.pagination.pageNum = 1
-      this.fetchMerchants()
-    },
-
-    // 加载更多商家
-    async loadMoreMerchants() {
-      if (this.loadingMore || !this.hasMore) return
-
-      this.loadingMore = true
-      this.pagination.pageNum++
-      await this.fetchMerchants()
-      this.loadingMore = false
-    },
-
-    // 进入商家页面
-    goToMerchant(merchant) {
-      this.$router.push(`/takeout/menu/${merchant.id}`)
-    },
-
-    // 更新购物车数量
-    updateCartCount() {
-      this.cartItemCount = this.cartCount
-    },
-
-    // 生成模拟商家数据
-    generateMockMerchants() {
-      const categories = ['chinese', 'western', 'asian', 'snacks']
-      const names = [
-        '兰州拉面',
-        '黄焖鸡米饭',
-        '沙县小吃',
-        '麻辣烫',
-        '重庆小面',
-        '肯德基',
-        '麦当劳',
-        '必胜客',
-        '汉堡王',
-        '寿司道',
-        '韩式烤肉',
-        '日式料理',
-        '奶茶工坊',
-        '咖啡小站',
-        '甜品屋',
-        '果汁吧',
-      ]
-
-      const merchants = []
-      for (let i = 0; i < this.pagination.pageSize; i++) {
-        const category = categories[Math.floor(Math.random() * categories.length)]
-        const name = names[Math.floor(Math.random() * names.length)]
-
-        merchants.push({
-          id: (this.pagination.pageNum - 1) * this.pagination.pageSize + i + 1,
-          name: `${name}${(this.pagination.pageNum - 1) * this.pagination.pageSize + i + 1}`,
-          description: `专业${name}，新鲜制作，配送快速`,
-          category,
-          rating: 3.5 + Math.random() * 1.5,
-          monthlySales: Math.floor(Math.random() * 2000) + 100,
-          deliveryFee: 1 + Math.random() * 3,
-          minOrderAmount: 10 + Math.random() * 20,
-          deliveryTime: 20 + Math.floor(Math.random() * 30),
-          image: '/static/images/default-merchant.jpg',
-          isNew: Math.random() < 0.2,
-          isHot: Math.random() < 0.3,
-          isRecommended: Math.random() < 0.1,
-          promotions: [
-            { id: 1, title: '满20减5', type: 'discount' },
-            { id: 2, title: '新用户立减10元', type: 'new_user' },
-          ].filter(() => Math.random() < 0.5),
-        })
-      }
-
-      return merchants
-    },
-  },
-
-  watch: {
-    // 监听购物车变化
-    cartCount(newCount) {
-      this.cartItemCount = newCount
-    },
-  },
+    pagination.value.total = 50 // 模拟总数据量
+    hasMore.value = merchantList.value.length < pagination.value.total
+  } catch (error) {
+    ElMessage.error('获取商家列表失败')
+    logger.error('获取商家列表失败', error)
+  } finally {
+    loading.value = false
+  }
 }
+
+// 搜索商家
+const handleSearch = () => {
+  pagination.value.pageNum = 1
+  fetchMerchants()
+}
+
+// 加载更多商家
+const loadMoreMerchants = async () => {
+  if (loadingMore.value || !hasMore.value) return
+
+  loadingMore.value = true
+  pagination.value.pageNum++
+  await fetchMerchants()
+  loadingMore.value = false
+}
+
+// 进入商家页面
+const goToMerchant = (merchant: any) => {
+  router.push(`/takeout/menu/${merchant.id}`)
+}
+
+// 生成模拟商家数据
+const generateMockMerchants = () => {
+  const categories = ['chinese', 'western', 'asian', 'snacks']
+  const names = [
+    '兰州拉面',
+    '黄焖鸡米饭',
+    '沙县小吃',
+    '麻辣烫',
+    '重庆小面',
+    '肯德基',
+    '麦当劳',
+    '必胜客',
+    '汉堡王',
+    '寿司道',
+    '韩式烤肉',
+    '日式料理',
+    '奶茶工坊',
+    '咖啡小站',
+    '甜品屋',
+    '果汁吧',
+  ]
+
+  const merchants: any[] = []
+  for (let i = 0; i < pagination.value.pageSize; i++) {
+    const category = categories[Math.floor(Math.random() * categories.length)]
+    const name = names[Math.floor(Math.random() * names.length)]
+
+    merchants.push({
+      id: (pagination.value.pageNum - 1) * pagination.value.pageSize + i + 1,
+      name: `${name}${(pagination.value.pageNum - 1) * pagination.value.pageSize + i + 1}`,
+      description: `专业${name}，新鲜制作，配送快速`,
+      category,
+      rating: 3.5 + Math.random() * 1.5,
+      monthlySales: Math.floor(Math.random() * 2000) + 100,
+      deliveryFee: 1 + Math.random() * 3,
+      minOrderAmount: 10 + Math.random() * 20,
+      deliveryTime: 20 + Math.floor(Math.random() * 30),
+      image: '/static/images/default-merchant.jpg',
+      isNew: Math.random() < 0.2,
+      isHot: Math.random() < 0.3,
+      isRecommended: Math.random() < 0.1,
+      promotions: [
+        { id: 1, title: '满20减5', type: 'discount' },
+        { id: 2, title: '新用户立减10元', type: 'new_user' },
+      ].filter(() => Math.random() < 0.5),
+    })
+  }
+
+  return merchants
+}
+
+// 组件挂载时获取商家列表
+onMounted(() => {
+  fetchMerchants()
+})
 </script>
 
 <style scoped>

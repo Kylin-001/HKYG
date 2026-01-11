@@ -1,9 +1,10 @@
 import request from '@/utils/request'
+import config from '@/config/environment'
 
 // 用户登录 - 使用LoginController和AuthController
 export function login(data) {
   return request({
-    url: '/api/auth/login',
+    url: `${config.API_BASE_URL}/api/auth/login`,
     method: 'post',
     data,
   })
@@ -12,7 +13,7 @@ export function login(data) {
 // 获取验证码 - 使用LoginController
 export function getCodeImg() {
   return request({
-    url: '/api/auth/captcha',
+    url: `${config.API_BASE_URL}/api/auth/captcha`,
     method: 'get',
   })
 }
@@ -20,7 +21,7 @@ export function getCodeImg() {
 // 退出登录 - 使用LoginController
 export function logout() {
   return request({
-    url: '/api/auth/logout',
+    url: `${config.API_BASE_URL}/api/auth/logout`,
     method: 'post',
   })
 }
@@ -28,7 +29,7 @@ export function logout() {
 // 获取当前用户信息 - 使用AuthController
 export function getCurrentUser() {
   return request({
-    url: '/api/auth/currentUser',
+    url: `${config.API_BASE_URL}/api/auth/currentUser`,
     method: 'get',
   })
 }
@@ -36,7 +37,7 @@ export function getCurrentUser() {
 // 刷新令牌 - 使用AuthController
 export function refreshToken() {
   return request({
-    url: '/api/auth/refresh',
+    url: `${config.API_BASE_URL}/api/auth/refresh`,
     method: 'post',
   })
 }

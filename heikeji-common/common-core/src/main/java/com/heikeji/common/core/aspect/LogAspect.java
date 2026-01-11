@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -68,9 +68,9 @@ public class LogAspect {
             Object[] args = joinPoint.getArgs();
             if (args != null && args.length > 0) {
                 // 过滤掉request/response等对象
-                Object[] filteredArgs = Arrays.stream(args)
-                        .filter(arg -> !(arg instanceof HttpServletRequest || arg instanceof jakarta.servlet.http.HttpServletResponse))
-                        .toArray();
+            Object[] filteredArgs = Arrays.stream(args)
+                    .filter(arg -> !(arg instanceof HttpServletRequest || arg instanceof javax.servlet.http.HttpServletResponse))
+                    .toArray();
                 if (filteredArgs.length > 0) {
                     String argsJson = objectMapper.writeValueAsString(filteredArgs);
                     // 限制日志长度，避免日志过大

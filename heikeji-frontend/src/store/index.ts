@@ -23,5 +23,6 @@ export * from './modules/system'
 export * from './modules/campus'
 export * from './modules/dashboard'
 export * from './modules/courier'
+export * from './modules/cart'
 
 export default pinia

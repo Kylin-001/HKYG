@@ -1,241 +1,373 @@
-import productModule from '@/store/modules/product'
-import { getProductList, getProductDetail, getCategoryList, getBrandList } from '@/api/product'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useProductStore } from '@/store/modules/product'
+import * as productApi from '@/api/product'
 
 // Mock API calls
-jest.mock('@/api/product', () => ({
-  getProductList: jest.fn(),
-  getProductDetail: jest.fn(),
-  getCategoryList: jest.fn(),
-  getBrandList: jest.fn(),
+vi.mock('@/api/product', () => ({
+  getProductList: vi.fn(),
+  getProductDetail: vi.fn(),
+  getProductCategories: vi.fn(),
+  addProduct: vi.fn(),
+  updateProduct: vi.fn(),
+  deleteProduct: vi.fn(),
 }))
 
 describe('Product Store Module', () => {
-  let state
-  let commit
-  let dispatch
+  let productStore
+  let mockGetProductList
+  let mockGetProductDetail
+  let mockGetProductCategories
 
   beforeEach(() => {
-    // Reset state
-    state = {
-      list: [],
-      total: 0,
-      detail: {},
-      categories: [],
-      brands: [],
-    }
-    commit = jest.fn()
-    dispatch = jest.fn()
+    // Reset Pinia
+    const pinia = createPinia()
+    setActivePinia(pinia)
+
+    // Create store instance
+    productStore = useProductStore()
+
+    // Get mocked functions
+    mockGetProductList = productApi.getProductList
+    mockGetProductDetail = productApi.getProductDetail
+    mockGetProductCategories = productApi.getProductCategories
+
+    // Clear all mocks
+    vi.clearAllMocks()
   })
 
   // Test State initialization
   describe('State', () => {
     it('should have initial state with empty values', () => {
-      expect(productModule.state.list).toEqual([])
-      expect(productModule.state.total).toBe(0)
-      expect(productModule.state.detail).toEqual({})
-      expect(productModule.state.categories).toEqual([])
-      expect(productModule.state.brands).toEqual([])
+      expect(productStore.products).toEqual([])
+      expect(productStore.total).toBe(0)
+      expect(productStore.currentProduct).toBeNull()
+      expect(productStore.categories).toEqual([])
+      expect(productStore.loading).toBe(false)
+      expect(productStore.error).toBeNull()
+      expect(productStore.filterParams).toEqual({
+        keyword: '',
+        categoryId: 0,
+        brandId: 0,
+        status: 0,
+        isNew: false,
+        isHot: false,
+      })
     })
   })
 
-  // Test Mutations
-  describe('Mutations', () => {
-    it('SET_PRODUCT_LIST should set product list', () => {
-      const productList = [
-        { id: 1, name: 'Product 1' },
-        { id: 2, name: 'Product 2' },
+  // Test Getters (computed properties)
+  describe('Getters', () => {
+    it('should return correct computed properties', () => {
+      // Initially, productList should be empty
+      expect(productStore.productList).toEqual([])
+      expect(productStore.productCount).toBe(0)
+      expect(productStore.hasProducts).toBe(false)
+      expect(productStore.isProductLoading).toBe(false)
+
+      // Set some products
+      productStore.products = [
+        {
+          id: 1,
+          name: 'Product 1',
+          price: 99.99,
+          categoryId: 1,
+          brandId: 1,
+          status: 1,
+          stock: 100,
+          salesVolume: 0,
+          isNew: false,
+          isHot: false,
+          createTime: '2024-01-01',
+          updateTime: '2024-01-01',
+          images: [],
+          mainImage: '',
+          skuList: [],
+          categoryName: 'Category 1',
+          brandName: 'Brand 1',
+        },
+        {
+          id: 2,
+          name: 'Product 2',
+          price: 199.99,
+          categoryId: 1,
+          brandId: 1,
+          status: 1,
+          stock: 50,
+          salesVolume: 0,
+          isNew: true,
+          isHot: true,
+          createTime: '2024-01-02',
+          updateTime: '2024-01-02',
+          images: [],
+          mainImage: '',
+          skuList: [],
+          categoryName: 'Category 1',
+          brandName: 'Brand 1',
+        },
       ]
-      productModule.mutations.SET_PRODUCT_LIST(state, productList)
-      expect(state.list).toEqual(productList)
-    })
+      productStore.total = 2
 
-    it('SET_PRODUCT_TOTAL should set product total', () => {
-      productModule.mutations.SET_PRODUCT_TOTAL(state, 100)
-      expect(state.total).toBe(100)
-    })
-
-    it('SET_PRODUCT_DETAIL should set product detail', () => {
-      const productDetail = { id: 1, name: 'Product 1', price: 99.99 }
-      productModule.mutations.SET_PRODUCT_DETAIL(state, productDetail)
-      expect(state.detail).toEqual(productDetail)
-    })
-
-    it('SET_CATEGORIES should set categories', () => {
-      const categories = [
-        { id: 1, name: 'Category 1' },
-        { id: 2, name: 'Category 2' },
-      ]
-      productModule.mutations.SET_CATEGORIES(state, categories)
-      expect(state.categories).toEqual(categories)
-    })
-
-    it('SET_BRANDS should set brands', () => {
-      const brands = [
-        { id: 1, name: 'Brand 1' },
-        { id: 2, name: 'Brand 2' },
-      ]
-      productModule.mutations.SET_BRANDS(state, brands)
-      expect(state.brands).toEqual(brands)
-    })
-
-    it('SET_PRODUCT_LIST should handle empty list', () => {
-      productModule.mutations.SET_PRODUCT_LIST(state, null)
-      expect(state.list).toBeNull()
-    })
-
-    it('SET_PRODUCT_DETAIL should handle empty detail', () => {
-      productModule.mutations.SET_PRODUCT_DETAIL(state, null)
-      expect(state.detail).toBeNull()
+      // Check computed properties again
+      expect(productStore.productList).toEqual(productStore.products)
+      expect(productStore.productCount).toBe(2)
+      expect(productStore.hasProducts).toBe(true)
     })
   })
 
-  // Test Actions
+  // Test Actions (methods)
   describe('Actions', () => {
     describe('getProductList', () => {
-      it('should commit product list and total on success', async () => {
+      it('should set product list and total on success', async () => {
         const mockResponse = {
-          list: [
-            { id: 1, name: 'Product 1' },
-            { id: 2, name: 'Product 2' },
-          ],
-          total: 2,
+          data: {
+            records: [
+              {
+                id: 1,
+                name: 'Product 1',
+                price: 99.99,
+                categoryId: 1,
+                brandId: 1,
+                status: 1,
+                stock: 100,
+                salesVolume: 0,
+                isNew: false,
+                isHot: false,
+                createTime: '2024-01-01',
+                updateTime: '2024-01-01',
+                images: [],
+                mainImage: '',
+                skuList: [],
+                categoryName: 'Category 1',
+                brandName: 'Brand 1',
+              },
+              {
+                id: 2,
+                name: 'Product 2',
+                price: 199.99,
+                categoryId: 1,
+                brandId: 1,
+                status: 1,
+                stock: 50,
+                salesVolume: 0,
+                isNew: true,
+                isHot: true,
+                createTime: '2024-01-02',
+                updateTime: '2024-01-02',
+                images: [],
+                mainImage: '',
+                skuList: [],
+                categoryName: 'Category 1',
+                brandName: 'Brand 1',
+              },
+            ],
+            total: 2,
+          },
         }
-        getProductList.mockResolvedValue(mockResponse)
+        mockGetProductList.mockResolvedValue(mockResponse)
 
-        const params = { page: 1, limit: 10 }
-        const result = await productModule.actions.getProductList({ commit }, params)
+        const result = await productStore.getProductList(1, 10)
 
-        expect(getProductList).toHaveBeenCalledWith(params)
-        expect(commit).toHaveBeenCalledWith('SET_PRODUCT_LIST', mockResponse.list)
-        expect(commit).toHaveBeenCalledWith('SET_PRODUCT_TOTAL', mockResponse.total)
+        expect(mockGetProductList).toHaveBeenCalledWith({
+          keyword: '',
+          categoryId: 0,
+          brandId: 0,
+          status: 0,
+          isNew: false,
+          isHot: false,
+          page: 1,
+          limit: 10,
+        })
+        expect(productStore.products).toEqual(mockResponse.data.records)
+        expect(productStore.total).toBe(mockResponse.data.total)
         expect(result).toEqual(mockResponse)
       })
 
-      it('should handle empty response correctly', async () => {
-        getProductList.mockResolvedValue({})
-
-        const result = await productModule.actions.getProductList({ commit }, {})
-
-        expect(commit).toHaveBeenCalledWith('SET_PRODUCT_LIST', [])
-        expect(commit).toHaveBeenCalledWith('SET_PRODUCT_TOTAL', 0)
-      })
-
-      it('should reject with error on API failure', async () => {
+      it('should handle API error correctly', async () => {
         const error = new Error('API Error')
-        getProductList.mockRejectedValue(error)
+        mockGetProductList.mockRejectedValue(error)
 
-        await expect(productModule.actions.getProductList({ commit }, {})).rejects.toThrow(
-          'API Error'
-        )
-        expect(commit).not.toHaveBeenCalled()
+        await expect(productStore.getProductList(1, 10)).rejects.toThrow('API Error')
+        expect(productStore.error).toBe('API Error')
+        expect(productStore.loading).toBe(false)
       })
     })
 
     describe('getProductDetail', () => {
-      it('should commit product detail on success', async () => {
-        const mockDetail = { id: 1, name: 'Product 1', price: 99.99 }
-        getProductDetail.mockResolvedValue(mockDetail)
+      it('should set currentProduct on success', async () => {
+        const mockDetail = {
+          data: {
+            id: 1,
+            name: 'Product 1',
+            price: 99.99,
+            categoryId: 1,
+            brandId: 1,
+            status: 1,
+            stock: 100,
+            salesVolume: 0,
+            isNew: false,
+            isHot: false,
+            createTime: '2024-01-01',
+            updateTime: '2024-01-01',
+            images: [],
+            mainImage: '',
+            skuList: [],
+            categoryName: 'Category 1',
+            brandName: 'Brand 1',
+          },
+        }
+        mockGetProductDetail.mockResolvedValue(mockDetail)
 
-        const result = await productModule.actions.getProductDetail({ commit }, 1)
+        const result = await productStore.getProductDetail(1)
 
-        expect(getProductDetail).toHaveBeenCalledWith(1)
-        expect(commit).toHaveBeenCalledWith('SET_PRODUCT_DETAIL', mockDetail)
+        expect(mockGetProductDetail).toHaveBeenCalledWith(1)
+        expect(productStore.currentProduct).toEqual(mockDetail.data)
         expect(result).toEqual(mockDetail)
       })
 
-      it('should handle empty detail correctly', async () => {
-        getProductDetail.mockResolvedValue({})
-
-        const result = await productModule.actions.getProductDetail({ commit }, 1)
-
-        expect(commit).toHaveBeenCalledWith('SET_PRODUCT_DETAIL', {})
-      })
-
-      it('should reject with error on API failure', async () => {
+      it('should handle API error correctly', async () => {
         const error = new Error('Product not found')
-        getProductDetail.mockRejectedValue(error)
+        mockGetProductDetail.mockRejectedValue(error)
 
-        await expect(productModule.actions.getProductDetail({ commit }, 1)).rejects.toThrow(
-          'Product not found'
-        )
-        expect(commit).not.toHaveBeenCalled()
+        await expect(productStore.getProductDetail(999)).rejects.toThrow('Product not found')
+        expect(productStore.error).toBe('Product not found')
+        expect(productStore.loading).toBe(false)
       })
     })
 
-    describe('getCategories', () => {
-      it('should commit categories on success', async () => {
-        const mockCategories = [
-          { id: 1, name: 'Category 1' },
-          { id: 2, name: 'Category 2' },
-        ]
-        getCategoryList.mockResolvedValue(mockCategories)
+    describe('getProductCategories', () => {
+      it('should set categories on success', async () => {
+        const mockCategories = {
+          data: [
+            { id: 1, name: 'Category 1', parentId: 0, level: 1, sort: 1, status: 1 },
+            { id: 2, name: 'Category 2', parentId: 0, level: 1, sort: 2, status: 1 },
+          ],
+        }
+        mockGetProductCategories.mockResolvedValue(mockCategories)
 
-        const result = await productModule.actions.getCategories({ commit })
+        const result = await productStore.getProductCategories()
 
-        expect(getCategoryList).toHaveBeenCalled()
-        expect(commit).toHaveBeenCalledWith('SET_CATEGORIES', mockCategories)
+        expect(mockGetProductCategories).toHaveBeenCalled()
+        expect(productStore.categories).toEqual(mockCategories.data)
         expect(result).toEqual(mockCategories)
       })
 
-      it('should handle empty categories correctly', async () => {
-        getCategoryList.mockResolvedValue([])
-
-        const result = await productModule.actions.getCategories({ commit })
-
-        expect(commit).toHaveBeenCalledWith('SET_CATEGORIES', [])
-      })
-
-      it('should reject with error on API failure', async () => {
+      it('should handle API error correctly', async () => {
         const error = new Error('Network error')
-        getCategoryList.mockRejectedValue(error)
+        mockGetProductCategories.mockRejectedValue(error)
 
-        await expect(productModule.actions.getCategories({ commit })).rejects.toThrow(
-          'Network error'
-        )
-        expect(commit).not.toHaveBeenCalled()
+        await expect(productStore.getProductCategories()).rejects.toThrow('Network error')
+        expect(productStore.error).toBe('Network error')
+        expect(productStore.loading).toBe(false)
       })
     })
 
-    describe('getBrands', () => {
-      it('should commit brands on success with params', async () => {
-        const mockBrands = [
-          { id: 1, name: 'Brand 1' },
-          { id: 2, name: 'Brand 2' },
+    describe('setFilterParams', () => {
+      it('should update filter params', () => {
+        // Set some filter params
+        productStore.setFilterParams({
+          keyword: 'test',
+          categoryId: 1,
+          status: 1,
+        })
+
+        expect(productStore.filterParams).toEqual({
+          keyword: 'test',
+          categoryId: 1,
+          brandId: 0,
+          status: 1,
+          isNew: false,
+          isHot: false,
+        })
+      })
+    })
+
+    describe('resetFilterParams', () => {
+      it('should reset filter params to default values', () => {
+        // First set some filter params
+        productStore.setFilterParams({
+          keyword: 'test',
+          categoryId: 1,
+          status: 1,
+        })
+
+        // Then reset them
+        productStore.resetFilterParams()
+
+        expect(productStore.filterParams).toEqual({
+          keyword: '',
+          categoryId: 0,
+          brandId: 0,
+          status: 0,
+          isNew: false,
+          isHot: false,
+        })
+      })
+    })
+
+    describe('resetProductState', () => {
+      it('should reset all product state', () => {
+        // First set some state
+        productStore.products = [
+          {
+            id: 1,
+            name: 'Product 1',
+            price: 99.99,
+            categoryId: 1,
+            brandId: 1,
+            status: 1,
+            stock: 100,
+            salesVolume: 0,
+            isNew: false,
+            isHot: false,
+            createTime: '2024-01-01',
+            updateTime: '2024-01-01',
+            images: [],
+            mainImage: '',
+            skuList: [],
+            categoryName: 'Category 1',
+            brandName: 'Brand 1',
+          },
         ]
-        getBrandList.mockResolvedValue(mockBrands)
+        productStore.total = 1
+        productStore.currentProduct = {
+          id: 1,
+          name: 'Product 1',
+          price: 99.99,
+          categoryId: 1,
+          brandId: 1,
+          status: 1,
+          stock: 100,
+          salesVolume: 0,
+          isNew: false,
+          isHot: false,
+          createTime: '2024-01-01',
+          updateTime: '2024-01-01',
+          images: [],
+          mainImage: '',
+          skuList: [],
+          categoryName: 'Category 1',
+          brandName: 'Brand 1',
+        }
+        productStore.error = 'Some error'
+        productStore.setFilterParams({ keyword: 'test' })
 
-        const params = { page: 1, limit: 10 }
-        const result = await productModule.actions.getBrands({ commit }, params)
+        // Then reset state
+        productStore.resetProductState()
 
-        expect(getBrandList).toHaveBeenCalledWith(params)
-        expect(commit).toHaveBeenCalledWith('SET_BRANDS', mockBrands)
-        expect(result).toEqual(mockBrands)
-      })
-
-      it('should commit brands on success with default empty params', async () => {
-        const mockBrands = [{ id: 1, name: 'Brand 1' }]
-        getBrandList.mockResolvedValue(mockBrands)
-
-        const result = await productModule.actions.getBrands({ commit })
-
-        expect(getBrandList).toHaveBeenCalledWith({})
-        expect(commit).toHaveBeenCalledWith('SET_BRANDS', mockBrands)
-      })
-
-      it('should handle null brands response', async () => {
-        getBrandList.mockResolvedValue(null)
-
-        const result = await productModule.actions.getBrands({ commit })
-
-        expect(commit).toHaveBeenCalledWith('SET_BRANDS', null)
-      })
-
-      it('should reject with error on API failure', async () => {
-        const error = new Error('Server error')
-        getBrandList.mockRejectedValue(error)
-
-        await expect(productModule.actions.getBrands({ commit })).rejects.toThrow('Server error')
-        expect(commit).not.toHaveBeenCalled()
+        // Check that all state is reset
+        expect(productStore.products).toEqual([])
+        expect(productStore.total).toBe(0)
+        expect(productStore.currentProduct).toBeNull()
+        expect(productStore.error).toBeNull()
+        expect(productStore.filterParams).toEqual({
+          keyword: '',
+          categoryId: 0,
+          brandId: 0,
+          status: 0,
+          isNew: false,
+          isHot: false,
+        })
       })
     })
   })
@@ -244,48 +376,45 @@ describe('Product Store Module', () => {
   describe('Error Handling', () => {
     it('should handle network timeout errors', async () => {
       const timeoutError = new Error('timeout of 5000ms exceeded')
-      getProductList.mockRejectedValue(timeoutError)
+      mockGetProductList.mockRejectedValue(timeoutError)
 
-      await expect(productModule.actions.getProductList({ commit }, {})).rejects.toThrow('timeout')
+      await expect(productStore.getProductList(1, 10)).rejects.toThrow('timeout')
+      expect(productStore.error).toBe('timeout of 5000ms exceeded')
     })
 
     it('should handle server errors', async () => {
       const serverError = new Error('Internal Server Error')
-      getProductDetail.mockRejectedValue(serverError)
+      mockGetProductDetail.mockRejectedValue(serverError)
 
-      await expect(productModule.actions.getProductDetail({ commit }, 999)).rejects.toThrow(
-        'Internal Server Error'
-      )
+      await expect(productStore.getProductDetail(999)).rejects.toThrow('Internal Server Error')
+      expect(productStore.error).toBe('Internal Server Error')
     })
   })
 
   // Test edge cases
   describe('Edge Cases', () => {
-    it('should handle negative product ID', async () => {
-      const mockDetail = { id: -1, name: 'Invalid Product' }
-      getProductDetail.mockResolvedValue(mockDetail)
+    it('should handle empty API responses', async () => {
+      const mockEmptyResponse = {
+        data: {
+          records: [],
+          total: 0,
+        },
+      }
+      mockGetProductList.mockResolvedValue(mockEmptyResponse)
 
-      const result = await productModule.actions.getProductDetail({ commit }, -1)
+      await productStore.getProductList(1, 10)
 
-      expect(getProductDetail).toHaveBeenCalledWith(-1)
-      expect(result).toEqual(mockDetail)
-    })
-
-    it('should handle zero total products', async () => {
-      const mockResponse = { list: [], total: 0 }
-      getProductList.mockResolvedValue(mockResponse)
-
-      await productModule.actions.getProductList({ commit }, {})
-
-      expect(commit).toHaveBeenCalledWith('SET_PRODUCT_TOTAL', 0)
+      expect(productStore.products).toEqual([])
+      expect(productStore.total).toBe(0)
     })
 
     it('should handle undefined API responses', async () => {
-      getCategoryList.mockResolvedValue(undefined)
+      const mockUndefinedResponse = { data: undefined }
+      mockGetProductCategories.mockResolvedValue(mockUndefinedResponse)
 
-      await productModule.actions.getCategories({ commit })
+      await productStore.getProductCategories()
 
-      expect(commit).toHaveBeenCalledWith('SET_CATEGORIES', undefined)
+      expect(productStore.categories).toEqual([])
     })
   })
 })

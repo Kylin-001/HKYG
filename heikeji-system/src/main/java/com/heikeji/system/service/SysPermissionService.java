@@ -2,6 +2,7 @@ package com.heikeji.system.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.heikeji.common.core.service.PermissionService;
 import com.heikeji.system.entity.SysPermission;
 import com.heikeji.system.vo.PermissionQueryVO;
 
@@ -14,7 +15,7 @@ import java.util.Set;
  * @author zhangkaiyuan
  * @date 2023-11-09
  */
-public interface SysPermissionService extends IService<SysPermission> {
+public interface SysPermissionService extends IService<SysPermission>, PermissionService {
     
     /**
      * 根据权限编码查询权限

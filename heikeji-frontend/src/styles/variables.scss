@@ -1,85 +1,518 @@
-// 颜色变量
-$primary: #667eea;
-$primary-light: #764ba2;
-$success: #67c23a;
-$warning: #e6a23c;
-$danger: #f56c6c;
-$info: #909399;
-$text-primary: #303133;
-$text-regular: #606266;
-$text-secondary: #909399;
-$text-placeholder: #c0c4cc;
-$border-color: #dcdfe6;
-$border-light: #ebeef5;
-$background-color: #f5f7fa;
-$card-background: #ffffff;
-$hover-background: #f5f7fa;
+// 黑科易购样式变量系统 v2.0 - 现代化设计语言
+// 设计令牌(Design Tokens)定义
+// 支持主题切换和现代化设计元素
 
+// =========================================
+// 设计系统版本
+// =========================================
+$design-system-version: 'v2.0';
+
+// =========================================
+// 圆角系统 (现代化设计核心)
+// =========================================
+$border-radius: (
+  none: 0,
+  xs: 2px,
+  sm: 4px,
+  md: 6px,
+  lg: 8px,
+  xl: 12px,
+  2xl: 16px,
+  3xl: 24px,
+  full: 9999px
+);
+
+// =========================================
+// 间距系统
+// =========================================
+$spacing: (
+  0: 0px,
+  1: 2px,
+  2: 4px,
+  3: 6px,
+  4: 8px,
+  5: 10px,
+  6: 12px,
+  7: 14px,
+  8: 16px,
+  10: 20px,
+  12: 24px,
+  14: 28px,
+  16: 32px,
+  20: 40px,
+  24: 48px,
+  32: 64px,
+  40: 80px,
+  48: 96px,
+  56: 112px,
+  64: 128px
+);
+
+// =========================================
+// 过渡系统
+// =========================================
+$transitions: (
+  // 持续时间
+  duration: (
+    fast: 150ms,
+    base: 250ms,
+    slow: 350ms,
+    xslow: 500ms
+  ),
+  
+  // 缓动函数
+  easing: (
+    linear: linear,
+    ease: ease,
+    'ease-in': ease-in,
+    'ease-out': ease-out,
+    'ease-in-out': ease-in-out,
+    // 自定义缓动函数
+    'cubic-bezier': cubic-bezier(0.4, 0, 0.2, 1),
+    // 弹入效果
+    'bounce-in': cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    // 弹入弹入效果
+    'spring': cubic-bezier(0.25, 0.46, 0.45, 0.94)
+  )
+);
+
+// =========================================
+// 主题配置
+// =========================================
+
+// 主题类型
+$themes: (
+  light: (
+    // 主色调 - 黑龙江科技大学深蓝色（现代化调整）
+    primary: #003366,
+    primary-light: #004080,
+    primary-dark: #00264d,
+    primary-lightest: #e6f0ff,
+    primary-transparent: rgba(0, 51, 102, 0.1),
+    
+    // 辅助色 - 黑龙江科技大学红色（现代化调整）
+    secondary: #cc0000,
+    secondary-light: #e60000,
+    secondary-dark: #990000,
+    secondary-lightest: #fff0f0,
+    secondary-transparent: rgba(204, 0, 0, 0.1),
+    
+    // 功能色
+    success: #009966,
+    success-light: #00b377,
+    success-dark: #006644,
+    success-lightest: #e6fff0,
+    warning: #ff9900,
+    warning-light: #ffa600,
+    warning-dark: #cc7a00,
+    warning-lightest: #fff5e6,
+    danger: #cc0000,
+    danger-light: #e60000,
+    danger-dark: #990000,
+    danger-lightest: #fff0f0,
+    info: #666666,
+    info-light: #8c8c8c,
+    info-dark: #4d4d4d,
+    info-lightest: #f5f5f5,
+    
+    // 文字色（现代化灰度系统）
+    text-primary: #1a1a1a,
+    text-regular: #4d4d4d,
+    text-secondary: #808080,
+    text-placeholder: #b3b3b3,
+    text-disabled: #d9d9d9,
+    
+    // 边框和背景色
+    border-color: #e5e7eb,
+    border-light: #f3f4f6,
+    border-dark: #d1d5db,
+    background-color: #f9fafb,
+    background-light: #ffffff,
+    background-dark: #f3f4f6,
+    card-background: #ffffff,
+    card-hover: #ffffff,
+    hover-background: #f3f4f6,
+    overlay-background: rgba(0, 0, 0, 0.5),
+    
+    // 菜单相关颜色
+    menuBackground: #003366,
+    menuText: #ffffff,
+    menuActiveText: #ffffff,
+    menuActiveBackground: #cc0000,
+    menuHover: rgba(255, 255, 255, 0.1),
+    subMenuBackground: #004080,
+    
+    // 表格相关颜色
+    table-header-background: #f9fafb,
+    table-row-hover: #f3f4f6,
+    table-row-alternate: #f9fafb,
+    table-row-active: #e6f0ff,
+    
+    // 表单相关颜色
+    form-background: #ffffff,
+    input-background: #ffffff,
+    input-border: #e5e7eb,
+    input-focus-border: #003366,
+    input-focus-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1),
+    
+    // 现代化阴影系统
+    shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05),
+    shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    shadow-xl: 0 40px 50px -15px rgba(0, 0, 0, 0.1),
+    shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05),
+    shadow-none: none,
+    
+    // 渐变
+    gradient-primary: linear-gradient(135deg, #003366 0%, #004080 100%),
+    gradient-secondary: linear-gradient(135deg, #cc0000 0%, #e60000 100%),
+    gradient-success: linear-gradient(135deg, #009966 0%, #00b377 100%),
+    gradient-warning: linear-gradient(135deg, #ff9900 0%, #ffa600 100%),
+    gradient-danger: linear-gradient(135deg, #cc0000 0%, #e60000 100%),
+    gradient-info: linear-gradient(135deg, #666666 0%, #8c8c8c 100%),
+    gradient-background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%),
+  ),
+  
+  dark: (
+    // 主色调 - 黑龙江科技大学深蓝色（现代化调整）
+    primary: #1a4a80,
+    primary-light: #2d5d90,
+    primary-dark: #0d335a,
+    primary-lightest: rgba(26, 74, 128, 0.2),
+    primary-transparent: rgba(26, 74, 128, 0.1),
+    
+    // 辅助色 - 黑龙江科技大学红色（现代化调整）
+    secondary: #e60000,
+    secondary-light: #ff0000,
+    secondary-dark: #b30000,
+    secondary-lightest: rgba(230, 0, 0, 0.2),
+    secondary-transparent: rgba(230, 0, 0, 0.1),
+    
+    // 功能色
+    success: #00b377,
+    success-light: #00d988,
+    success-dark: #008055,
+    success-lightest: rgba(0, 179, 119, 0.2),
+    warning: #ffa600,
+    warning-light: #ffb733,
+    warning-dark: #cc8400,
+    warning-lightest: rgba(255, 166, 0, 0.2),
+    danger: #e60000,
+    danger-light: #ff0000,
+    danger-dark: #b30000,
+    danger-lightest: rgba(230, 0, 0, 0.2),
+    info: #8c8c8c,
+    info-light: #a6a6a6,
+    info-dark: #737373,
+    info-lightest: rgba(140, 140, 140, 0.2),
+    
+    // 文字色（现代化灰度系统）
+    text-primary: #ffffff,
+    text-regular: #e5e7eb,
+    text-secondary: #9ca3af,
+    text-placeholder: #6b7280,
+    text-disabled: #4b5563,
+    
+    // 边框和背景色
+    border-color: #374151,
+    border-light: #4b5563,
+    border-dark: #1f2937,
+    background-color: #111827,
+    background-light: #1f2937,
+    background-dark: #111827,
+    card-background: #1f2937,
+    card-hover: #374151,
+    hover-background: #374151,
+    overlay-background: rgba(0, 0, 0, 0.75),
+    
+    // 菜单相关颜色
+    menuBackground: #1a1a1a,
+    menuText: #cccccc,
+    menuActiveText: #ffffff,
+    menuActiveBackground: #e60000,
+    menuHover: rgba(255, 255, 255, 0.1),
+    subMenuBackground: #2d2d2d,
+    
+    // 表格相关颜色
+    table-header-background: #333333,
+    table-row-hover: #3a3a3a,
+    table-row-alternate: #333333,
+    table-row-active: rgba(26, 74, 128, 0.2),
+    
+    // 表单相关颜色
+    form-background: #2d2d2d,
+    input-background: #333333,
+    input-border: #444444,
+    input-focus-border: #1a4a80,
+    input-focus-shadow: 0 0 0 3px rgba(26, 74, 128, 0.3),
+    
+    // 现代化阴影系统
+    shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.5),
+    shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5),
+    shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.5),
+    shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5),
+    shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5),
+    shadow-xl: 0 40px 50px -15px rgba(0, 0, 0, 0.5),
+    shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.75),
+    shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5),
+    shadow-none: none,
+    
+    // 渐变
+    gradient-primary: linear-gradient(135deg, #1a4a80 0%, #2d5d90 100%),
+    gradient-secondary: linear-gradient(135deg, #e60000 0%, #ff0000 100%),
+    gradient-success: linear-gradient(135deg, #00b377 0%, #00d988 100%),
+    gradient-warning: linear-gradient(135deg, #ffa600 0%, #ffb733 100%),
+    gradient-danger: linear-gradient(135deg, #e60000 0%, #ff0000 100%),
+    gradient-info: linear-gradient(135deg, #8c8c8c 0%, #a6a6a6 100%),
+    gradient-background: linear-gradient(135deg, #111827 0%, #1f2937 100%),
+  )
+);
+
+// 默认主题
+$default-theme: light;
+
+// 当前主题
+$current-theme: map-get($themes, $default-theme);
+
+// =========================================
+// SCSS变量 (用于编译时使用)
+// =========================================
+
+// 从当前主题获取颜色
+@function theme-color($key) {
+  @return map-get($current-theme, $key);
+}
+
+// 主色调
+$primary: theme-color(primary);
+$primary-light: theme-color(primary-light);
+$primary-dark: theme-color(primary-dark);
+
+// 辅助色
+$secondary: theme-color(secondary);
+$secondary-light: theme-color(secondary-light);
+$secondary-dark: theme-color(secondary-dark);
+
+// 功能色
+$success: theme-color(success);
+$warning: theme-color(warning);
+$danger: theme-color(danger);
+$info: theme-color(info);
+
+// 文字色
+$text-primary: theme-color(text-primary);
+$text-regular: theme-color(text-regular);
+$text-secondary: theme-color(text-secondary);
+$text-placeholder: theme-color(text-placeholder);
+
+// 边框和背景色
+$border-color: theme-color(border-color);
+$border-light: theme-color(border-light);
+$background-color: theme-color(background-color);
+$card-background: theme-color(card-background);
+$hover-background: theme-color(hover-background);
+
+// 菜单相关颜色
+$menuBackground: theme-color(menuBackground);
+$menuText: theme-color(menuText);
+$menuActiveText: theme-color(menuActiveText);
+$menuActiveBackground: theme-color(menuActiveBackground);
+$menuHover: theme-color(menuHover);
+$subMenuBackground: theme-color(subMenuBackground);
+
+// 表格相关颜色
+$table-header-background: theme-color(table-header-background);
+$table-row-hover: theme-color(table-row-hover);
+$table-row-alternate: theme-color(table-row-alternate);
+
+// 表单相关颜色
+$form-background: theme-color(form-background);
+$input-background: theme-color(input-background);
+$input-border: theme-color(input-border);
+$input-focus-border: theme-color(input-focus-border);
+
+// 阴影
+$shadow-sm: theme-color(shadow-sm);
+$shadow-base: theme-color(shadow-base);
+$shadow-lg: theme-color(shadow-lg);
+
+// 渐变
+$gradient-primary: theme-color(gradient-primary);
+$gradient-secondary: theme-color(gradient-secondary);
+
+// =========================================
 // 布局变量
-$header-height: 50px;
-$sideBarWidth: 220px;
+// =========================================
+
+// 固定布局尺寸
+$header-height: 60px;
+$sideBarWidth: 240px;
 $logoHeight: 60px;
 $main-content-min-height: calc(100vh - #{$header-height});
 
-// 菜单相关颜色
-$menuBackground: #001529;
-$menuText: #ffffff;
-$menuActiveText: #409eff;
-$menuHover: rgba(255, 255, 255, 0.1);
-$subMenuBackground: #1f2d3d;
-
-// 滚动条相关
-$scrollbarWidth: 6px;
-$scrollbarColor: rgba(0, 0, 0, 0.3);
-$scrollbarTrackColor: rgba(0, 0, 0, 0.05);
-
+// =========================================
 // 响应式断点
-$screen-xs: 480px;
-$screen-sm: 576px;
-$screen-md: 768px;
-$screen-lg: 992px;
-$screen-xl: 1200px;
-$screen-xxl: 1600px;
+// =========================================
 
-// 阴影
-$box-shadow-base: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-$box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
-$box-shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.15);
+$breakpoints: (
+  xs: 480px,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1600px
+);
 
-// 边框圆角
-$border-radius-base: 4px;
-$border-radius-small: 2px;
-$border-radius-medium: 6px;
-$border-radius-large: 8px;
-$border-radius-round: 16px;
-$border-radius-circle: 50%;
+@function breakpoint($key) {
+  @return map-get($breakpoints, $key);
+}
 
+// =========================================
 // 字体大小
-$font-size-xs: 12px;
-$font-size-sm: 14px;
-$font-size-base: 16px;
-$font-size-lg: 18px;
-$font-size-xl: 20px;
-$font-size-xxl: 24px;
+// =========================================
 
-// 间距
-$margin-xs: 4px;
-$margin-sm: 8px;
-$margin-base: 12px;
-$margin-md: 16px;
-$margin-lg: 20px;
-$margin-xl: 24px;
-$margin-xxl: 32px;
+$font-sizes: (
+  xs: 12px,
+  sm: 14px,
+  base: 16px,
+  lg: 18px,
+  xl: 20px,
+  xxl: 24px,
+  xxxl: 32px
+);
 
-$padding-xs: 4px;
-$padding-sm: 8px;
-$padding-base: 12px;
-$padding-md: 16px;
-$padding-lg: 20px;
-$padding-xl: 24px;
-$padding-xxl: 32px;
+@function font-size($key) {
+  @return map-get($font-sizes, $key);
+}
 
+// =========================================
+// 间距系统
+// =========================================
+
+$spacing: (
+  xs: 4px,
+  sm: 8px,
+  base: 12px,
+  md: 16px,
+  lg: 20px,
+  xl: 24px,
+  xxl: 32px,
+  xxxl: 48px
+);
+
+@function spacing($key) {
+  @return map-get($spacing, $key);
+}
+
+// =========================================
+// 边框圆角
+// =========================================
+
+$border-radius: (
+  none: 0,
+  xs: 2px,
+  sm: 4px,
+  base: 6px,
+  md: 8px,
+  lg: 12px,
+  xl: 16px,
+  round: 50%
+);
+
+@function border-radius($key) {
+  @return map-get($border-radius, $key);
+}
+
+// =========================================
 // 动画时间
-$transition-time: 0.3s;
-$transition-time-fast: 0.2s;
-$transition-time-slow: 0.5s;
+// =========================================
+
+$transition-time: (
+  fast: 0.2s,
+  base: 0.3s,
+  slow: 0.5s
+);
+
+@function transition-time($key: base) {
+  @return map-get($transition-time, $key);
+}
+
+// =========================================
+// 滚动条相关
+// =========================================
+
+$scrollbar: (
+  width: 6px,
+  color: rgba(0, 0, 0, 0.3),
+  track-color: rgba(0, 0, 0, 0.05)
+);
+
+@function scrollbar($key) {
+  @return map-get($scrollbar, $key);
+}
+
+// =========================================
+// CSS变量生成
+// =========================================
+
+// 生成CSS变量
+@mixin generate-css-variables($theme-name, $theme-map) {
+  // 主题选择器 - 使用data-theme属性
+  :root[data-theme="#{$theme-name}"] {
+    // 颜色变量
+    @each $key, $value in $theme-map {
+      --color-#{$key}: #{$value};
+    }
+    
+    // 布局变量
+    --layout-header-height: #{$header-height};
+    --layout-sidebar-width: #{$sideBarWidth};
+    --layout-logo-height: #{$logoHeight};
+    --layout-main-content-min-height: #{$main-content-min-height};
+    
+    // 响应式断点变量
+    @each $key, $value in $breakpoints {
+      --breakpoint-#{$key}: #{$value};
+    }
+    
+    // 字体大小变量
+    @each $key, $value in $font-sizes {
+      --font-size-#{$key}: #{$value};
+    }
+    
+    // 间距变量
+    @each $key, $value in $spacing {
+      --spacing-#{$key}: #{$value};
+    }
+    
+    // 边框圆角变量
+    @each $key, $value in $border-radius {
+      --border-radius-#{$key}: #{$value};
+    }
+    
+    // 动画时间变量
+    @each $key, $value in $transition-time {
+      --transition-time-#{$key}: #{$value};
+    }
+    
+    // 滚动条变量
+    @each $key, $value in $scrollbar {
+      --scrollbar-#{$key}: #{$value};
+    }
+  }
+}
+
+// 生成所有主题的CSS变量
+@mixin generate-all-themes {
+  // 浅色主题
+  @include generate-css-variables('light', map-get($themes, light));
+  
+  // 深色主题
+  @include generate-css-variables('dark', map-get($themes, dark));
+}
+
+// 应用主题
+@include generate-all-themes;

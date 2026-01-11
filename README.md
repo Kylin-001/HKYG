@@ -1,8 +1,8 @@
-# 黑科技商城（黑科易购）
+# 黑科易购校园服务平台
 
 > **你的时间很宝贵，跑腿的事交给我们。**
 
-黑科技商城是专为黑龙江科技大学学生打造的校园综合性电商平台，整合购物、外卖、跑腿、信息服务等功能，让大三大四学生足不出户即可解决生活、学习所需。
+黑科易购校园服务平台是专为黑龙江科技大学学生打造的校园综合性服务平台，整合购物、外卖、跑腿、信息服务等功能，让大三大四学生足不出户即可解决生活、学习所需。
 
 ## 项目定位
 
@@ -46,8 +46,47 @@ heikeji-mall/
 ├── heikeji-app/                # 手机应用APP端API
 ├── heikeji-miniprogram/        # 微信小程序
 ├── sql/                        # 数据库初始化脚本
-└── docs/                       # 项目文档
+├── docs/                       # 项目文档
+│   ├── architecture/           # 架构相关文档
+│   ├── development/            # 开发相关文档
+│   ├── deployment/             # 部署相关文档
+│   ├── operation/              # 运维相关文档
+│   ├── test/                   # 测试相关文档
+│   ├── module/                 # 模块说明文档
+│   ├── api/                    # API接口文档
+│   └── project/                # 项目管理文档
+└── misc/                       # 杂项文档
+    ├── issues/                 # 问题解决方案
+    └── temp/                   # 临时文档
 ```
+
+## 文档结构
+
+### 主要文档目录
+
+| 目录 | 内容说明 |
+|------|----------|
+| **docs/architecture** | 架构设计、服务拆分、技术方案等 |
+| **docs/development** | 开发规范、开发计划、最佳实践、组件开发总结等 |
+| **docs/deployment** | 部署文档、环境配置、数据库导入等 |
+| **docs/operation** | 运维指南、监控方案、备份恢复等 |
+| **docs/test** | 测试用例、质量保障、性能测试等 |
+| **docs/module** | 各功能模块详细说明 |
+| **docs/api** | API接口文档、接口规范等 |
+| **docs/project** | 项目计划、上线准备、总结报告等 |
+
+### 核心文档
+
+- **架构设计**：docs/architecture/架构文档.md
+- **开发规范**：docs/development/开发规范文档.md
+- **组件开发**：docs/development/VirtualTable-Development-Summary.md
+- **部署指南**：docs/deployment/部署文档.md
+- **API文档**：docs/api/API接口文档.md
+- **数据库设计**：docs/database/数据库设计文档.md
+- **支付模块**：docs/payment/支付模块集成开发文档.md
+- **前端开发**：docs/frontend/development/开发手册.md
+- **小程序开发**：docs/frontend/miniprogram/README.md
+- **上线计划**：docs/project/上线准备与演练计划.md
 
 ## 核心功能模块
 

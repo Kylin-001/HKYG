@@ -1,6 +1,6 @@
 <template>
   <div class="stats-card">
-    <div class="stats-icon-container">
+    <div class="stats-icon-container" :style="{ background: iconBgStyle }">
       <i :class="['stats-icon', icon]"></i>
     </div>
     <div class="stats-content">
@@ -47,9 +47,7 @@ const iconBgStyle = computed(() => {
     'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
   ]
-  return {
-    background: colors[Math.abs(props.title.charCodeAt(0)) % colors.length],
-  }
+  return colors[Math.abs(props.title.charCodeAt(0)) % colors.length]
 })
 </script>
 

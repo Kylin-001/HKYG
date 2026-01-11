@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.campus.mapper.EmptyClassroomMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.campus.entity.EmptyClassroom">
+        <id column="id" property="id"/>
+        <result column="campus_id" property="campusId"/>
+        <result column="building_id" property="buildingId"/>
+        <result column="building_name" property="buildingName"/>
+        <result column="classroom_no" property="classroomNo"/>
+        <result column="weekday" property="weekday"/>
+        <result column="class_section" property="classSection"/>
+        <result column="classroom_type" property="classroomType"/>
+        <result column="capacity" property="capacity"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询空教室列表 -->
+    <select id="selectEmptyClassrooms" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT * FROM empty_classroom 
+        WHERE status = 1
+        <if test="campusId != null">
+            AND campus_id = #{campusId}
+        </if>
+        <if test="buildingId != null">
+            AND building_id = #{buildingId}
+        </if>
+        <if test="weekday != null">
+            AND weekday = #{weekday}
+        </if>
+        <if test="classSection != null">
+            AND class_section = #{classSection}
+        </if>
+        <if test="classroomType != null">
+            AND classroom_type = #{classroomType}
+        </if>
+        ORDER BY building_name ASC, classroom_no ASC
+    </select>
+
+    <!-- 根据教学楼查询空教室 -->
+    <select id="selectEmptyClassroomsByBuilding" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM empty_classroom 
+        WHERE status = 1 AND building_id = #{buildingId}
+        <if test="weekday != null">
+            AND weekday = #{weekday}
+        </if>
+        <if test="classSection != null">
+            AND class_section = #{classSection}
+        </if>
+        ORDER BY classroom_no ASC
+    </select>
+
+    <!-- 根据校区查询空教室 -->
+    <select id="selectEmptyClassroomsByCampus" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM empty_classroom 
+        WHERE status = 1 AND campus_id = #{campusId}
+        <if test="weekday != null">
+            AND weekday = #{weekday}
+        </if>
+        <if test="classSection != null">
+            AND class_section = #{classSection}
+        </if>
+        ORDER BY building_name ASC, classroom_no ASC
+    </select>
+
+    <!-- 查询可用的教室类型 -->
+    <select id="selectAvailableClassroomTypes" resultType="java.lang.Integer">
+        SELECT DISTINCT classroom_type FROM empty_classroom WHERE status = 1 ORDER BY classroom_type ASC
+    </select>
+
+</mapper>

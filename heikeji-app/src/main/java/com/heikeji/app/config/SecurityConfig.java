@@ -53,9 +53,9 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 // 请求授权配置
-                .authorizeHttpRequests()
+                .authorizeRequests()
                 // 允许匿名访问的接口
-                .requestMatchers("/api/app/auth/login", 
+                .antMatchers("/api/app/auth/login", 
                             "/api/app/auth/register", 
                             "/api/app/auth/send-code",
                             "/api/app/version/check",

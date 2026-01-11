@@ -1,0 +1,112 @@
+<!-- pages/user/edit.wxml -->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="header-left" bindtap="onBack">返回</text>
+    <text class="page-title">编辑个人信息</text>
+    <text class="header-right" bindtap="onSave">保存</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <form class="edit-form">
+    <!-- 头像编辑 -->
+    <view class="form-section">
+      <view class="avatar-section">
+        <text class="avatar-label">头像</text>
+        <view class="avatar-upload">
+          <image 
+            class="avatar-image" 
+            src="{{formData.avatarUrl || '/assets/images/default-avatar.png'}}" 
+            bindtap="onChooseAvatar"
+          ></image>
+          <text class="avatar-tip">点击更换头像</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入昵称" 
+          name="nickName" 
+          value="{{formData.nickName}}" 
+          bindinput="onInputChange" 
+          data-field="nickName"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">学号</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入学号" 
+          name="studentId" 
+          value="{{formData.studentId}}" 
+          bindinput="onInputChange" 
+          data-field="studentId"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">所在校区</text>
+        <picker 
+          class="form-picker" 
+          range="{{campusList}}" 
+          range-key="name" 
+          value="{{campusIndex}}" 
+          bindchange="onCampusChange"
+        >
+          <view class="picker-text">
+            {{formData.campus || '请选择所在校区'}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">性别</text>
+        <picker 
+          class="form-picker" 
+          range="{{genderList}}" 
+          value="{{genderIndex}}" 
+          bindchange="onGenderChange"
+        >
+          <view class="picker-text">
+            {{formData.gender || '请选择性别'}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">手机号</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入手机号" 
+          name="phone" 
+          type="number" 
+          value="{{formData.phone}}" 
+          bindinput="onInputChange" 
+          data-field="phone"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">邮箱</text>
+        <input 
+          class="form-input" 
+          placeholder="请输入邮箱" 
+          name="email" 
+          type="text" 
+          value="{{formData.email}}" 
+          bindinput="onInputChange" 
+          data-field="email"
+        />
+      </view>
+    </view>
+
+    <!-- 保存按钮 -->
+    <button class="save-btn" form-type="submit" bindtap="onSave">保存</button>
+  </form>
+</view>

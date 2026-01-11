@@ -50,6 +50,12 @@ public interface ProductService extends IService<Product> {
     Boolean restoreStock(Long productId, Integer quantity);
 
     /**
+     * 批量删除商品（逻辑删除）
+     * @param ids 商品ID列表
+     */
+    void batchDeleteByIds(List<Long> ids);
+
+    /**
      * 检查商品库存是否充足
      * @param productId 商品ID
      * @param quantity 数量
@@ -152,4 +158,31 @@ public interface ProductService extends IService<Product> {
      * @return 推荐商品列表
      */
     List<Product> getPersonalizedRecommendProductList(Long userId, Integer limit);
+    
+    /**
+     * 获取商品总数
+     * @return 商品总数
+     */
+    Integer getProductCount();
+    
+    /**
+     * 设置商品库存预警阈值
+     * @param productId 商品ID
+     * @param alertStock 预警阈值
+     * @return 是否成功
+     */
+    Boolean setAlertStock(Long productId, Integer alertStock);
+    
+    /**
+     * 获取库存预警商品列表
+     * @return 库存预警商品列表
+     */
+    List<Product> getAlertStockProducts();
+    
+    /**
+     * 检查商品是否需要库存预警
+     * @param productId 商品ID
+     * @return 是否需要预警
+     */
+    Boolean checkAlertStock(Long productId);
 }

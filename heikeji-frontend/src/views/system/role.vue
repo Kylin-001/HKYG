@@ -83,7 +83,6 @@
 <script setup lang="ts">
 // 导入Vue 3 API
 import { ref, reactive, onMounted } from 'vue'
-import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox, FormInstance, TreeInstance } from 'element-plus'
 // 导入日志工具
 import logger from '@/utils/logger'
@@ -108,9 +107,6 @@ interface Permission {
   children?: Permission[]
   disabled?: boolean
 }
-
-// Vuex store
-const store = useStore()
 
 // 响应式数据
 const roleList = ref<Role[]>([])
@@ -138,21 +134,37 @@ const rules = reactive({
 // 获取角色列表
 const fetchRoleList = async () => {
   try {
-    await store.dispatch('setLoading', true)
-    await store.dispatch('getRoleList', {})
+    // 初始化模拟数据
+    roleList.value = [
+      {
+        id: 1,
+        name: '超级管理员',
+        description: '拥有系统所有权限',
+        createTime: '2023-01-01 10:00:00',
+      },
+      {
+        id: 2,
+        name: '运营管理员',
+        description: '负责商品和订单管理',
+        createTime: '2023-01-02 14:30:00',
+      },
+      {
+        id: 3,
+        name: '用户管理员',
+        description: '负责用户管理',
+        createTime: '2023-01-03 09:15:00',
+      },
+    ]
     ElMessage.success('角色列表加载成功')
   } catch (error) {
     ElMessage.error('获取角色列表失败')
     logger.error('获取角色列表失败', error)
-  } finally {
-    await store.dispatch('setLoading', false)
   }
 }
 
 // 获取权限树
 const fetchPermissionTree = async () => {
   try {
-    await store.dispatch('getPermissionList', {})
     // 这里需要根据实际API返回的数据结构来构建权限树
     permissionTree.value = buildPermissionTree()
   } catch (error) {

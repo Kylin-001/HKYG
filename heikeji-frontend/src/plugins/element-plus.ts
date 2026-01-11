@@ -1,5 +1,6 @@
 import { App } from 'vue'
 import { ElMessage, ElNotification, ElMessageBox } from 'element-plus'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 // 定义需要全局注册的组件列表
 const components = [
@@ -25,6 +26,11 @@ export function setupElementPlus(app: App<Element>) {
   components.forEach(component => {
     app.component(component.name, component)
   })
+
+  // 全局注册所有Element Plus图标
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component)
+  }
 
   // 挂载全局方法
   app.config.globalProperties.$message = ElMessage

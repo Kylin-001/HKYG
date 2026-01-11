@@ -18,4 +18,9 @@ public class ProductFeignClientFallback implements ProductFeignClient {
     public R<Integer> getProductStock(Long productId) {
         return R.success(0);
     }
+    
+    @Override
+    public R<Integer> getProductCount() {
+        return R.success(0);
+    }
 }

@@ -37,7 +37,7 @@ function log(level, ...args) {
   }
 
   const levelUpper = level.toUpperCase()
-  if (!LOG_LEVELS[levelUpper]) {
+  if (LOG_LEVELS[levelUpper] === undefined) {
     console.error(`无效的日志级别: ${level}`)
     return
   }
@@ -126,21 +126,39 @@ export function logResponse(response) {
 }
 
 /**
+ * 输出API响应时间日志
+ * @param {string} url - 请求URL
+ * @param {number} duration - 响应时间（毫秒）
+ * @param {number} status - 响应状态码
+ */
+export function logApiResponseTime(url, duration, status) {
+  if (!url) return
+
+  debug('API响应时间:', {
+    url,
+    duration: `${duration.toFixed(2)}ms`,
+    status,
+    timestamp: new Date().toISOString(),
+  })
+}
+
+/**
  * 输出错误日志（用于API错误）
- * @param {Error} error - 错误对象
+ * @param {Error} err - 错误对象
  * @param {Object} context - 上下文信息
  */
-export function logApiError(error, context = {}) {
-  if (!error) return
+export function logApiError(err, context = {}) {
+  if (!err) return
 
-  const { message, stack } = error
-  const { url, method, statusCode } = context
+  const { message, stack } = err
+  const { url, method, statusCode, requestId } = context
 
   error('API错误:', {
     message,
     url,
     method,
     statusCode,
+    requestId,
     stack,
     timestamp: new Date().toISOString(),
   })
@@ -155,4 +173,5 @@ export default {
   logRequest,
   logResponse,
   logApiError,
+  logApiResponseTime,
 }

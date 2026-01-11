@@ -3,7 +3,7 @@
     <!-- 商家头部信息 -->
     <div class="merchant-header">
       <div class="merchant-basic-info">
-        <img :src="merchantInfo.logo" :alt="merchantInfo.name" class="merchant-logo" />
+        <img v-lazy="merchantInfo.logo" :alt="merchantInfo.name" class="merchant-logo" />
         <div class="info-content">
           <h2 class="merchant-name">{{ merchantInfo.name }}</h2>
           <div class="merchant-rating">
@@ -54,7 +54,7 @@
               class="product-item"
             >
               <div class="product-image">
-                <img :src="product.image" :alt="product.name" />
+                <img v-lazy="product.image" :alt="product.name" />
               </div>
               <div class="product-info">
                 <h4 class="product-name">{{ product.name }}</h4>
@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, StarFilled } from '@element-plus/icons-vue'
+import { ArrowLeft } from '@element-plus/icons-vue'
 
 // 路由和导航
 const route = useRoute()

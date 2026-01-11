@@ -4,8 +4,8 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 
 /**
  * Product Service Application Class
@@ -19,6 +19,7 @@ import org.springframework.context.annotation.FilterType;
 // 只扫描当前模块，避免引入common.core中的冲突Bean
 @ComponentScan(basePackages = "com.heikeji.mall.product")
 @MapperScan("com.heikeji.mall.product.mapper")
+@EnableFeignClients // 启用Feign客户端，自动扫描当前包及其子包
 public class ProductApplication {
 
     public static void main(String[] args) {

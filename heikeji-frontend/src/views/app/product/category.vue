@@ -135,6 +135,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { productApi } from '@/api/product'
+import { getCartCount } from '@/api/app/cart'
 
 // 定义类型接口
 interface Category {
@@ -161,6 +163,7 @@ const levelOneCategories = ref<Category[]>([])
 const activeCategoryId = ref<number | null>(null)
 const expandedSubCategories = ref<number[]>([])
 const cartItemCount = ref(0)
+const hotProducts = ref<Product[]>([])
 
 const router = useRouter()
 
@@ -174,33 +177,16 @@ const currentSubCategories = computed(() => {
   return activeCategory.children
 })
 
-const hotProducts = computed(() => {
-  // 这里模拟数据，实际应该根据分类ID从API获取
-  // 为了演示，返回一些模拟数据
-  return [
-    {
-      id: 1,
-      name: '智能手表 Pro Max',
-      price: 1299,
-      sales: 256,
-      mainImage: 'https://via.placeholder.com/120x120/e9ecef/495057?text=智能手表',
-    },
-    {
-      id: 2,
-      name: '无线蓝牙耳机',
-      price: 299,
-      sales: 1432,
-      mainImage: 'https://via.placeholder.com/120x120/e9ecef/495057?text=蓝牙耳机',
-    },
-    {
-      id: 3,
-      name: '移动电源 20000mAh',
-      price: 129,
-      sales: 892,
-      mainImage: 'https://via.placeholder.com/120x120/e9ecef/495057?text=移动电源',
-    },
-  ]
-})
+// 获取热门商品
+async function fetchHotProducts() {
+  try {
+    const response = await productApi.getHotProducts(3)
+    hotProducts.value = response.data || []
+  } catch (error) {
+    console.error('获取热门商品失败:', error)
+    hotProducts.value = []
+  }
+}
 
 // 导航方法
 function goBack() {
@@ -247,12 +233,9 @@ function toggleSubCategory(subCategoryId: number) {
 async function fetchCategoryData() {
   try {
     loading.value = true
-    // 实际项目中应该调用API获取分类数据
-    // const response = await store.dispatch('category/getCategoryTree')
-    // categoryTree.value = response.data || []
-
-    // 模拟分类数据
-    categoryTree.value = getMockCategoryData()
+    // 调用真实API获取分类数据
+    const response = await productApi.getCategoryTree()
+    categoryTree.value = response.data || []
     levelOneCategories.value = categoryTree.value.filter(cat => cat.level === 1)
 
     // 默认选中第一个分类
@@ -267,164 +250,22 @@ async function fetchCategoryData() {
   }
 }
 
-function fetchCartCount() {
-  // 实际项目中应该从API获取购物车数量
-  cartItemCount.value = 0
-}
-
-// 模拟分类数据
-function getMockCategoryData() {
-  return [
-    {
-      id: 1,
-      name: '手机数码',
-      level: 1,
-      icon: 'el-icon-mobile-phone',
-      children: [
-        {
-          id: 11,
-          name: '手机',
-          level: 2,
-          children: [
-            {
-              id: 111,
-              name: '苹果',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=苹果',
-            },
-            {
-              id: 112,
-              name: '华为',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=华为',
-            },
-            {
-              id: 113,
-              name: '小米',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=小米',
-            },
-          ],
-        },
-        {
-          id: 12,
-          name: '耳机音箱',
-          level: 2,
-          children: [
-            {
-              id: 121,
-              name: '蓝牙耳机',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=蓝牙',
-            },
-            {
-              id: 122,
-              name: '有线耳机',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=有线',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: '电脑办公',
-      level: 1,
-      icon: 'el-icon-laptop',
-      children: [
-        {
-          id: 21,
-          name: '笔记本',
-          level: 2,
-          children: [
-            {
-              id: 211,
-              name: '游戏本',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=游戏',
-            },
-            {
-              id: 212,
-              name: '轻薄本',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=轻薄',
-            },
-          ],
-        },
-        {
-          id: 22,
-          name: '配件',
-          level: 2,
-          children: [
-            {
-              id: 221,
-              name: '鼠标',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=鼠标',
-            },
-            {
-              id: 222,
-              name: '键盘',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=键盘',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: '家用电器',
-      level: 1,
-      icon: 'el-icon-s-cooperation',
-      children: [
-        {
-          id: 31,
-          name: '空调',
-          level: 2,
-          children: [
-            {
-              id: 311,
-              name: '挂机空调',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=挂机',
-            },
-            {
-              id: 312,
-              name: '柜机空调',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=柜机',
-            },
-          ],
-        },
-        {
-          id: 32,
-          name: '冰箱',
-          level: 2,
-          children: [
-            {
-              id: 321,
-              name: '双门冰箱',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=双门',
-            },
-            {
-              id: 322,
-              name: '三门冰箱',
-              level: 3,
-              image: 'https://via.placeholder.com/40x40/e9ecef/495057?text=三门',
-            },
-          ],
-        },
-      ],
-    },
-  ]
+async function fetchCartCount() {
+  try {
+    // 调用真实API获取购物车数量
+    const response = await getCartCount()
+    cartItemCount.value = response.data.count || 0
+  } catch (error) {
+    console.error('获取购物车数量失败:', error)
+    // 失败时不显示错误，只显示默认数量0
+    cartItemCount.value = 0
+  }
 }
 
 // 组件挂载时初始化数据
 onMounted(async () => {
   await fetchCategoryData()
+  fetchHotProducts()
   fetchCartCount()
 })
 </script>

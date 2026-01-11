@@ -1,0 +1,245 @@
+<!-- 团长管理页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <text class="title">团长管理中心</text>
+    <view class="header-right">
+      <image src="/assets/icons/settings.png" class="setting-icon" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 团长信息 -->
+  <view class="captain-info" bindtap="editCaptainInfo">
+    <view class="captain-avatar">
+      <text class="avatar-text">{{captainInfo.name.charAt(0)}}</text>
+    </view>
+    <view class="captain-details">
+      <view class="captain-name-row">
+        <text class="captain-name">{{captainInfo.name}}</text>
+        <text class="captain-status active">活跃</text>
+      </view>
+      <text class="captain-info-text">{{captainInfo.school}} {{captainInfo.major}} {{captainInfo.grade}}</text>
+      <text class="captain-info-text">团队名称：{{captainInfo.teamName}}（{{captainInfo.teamSize}}人）</text>
+      <text class="captain-info-text">加入时间：{{captainInfo.joinTime}}</text>
+    </view>
+    <icon type="right" size="20" class="arrow-icon"></icon>
+  </view>
+
+  <!-- 佣金余额 -->
+  <view class="commission-balance">
+    <view class="balance-info">
+      <text class="balance-label">佣金余额</text>
+      <text class="balance-amount">¥{{captainInfo.commissionBalance.toFixed(2)}}</text>
+    </view>
+    <button class="withdraw-btn" bindtap="withdrawCommission">提现</button>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="statistics">
+    <view class="stat-item">
+      <text class="stat-label">总订单</text>
+      <text class="stat-value">{{statistics.totalOrders}}</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-label">团队成员</text>
+      <text class="stat-value">{{statistics.totalTeamMembers}}</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-label">总佣金</text>
+      <text class="stat-value">¥{{statistics.totalCommission.toFixed(2)}}</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-label">今日订单</text>
+      <text class="stat-value">{{statistics.todayOrders}}</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-label">今日佣金</text>
+      <text class="stat-value">¥{{statistics.todayCommission.toFixed(2)}}</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-grid">
+      <view class="menu-item" bindtap="manageProducts">
+        <image src="/assets/icons/product.png" class="menu-icon" mode="aspectFit"></image>
+        <text class="menu-text">商品管理</text>
+      </view>
+      <view class="menu-item" bindtap="viewAllCommissionRecords">
+        <image src="/assets/icons/commission.png" class="menu-icon" mode="aspectFit"></image>
+        <text class="menu-text">佣金记录</text>
+      </view>
+      <view class="menu-item" bindtap="viewAllTeamMembers">
+        <image src="/assets/icons/team.png" class="menu-icon" mode="aspectFit"></image>
+        <text class="menu-text">团队管理</text>
+      </view>
+      <view class="menu-item" bindtap="editCaptainInfo">
+        <image src="/assets/icons/profile.png" class="menu-icon" mode="aspectFit"></image>
+        <text class="menu-text">个人设置</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签页 -->
+  <view class="tab-section">
+    <view class="tab-bar">
+      <view 
+        class="tab-item {{activeTab === 'dashboard' ? 'active' : ''}}" 
+        bindtap="switchTab" 
+        data-tab="dashboard"
+      >
+        <text>概览</text>
+      </view>
+      <view 
+        class="tab-item {{activeTab === 'commissions' ? 'active' : ''}}" 
+        bindtap="switchTab" 
+        data-tab="commissions"
+      >
+        <text>佣金记录</text>
+      </view>
+      <view 
+        class="tab-item {{activeTab === 'team' ? 'active' : ''}}" 
+        bindtap="switchTab" 
+        data-tab="team"
+      >
+        <text>团队成员</text>
+      </view>
+    </view>
+
+    <!-- 概览内容 -->
+    <view class="tab-content" wx:if="{{activeTab === 'dashboard'}}">
+      <!-- 最近佣金记录 -->
+      <view class="overview-section">
+        <view class="section-header">
+          <text class="section-title">最近佣金记录</text>
+          <view class="section-more" bindtap="viewAllCommissionRecords">
+            <text class="more-text">查看全部</text>
+            <icon type="right" size="16" class="more-icon"></icon>
+          </view>
+        </view>
+        
+        <view class="commission-list">
+          <block wx:if="{{commissionRecords.length > 0}}">
+            <block wx:for="{{commissionRecords}}" wx:key="id">
+              <view class="commission-item">
+                <view class="commission-left">
+                  <text class="commission-description">{{item.description}}</text>
+                  <text class="commission-time">{{item.createTime}}</text>
+                </view>
+                <text class="commission-amount">+¥{{item.amount.toFixed(2)}}</text>
+              </view>
+            </block>
+          </block>
+          <block wx:else>
+            <view class="empty-list">
+              <text class="empty-text">暂无佣金记录</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 最近团队成员 -->
+      <view class="overview-section">
+        <view class="section-header">
+          <text class="section-title">最近团队成员</text>
+          <view class="section-more" bindtap="viewAllTeamMembers">
+            <text class="more-text">查看全部</text>
+            <icon type="right" size="16" class="more-icon"></icon>
+          </view>
+        </view>
+        
+        <view class="team-list">
+          <block wx:if="{{teamMembers.length > 0}}">
+            <block wx:for="{{teamMembers}}" wx:key="id">
+              <view class="team-item" bindtap="viewTeamMemberDetail" data-id="{{item.id}}">
+                <view class="member-avatar">
+                  <text class="avatar-text">{{item.name.charAt(0)}}</text>
+                </view>
+                <view class="member-details">
+                  <text class="member-name">{{item.name}}</text>
+                  <text class="member-info">{{item.studentId}} | {{item.phone}}</text>
+                  <text class="member-join-time">加入时间：{{item.joinTime}}</text>
+                </view>
+                <text class="member-role">{{item.role === 'member' ? '成员' : '管理员'}}</text>
+              </view>
+            </block>
+          </block>
+          <block wx:else>
+            <view class="empty-list">
+              <text class="empty-text">暂无团队成员</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 佣金记录内容 -->
+    <view class="tab-content" wx:elif="{{activeTab === 'commissions'}}">
+      <view class="commission-section">
+        <view class="commission-list">
+          <block wx:if="{{commissionRecords.length > 0}}">
+            <block wx:for="{{commissionRecords}}" wx:key="id">
+              <view class="commission-item">
+                <view class="commission-header">
+                  <text class="commission-order-no">订单号：{{item.orderNo}}</text>
+                  <text class="commission-status completed">已完成</text>
+                </view>
+                <view class="commission-body">
+                  <text class="commission-description">{{item.description}}</text>
+                  <text class="commission-amount">+¥{{item.amount.toFixed(2)}}</text>
+                </view>
+                <view class="commission-footer">
+                  <text class="commission-time">{{item.createTime}}</text>
+                </view>
+              </view>
+            </block>
+          </block>
+          <block wx:else>
+            <view class="empty-list">
+              <image src="/assets/icons/empty-commission.png" class="empty-icon" mode="aspectFit"></image>
+              <text class="empty-text">暂无佣金记录</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 团队成员内容 -->
+    <view class="tab-content" wx:else>
+      <view class="team-section">
+        <view class="team-list">
+          <block wx:if="{{teamMembers.length > 0}}">
+            <block wx:for="{{teamMembers}}" wx:key="id">
+              <view class="team-item" bindtap="viewTeamMemberDetail" data-id="{{item.id}}">
+                <view class="member-avatar">
+                  <text class="avatar-text">{{item.name.charAt(0)}}</text>
+                </view>
+                <view class="member-details">
+                  <view class="member-name-row">
+                    <text class="member-name">{{item.name}}</text>
+                    <text class="member-status active">{{item.status === 'active' ? '活跃' : '不活跃'}}</text>
+                  </view>
+                  <text class="member-info">{{item.studentId}}</text>
+                  <text class="member-info">{{item.phone}}</text>
+                  <text class="member-join-time">加入时间：{{item.joinTime}}</text>
+                </view>
+                <icon type="right" size="16" class="arrow-icon"></icon>
+              </view>
+            </block>
+          </block>
+          <block wx:else>
+            <view class="empty-list">
+              <image src="/assets/icons/empty-team.png" class="empty-icon" mode="aspectFit"></image>
+              <text class="empty-text">暂无团队成员</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view wx:if="{{loading}}" class="loading-more">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

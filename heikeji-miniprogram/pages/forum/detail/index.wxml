@@ -1,0 +1,118 @@
+<!-- pages/forum/detail/index.wxml -->
+<view class="detail-container">
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 帖子详情 -->
+  <view class="post-detail" wx:else>
+    <!-- 帖子标题 -->
+    <view class="post-header">
+      <text class="post-title">{{postDetail.title}}</text>
+    </view>
+
+    <!-- 作者信息 -->
+    <view class="author-info">
+      <image class="avatar" src="{{postDetail.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFit"></image>
+      <view class="author-meta">
+        <text class="author-name">{{postDetail.author}}</text>
+        <text class="post-time">{{postDetail.createTime}}</text>
+      </view>
+      <view class="view-count">
+        <image class="view-icon" src="/assets/icons/eye.png" mode="aspectFit"></image>
+        <text>{{postDetail.viewCount || 0}} 浏览</text>
+      </view>
+    </view>
+
+    <!-- 帖子内容 -->
+    <view class="post-content">
+      <text class="content-text">{{postDetail.content}}</text>
+    </view>
+
+    <!-- 交互按钮 -->
+    <view class="action-bar">
+      <view class="action-item" bindtap="onLikePost">
+        <image class="action-icon {{isLiked ? 'active' : ''}}" src="/assets/icons/like.png" mode="aspectFit"></image>
+        <text class="action-text {{isLiked ? 'active' : ''}}">{{likeCount}}</text>
+      </view>
+      <view class="action-item" bindtap="onFavoritePost">
+        <image class="action-icon {{isFavorited ? 'active' : ''}}" src="/assets/icons/favorite.png" mode="aspectFit"></image>
+        <text class="action-text {{isFavorited ? 'active' : ''}}">{{favoriteCount}}</text>
+      </view>
+      <view class="action-item">
+        <image class="action-icon" src="/assets/icons/comment.png" mode="aspectFit"></image>
+        <text class="action-text">{{postDetail.commentCount || 0}}</text>
+      </view>
+      <view class="action-item">
+        <image class="action-icon" src="/assets/icons/share.png" mode="aspectFit"></image>
+        <text class="action-text">分享</text>
+      </view>
+    </view>
+
+    <!-- 评论列表 -->
+    <view class="comments-section">
+      <view class="section-title">
+        <text>评论 ({{postDetail.commentCount || 0}})</text>
+      </view>
+
+      <view class="comments-list">
+        <view 
+          class="comment-item" 
+          wx:for="{{comments}}" 
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-index="{{index}}"
+        >
+          <image class="comment-avatar" src="{{item.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFit"></image>
+          <view class="comment-content">
+            <view class="comment-header">
+              <text class="comment-author">{{item.author}}</text>
+              <text class="comment-time">{{item.createTime}}</text>
+            </view>
+            <text class="comment-text">{{item.content}}</text>
+            <view class="comment-footer">
+              <view class="comment-action" bindtap="onLikeComment" data-id="{{item.id}}" data-index="{{index}}">
+                <image class="comment-action-icon {{item.isLiked ? 'active' : ''}}" src="/assets/icons/like.png" mode="aspectFit"></image>
+                <text class="comment-action-text {{item.isLiked ? 'active' : ''}}">{{item.likeCount || 0}}</text>
+              </view>
+              <view class="comment-action" bindtap="onReplyComment" data-id="{{item.id}}" data-author="{{item.author}}">
+                <image class="comment-action-icon" src="/assets/icons/reply.png" mode="aspectFit"></image>
+                <text class="comment-action-text">回复</text>
+              </view>
+              <view class="comment-action" bindtap="onViewReplies" data-id="{{item.id}}">
+                <text class="comment-action-text">查看回复</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载更多评论 -->
+      <view class="loading-more" wx:if="{{commentLoading}}">
+        <text>加载中...</text>
+      </view>
+      <view class="no-more" wx:if="{{!hasMoreComments && comments.length > 0}}">
+        <text>没有更多评论了</text>
+      </view>
+      <view class="empty-comments" wx:if="{{!commentLoading && comments.length === 0}}">
+        <text>暂无评论，快来抢沙发吧~</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评论输入框 -->
+  <view class="comment-input-bar">
+    <input 
+      id="commentInput"
+      class="comment-input" 
+      placeholder="写下你的评论..." 
+      value="{{commentContent}}" 
+      bindinput="onCommentInput" 
+      bindconfirm="onSubmitComment"
+    ></input>
+    <view class="submit-btn" bindtap="onSubmitComment">
+      <text>发送</text>
+    </view>
+  </view>
+</view>

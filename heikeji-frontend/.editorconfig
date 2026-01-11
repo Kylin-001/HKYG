@@ -1,33 +1,43 @@
-# EditorConfig is awesome: http://EditorConfig.org
+# EditorConfig helps developers define and maintain consistent coding styles between different editors and IDEs
+# https://editorconfig.org
 
-# top-most EditorConfig file
 root = true
 
-# Unix-style newlines with a newline ending every file
 [*]
-end_of_line = lf
-insert_final_newline = true
-
-# Matches multiple files with brace expansion notation
-# Set default charset
-[*.{js,py}]
+# 字符集
 charset = utf-8
-
-# 4 space indentation
-[*.py]
+# 缩进风格
 indent_style = space
-indent_size = 4
+# 缩进空格数
+indent_size = 2
+# 结尾换行符
+end_of_line = lf
+# 保存时删除行尾空格
+trim_trailing_whitespace = true
+# 保存时在文件末尾添加换行
+insert_final_newline = true
+# 最大行宽
+max_line_length = 100
 
-# Tab indentation (no size specified)
-[Makefile]
-indent_style = tab
-
-# Indentation override for all JS under lib directory
-[lib/**.js]
+[*.{js,jsx,ts,tsx,vue}]
 indent_style = space
 indent_size = 2
 
-# Matches the exact files either package.json or .travis.yml
-[{package.json,.travis.yml}]
+[*.{css,scss,less}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = 120
+
+[Makefile]
+indent_style = tab
+
+[*.{json,json5}]
+indent_style = space
+indent_size = 2
+
+[*.{yml,yaml}]
 indent_style = space
 indent_size = 2

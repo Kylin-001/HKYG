@@ -10,6 +10,7 @@ module.exports = {
     'eslint:recommended',
     'prettier',
     'plugin:@typescript-eslint/recommended',
+    'plugin:storybook/recommended',
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -42,6 +43,7 @@ module.exports = {
     'vue/no-useless-mustaches': 'error',
     'vue/valid-v-model': 'error',
     'vue/valid-v-bind-sync': 'error',
+    'vue/no-v-model-argument': 'off',
 
     // JavaScript核心规则
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',

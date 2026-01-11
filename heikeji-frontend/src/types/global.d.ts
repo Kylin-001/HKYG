@@ -45,6 +45,7 @@ declare interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string
   readonly VITE_APP_VERSION: string
   readonly VITE_APP_DEBUG: boolean
+  readonly MODE: string
 }
 
 declare interface ImportMeta {

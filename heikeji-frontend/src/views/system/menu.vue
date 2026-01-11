@@ -18,7 +18,7 @@
           @node-contextmenu="handleContextMenu"
           default-expand-all
         >
-          <template v-slot="{ node, data }">
+          <template v-slot="{ data }">
             <span class="menu-item">
               <span v-if="data.icon" class="menu-icon">
                 <i :class="data.icon"></i>
@@ -89,7 +89,7 @@
 <script setup lang="ts">
 // 导入Vue 3 API
 import { ref, reactive, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useSystemStore } from '@/store/modules/system'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 // 导入日志工具
 import logger from '@/utils/logger'
@@ -125,14 +125,13 @@ interface CascaderOption {
   children?: CascaderOption[]
 }
 
-// Vuex store
-const store = useStore()
+// Pinia store
+const systemStore = useSystemStore()
 
 // 响应式数据
 const menuTree = ref<Menu[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('添加菜单')
-const currentParentId = ref(0)
 const parentPath = ref<string[]>([])
 const cascaderOptions = ref<CascaderOption[]>([])
 const formData = reactive<FormData>({
@@ -168,8 +167,8 @@ const defaultProps = reactive({
 const fetchMenuTree = async () => {
   try {
     loading.value = true
-    // 调用Vuex Store中的getMenuList方法
-    const menuList = await store.dispatch('system/getMenuList', {
+    // 调用Pinia Store中的getMenuList方法
+    const menuList = await systemStore.getMenuList({
       page: 1,
       pageSize: 100,
     })
@@ -302,11 +301,11 @@ const handleSubmit = async () => {
 
     if (formData.id) {
       // 编辑操作
-      await store.dispatch('system/updateMenu', submitData)
+      await systemStore.updateMenu(submitData)
       ElMessage.success('编辑成功')
     } else {
       // 添加操作
-      await store.dispatch('system/addMenu', submitData)
+      await systemStore.addMenu(submitData)
       ElMessage.success('添加成功')
     }
 
@@ -336,7 +335,7 @@ const handleDelete = (data: Menu) => {
         }
 
         // 调用删除API
-        await store.dispatch('system/deleteMenu', data.id)
+        await systemStore.deleteMenu(data.id)
 
         fetchMenuTree() // 重新加载菜单树
         ElMessage.success('删除成功')

@@ -1,0 +1,147 @@
+<!-- 订单进度追踪页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left" bindtap="onBack">
+      <image src="/assets/icons/back.png" class="back-icon" mode="aspectFit"></image>
+    </view>
+    <text class="header-title">订单进度</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 任务基本信息 -->
+  <view class="task-info">
+    <view class="task-header">
+      <view class="task-type-tag" style="background-color: {{taskInfo.typeColor}}">
+        {{taskInfo.typeName}}
+      </view>
+      <text class="task-status" style="color: {{taskInfo.statusColor}}">{{taskInfo.statusText}}</text>
+    </view>
+    <text class="task-title">{{taskInfo.title}}</text>
+    <text class="task-price">¥{{taskInfo.price}}</text>
+  </view>
+
+  <!-- 进度追踪 -->
+  <view class="progress-section">
+    <view class="section-title">订单进度</view>
+    
+    <!-- 进度条 -->
+    <view class="progress-bar">
+      <view class="progress-line" style="width: {{progressWidth}}%"></view>
+      <view class="progress-steps">
+        <!-- 已发布 -->
+        <view class="progress-step {{taskInfo.status >= 1 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">已发布</text>
+          <text class="step-time">{{taskInfo.createTime}}</text>
+        </view>
+        
+        <!-- 已接单 -->
+        <view class="progress-step {{taskInfo.status >= 2 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">已接单</text>
+          <text class="step-time">{{taskInfo.claimTime || '等待接单...'}}</text>
+        </view>
+        
+        <!-- 进行中 -->
+        <view class="progress-step {{taskInfo.status >= 2 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">进行中</text>
+          <text class="step-time">{{taskInfo.startTime || '尚未开始...'}}</text>
+        </view>
+        
+        <!-- 已完成 -->
+        <view class="progress-step {{taskInfo.status >= 3 ? 'active' : ''}}">
+          <view class="step-circle">
+            <image src="/assets/icons/checked.png" class="step-icon" mode="aspectFit"></image>
+          </view>
+          <text class="step-text">已完成</text>
+          <text class="step-time">{{taskInfo.completeTime || '未完成...'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 详细信息 -->
+  <view class="detail-section">
+    <view class="section-title">详细信息</view>
+    
+    <!-- 任务描述 -->
+    <view class="detail-item">
+      <text class="detail-label">任务描述</text>
+      <text class="detail-value">{{taskInfo.description}}</text>
+    </view>
+    
+    <!-- 取件地点 -->
+    <view class="detail-item location">
+      <text class="detail-label">取件地点</text>
+      <view class="location-content" bindtap="openPickupMap">
+        <image src="/assets/icons/pickup.png" class="location-icon" mode="aspectFit"></image>
+        <text class="location-text">{{taskInfo.pickupLocation}}</text>
+        <image src="/assets/icons/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+    
+    <!-- 送达地点 -->
+    <view class="detail-item location">
+      <text class="detail-label">送达地点</text>
+      <view class="location-content" bindtap="openDeliveryMap">
+        <image src="/assets/icons/delivery.png" class="location-icon" mode="aspectFit"></image>
+        <text class="location-text">{{taskInfo.deliveryLocation}}</text>
+        <image src="/assets/icons/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+    
+    <!-- 跑腿员信息 -->
+    <view class="detail-item runner" bindtap="goToRunnerDetail">
+      <text class="detail-label">跑腿员</text>
+      <view class="runner-content">
+        <image src="{{taskInfo.runnerAvatar || '/assets/icons/default-avatar.png'}}" class="runner-avatar" mode="aspectFit"></image>
+        <view class="runner-info">
+          <text class="runner-name">{{taskInfo.runnerName || '尚未接单'}}</text>
+          <text class="runner-rating">评分: {{taskInfo.runnerRating || '暂无'}}</text>
+        </view>
+        <image src="/assets/icons/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+    
+    <!-- 联系信息 -->
+    <view class="contact-section">
+      <view class="contact-item" bindtap="contactRunner" wx:if="{{taskInfo.runnerPhone}}">
+        <image src="/assets/icons/phone.png" class="contact-icon" mode="aspectFit"></image>
+        <text class="contact-text">联系跑腿员</text>
+      </view>
+      <view class="contact-item" bindtap="contactPublisher">
+        <image src="/assets/icons/phone.png" class="contact-icon" mode="aspectFit"></image>
+        <text class="contact-text">联系发布者</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section" wx:if="{{taskInfo && taskInfo.status}}">
+    <view class="action-buttons">
+      <!-- 进行中状态 -->
+      <block wx:if="{{taskInfo.status === 2}}">
+        <view class="action-btn primary" bindtap="onConfirmComplete">确认完成</view>
+      </block>
+      
+      <!-- 已完成状态 -->
+      <block wx:if="{{taskInfo.status === 3}}">
+        <view class="action-btn" bindtap="onEvaluate">评价</view>
+        <view class="action-btn" bindtap="onBuyAgain">再次发布</view>
+      </block>
+      
+      <!-- 待接单状态 -->
+      <block wx:if="{{taskInfo.status === 1}}">
+        <view class="action-btn cancel" bindtap="onCancelTask">取消订单</view>
+      </block>
+    </view>
+  </view>
+</view>

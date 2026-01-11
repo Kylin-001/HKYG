@@ -1,78 +1,375 @@
-/* 动画和交互效果样式文件 */
+// 黑科易购动画系统 v2.0 - 现代化交互动画
+// 与设计令牌集成，提供流畅的交互动画效果
 
-/* 通用动画关键帧 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+// =========================================
+// 使用设计令牌中的动画变量
+// =========================================
+
+// 从主题中获取动画配置
+$animation-duration: map-get(map-get($transitions, duration), base);
+$animation-easing: map-get(map-get($transitions, easing), 'cubic-bezier');
+
+// 主题颜色变量
+$primary-color: theme-color(primary);
+$primary-light: theme-color(primary-light);
+$primary-lightest: theme-color(primary-lightest);
+
+// =========================================
+// 页面转场动画
+// =========================================
+
+// 淡入淡出 + 变换
+.fade-transform-enter-active,
+.fade-transform-leave-active {
+  transition: all $animation-duration $animation-easing;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.fade-transform-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
 }
 
-@keyframes slideRight {
-  from {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
 }
 
-@keyframes scaleIn {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+// 淡入淡出
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $animation-duration $animation-easing;
 }
 
-@keyframes pulse {
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// 滑动
+.slide-enter-active,
+.slide-leave-active {
+  transition: all $animation-duration $animation-easing;
+  overflow: hidden;
+}
+
+.slide-enter-from {
+  transform: translateY(30px);
+  opacity: 0;
+}
+
+.slide-leave-to {
+  transform: translateY(-30px);
+  opacity: 0;
+}
+
+// 缩放
+.zoom-enter-active,
+.zoom-leave-active {
+  transition: all $animation-duration $animation-easing;
+}
+
+.zoom-enter-from,
+.zoom-leave-to {
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+// 旋转
+.rotate-enter-active,
+.rotate-leave-active {
+  transition: all $animation-duration $animation-easing;
+  transform-origin: center;
+}
+
+.rotate-enter-from {
+  transform: rotateZ(-10deg) scale(0.9);
+  opacity: 0;
+}
+
+.rotate-leave-to {
+  transform: rotateZ(10deg) scale(0.9);
+  opacity: 0;
+}
+
+// =========================================
+// 组件交互动画
+// =========================================
+
+// 悬停上浮效果
+.hover-float {
+  transition: all $animation-duration $animation-easing;
+  transform: translateY(0);
+  box-shadow: theme-color(shadow-base);
+}
+
+.hover-float:hover {
+  transform: translateY(-5px);
+  box-shadow: theme-color(shadow-lg);
+}
+
+// 悬停缩放效果
+.hover-scale {
+  transition: all $animation-duration $animation-easing;
+  transform: scale(1);
+  box-shadow: theme-color(shadow-base);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: theme-color(shadow-lg);
+}
+
+// 悬停发光效果
+.hover-glow {
+  transition: all $animation-duration $animation-easing;
+  box-shadow: theme-color(shadow-sm);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba($primary-color, 0.2);
+}
+
+// 点击缩放效果
+.click-scale {
+  transition: transform $animation-duration / 2 $animation-easing;
+}
+
+.click-scale:active {
+  transform: scale(0.98);
+}
+
+// 边框高亮效果
+.hover-border-highlight {
+  transition: all $animation-duration $animation-easing;
+  border-color: theme-color(border-color);
+}
+
+.hover-border-highlight:hover {
+  border-color: theme-color(primary);
+}
+
+// =========================================
+// 加载动画
+// =========================================
+
+// 旋转加载
+@keyframes spin {
   0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
+    transform: rotate(0deg);
   }
   100% {
-    transform: scale(1);
+    transform: rotate(360deg);
   }
 }
 
-/* 按钮动画效果 */
-.el-button {
-  transition: all 0.3s ease;
+.loading-spin {
+  animation: spin 1s linear infinite;
+}
+
+// 脉冲效果
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+// 跳动效果
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.loading-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+// 波浪效果
+@keyframes wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loading-wave {
   position: relative;
   overflow: hidden;
 }
 
-.el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.loading-wave::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: wave 1.5s ease-in-out infinite;
 }
 
-.el-button:active {
+// =========================================
+// 元素进入动画
+// =========================================
+
+// 从底部进入
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp $animation-duration $animation-easing;
+}
+
+// 从左侧进入
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in-left {
+  animation: fadeInLeft $animation-duration $animation-easing;
+}
+
+// 从右侧进入
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in-right {
+  animation: fadeInRight $animation-duration $animation-easing;
+}
+
+// 从顶部进入
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-down {
+  animation: fadeInDown $animation-duration $animation-easing;
+}
+
+// =========================================
+// 列表动画
+// =========================================
+
+// 列表项进入动画
+.list-item-enter-active,
+.list-item-leave-active {
+  transition: all $animation-duration $animation-easing;
+}
+
+.list-item-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.list-item-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.list-item-move {
+  transition: transform $animation-duration $animation-easing;
+}
+
+// 交错动画延迟
+.stagger-100 > * {
+  animation-delay: 0.1s;
+}
+
+.stagger-200 > * {
+  animation-delay: 0.2s;
+}
+
+.stagger-300 > * {
+  animation-delay: 0.3s;
+}
+
+// =========================================
+// 滚动动画
+// =========================================
+
+// 滚动时淡入
+.scroll-fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s map-get(map-get($transitions, easing), 'cubic-bezier');
+}
+
+.scroll-fade-in.visible {
+  opacity: 1;
   transform: translateY(0);
 }
 
-/* 按钮点击波纹效果 */
-.el-button::after {
+// =========================================
+// 现代化微交互动画
+// =========================================
+
+// 卡片悬停效果 - 深度变换
+.card-hover-depth {
+  transition: all $animation-duration $animation-easing;
+  box-shadow: theme-color(shadow-base);
+  transform: translateY(0);
+}
+
+.card-hover-depth:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: theme-color(shadow-xl);
+}
+
+// 按钮交互效果
+.button-hover {
+  transition: all $animation-duration $animation-easing;
+  position: relative;
+  overflow: hidden;
+}
+
+.button-hover::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -80,228 +377,168 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition:
-    width 0.6s,
-    height 0.6s;
+  transition: width 0.6s $animation-easing, height 0.6s $animation-easing;
 }
 
-.el-button:active::after {
+.button-hover:active::before {
   width: 300px;
   height: 300px;
 }
 
-/* 卡片动画效果 */
-.el-card {
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  overflow: hidden;
+// 表单元素聚焦动画
+.form-focus {
+  transition: all $animation-duration $animation-easing;
+  border-color: theme-color(input-border);
+  box-shadow: none;
 }
 
-.el-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-/* 快捷入口卡片特殊样式 */
-.quick-entry .entry-item {
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.quick-entry .entry-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.quick-entry .entry-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s;
-}
-
-.quick-entry .entry-item:hover::before {
-  left: 100%;
-}
-
-/* 表格行悬停效果 */
-.el-table {
-  transition: all 0.2s ease;
-}
-
-.el-table__row {
-  transition: all 0.2s ease;
-}
-
-.el-table__row:hover {
-  background-color: rgba(144, 147, 153, 0.05) !important;
-  transform: translateX(4px);
-}
-
-/* 表单元素交互效果 */
-.el-input__inner,
-.el-select__wrapper,
-.el-textarea__inner,
-.el-date-editor .el-input__inner {
-  transition: all 0.3s ease;
-}
-
-.el-input__inner:focus,
-.el-select__wrapper:focus-within,
-.el-textarea__inner:focus,
-.el-date-editor .el-input__inner:focus {
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+.form-focus:focus {
+  border-color: $primary-color;
+  box-shadow: theme-color(input-focus-shadow);
   transform: translateY(-1px);
 }
 
-/* 标签组件样式增强 */
-.el-tag {
-  transition: all 0.3s ease;
-  cursor: default;
+// 标签动画
+.tag-hover {
+  transition: all $animation-duration $animation-easing;
+  transform: scale(1);
 }
 
-.el-tag:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.tag-hover:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: theme-color(shadow-md);
 }
 
-/* 头像组件动画 */
-.el-avatar {
-  transition: all 0.3s ease;
-  overflow: hidden;
+// 图标旋转动画
+.icon-rotate {
+  transition: transform $animation-duration $animation-easing;
 }
 
-.el-avatar:hover {
-  transform: scale(1.1);
-  border-radius: 50%;
+.icon-rotate:hover {
+  transform: rotate(360deg);
 }
 
-/* 分页组件样式 */
-.el-pagination {
-  transition: all 0.3s ease;
+// 数字增长动画
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.el-pagination__item:hover:not(.disabled) {
-  transform: translateY(-2px);
+.count-up {
+  animation: countUp 1s $animation-easing;
 }
 
-.el-pagination__item:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
-}
-
-/* 对话框动画 */
-.el-dialog {
-  animation: scaleIn 0.3s ease;
-}
-
-.el-dialog__headerbtn:hover {
-  transform: scale(1.2);
-  color: #409eff;
-}
-
-/* 加载动画增强 */
-.el-loading-spinner .path {
-  stroke: #409eff;
-  stroke-linecap: round;
-  animation: loading-dash 1.5s ease-in-out infinite;
-}
-
-@keyframes loading-dash {
-  0% {
-    stroke-dasharray: 1, 200;
-    stroke-dashoffset: 0;
+// 骨架屏加载动画
+@keyframes pulse {
+  0%, 100% {
+    background-color: theme-color(border-light);
   }
   50% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -35;
+    background-color: theme-color(border-color);
+  }
+}
+
+.skeleton-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+// 波浪加载动画
+@keyframes wave {
+  0% {
+    transform: translateX(-100%);
   }
   100% {
-    stroke-dasharray: 90, 150;
-    stroke-dashoffset: -124;
+    transform: translateX(100%);
   }
 }
 
-/* 面包屑导航样式 */
-.el-breadcrumb__inner a,
-.el-breadcrumb__inner.is-link {
-  transition: all 0.2s ease;
-}
-
-.el-breadcrumb__inner a:hover,
-.el-breadcrumb__inner.is-link:hover {
-  color: #409eff;
-  text-decoration: underline;
-}
-
-/* 标签页样式 */
-.el-tabs__item {
-  transition: all 0.3s ease;
-}
-
-.el-tabs__item:hover {
-  color: #409eff;
-  transform: translateY(-2px);
-}
-
-.el-tabs__item.is-active {
-  color: #409eff;
-  font-weight: 600;
-}
-
-/* 商家卡片特殊样式 */
-.merchant-card {
-  transition: all 0.3s ease;
+.wave-loader {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  background: theme-color(border-light);
 }
 
-.merchant-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-.merchant-card::before {
+.wave-loader::after {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
+  left: 0;
+  width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.8s;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba($primary-color, 0.2),
+    transparent
+  );
+  animation: wave 1.5s ease-in-out infinite;
 }
 
-.merchant-card:hover::before {
-  left: 100%;
+// =========================================
+// 工具类
+// =========================================
+
+// 隐藏滚动条但允许滚动
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .el-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
-  .el-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  }
+// 平滑滚动
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
 
-  .quick-entry .entry-item:hover {
-    transform: translateY(-3px);
-  }
+// 防止用户选择
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
-  .merchant-card:hover {
-    transform: translateY(-4px);
+// 文本截断
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行文本截断
+.text-ellipsis-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.text-ellipsis-3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+// 响应式动画控制
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -1,14 +1,16 @@
 // app.js
+const config = require('./config/config');
+const { request } = require('./utils/request');
 App({
   globalData: {
     userInfo: null,
     token: null,
     isLogin: false,
     // 接口基础URL
-    API_BASE_URL: 'http://localhost:8080/api/miniprogram',
+    API_BASE_URL: config.baseUrl,
     // 小程序配置
     appConfig: {
-      version: '1.0.0',
+      version: '1.4.0',
       schoolName: '黑龙江科技大学',
       schoolCode: 'USTH'
     },
@@ -31,8 +33,6 @@ App({
   },
 
   onLaunch() {
-    console.log('黑科易购小程序启动');
-    
     // 检查更新
     this.checkUpdate();
     
@@ -52,17 +52,69 @@ App({
   },
 
   onShow() {
-    console.log('小程序显示');
     // 检查登录状态
     this.checkLoginStatus();
   },
 
   onHide() {
-    console.log('小程序隐藏');
   },
 
   onError(msg) {
     console.error('小程序错误:', msg);
+    // 错误上报（可以连接到第三方错误监控平台）
+    this.reportError(msg);
+    // 显示友好的错误提示
+    wx.showToast({
+      title: '系统出现错误，请稍后重试',
+      icon: 'none',
+      duration: 2000
+    });
+  },
+  
+  /**
+   * 错误上报
+   */
+  reportError(errorMsg) {
+    // 这里可以将错误信息上报到第三方监控平台
+    console.log('上报错误:', errorMsg);
+    // 示例：将错误信息发送到服务器
+    if (this.globalData.token) {
+      wx.request({
+        url: this.globalData.API_BASE_URL + '/error/report',
+        method: 'POST',
+        data: {
+          errorMsg: errorMsg,
+          userInfo: this.globalData.userInfo,
+          version: this.globalData.appConfig.version
+        },
+        header: {
+          'Authorization': 'Bearer ' + this.globalData.token
+        },
+        fail: (err) => {
+          console.error('错误上报失败:', err);
+        }
+      });
+    }
+  },
+  
+  /**
+   * 静默登录
+   */
+  silentLogin() {
+    return new Promise((resolve, reject) => {
+      // 获取登录凭证
+      wx.login({
+        success: (res) => {
+          if (res.code) {
+            // 调用登录接口
+            this.login(res.code).then(resolve).catch(reject);
+          } else {
+            reject(new Error('获取登录凭证失败'));
+          }
+        },
+        fail: reject
+      });
+    });
   },
 
   /**
@@ -73,7 +125,7 @@ App({
       const updateManager = wx.getUpdateManager();
       
       updateManager.onCheckForUpdate((res) => {
-        console.log('检查更新结果:', res.hasUpdate);
+        // 检查更新结果，静默处理
       });
 
       updateManager.onUpdateReady(() => {
@@ -193,7 +245,6 @@ App({
         this.getAddressDetail(res.latitude, res.longitude);
       },
       fail: () => {
-        console.log('获取位置失败');
         // 使用学校默认位置
         this.globalData.location = {
           latitude: 45.7859,
@@ -319,37 +370,9 @@ App({
   },
 
   /**
-   * 网络请求封装
+   * 网络请求封装（使用优化后的request工具）
    */
   request(options) {
-    const token = this.globalData.token;
-    
-    return new Promise((resolve, reject) => {
-      wx.request({
-        url: this.globalData.API_BASE_URL + options.url,
-        method: options.method || 'GET',
-        data: options.data || {},
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? 'Bearer ' + token : ''
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            if (res.data.code === 401) {
-              // token过期，重新登录
-              this.logout();
-              reject({ code: 401, message: '登录已过期' });
-            } else {
-              resolve(res.data);
-            }
-          } else {
-            reject(res.data);
-          }
-        },
-        fail: (err) => {
-          reject(err);
-        }
-      });
-    });
+    return request(options);
   }
 });

@@ -2,11 +2,14 @@ package com.heikeji.mall.payment.controller;
 
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.payment.entity.Payment;
+import com.heikeji.mall.payment.entity.vo.PaymentVO;
 import com.heikeji.mall.payment.service.PaymentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -103,11 +106,16 @@ public class PaymentController {
      */
     @PostMapping("/recharge")
     @ApiOperation("创建充值订单")
-    public R<Payment> recharge(@RequestParam BigDecimal amount, @RequestParam Integer paymentType) {
+    public R<PaymentVO> recharge(@RequestParam BigDecimal amount, @RequestParam Integer paymentType) {
         log.info("创建充值订单请求，金额: {}, 支付类型: {}", amount, paymentType);
         Payment payment = paymentService.recharge(amount, paymentType);
         log.info("充值订单创建成功，订单号: {}", payment.getOrderNo());
-        return R.success(payment);
+        
+        // 转换为PaymentVO
+        PaymentVO paymentVO = new PaymentVO();
+        BeanUtils.copyProperties(payment, paymentVO);
+        
+        return R.success(paymentVO);
     }
     
     /**

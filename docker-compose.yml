@@ -95,54 +95,8 @@ services:
     restart: always
     networks:
       - heikeji-network
-    depends_on:
-      - gateway
 
-  # API 网关
-  gateway:
-    image: heikeji-gateway:latest
-    container_name: heikeji-gateway
-    build:
-      context: ./heikeji-gateway
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
-    restart: always
-    networks:
-      - heikeji-network
-    depends_on:
-      - nacos
-      - redis
 
-  # 认证服务
-  auth:
-    image: heikeji-auth:latest
-    container_name: heikeji-auth
-    build:
-      context: ./heikeji-auth
-      dockerfile: Dockerfile
-    ports:
-      - "9999:9999"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
-      - SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR=nacos:8848
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/heikeji_mall?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=Mysql@8Root!2025
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-    restart: always
-    networks:
-      - heikeji-network
-    depends_on:
-      - nacos
-      - mysql
-      - redis
 
 volumes:
   mysql_data:

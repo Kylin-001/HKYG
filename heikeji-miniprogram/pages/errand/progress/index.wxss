@@ -1,0 +1,381 @@
+/* 订单进度追踪页面样式 */
+.container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+/* 任务基本信息 */
+.task-info {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15rpx;
+}
+
+.task-type-tag {
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.task-status {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.task-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.task-price {
+  font-size: 36rpx;
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+/* 进度追踪 */
+.progress-section {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  display: block;
+}
+
+/* 进度条 */
+.progress-bar {
+  position: relative;
+  padding: 20rpx 0;
+}
+
+.progress-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  height: 8rpx;
+  background-color: #3cc51f;
+  border-radius: 4rpx;
+  z-index: 1;
+  transition: width 0.3s ease;
+}
+
+.progress-steps {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.progress-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+
+.step-circle {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20rpx;
+  position: relative;
+  z-index: 3;
+}
+
+.step-icon {
+  width: 40rpx;
+  height: 40rpx;
+  opacity: 0.5;
+}
+
+.step-text {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.step-time {
+  display: block;
+  font-size: 24rpx;
+  color: #ccc;
+}
+
+/* 激活状态 */
+.progress-step.active .step-circle {
+  background-color: #3cc51f;
+}
+
+.progress-step.active .step-icon {
+  opacity: 1;
+}
+
+.progress-step.active .step-text {
+  color: #333;
+  font-weight: bold;
+}
+
+.progress-step.active .step-time {
+  color: #666;
+}
+
+/* 详细信息 */
+.detail-section {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.detail-item {
+  margin-bottom: 30rpx;
+}
+
+.detail-item:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 15rpx;
+}
+
+.detail-value {
+  display: block;
+  font-size: 32rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* 地点信息 */
+.detail-item.location .detail-value {
+  display: flex;
+  align-items: center;
+}
+
+.location-content {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 10rpx;
+}
+
+.location-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-right: 15rpx;
+}
+
+.location-text {
+  flex: 1;
+  font-size: 32rpx;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrow-icon {
+  width: 20rpx;
+  height: 20rpx;
+  margin-left: 15rpx;
+}
+
+/* 跑腿员信息 */
+.runner-content {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 10rpx;
+}
+
+.runner-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+
+.runner-info {
+  flex: 1;
+}
+
+.runner-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5rpx;
+}
+
+.runner-rating {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 联系信息 */
+.contact-section {
+  display: flex;
+  margin-top: 30rpx;
+}
+
+.contact-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 10rpx;
+  margin-right: 20rpx;
+}
+
+.contact-item:last-child {
+  margin-right: 0;
+}
+
+.contact-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-right: 15rpx;
+}
+
+.contact-text {
+  font-size: 32rpx;
+  color: #333;
+}
+
+/* 操作按钮 */
+.action-section {
+  background-color: #fff;
+  padding: 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  padding: 20rpx 40rpx;
+  border-radius: 60rpx;
+  font-size: 32rpx;
+  margin-left: 20rpx;
+  border: 2rpx solid #ddd;
+  background-color: #fff;
+  color: #666;
+}
+
+.action-btn.primary {
+  background-color: #3cc51f;
+  color: #fff;
+  border-color: #3cc51f;
+}
+
+.action-btn.cancel {
+  background-color: #fff;
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+/* 状态颜色 */
+.status-pending {
+  color: #ff9800;
+}
+
+.status-in-progress {
+  color: #2196f3;
+}
+
+.status-completed {
+  color: #4caf50;
+}
+
+.status-cancelled {
+  color: #f44336;
+}
+
+/* 任务类型颜色 */
+.delivery-color {
+  background-color: #2196f3;
+}
+
+.purchase-color {
+  background-color: #4caf50;
+}
+
+.help-color {
+  background-color: #ff9800;
+}
+
+.other-color {
+  background-color: #9c27b0;
+}

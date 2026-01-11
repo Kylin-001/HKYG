@@ -13,6 +13,7 @@ import com.heikeji.mall.delivery.vo.DeliveryOrderListVO;
 import com.heikeji.mall.delivery.vo.DeliveryOrderStatusVO;
 import com.heikeji.mall.delivery.vo.OrderAcceptRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class DeliveryOrderServiceImpl extends ServiceImpl<DeliveryOrderMapper, D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "deliveryAnalysis", allEntries = true)
     public DeliveryOrder createOrder(DeliveryOrder order) {
         // 设置默认值
         order.setOrderNo(generateOrderNo());
@@ -84,6 +86,7 @@ public class DeliveryOrderServiceImpl extends ServiceImpl<DeliveryOrderMapper, D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "deliveryAnalysis", allEntries = true)
     public boolean updateOrderStatus(Long orderId, Integer status) {
         DeliveryOrder order = getById(orderId);
         if (order == null) {
@@ -101,6 +104,7 @@ public class DeliveryOrderServiceImpl extends ServiceImpl<DeliveryOrderMapper, D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "deliveryAnalysis", allEntries = true)
     public boolean acceptOrder(OrderAcceptRequest request) {
         // 查询订单
         DeliveryOrder order = getById(request.getOrderId());
@@ -135,6 +139,7 @@ public class DeliveryOrderServiceImpl extends ServiceImpl<DeliveryOrderMapper, D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "deliveryAnalysis", allEntries = true)
     public boolean startDelivery(Long orderId, Long deliveryUserId) {
         // 查询订单
         DeliveryOrder order = getById(orderId);
@@ -171,6 +176,7 @@ public class DeliveryOrderServiceImpl extends ServiceImpl<DeliveryOrderMapper, D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "deliveryAnalysis", allEntries = true)
     public boolean completeDelivery(Long orderId) {
         // 查询订单
         DeliveryOrder order = getById(orderId);
@@ -204,6 +210,7 @@ public class DeliveryOrderServiceImpl extends ServiceImpl<DeliveryOrderMapper, D
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "deliveryAnalysis", allEntries = true)
     public boolean cancelOrder(Long orderId, String reason) {
         // 查询订单
         DeliveryOrder order = getById(orderId);

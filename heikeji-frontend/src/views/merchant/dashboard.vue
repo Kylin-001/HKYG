@@ -338,7 +338,7 @@ const merchantInfo = reactive<MerchantInfo>({
   type: '中式快餐',
   status: '营业中',
   lastUpdate: '2024-11-21 14:30',
-  avatar: ''
+  avatar: '',
 })
 
 // 今日数据统计
@@ -346,7 +346,7 @@ const todayStats = reactive<TodayStats>({
   revenue: '1,256.80',
   orders: 24,
   rating: '4.8',
-  visitors: 156
+  visitors: 156,
 })
 
 // 营收图表数据
@@ -366,12 +366,12 @@ const editForm = reactive<EditForm>({
   description: '',
   minOrderAmount: 0,
   deliveryFee: 0,
-  deliveryTime: 30
+  deliveryTime: 30,
 })
 
 // 定时器和事件监听
 let refreshTimer: number | null = null
-let handleResize: () => void = () => {}
+const handleResize: () => void = () => {}
 
 // 路由
 const router = useRouter()
@@ -409,7 +409,7 @@ const setupAutoRefresh = () => {
     loadDashboardData()
     loadRecentOrders()
   }, 30000) // 每30秒刷新一次订单数据
-} as unknown as number
+}
 
 // 加载仪表板数据
 const loadDashboardData = () => {
@@ -421,7 +421,7 @@ const loadDashboardData = () => {
       amount: 45.8,
       createTime: '14:30',
       status: '待接单',
-      statusText: '待接单'
+      statusText: '待接单',
     },
     {
       id: 2,
@@ -429,7 +429,7 @@ const loadDashboardData = () => {
       amount: 32.5,
       createTime: '14:25',
       status: '制作中',
-      statusText: '制作中'
+      statusText: '制作中',
     },
     {
       id: 3,
@@ -437,8 +437,8 @@ const loadDashboardData = () => {
       amount: 68.9,
       createTime: '14:20',
       status: '已完成制作',
-      statusText: '已完成制作'
-    }
+      statusText: '已完成制作',
+    },
   ]
 }
 
@@ -497,7 +497,7 @@ const getOrderStatusType = (status: string) => {
     待接单: 'warning',
     制作中: 'primary',
     已完成制作: 'success',
-    已取消: 'danger'
+    已取消: 'danger',
   }
   return statusMap[status] || 'info'
 }
@@ -507,7 +507,7 @@ const acceptOrder = (orderId: number) => {
   ElMessageBox.confirm('确定要接单吗?', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'warning',
   }).then(() => {
     // 更新订单状态
     updateOrderStatus(orderId, '制作中')

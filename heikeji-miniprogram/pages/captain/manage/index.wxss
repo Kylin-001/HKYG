@@ -1,0 +1,499 @@
+/* 团长管理页面样式 */
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 32rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.setting-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-left: 20rpx;
+}
+
+/* 团长信息 */
+.captain-info {
+  background-color: #fff;
+  padding: 24rpx 32rpx;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.captain-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #1989fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 24rpx;
+}
+
+.avatar-text {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.captain-details {
+  flex: 1;
+}
+
+.captain-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.captain-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 16rpx;
+}
+
+.captain-status {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: bold;
+  color: #f56c6c;
+  background-color: #fef0f0;
+}
+
+.captain-status.active {
+  color: #67c23a;
+  background-color: #f0f9eb;
+}
+
+.captain-info-text {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.arrow-icon {
+  color: #999;
+}
+
+/* 佣金余额 */
+.commission-balance {
+  background-color: #fff;
+  padding: 24rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balance-info {
+  flex: 1;
+}
+
+.balance-label {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.balance-amount {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #e6a23c;
+}
+
+.withdraw-btn {
+  width: 120rpx;
+  height: 60rpx;
+  background-color: #1989fa;
+  color: #fff;
+  border: none;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  font-weight: bold;
+  line-height: 60rpx;
+}
+
+/* 统计数据 */
+.statistics {
+  background-color: #fff;
+  padding: 24rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.stat-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 功能菜单 */
+.menu-section {
+  background-color: #fff;
+  padding: 24rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32rpx;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-item:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 5rpx rgba(0, 0, 0, 0.05);
+}
+
+.menu-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 12rpx;
+}
+
+.menu-text {
+  font-size: 26rpx;
+  color: #333;
+  text-align: center;
+}
+
+/* 标签页 */
+.tab-section {
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 标签栏 */
+.tab-bar {
+  display: flex;
+  border-bottom: 2rpx solid #e0e0e0;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #1989fa;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background-color: #1989fa;
+  border-radius: 2rpx;
+}
+
+/* 标签内容 */
+.tab-content {
+  padding: 24rpx 32rpx;
+}
+
+/* 概览区块 */
+.overview-section {
+  margin-bottom: 32rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-more {
+  display: flex;
+  align-items: center;
+}
+
+.more-text {
+  font-size: 26rpx;
+  color: #409eff;
+  margin-right: 8rpx;
+}
+
+.more-icon {
+  color: #409eff;
+}
+
+/* 佣金记录列表 */
+.commission-list {
+  margin-bottom: 20rpx;
+}
+
+.commission-item {
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.commission-item:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 5rpx rgba(0, 0, 0, 0.05);
+}
+
+.commission-left {
+  flex: 1;
+}
+
+.commission-description {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.commission-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.commission-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #67c23a;
+}
+
+/* 佣金记录详情 */
+.commission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.commission-order-no {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.commission-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #e0e0e0;
+}
+
+.commission-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 团队成员列表 */
+.team-list {
+  margin-bottom: 20rpx;
+}
+
+.team-item {
+  background-color: #fafafa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-item:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 5rpx rgba(0, 0, 0, 0.05);
+}
+
+.member-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #1989fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 20rpx;
+}
+
+.member-details {
+  flex: 1;
+}
+
+.member-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.member-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 16rpx;
+}
+
+.member-status {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: bold;
+  color: #f56c6c;
+  background-color: #fef0f0;
+}
+
+.member-status.active {
+  color: #67c23a;
+  background-color: #f0f9eb;
+}
+
+.member-info {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 4rpx;
+}
+
+.member-join-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.member-role {
+  font-size: 26rpx;
+  color: #409eff;
+  margin-left: 16rpx;
+}
+
+/* 空列表 */
+.empty-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80rpx 0;
+  background-color: #fafafa;
+  border-radius: 12rpx;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 加载更多 */
+.loading-more {
+  text-align: center;
+  padding: 20rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .statistics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20rpx;
+  }
+  
+  .captain-info {
+    padding: 16rpx 20rpx;
+  }
+  
+  .commission-balance {
+    padding: 16rpx 20rpx;
+  }
+  
+  .tab-content {
+    padding: 16rpx 20rpx;
+  }
+}

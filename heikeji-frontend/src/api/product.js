@@ -1,9 +1,10 @@
 import request from '@/utils/request'
+import config from '@/config/environment'
 
 // 产品管理相关API
 export function getProductList(params) {
   return request({
-    url: '/product/list',
+    url: `${config.API_BASE_URL}/product/list`,
     method: 'get',
     params,
   })
@@ -11,14 +12,14 @@ export function getProductList(params) {
 
 export function getProductDetail(id) {
   return request({
-    url: `/product/detail/${id}`,
+    url: `${config.API_BASE_URL}/product/detail/${id}`,
     method: 'get',
   })
 }
 
 export function addProduct(data) {
   return request({
-    url: '/product/add',
+    url: `${config.API_BASE_URL}/product/add`,
     method: 'post',
     data,
   })
@@ -26,7 +27,7 @@ export function addProduct(data) {
 
 export function updateProduct(data) {
   return request({
-    url: '/product/update',
+    url: `${config.API_BASE_URL}/product/update`,
     method: 'put',
     data,
   })
@@ -34,14 +35,14 @@ export function updateProduct(data) {
 
 export function deleteProduct(id) {
   return request({
-    url: `/product/delete/${id}`,
+    url: `${config.API_BASE_URL}/product/delete/${id}`,
     method: 'delete',
   })
 }
 
 export function updateProductStatus(id, status) {
   return request({
-    url: `/product/status/${id}`,
+    url: `${config.API_BASE_URL}/product/status/${id}`,
     method: 'put',
     params: { status },
   })
@@ -50,14 +51,14 @@ export function updateProductStatus(id, status) {
 // 分类相关API
 export function getCategoryList() {
   return request({
-    url: '/product/category/list',
+    url: `${config.API_BASE_URL}/product/category/list`,
     method: 'get',
   })
 }
 
 export function addCategory(data) {
   return request({
-    url: '/product/category/add',
+    url: `${config.API_BASE_URL}/product/category/add`,
     method: 'post',
     data,
   })
@@ -65,7 +66,7 @@ export function addCategory(data) {
 
 export function updateCategory(data) {
   return request({
-    url: '/product/category/update',
+    url: `${config.API_BASE_URL}/product/category/update`,
     method: 'put',
     data,
   })
@@ -73,7 +74,7 @@ export function updateCategory(data) {
 
 export function deleteCategory(id) {
   return request({
-    url: `/product/category/delete/${id}`,
+    url: `${config.API_BASE_URL}/product/category/delete/${id}`,
     method: 'delete',
   })
 }
@@ -81,7 +82,7 @@ export function deleteCategory(id) {
 // 品牌相关API
 export function getBrandList(params) {
   return request({
-    url: '/product/brand/list',
+    url: `${config.API_BASE_URL}/product/brand/list`,
     method: 'get',
     params,
   })
@@ -89,7 +90,7 @@ export function getBrandList(params) {
 
 export function addBrand(data) {
   return request({
-    url: '/product/brand/add',
+    url: `${config.API_BASE_URL}/product/brand/add`,
     method: 'post',
     data,
   })
@@ -97,7 +98,7 @@ export function addBrand(data) {
 
 export function updateBrand(data) {
   return request({
-    url: '/product/brand/update',
+    url: `${config.API_BASE_URL}/product/brand/update`,
     method: 'put',
     data,
   })
@@ -105,14 +106,14 @@ export function updateBrand(data) {
 
 export function deleteBrand(id) {
   return request({
-    url: `/product/brand/delete/${id}`,
+    url: `${config.API_BASE_URL}/product/brand/delete/${id}`,
     method: 'delete',
   })
 }
 
 export function uploadProductImage(data) {
   return request({
-    url: '/product/upload/image',
+    url: `${config.API_BASE_URL}/product/upload/image`,
     method: 'post',
     data,
     headers: {
@@ -124,7 +125,7 @@ export function uploadProductImage(data) {
 // 获取商品操作日志
 export function getProductOperationLogs(productId) {
   return request({
-    url: `/product/logs/${productId}`,
+    url: `${config.API_BASE_URL}/product/logs/${productId}`,
     method: 'get',
   })
 }

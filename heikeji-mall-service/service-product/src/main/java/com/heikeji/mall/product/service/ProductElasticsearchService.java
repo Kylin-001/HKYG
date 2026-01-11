@@ -9,6 +9,7 @@ import com.heikeji.mall.product.entity.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductElasticsearchService {
 
-    @Autowired
+    @Autowired(required = false)
     private ElasticsearchOperations elasticsearchOperations;
 
     /**
@@ -36,20 +37,44 @@ public class ProductElasticsearchService {
      * @return 分页搜索结果
      */
     public Page<Product> advancedSearch(Page<Product> page, ProductSearchDTO searchDTO) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回空结果
+            int pageNum = (int) page.getCurrent();
+            int pageSize = (int) page.getSize();
+            Page<Product> resultPage = new Page<>(pageNum, pageSize);
+            resultPage.setRecords(new ArrayList<>());
+            resultPage.setTotal(0);
+            return resultPage;
+        }
+        
         // 构建查询条件
         Criteria criteria = new Criteria();
 
-        // 关键字搜索（名称、副标题、详情）
+        // 关键字搜索（名称、副标题、详情，支持短语搜索）
         if (searchDTO.getKeyword() != null && !searchDTO.getKeyword().isEmpty()) {
             String keyword = searchDTO.getKeyword();
-            criteria.or(new Criteria("name").contains(keyword))
-                   .or(new Criteria("subtitle").contains(keyword))
-                   .or(new Criteria("detail").contains(keyword));
+            // 支持精确短语搜索（带引号的情况）
+            if (keyword.startsWith("\"") && keyword.endsWith("\"")) {
+                String exactPhrase = keyword.substring(1, keyword.length() - 1);
+                criteria.or(new Criteria("name").is(exactPhrase))
+                       .or(new Criteria("subtitle").is(exactPhrase))
+                       .or(new Criteria("detail").is(exactPhrase));
+            } else {
+                // 普通关键字搜索
+                criteria.or(new Criteria("name").contains(keyword))
+                       .or(new Criteria("subtitle").contains(keyword))
+                       .or(new Criteria("detail").contains(keyword));
+            }
         }
 
         // 分类筛选
         if (searchDTO.getCategoryId() != null) {
             criteria.and(new Criteria("categoryId").is(searchDTO.getCategoryId()));
+        }
+
+        // 商家筛选
+        if (searchDTO.getMerchantId() != null) {
+            criteria.and(new Criteria("merchantId").is(searchDTO.getMerchantId()));
         }
 
         // 价格区间筛选
@@ -72,6 +97,16 @@ public class ProductElasticsearchService {
         // 状态筛选（只显示上架商品）
         criteria.and(new Criteria("status").is(1));
         criteria.and(new Criteria("delFlag").is(0));
+        
+        // 新品筛选
+        if (searchDTO.getIsNew() != null && searchDTO.getIsNew()) {
+            criteria.and(new Criteria("isNew").is(true));
+        }
+        
+        // 推荐商品筛选
+        if (searchDTO.getIsRecommend() != null && searchDTO.getIsRecommend()) {
+            criteria.and(new Criteria("isRecommend").is(true));
+        }
 
         // 分页
         int pageNum = (int) page.getCurrent();
@@ -80,6 +115,29 @@ public class ProductElasticsearchService {
 
         // 构建查询
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria, pageable);
+
+        // 添加排序
+        if (searchDTO.getSortBy() != null && !searchDTO.getSortBy().isEmpty()) {
+            // 自定义排序
+            Sort.Direction direction = "asc".equalsIgnoreCase(searchDTO.getSortOrder()) ? Sort.Direction.ASC : Sort.Direction.DESC;
+            switch (searchDTO.getSortBy()) {
+                case "price":
+                    criteriaQuery.addSort(Sort.by(direction, "price"));
+                    break;
+                case "sales":
+                    criteriaQuery.addSort(Sort.by(direction, "sales"));
+                    break;
+                case "update_time":
+                    criteriaQuery.addSort(Sort.by(direction, "updateTime"));
+                    break;
+                default:
+                    // 默认排序
+                    criteriaQuery.addSort(Sort.by("sales").descending().and(Sort.by("updateTime").descending()));
+            }
+        } else {
+            // 默认排序
+            criteriaQuery.addSort(Sort.by("sales").descending().and(Sort.by("updateTime").descending()));
+        }
 
         // 执行查询
         SearchHits<ProductIndex> searchHits = elasticsearchOperations.search(criteriaQuery, ProductIndex.class);
@@ -122,20 +180,44 @@ public class ProductElasticsearchService {
      * @return 分页搜索结果
      */
     public Page<ProductIndex> advancedSearch(ProductSearchDTO searchDTO) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回空结果
+            int pageNum = searchDTO.getPageNum() != null ? searchDTO.getPageNum() : 1;
+            int pageSize = searchDTO.getPageSize() != null ? searchDTO.getPageSize() : 10;
+            Page<ProductIndex> productIndexPage = new Page<>(pageNum, pageSize);
+            productIndexPage.setRecords(new ArrayList<>());
+            productIndexPage.setTotal(0);
+            return productIndexPage;
+        }
+        
         // 构建查询条件
         Criteria criteria = new Criteria();
 
-        // 关键字搜索（名称、副标题、详情）
+        // 关键字搜索（名称、副标题、详情，支持短语搜索）
         if (searchDTO.getKeyword() != null && !searchDTO.getKeyword().isEmpty()) {
             String keyword = searchDTO.getKeyword();
-            criteria.or(new Criteria("name").contains(keyword))
-                   .or(new Criteria("subtitle").contains(keyword))
-                   .or(new Criteria("detail").contains(keyword));
+            // 支持精确短语搜索（带引号的情况）
+            if (keyword.startsWith("\"") && keyword.endsWith("\"")) {
+                String exactPhrase = keyword.substring(1, keyword.length() - 1);
+                criteria.or(new Criteria("name").is(exactPhrase))
+                       .or(new Criteria("subtitle").is(exactPhrase))
+                       .or(new Criteria("detail").is(exactPhrase));
+            } else {
+                // 普通关键字搜索
+                criteria.or(new Criteria("name").contains(keyword))
+                       .or(new Criteria("subtitle").contains(keyword))
+                       .or(new Criteria("detail").contains(keyword));
+            }
         }
 
         // 分类筛选
         if (searchDTO.getCategoryId() != null) {
             criteria.and(new Criteria("categoryId").is(searchDTO.getCategoryId()));
+        }
+
+        // 商家筛选
+        if (searchDTO.getMerchantId() != null) {
+            criteria.and(new Criteria("merchantId").is(searchDTO.getMerchantId()));
         }
 
         // 价格区间筛选
@@ -167,6 +249,29 @@ public class ProductElasticsearchService {
         // 构建查询
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria, pageable);
 
+        // 添加排序
+        if (searchDTO.getSortBy() != null && !searchDTO.getSortBy().isEmpty()) {
+            // 自定义排序
+            Sort.Direction direction = "asc".equalsIgnoreCase(searchDTO.getSortOrder()) ? Sort.Direction.ASC : Sort.Direction.DESC;
+            switch (searchDTO.getSortBy()) {
+                case "price":
+                    criteriaQuery.addSort(Sort.by(direction, "price"));
+                    break;
+                case "sales":
+                    criteriaQuery.addSort(Sort.by(direction, "sales"));
+                    break;
+                case "update_time":
+                    criteriaQuery.addSort(Sort.by(direction, "updateTime"));
+                    break;
+                default:
+                    // 默认排序
+                    criteriaQuery.addSort(Sort.by("sales").descending().and(Sort.by("updateTime").descending()));
+            }
+        } else {
+            // 默认排序
+            criteriaQuery.addSort(Sort.by("sales").descending().and(Sort.by("updateTime").descending()));
+        }
+
         // 执行查询
         SearchHits<ProductIndex> searchHits = elasticsearchOperations.search(criteriaQuery, ProductIndex.class);
 
@@ -189,6 +294,11 @@ public class ProductElasticsearchService {
      * @return 保存结果列表
      */
     public List<ProductIndex> bulkSave(List<ProductIndex> productIndices) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回空列表
+            return new ArrayList<>();
+        }
+        
         Iterable<ProductIndex> result = elasticsearchOperations.save(productIndices);
         List<ProductIndex> list = new ArrayList<>();
         result.forEach(list::add);
@@ -201,6 +311,11 @@ public class ProductElasticsearchService {
      * @return 保存后的商品索引
      */
     public ProductIndex save(ProductIndex productIndex) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回原对象
+            return productIndex;
+        }
+        
         return elasticsearchOperations.save(productIndex);
     }
 
@@ -209,6 +324,11 @@ public class ProductElasticsearchService {
      * @param id 商品ID
      */
     public void deleteById(Long id) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，直接返回
+            return;
+        }
+        
         elasticsearchOperations.delete(String.valueOf(id), ProductIndex.class);
     }
 
@@ -217,6 +337,11 @@ public class ProductElasticsearchService {
      * @param ids 商品ID列表
      */
     public void bulkDelete(List<Long> ids) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，直接返回
+            return;
+        }
+        
         for (Long id : ids) {
             elasticsearchOperations.delete(id.toString(), ProductIndex.class);
         }
@@ -228,6 +353,11 @@ public class ProductElasticsearchService {
      * @return 商品索引
      */
     public ProductIndex getById(Long id) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回null
+            return null;
+        }
+        
         return elasticsearchOperations.get(String.valueOf(id), ProductIndex.class);
     }
 
@@ -238,6 +368,11 @@ public class ProductElasticsearchService {
      * @return 推荐商品列表
      */
     public List<ProductIndex> searchSuggestions(String keyword, Integer limit) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回空列表
+            return new ArrayList<>();
+        }
+        
         // 构建查询条件
         Criteria criteria = new Criteria();
 
@@ -272,6 +407,11 @@ public class ProductElasticsearchService {
      * @return 相关商品列表
      */
     public List<ProductIndex> searchRelatedProducts(Long productId, Long categoryId, Integer limit) {
+        if (elasticsearchOperations == null) {
+            // Elasticsearch不可用，返回空列表
+            return new ArrayList<>();
+        }
+        
         // 构建查询条件
         Criteria criteria = new Criteria();
 

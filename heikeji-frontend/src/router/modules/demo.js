@@ -8,7 +8,7 @@ export const demoRoutes = [
     name: 'Demo',
     meta: {
       title: '组件演示',
-      icon: 'el-icon-s-cooperation',
+      icon: 'Cooperation',
     },
     children: [
       {
@@ -17,7 +17,7 @@ export const demoRoutes = [
         component: () => import('@/views/demo/virtual-table'),
         meta: {
           title: 'VirtualTable演示',
-          icon: 'el-icon-table-lamp',
+          icon: 'Table',
         },
       },
       {
@@ -26,7 +26,7 @@ export const demoRoutes = [
         component: () => import('@/views/demo/search-filter'),
         meta: {
           title: '智能搜索筛选',
-          icon: 'el-icon-search',
+          icon: 'Search',
         },
       },
       {
@@ -35,7 +35,7 @@ export const demoRoutes = [
         component: () => import('@/views/demo/performance-monitor'),
         meta: {
           title: '性能监控仪表板',
-          icon: 'el-icon-data-analysis',
+          icon: 'DataLine',
         },
       },
     ],

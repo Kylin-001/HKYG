@@ -6,14 +6,8 @@
     <resultMap id="CategoryResultMap" type="com.heikeji.mall.product.entity.Category">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
-        <result column="icon" property="icon"/>
-        <result column="sort_order" property="sortOrder"/>
-        <result column="status" property="status"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
-        <result column="del_flag" property="delFlag"/>
         <result column="parent_id" property="parentId"/>
-        <result column="level" property="level"/>
+        <result column="sort_order" property="sortOrder"/>
     </resultMap>
     
     <!-- 分类树结果映射 -->
@@ -23,55 +17,46 @@
 
     <!-- 查询所有启用状态的分类 -->
     <select id="selectEnabledCategories" resultMap="CategoryResultMap">
-        SELECT id, name, icon, sort_order, status, create_time, update_time, del_flag, parent_id, level
+        SELECT id, name, parent_id, sort_order
         FROM category
-        WHERE status = 1
-        AND del_flag = 0
-        ORDER BY sort_order ASC, create_time DESC
+        ORDER BY sort_order ASC
     </select>
     
     <!-- 根据状态查询分类 -->
     <select id="selectByStatus" resultMap="CategoryResultMap">
-        SELECT id, name, icon, sort_order, status, create_time, update_time, del_flag, parent_id, level
+        SELECT id, name, parent_id, sort_order
         FROM category
-        WHERE status = #{status}
-        AND del_flag = 0
-        ORDER BY sort_order ASC, create_time DESC
+        ORDER BY sort_order ASC
     </select>
     
     <!-- 按排序字段查询所有分类 -->
     <select id="selectOrderBySort" resultMap="CategoryResultMap">
-        SELECT id, name, icon, sort_order, status, create_time, update_time, del_flag, parent_id, level
+        SELECT id, name, parent_id, sort_order
         FROM category
-        WHERE del_flag = 0
-        ORDER BY sort_order ASC, create_time DESC
+        ORDER BY sort_order ASC
     </select>
     
     <!-- 根据父分类ID查询子分类 -->
     <select id="selectByParentId" resultMap="CategoryResultMap">
-        SELECT id, name, icon, sort_order, status, create_time, update_time, del_flag, parent_id, level
+        SELECT id, name, parent_id, sort_order
         FROM category
         WHERE parent_id = #{parentId}
-        AND del_flag = 0
-        ORDER BY sort_order ASC, create_time DESC
+        ORDER BY sort_order ASC
     </select>
     
     <!-- 获取所有分类（包含父子关系） -->
     <select id="selectAllCategoriesWithRelation" resultMap="CategoryTreeResultMap">
-        SELECT id, name, icon, sort_order, status, create_time, update_time, del_flag, parent_id, level
+        SELECT id, name, parent_id, sort_order
         FROM category
         WHERE parent_id = 0
-        AND del_flag = 0
-        ORDER BY sort_order ASC, create_time DESC
+        ORDER BY sort_order ASC
     </select>
     
     <!-- 获取启用的分类树 -->
     <select id="selectEnabledCategoryTree" resultMap="CategoryTreeResultMap">
-        SELECT id, name, icon, sort_order, status, create_time, update_time, del_flag, parent_id, level
+        SELECT id, name, parent_id, sort_order
         FROM category
         WHERE parent_id = 0
-        AND status = 1
-        AND del_flag = 0
-        ORDER BY sort_order ASC, create_time DESC
+        ORDER BY sort_order ASC
     </select>
 </mapper>

@@ -1,45 +1,66 @@
 <template>
   <div class="order-list-container">
-    <el-card>
-      <div #header class="card-header">
-        <span>订单管理</span>
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h2>订单管理</h2>
+        <span class="subtitle">管理平台的订单信息</span>
+      </div>
+      <div class="header-right">
+        <el-button type="primary" @click="handleExport">
+          <el-icon><Download /></el-icon>
+          导出订单
+        </el-button>
+        <el-button @click="handleRefresh">
+          <el-icon><Refresh /></el-icon>
+          刷新
+        </el-button>
+      </div>
+    </div>
+
+    <!-- 订单列表 -->
+    <el-card class="order-list-card">
+      <!-- 搜索和筛选 -->
+      <div class="search-filter">
+        <el-form :inline="true" :model="searchParams" class="search-form">
+          <el-form-item label="订单号">
+            <el-input v-model="searchParams.orderId" placeholder="请输入订单号"></el-input>
+          </el-form-item>
+          <el-form-item label="用户名">
+            <el-input v-model="searchParams.userName" placeholder="请输入用户名"></el-input>
+          </el-form-item>
+          <el-form-item label="订单状态">
+            <el-select v-model="searchParams.orderStatus" placeholder="请选择订单状态">
+              <el-option label="全部" value=""></el-option>
+              <el-option
+                v-for="option in orderStore.statusOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="下单时间">
+            <el-date-picker
+              v-model="searchParams.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              style="width: 300px"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleSearch">
+              <el-icon><Search /></el-icon>
+              搜索
+            </el-button>
+            <el-button @click="handleReset">重置</el-button>
+          </el-form-item>
+        </el-form>
       </div>
 
-      <!-- 搜索筛选区域 -->
-      <el-form :inline="true" :model="searchParams" class="search-form">
-        <el-form-item label="订单号">
-          <el-input v-model="searchParams.orderId" placeholder="请输入订单号"></el-input>
-        </el-form-item>
-        <el-form-item label="用户名">
-          <el-input v-model="searchParams.userName" placeholder="请输入用户名"></el-input>
-        </el-form-item>
-        <el-form-item label="订单状态">
-          <el-select v-model="searchParams.orderStatus" placeholder="请选择订单状态">
-            <el-option label="全部" value=""></el-option>
-            <el-option
-              v-for="option in orderStore.statusOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="下单时间">
-          <el-date-picker
-            v-model="searchParams.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-          ></el-date-picker>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="search">搜索</el-button>
-          <el-button @click="resetSearch">重置</el-button>
-        </el-form-item>
-      </el-form>
-
-      <!-- 订单列表 -->
+      <!-- 订单表格 -->
       <el-table
         v-loading="orderStore.loading"
         :data="orderStore.list"
@@ -64,17 +85,19 @@
         </el-table-column>
         <el-table-column prop="createTime" label="下单时间" width="180"></el-table-column>
         <el-table-column prop="paymentTime" label="支付时间" width="180"></el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="scope">
-            <el-button size="small" @click="handleViewDetail(scope.row.orderId)"
-              >查看详情</el-button
-            >
+            <el-button size="small" @click="handleViewDetail(scope.row.orderId)">
+              <el-icon><View /></el-icon>
+              查看详情
+            </el-button>
             <el-button
               v-if="scope.row.orderStatus === 1"
               size="small"
               type="warning"
               @click="handleRemindPay(scope.row.orderId)"
             >
+              <el-icon><Bell /></el-icon>
               提醒付款
             </el-button>
             <el-button
@@ -83,6 +106,7 @@
               type="primary"
               @click="handleShip(scope.row.orderId)"
             >
+              <el-icon><Van /></el-icon><el-icon><CirclePlus /></el-icon>
               发货
             </el-button>
             <el-button
@@ -91,6 +115,7 @@
               type="primary"
               @click="handleRefund(scope.row.orderId)"
             >
+              <el-icon><Money /></el-icon>
               处理退款
             </el-button>
           </template>
@@ -100,20 +125,14 @@
       <!-- 分页 -->
       <div class="pagination-container">
         <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="pagination.pageNum"
+          v-model:current-page="pagination.pageNum"
+          v-model:page-size="pagination.pageSize"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size="pagination.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="orderStore.total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
         ></el-pagination>
-      </div>
-
-      <!-- 按钮区域 -->
-      <div class="button-container">
-        <el-button icon="el-icon-refresh" @click="refreshData">刷新</el-button>
-        <el-button type="primary" icon="el-icon-download" @click="exportOrder">导出订单</el-button>
       </div>
     </el-card>
   </div>
@@ -125,6 +144,16 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useOrderStore } from '@/store/modules/order'
 import logger from '@/utils/logger'
+import {
+  Download,
+  Refresh,
+  Search,
+  View,
+  Bell,
+  Van,
+  CirclePlus,
+  Money,
+} from '@element-plus/icons-vue'
 
 const orderStore = useOrderStore()
 const router = useRouter()
@@ -165,19 +194,19 @@ async function loadData() {
 
     await orderStore.fetchOrderList(params)
   } catch (error) {
-    logger.error('获取订单列表失败', error)
+    console.error('获取订单列表失败', error)
     ElMessage.error('获取订单列表失败')
   }
 }
 
 // 搜索
-function search() {
+function handleSearch() {
   pagination.pageNum = 1
   loadData()
 }
 
 // 重置搜索
-function resetSearch() {
+function handleReset() {
   searchParams.orderId = ''
   searchParams.userName = ''
   searchParams.orderStatus = ''
@@ -187,12 +216,12 @@ function resetSearch() {
 }
 
 // 刷新数据
-function refreshData() {
+function handleRefresh() {
   loadData()
 }
 
 // 导出订单
-function exportOrder() {
+function handleExport() {
   ElMessage.success('导出功能已触发')
 }
 
@@ -274,27 +303,53 @@ onMounted(() => {
 <style scoped>
 .order-list-container {
   padding: 20px;
+  background-color: #f5f5f5;
+  min-height: calc(100vh - 60px);
 }
 
-.card-header {
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .subtitle {
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #999;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.order-list-card {
+  margin-bottom: 20px;
+}
+
+.search-filter {
+  margin-bottom: 20px;
 }
 
 .search-form {
   margin-bottom: 20px;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
 .pagination-container {
-  margin-top: 15px;
-  text-align: right;
-}
-
-.button-container {
-  margin-top: 15px;
-  text-align: right;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

@@ -113,7 +113,7 @@
 // 导入Vue 3组合式API
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useCartStore } from '@/store/modules/cart'
 
 // 定义类型
 interface Address {
@@ -198,7 +198,7 @@ const mockOrder = reactive<Order>({
 // 使用路由和状态管理
 const route = useRoute()
 const router = useRouter()
-const store = useStore()
+const cartStore = useCartStore()
 
 // 查看订单详情
 const viewOrderDetail = () => {
@@ -209,10 +209,15 @@ const viewOrderDetail = () => {
 }
 
 // 继续购物
-const continueShopping = () => {
+const continueShopping = async () => {
   // 清空购物车并跳转到首页
-  store.dispatch('cart/clearCart')
-  router.push('/takeout/merchantList')
+  try {
+    await cartStore.clearCart()
+    router.push('/takeout/merchantList')
+  } catch (error) {
+    console.error('清空购物车失败:', error)
+    router.push('/takeout/merchantList')
+  }
 }
 
 // 页面加载时执行

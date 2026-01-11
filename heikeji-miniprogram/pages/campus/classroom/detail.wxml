@@ -1,0 +1,46 @@
+<!-- 教室详情页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">教室详情</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 教室基本信息 -->
+  <view class="classroom-info-section">
+    <view class="classroom-name">{{classroom.name}}</view>
+    <view class="classroom-location">{{classroom.building}} {{classroom.floor}}层</view>
+    <view class="classroom-capacity">可容纳 {{classroom.capacity}} 人</view>
+    <view class="classroom-status {{currentStatus === 'empty' ? 'empty' : 'occupied'}}">
+      当前状态：{{currentStatus === 'empty' ? '空闲' : '使用中'}}
+    </view>
+  </view>
+
+  <!-- 今日课程安排 -->
+  <view class="schedule-section">
+    <view class="section-title">今日课程安排</view>
+    <view class="schedule-list">
+      <view class="schedule-item" wx:for="{{todaysClasses}}" wx:key="index">
+        <view class="schedule-time">{{item.timeRange}}</view>
+        <view class="schedule-content">
+          <view class="course-name">{{item.courseName}}</view>
+          <view class="course-info">{{item.teacher}} · {{item.className}}</view>
+        </view>
+      </view>
+      
+      <!-- 无课程提示 -->
+      <view class="no-classes" wx:if="{{todaysClasses.length === 0}}">
+        <text>今日无课程安排</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <loading></loading>
+    <text>正在加载...</text>
+  </view>
+</view>

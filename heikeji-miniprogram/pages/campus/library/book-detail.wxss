@@ -1,0 +1,253 @@
+/* 图书详情页面样式 */
+
+/* 容器样式 */
+.book-detail-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 20rpx;
+}
+
+/* 加载提示 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 50rpx;
+  height: 50rpx;
+  border: 4rpx solid #e0e0e0;
+  border-top-color: #3cc51f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 图书内容 */
+.book-content {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 图书头部信息 */
+.book-header {
+  display: flex;
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+/* 图书封面 */
+.book-cover {
+  width: 200rpx;
+  height: 280rpx;
+  margin-right: 30rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.book-cover image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 基本信息 */
+.book-basic-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.book-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15rpx;
+  line-height: 1.4;
+}
+
+.book-author,
+.book-publisher,
+.book-publish-date,
+.book-isbn,
+.book-status {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  display: flex;
+  align-items: center;
+}
+
+.book-author .label,
+.book-publisher .label,
+.book-publish-date .label,
+.book-isbn .label,
+.book-status .label {
+  color: #999;
+  margin-right: 10rpx;
+}
+
+/* 状态样式 */
+.status-available {
+  color: #3cc51f;
+}
+
+.status-borrowed {
+  color: #fa5151;
+}
+
+/* 详情区块 */
+.book-detail-section {
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.book-detail-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: '';
+  width: 8rpx;
+  height: 28rpx;
+  background-color: #3cc51f;
+  border-radius: 4rpx;
+  margin-right: 12rpx;
+}
+
+/* 图书描述 */
+.book-description {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* 标签样式 */
+.book-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+}
+
+.tag {
+  padding: 8rpx 20rpx;
+  background-color: #f0f0f0;
+  color: #666;
+  font-size: 24rpx;
+  border-radius: 20rpx;
+}
+
+/* 馆藏信息 */
+.collection-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx 40rpx;
+}
+
+.info-item {
+  font-size: 26rpx;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.info-item .label {
+  color: #999;
+  margin-right: 10rpx;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 40rpx;
+  padding-top: 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.btn-borrow {
+  background-color: #3cc51f;
+  color: #fff;
+  border: none;
+}
+
+.btn-borrow:active {
+  background-color: #2d9b17;
+}
+
+.btn-borrow.btn-disabled {
+  background-color: #cccccc;
+  color: #ffffff;
+}
+
+.btn-reserve {
+  background-color: #fff;
+  color: #3cc51f;
+  border: 2rpx solid #3cc51f;
+}
+
+.btn-reserve:active {
+  background-color: #f0f0f0;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .book-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .book-cover {
+    margin-right: 0;
+    margin-bottom: 20rpx;
+  }
+  
+  .collection-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}

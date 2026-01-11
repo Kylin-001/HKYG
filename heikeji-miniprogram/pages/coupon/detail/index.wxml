@@ -1,0 +1,103 @@
+<!-- 优惠券详情页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">优惠券详情</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 优惠券详情内容 -->
+  <view class="coupon-detail" wx:if="{{!loading}}">
+    <!-- 优惠券主体信息 -->
+    <view class="coupon-main {{couponDetail.status === 'used' ? 'used' : couponDetail.status === 'expired' ? 'expired' : ''}}">
+      <!-- 优惠券左侧金额区域 -->
+      <view class="coupon-left">
+        <view class="amount-container">
+          <text class="currency-symbol">¥</text>
+          <text class="amount">{{couponDetail.amount}}</text>
+        </view>
+        <text class="amount-desc">{{couponDetail.type === 'discount' ? '折扣券' : '满减券'}}</text>
+      </view>
+      
+      <!-- 优惠券右侧信息区域 -->
+      <view class="coupon-right">
+        <!-- 优惠券名称和描述 -->
+        <text class="coupon-name">{{couponDetail.name}}</text>
+        <text class="coupon-desc">{{couponDetail.description}}</text>
+        
+        <!-- 使用条件 -->
+        <view class="coupon-conditions">
+          <text wx:if="{{couponDetail.minAmount}}" class="condition">满{{couponDetail.minAmount}}元可用</text>
+          <text wx:if="{{couponDetail.orderType}}" class="condition">{{couponDetail.orderType === 'takeout' ? '外卖' : couponDetail.orderType === 'product' ? '商品' : couponDetail.orderType === 'errand' ? '跑腿' : '全品类'}}可用</text>
+        </view>
+        
+        <!-- 有效期 -->
+        <view class="coupon-expire">
+          <text class="expire-label">有效期：</text>
+          <text class="expire-date">{{couponDetail.startTime}}至{{couponDetail.endTime}}</text>
+        </view>
+      </view>
+      
+      <!-- 优惠券状态标签 -->
+      <view wx:if="{{couponDetail.status === 'used'}}" class="status-tag used">已使用</view>
+      <view wx:elif="{{couponDetail.status === 'expired'}}" class="status-tag expired">已过期</view>
+    </view>
+    
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button 
+        wx:if="{{canReceive}}" 
+        class="action-btn primary" 
+        bindtap="receiveCoupon"
+        type="primary"
+      >
+        立即领取
+      </button>
+      <button 
+        wx:elif="{{canUse}}" 
+        class="action-btn primary" 
+        bindtap="useCoupon"
+        type="primary"
+      >
+        立即使用
+      </button>
+      <button 
+        wx:else 
+        class="action-btn disabled"
+        disabled
+      >
+        {{couponDetail.status === 'used' ? '已使用' : couponDetail.status === 'expired' ? '已过期' : '不可用'}}
+      </button>
+    </view>
+    
+    <!-- 优惠券使用规则 -->
+    <view class="coupon-rules">
+      <text class="rules-title">使用规则</text>
+      <view class="rules-content">
+        <text class="rule-item">1. 本优惠券仅限在黑科易购小程序内使用</text>
+        <text class="rule-item">2. 每个订单仅限使用一张优惠券</text>
+        <text class="rule-item">3. 优惠券不可提现，不可找零</text>
+        <text class="rule-item">4. 优惠券过期后将自动失效</text>
+        <text class="rule-item" wx:if="{{couponDetail.orderType}}">5. 仅限{{couponDetail.orderType === 'takeout' ? '外卖' : couponDetail.orderType === 'product' ? '商品' : couponDetail.orderType === 'errand' ? '跑腿' : '全品类'}}使用</text>
+        <text class="rule-item" wx:if="{{couponDetail.minAmount}}">6. 订单金额满{{couponDetail.minAmount}}元才可使用</text>
+        <text class="rule-item">7. 优惠券使用后，若订单取消，优惠券将自动退回</text>
+      </view>
+    </view>
+    
+    <!-- 适用范围 -->
+    <view class="applicable-range">
+      <text class="range-title">适用范围</text>
+      <view class="range-content">
+        <text class="range-text">{{couponDetail.orderType === 'takeout' ? '所有外卖商家' : couponDetail.orderType === 'product' ? '所有商品' : couponDetail.orderType === 'errand' ? '所有跑腿服务' : '所有商品和服务'}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view wx:elif="{{loading}}" class="loading-container">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

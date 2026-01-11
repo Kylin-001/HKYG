@@ -160,6 +160,40 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
     }
 
     @Override
+    public boolean hasPermission(Long userId, String permissionCode) {
+        Set<String> permissionCodes = getPermissionCodesByUserId(userId);
+        return permissionCodes.contains(permissionCode);
+    }
+
+    @Override
+    public boolean hasAnyPermission(Long userId, String[] permissionCodes) {
+        if (permissionCodes == null || permissionCodes.length == 0) {
+            return true;
+        }
+        Set<String> userPermissionCodes = getPermissionCodesByUserId(userId);
+        for (String permissionCode : permissionCodes) {
+            if (userPermissionCodes.contains(permissionCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasAllPermissions(Long userId, String[] permissionCodes) {
+        if (permissionCodes == null || permissionCodes.length == 0) {
+            return true;
+        }
+        Set<String> userPermissionCodes = getPermissionCodesByUserId(userId);
+        for (String permissionCode : permissionCodes) {
+            if (!userPermissionCodes.contains(permissionCode)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public List<SysPermission> buildMenuTree(List<SysPermission> permissions) {
         List<SysPermission> menuTree = new ArrayList<>();
         

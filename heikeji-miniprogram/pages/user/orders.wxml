@@ -1,0 +1,71 @@
+<!-- pages/user/orders.wxml -->
+<view class="container">
+  <!-- 订单状态筛选 -->
+  <view class="order-tabs">
+    <view 
+      wx:for="{{tabs}}" 
+      wx:key="id" 
+      class="tab-item {{currentTab === item.id ? 'active' : ''}}" 
+      data-id="{{item.id}}" 
+      bindtap="onTabChange"
+    >
+      <text class="tab-text">{{item.name}}</text>
+      <view class="tab-line" wx:if="{{currentTab === item.id}}"></view>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{orders.length > 0}}">
+    <view 
+      class="order-item" 
+      wx:for="{{orders}}" 
+      wx:key="orderId" 
+      bindtap="onOrderTap" 
+      data-id="{{item.orderId}}"
+    >
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <view class="order-info">
+          <text class="order-type">{{item.orderTypeText}}</text>
+          <text class="order-status" style="color: {{item.statusColor}}">{{item.statusText}}</text>
+        </view>
+        <text class="order-time">{{item.createTime}}</text>
+      </view>
+
+      <!-- 订单内容 -->
+      <view class="order-content">
+        <view class="order-desc" wx:for="{{item.items}}" wx:key="index" wx:for-item="orderItem">
+          <text class="item-name">{{orderItem.name}} x{{orderItem.quantity}}</text>
+          <text class="item-price">¥{{orderItem.price}}</text>
+        </view>
+      </view>
+
+      <!-- 订单底部 -->
+      <view class="order-footer">
+        <view class="order-total">
+          <text class="total-label">共{{item.totalItems}}件商品</text>
+          <text class="total-price">合计：¥{{item.totalAmount}}</text>
+        </view>
+        <view class="order-actions">
+          <button 
+            wx:for="{{item.actions}}" 
+            wx:key="index" 
+            class="action-btn {{item.actionType}}" 
+            size="mini" 
+            bindtap="onActionTap" 
+            data-order-id="{{item.orderId}}" 
+            data-action="{{item.action}}">
+            {{item.actionText}}
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空订单提示 -->
+  <view class="empty-orders" wx:else>
+    <image class="empty-icon" src="/assets/images/empty-orders.png"></image>
+    <text class="empty-text">暂无订单</text>
+    <button class="go-shopping" bindtap="onGoShopping">去逛逛</button>
+  </view>
+</view>

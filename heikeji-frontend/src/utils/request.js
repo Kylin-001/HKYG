@@ -1,14 +1,61 @@
 import axios from 'axios'
-import { Message, MessageBox, Notification } from 'element-ui'
+import {
+  ElMessage as Message,
+  ElMessageBox as MessageBox,
+  ElNotification as Notification,
+} from 'element-plus'
 import store from '../store'
 import { getToken } from '@/utils/auth'
 import logger from './logger'
+// 增强的API拦截器功能将直接在文件中实现，无需导入TypeScript模块
+
+// 配置选项接口
+const DEFAULT_CONFIG = {
+  // 错误日志配置
+  errorLog: {
+    maxErrors: 10,
+    reportToMonitoring: process.env.NODE_ENV === 'production',
+  },
+  // 性能监控配置
+  performance: {
+    enabled: true,
+    maxDataPoints: 100,
+    slowRequestThreshold: 2000, // 慢请求阈值（毫秒）
+  },
+  // 缓存配置
+  cache: {
+    enabled: true,
+    defaultCacheTime: 5 * 60 * 1000, // 默认缓存时间（5分钟）
+  },
+  // 重试配置
+  retry: {
+    enabled: true,
+    maxRetries: 3,
+    retryDelay: retryCount => Math.min(1000 * Math.pow(2, retryCount - 1), 5000),
+    retryableStatusCodes: [408, 429, 500, 502, 503, 504],
+    retryableErrors: ['Network Error', 'timeout'],
+  },
+  // 重复请求配置
+  duplicateRequest: {
+    enabled: true,
+    cancelMessage: '取消重复请求',
+  },
+  // 动态超时配置
+  timeout: {
+    default: 15000,
+    upload: 60000,
+    download: 30000,
+  },
+}
 
 // 错误日志记录器
 class ErrorLogger {
-  constructor() {
+  constructor(config) {
+    this.config = {
+      ...DEFAULT_CONFIG.errorLog,
+      ...config,
+    }
     this.errorCount = 0
-    this.maxErrors = 10 // 限制错误日志数量
     this.errors = []
   }
 
@@ -18,21 +65,47 @@ class ErrorLogger {
       message: error.message || String(error),
       stack: error.stack,
       context,
+      errorType: this.getErrorType(error),
     }
 
     this.errors.unshift(errorInfo)
-    this.errors = this.errors.slice(0, this.maxErrors)
+    this.errors = this.errors.slice(0, this.config.maxErrors)
     this.errorCount++
 
     // 使用logger记录错误
     logger.logApiError(error, context)
 
     // 生产环境可以上报到错误监控系统
-    if (process.env.NODE_ENV === 'production') {
+    if (this.config.reportToMonitoring) {
       this.reportToMonitoring(errorInfo)
     }
 
     return errorInfo
+  }
+
+  getErrorType(error) {
+    if (error.code === 'REQUEST_CANCELLED') {
+      return 'canceled'
+    }
+    if (error.code === 'MAX_RETRY_EXCEEDED') {
+      return 'maxRetryExceeded'
+    }
+    if (error.response) {
+      const { status } = error.response
+      if (status >= 400 && status < 500) {
+        return 'clientError'
+      }
+      if (status >= 500) {
+        return 'serverError'
+      }
+    }
+    if (error.message && error.message.includes('Network Error')) {
+      return 'networkError'
+    }
+    if (error.message && error.message.includes('timeout')) {
+      return 'timeoutError'
+    }
+    return 'unknownError'
   }
 
   reportToMonitoring(errorInfo) {
@@ -42,19 +115,129 @@ class ErrorLogger {
   }
 
   getErrorSummary() {
+    const errorTypes = this.errors.reduce((acc, error) => {
+      acc[error.errorType] = (acc[error.errorType] || 0) + 1
+      return acc
+    }, {})
+
     return {
       count: this.errorCount,
       recentErrors: this.errors.slice(0, 5),
+      errorTypes,
     }
   }
 }
 
 const errorLogger = new ErrorLogger()
 
+// 性能监控类
+class PerformanceMonitor {
+  constructor(config) {
+    this.config = {
+      ...DEFAULT_CONFIG.performance,
+      ...config,
+    }
+    this.performanceData = []
+  }
+
+  recordRequest(config) {
+    if (config.monitorPerformance !== false && this.config.enabled) {
+      // 默认启用性能监控，除非明确关闭
+      config._startTime = performance.now()
+      config._performanceId = Math.random().toString(36).substr(2, 9)
+    }
+  }
+
+  recordResponse(config, response) {
+    if (config._startTime && this.config.enabled) {
+      const endTime = performance.now()
+      const duration = endTime - config._startTime
+
+      const performanceData = {
+        id: config._performanceId,
+        startTime: config._startTime,
+        endTime,
+        duration,
+        url: config.url || '',
+        method: config.method || 'GET',
+        status: response.status,
+        isSlow: duration > this.config.slowRequestThreshold,
+        timestamp: new Date().toISOString(),
+      }
+
+      // 添加到性能数据数组
+      this.performanceData.unshift(performanceData)
+      this.performanceData = this.performanceData.slice(0, this.config.maxDataPoints)
+
+      // 记录API响应时间
+      logger.logApiResponseTime(config.url || '', duration, response.status)
+
+      // 如果响应时间过长，记录警告
+      if (performanceData.isSlow) {
+        logger.warn(`API响应时间过长: ${config.url || ''} - ${duration.toFixed(2)}ms`, {
+          method: config.method,
+          status: response.status,
+          duration: duration.toFixed(2),
+          performanceId: config._performanceId,
+        })
+      }
+    }
+  }
+
+  recordError(config, error) {
+    if (config._startTime && this.config.enabled) {
+      const endTime = performance.now()
+      const duration = endTime - config._startTime
+
+      logger.error(`API请求失败: ${config.url || ''} - ${duration.toFixed(2)}ms`, {
+        method: config.method,
+        status: error.response?.status,
+        error: error.message,
+        duration: duration.toFixed(2),
+        performanceId: config._performanceId,
+      })
+    }
+  }
+
+  getPerformanceSummary() {
+    if (this.performanceData.length === 0) {
+      return {
+        average: 0,
+        max: 0,
+        min: 0,
+        count: 0,
+        slowCount: 0,
+        slowRate: 0,
+        successRate: 0,
+      }
+    }
+
+    const durations = this.performanceData.map(data => data.duration)
+    const slowCount = this.performanceData.filter(data => data.isSlow).length
+    const successCount = this.performanceData.filter(
+      data => data.status >= 200 && data.status < 300
+    ).length
+
+    return {
+      average: durations.reduce((sum, dur) => sum + dur, 0) / durations.length,
+      max: Math.max(...durations),
+      min: Math.min(...durations),
+      count: durations.length,
+      slowCount,
+      slowRate: (slowCount / durations.length) * 100,
+      successRate: (successCount / durations.length) * 100,
+      recentSlowRequests: this.performanceData.filter(data => data.isSlow).slice(0, 5),
+    }
+  }
+}
+
+// 创建性能监控实例
+const performanceMonitor = new PerformanceMonitor()
+
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API || '/api', // 优先使用环境变量，降级到固定路径
-  timeout: 15000, // 默认请求超时时间
+  timeout: DEFAULT_CONFIG.timeout.default, // 默认请求超时时间
 })
 
 // 请求缓存对象
@@ -65,21 +248,35 @@ const pendingRequests = new Map()
 // 生成请求唯一标识
 function generateReqKey(config) {
   const { method, url, params, data } = config
+  // 对于FormData，只使用URL和方法作为key，因为数据可能很大
+  if (data instanceof FormData) {
+    return [method, url].join('&')
+  }
   return [method, url, JSON.stringify(params), JSON.stringify(data)].join('&')
 }
 
 // 取消重复请求
 function cancelPendingRequest(config) {
+  if (!DEFAULT_CONFIG.duplicateRequest.enabled) {
+    return
+  }
+
   const requestKey = generateReqKey(config)
   if (pendingRequests.has(requestKey)) {
-    const cancelToken = pendingRequests.get(requestKey)
-    cancelToken.cancel(`取消重复请求: ${requestKey}`)
+    const { cancel } = pendingRequests.get(requestKey)
+    const cancelMessage = `${DEFAULT_CONFIG.duplicateRequest.cancelMessage}: ${requestKey}`
+    cancel(cancelMessage)
     pendingRequests.delete(requestKey)
+    logger.debug(cancelMessage)
   }
 }
 
 // 添加到待处理请求
 function addPendingRequest(config) {
+  if (!DEFAULT_CONFIG.duplicateRequest.enabled) {
+    return
+  }
+
   const requestKey = generateReqKey(config)
   // 为配置添加取消令牌
   config.cancelToken =
@@ -91,6 +288,10 @@ function addPendingRequest(config) {
 
 // 从待处理请求中移除
 function removePendingRequest(config) {
+  if (!DEFAULT_CONFIG.duplicateRequest.enabled) {
+    return
+  }
+
   const requestKey = generateReqKey(config)
   pendingRequests.delete(requestKey)
 }
@@ -103,8 +304,15 @@ function retryRequest(config) {
     _isRetryRequest: true,
   }
 
-  if (retryConfig._retryCount >= 3) {
-    // 重试次数过多，不再重试
+  // 检查是否启用重试
+  if (!DEFAULT_CONFIG.retry.enabled) {
+    const error = new Error('请求失败')
+    error.code = 'RETRY_DISABLED'
+    return Promise.reject(error)
+  }
+
+  // 检查重试次数是否超过限制
+  if (retryConfig._retryCount >= DEFAULT_CONFIG.retry.maxRetries) {
     const error = new Error('请求失败次数过多，请稍后再试')
     error.code = 'MAX_RETRY_EXCEEDED'
     return Promise.reject(error)
@@ -112,11 +320,11 @@ function retryRequest(config) {
 
   retryConfig._retryCount++
 
-  // 使用指数退避策略
-  const delay = Math.min(1000 * Math.pow(2, retryConfig._retryCount - 1), 5000)
+  // 使用配置的重试延迟策略
+  const delay = DEFAULT_CONFIG.retry.retryDelay(retryConfig._retryCount)
 
   return new Promise(resolve => {
-    logger.info(`请求重试第${retryConfig._retryCount}次: ${config.url}`)
+    logger.info(`请求重试第${retryConfig._retryCount}次: ${config.url}，延迟${delay}ms`)
     setTimeout(() => {
       resolve(service(retryConfig))
     }, delay)
@@ -125,37 +333,50 @@ function retryRequest(config) {
 
 // 根据请求类型动态设置超时时间
 function setDynamicTimeout(config) {
+  // 如果配置了自定义超时时间，优先使用
+  if (config.timeout) {
+    return
+  }
+
   // 上传文件等操作设置更长的超时时间
   if (
     config.url.includes('/upload') ||
     (config.method === 'post' && config.data instanceof FormData)
   ) {
-    config.timeout = 60000 // 60秒
+    config.timeout = DEFAULT_CONFIG.timeout.upload
   } else if (config.url.includes('/download')) {
-    config.timeout = 30000 // 30秒
+    config.timeout = DEFAULT_CONFIG.timeout.download
+  } else {
+    config.timeout = DEFAULT_CONFIG.timeout.default
   }
-  // 其他请求保持默认超时时间
 }
 
 // 检查是否需要缓存
 function shouldCache(config) {
-  // 只有GET请求才缓存，并且没有明确设置不缓存
-  return config.method === 'get' && config.cache !== false
+  // 只有启用缓存，且是GET请求，并且没有明确设置不缓存，才进行缓存
+  return DEFAULT_CONFIG.cache.enabled && config.method === 'get' && config.cache !== false
 }
 
 // 获取缓存的数据
 function getCachedResponse(config) {
+  if (!shouldCache(config)) {
+    return null
+  }
+
   const cacheKey = generateReqKey(config)
   if (requestCache.has(cacheKey)) {
     const cached = requestCache.get(cacheKey)
+    const cacheTime = config.cacheTime || DEFAULT_CONFIG.cache.defaultCacheTime
+
     // 检查缓存是否过期
-    if (Date.now() - cached.timestamp < (config.cacheTime || 5 * 60 * 1000)) {
-      // 默认缓存5分钟
+    if (Date.now() - cached.timestamp < cacheTime) {
       logger.debug('使用缓存响应:', config.url)
-      return cached.data
+      // 复制缓存数据，避免修改原始缓存
+      return JSON.parse(JSON.stringify(cached.data))
     } else {
       // 缓存过期，删除缓存
       requestCache.delete(cacheKey)
+      logger.debug('缓存已过期:', config.url)
     }
   }
   return null
@@ -163,18 +384,25 @@ function getCachedResponse(config) {
 
 // 缓存响应数据
 function cacheResponse(config, response) {
-  if (shouldCache(config)) {
-    const cacheKey = generateReqKey(config)
-    requestCache.set(cacheKey, {
-      data: response,
-      timestamp: Date.now(),
-    })
+  if (!shouldCache(config)) {
+    return
   }
+
+  const cacheKey = generateReqKey(config)
+  requestCache.set(cacheKey, {
+    data: response,
+    timestamp: Date.now(),
+    cacheTime: config.cacheTime || DEFAULT_CONFIG.cache.defaultCacheTime,
+  })
+  logger.debug('缓存响应:', config.url)
 }
 
-// request拦截器
+// 请求拦截器
 service.interceptors.request.use(
   config => {
+    // 性能监控：记录请求开始时间
+    performanceMonitor.recordRequest(config)
+
     // 性能优化：优先尝试使用缓存
     const cachedResponse = getCachedResponse(config)
     if (cachedResponse) {
@@ -190,9 +418,16 @@ service.interceptors.request.use(
     // 动态设置超时时间
     setDynamicTimeout(config)
 
+    // 添加请求日志
+    logger.logRequest(config)
+
+    // 添加认证令牌
     if (store.getters.token) {
       config.headers['Authorization'] = getToken() // 让每个请求携带自定义token
     }
+
+    // 添加请求ID，用于追踪
+    config.headers['X-Request-ID'] = Math.random().toString(36).substr(2, 9)
 
     return config
   },
@@ -203,14 +438,14 @@ service.interceptors.request.use(
 )
 
 // 防抖动的消息提示，避免频繁弹窗
-const lastMessage = {}
+const messageCache = new Map()
 function debouncedMessage(options, delay = 1000) {
   const message = typeof options === 'string' ? options : options.message
   const now = Date.now()
 
   // 如果相同的消息在短时间内多次触发，只显示一次
-  if (!lastMessage[message] || now - lastMessage[message] > delay) {
-    lastMessage[message] = now
+  if (!messageCache.has(message) || now - messageCache.get(message) > delay) {
+    messageCache.set(message, now)
     Message(options)
   }
 }
@@ -221,20 +456,27 @@ const errorTypeMap = {
   401: { type: 'warning', title: '未授权' },
   403: { type: 'warning', title: '权限不足' },
   404: { type: 'info', title: '资源不存在' },
+  429: { type: 'warning', title: '请求过于频繁' },
   500: { type: 'error', title: '服务器错误' },
   502: { type: 'error', title: '网关错误' },
   503: { type: 'error', title: '服务不可用' },
   504: { type: 'error', title: '网关超时' },
 }
 
-// respone拦截器
+// 响应拦截器
 service.interceptors.response.use(
   response => {
+    // 性能监控：记录请求结束时间，计算性能数据
+    performanceMonitor.recordResponse(response.config, response)
+
     // 从待处理请求中移除
     removePendingRequest(response.config)
 
     // 缓存响应
     cacheResponse(response.config, response)
+
+    // 添加响应日志
+    logger.logResponse(response)
 
     // code为非200是抛错 可结合自己业务进行修改
     const res = response.data
@@ -246,6 +488,7 @@ service.interceptors.response.use(
         url: response.config.url,
         method: response.config.method,
         statusCode: res.code,
+        requestId: response.headers['x-request-id'] || response.config.headers['X-Request-ID'],
       }
       errorLogger.logError(new Error(errorMessage), context)
 
@@ -293,6 +536,7 @@ service.interceptors.response.use(
       const error = new Error(errorMessage)
       error.code = res.code
       error.data = res
+      error.requestId = context.requestId
 
       return Promise.reject(error)
     } else {
@@ -308,8 +552,10 @@ service.interceptors.response.use(
     }
   },
   error => {
-    // 从待处理请求中移除
+    // 性能监控：记录请求失败时的性能数据
     if (error.config) {
+      performanceMonitor.recordError(error.config, error)
+      // 从待处理请求中移除
       removePendingRequest(error.config)
     }
 
@@ -322,11 +568,18 @@ service.interceptors.response.use(
     }
 
     // 网络错误重试
-    if (
+    const shouldRetry =
       error.config &&
       !error.config._isRetryRequest &&
-      (error.message.includes('timeout') || error.message.includes('Network Error'))
-    ) {
+      DEFAULT_CONFIG.retry.enabled &&
+      // 根据状态码重试
+      ((error.response &&
+        DEFAULT_CONFIG.retry.retryableStatusCodes.includes(error.response.status)) ||
+        // 根据错误消息重试
+        (error.message &&
+          DEFAULT_CONFIG.retry.retryableErrors.some(err => error.message.includes(err))))
+
+    if (shouldRetry) {
       // 显示重试提示
       debouncedMessage({
         message: '网络不稳定，正在尝试重试...',
@@ -342,6 +595,7 @@ service.interceptors.response.use(
     const context = {
       url: error.config?.url,
       method: error.config?.method,
+      requestId: error.config?.headers['X-Request-ID'],
     }
 
     if (error.response) {
@@ -388,6 +642,9 @@ service.interceptors.response.use(
           break
         case 404:
           errorMessage = '请求的资源不存在'
+          break
+        case 429:
+          errorMessage = '请求过于频繁，请稍后再试'
           break
         case 500:
           errorMessage =
@@ -496,6 +753,16 @@ export function handleFormError(error, form) {
   }
 
   return false
+}
+
+// 性能监控相关导出
+export function getPerformanceSummary() {
+  return performanceMonitor.getPerformanceSummary()
+}
+
+export function clearPerformanceData() {
+  performanceMonitor.performanceData = []
+  return true
 }
 
 export default service

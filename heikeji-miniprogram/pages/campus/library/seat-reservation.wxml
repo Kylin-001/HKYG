@@ -1,0 +1,104 @@
+<!-- 图书馆座位预约页面 -->
+<view class="seat-reservation-container">
+  <!-- 顶部导航 -->
+  <view class="top-nav">
+    <view class="nav-item {{currentNav === 'today' ? 'active' : ''}}" data-nav="today" bindtap="switchNav">今天</view>
+    <view class="nav-item {{currentNav === 'tomorrow' ? 'active' : ''}}" data-nav="tomorrow" bindtap="switchNav">明天</view>
+    <view class="nav-item {{currentNav === 'week' ? 'active' : ''}}" data-nav="week" bindtap="switchNav">本周</view>
+  </view>
+
+  <!-- 日期选择器 -->
+  <view class="date-picker">
+    <view class="date-title">{{currentDate}}</view>
+    <picker mode="date" start="{{startDate}}" end="{{endDate}}" bindchange="onDateChange">
+      <view class="date-picker-btn">
+        <text>{{currentDate}}</text>
+        <text class="icon-arrow"></text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 时间段选择 -->
+  <view class="time-selector">
+    <view class="section-title">选择时间段</view>
+    <scroll-view scroll-x="true" class="time-scroll">
+      <view 
+        class="time-item {{selectedTime === item.value ? 'selected' : ''}}" 
+        wx:for="{{timeSlots}}" 
+        wx:key="id" 
+        data-time="{{item.value}}" 
+        bindtap="selectTime"
+      >
+        {{item.label}}
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 座位分布图 -->
+  <view class="seat-map-container">
+    <view class="section-title">座位分布</view>
+    <view class="seat-map">
+      <view class="floor-selector">
+        <view 
+          class="floor-item {{selectedFloor === item ? 'active' : ''}}" 
+          wx:for="{{floors}}" 
+          wx:key="id" 
+          data-floor="{{item}}" 
+          bindtap="selectFloor"
+        >
+          {{item}}层
+        </view>
+      </view>
+      
+      <view class="map-content">
+        <!-- 座位网格 -->
+        <view class="seat-grid">
+          <view 
+            class="seat {{item.status === 'available' ? 'available' : item.status === 'occupied' ? 'occupied' : 'selected'}}" 
+            wx:for="{{seats}}" 
+            wx:key="id" 
+            data-seat="{{item}}" 
+            bindtap="selectSeat"
+          >
+            <view class="seat-number">{{item.number}}</view>
+            <view class="seat-status">{{item.statusText}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 座位信息 -->
+  <view class="seat-info" wx:if="selectedSeat">
+    <view class="info-item">
+      <text class="label">座位号：</text>
+      <text class="value">{{selectedSeat.number}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">位置：</text>
+      <text class="value">{{selectedSeat.location}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">状态：</text>
+      <text class="value {{selectedSeat.status === 'available' ? 'available' : 'occupied'}}">{{selectedSeat.statusText}}</text>
+    </view>
+  </view>
+
+  <!-- 底部预约按钮 -->
+  <view class="bottom-btn-container">
+    <button 
+      class="reserve-btn" 
+      disabled="{{!canReserve}}" 
+      bindtap="confirmReservation"
+    >
+      {{reserveBtnText}}
+    </button>
+  </view>
+
+  <!-- 加载提示 -->
+  <view class="loading-container" wx:if="isLoading">
+    <view class="loading-content">
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

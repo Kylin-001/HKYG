@@ -11,7 +11,8 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
  * Used to configure Elasticsearch client connection
  */
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.heikeji.mall.product.repository")
+// 暂时注释掉Elasticsearch仓库扫描，避免连接失败导致服务启动问题
+// @EnableElasticsearchRepositories(basePackages = "com.heikeji.mall.product.repository")
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
     @Value("${spring.elasticsearch.rest.uris}")

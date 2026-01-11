@@ -1,5 +1,6 @@
 package com.heikeji.mall.user.controller;
 
+import com.heikeji.common.core.security.UserContextHolderAdapter;
 import com.heikeji.mall.common.response.R;
 import com.heikeji.mall.user.entity.User;
 import com.heikeji.mall.user.entity.UserAuth;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,9 +55,14 @@ public class UserControllerTest {
         
         when(userService.getUserByPhone(phone)).thenReturn(user);
         
-        mockMvc.perform(get("/api/user/admin/getByPhone/{phone}", phone))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.code").value(200));
+        // 模拟UserContextHolder获取当前管理员ID
+        try (MockedStatic<UserContextHolderAdapter> mockedStatic = mockStatic(UserContextHolderAdapter.class)) {
+            mockedStatic.when(UserContextHolderAdapter::getCurrentUserId).thenReturn(1L);
+            
+            mockMvc.perform(get("/api/user/admin/getByPhone/{phone}", phone))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
+        }
     }
 
     @Test
@@ -64,8 +71,13 @@ public class UserControllerTest {
         
         when(userService.getUserByPhone(phone)).thenReturn(null);
         
-        mockMvc.perform(get("/api/user/admin/getByPhone/{phone}", phone))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.code").value(1001));
+        // 模拟UserContextHolder获取当前管理员ID
+        try (MockedStatic<UserContextHolderAdapter> mockedStatic = mockStatic(UserContextHolderAdapter.class)) {
+            mockedStatic.when(UserContextHolderAdapter::getCurrentUserId).thenReturn(1L);
+            
+            mockMvc.perform(get("/api/user/admin/getByPhone/{phone}", phone))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1001));
+        }
     }
 }

@@ -69,4 +69,9 @@ public class OrderReview {
      * 商品图片（冗余字段，便于展示）
      */
     private String productImage;
+    
+    /**
+     * 点赞数量
+     */
+    private Integer likeCount;
 }

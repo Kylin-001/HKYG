@@ -1,4 +1,6 @@
 // pages/user/profile.js
+const { request, clearAllCache } = require('../../utils/request');
+
 Page({
   data: {
     userInfo: {},
@@ -9,13 +11,15 @@ Page({
       walletBalance: 0
     },
     menuItems: [
-      { id: 'orders', name: '我的订单', icon: 'orders', url: '/pages/order/list' },
+      { id: 'orders', name: '我的订单', icon: 'orders', url: '/pages/user/orders' },
       { id: 'address', name: '收货地址', icon: 'address', url: '/pages/user/address' },
-      { id: 'coupons', name: '我的优惠券', icon: 'coupon', url: '/pages/coupon/list' },
+      { id: 'coupons', name: '我的优惠券', icon: 'coupon', url: '/pages/coupon/list/index' },
       { id: 'wallet', name: '我的钱包', icon: 'wallet', url: '/pages/wallet/index' },
       { id: 'help', name: '帮助与反馈', icon: 'help', url: '/pages/help/index' },
       { id: 'settings', name: '设置', icon: 'settings', url: '/pages/settings/index' }
-    ]
+    ],
+    isLoading: false,
+    lastLoadTime: 0 // 上次加载时间，用于控制刷新频率
   },
 
   onLoad: function(options) {
@@ -23,8 +27,12 @@ Page({
   },
 
   onShow: function() {
-    // 每次显示时刷新用户数据
-    this.loadUserData();
+    // 控制刷新频率，防止频繁请求
+    const now = Date.now();
+    if (now - this.data.lastLoadTime > 5000) { // 5秒内不重复刷新
+      this.loadUserData();
+      this.setData({ lastLoadTime: now });
+    }
   },
 
   /**
@@ -40,11 +48,20 @@ Page({
       return;
     }
 
-    // 加载用户基本信息
-    this.loadUserInfo();
-    
-    // 加载统计数据
-    this.loadUserStats();
+    // 防止重复加载
+    if (this.data.isLoading) {
+      return;
+    }
+
+    this.setData({ isLoading: true });
+
+    // 加载用户基本信息和统计数据
+    Promise.all([
+      this.loadUserInfo(),
+      this.loadUserStats()
+    ]).finally(() => {
+      this.setData({ isLoading: false });
+    });
   },
 
   /**
@@ -52,11 +69,12 @@ Page({
    */
   loadUserInfo: function() {
     const app = getApp();
-    const { request } = require('../../utils/request');
     
-    request({
+    return request({
       url: '/user/profile',
-      method: 'GET'
+      method: 'GET',
+      cache: true,
+      cacheExpire: 300000 // 5分钟缓存
     }).then(res => {
       if (res.code === 200) {
         this.setData({ userInfo: res.data });
@@ -67,6 +85,11 @@ Page({
       }
     }).catch(err => {
       console.log('加载用户信息失败:', err);
+      // 使用本地缓存数据作为备选
+      const cachedUserInfo = wx.getStorageSync('userInfo');
+      if (cachedUserInfo) {
+        this.setData({ userInfo: cachedUserInfo });
+      }
     });
   },
 
@@ -74,11 +97,11 @@ Page({
    * 加载用户统计信息
    */
   loadUserStats: function() {
-    const { request } = require('../../utils/request');
-    
-    request({
+    return request({
       url: '/user/stats',
-      method: 'GET'
+      method: 'GET',
+      cache: true,
+      cacheExpire: 60000 // 1分钟缓存
     }).then(res => {
       if (res.code === 200) {
         this.setData({ stats: res.data });
@@ -103,15 +126,7 @@ Page({
   onMenuItemTap: function(e) {
     const { id, url } = e.currentTarget.dataset;
     
-    if (id === 'orders') {
-      wx.navigateTo({ url: '/pages/user/orders' });
-    } else if (id === 'address') {
-      wx.navigateTo({ url: '/pages/user/address' });
-    } else if (id === 'wallet') {
-      wx.navigateTo({ url: '/pages/wallet/index' });
-    } else {
-      wx.navigateTo({ url: url });
-    }
+    wx.navigateTo({ url: url });
   },
 
   /**
@@ -158,7 +173,11 @@ Page({
       content: '确定要清除本地缓存数据吗？',
       success: (res) => {
         if (res.confirm) {
+          // 清除本地存储
           wx.clearStorageSync();
+          // 清除请求缓存
+          clearAllCache();
+          
           wx.showToast({
             title: '清除成功',
             icon: 'success'
@@ -166,7 +185,7 @@ Page({
           
           // 重新加载页面
           setTimeout(() => {
-            this.onLoad();
+            this.loadUserData();
           }, 1000);
         }
       }

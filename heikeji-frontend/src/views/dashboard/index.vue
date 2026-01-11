@@ -1,8 +1,16 @@
 <template>
   <div class="dashboard-container">
+    <!-- 学校特色头部横幅 -->
+    <div class="school-banner">
+      <div class="banner-content">
+        <h1 class="school-slogan">自强不息，创业创新</h1>
+        <p class="school-motto">黑龙江科技大学校训</p>
+      </div>
+    </div>
+
     <div class="dashboard-header">
-      <h2 class="dashboard-title">欢迎使用黑科易购校园服务平台管理系统</h2>
-      <p class="dashboard-subtitle">为校园师生提供便捷的外卖、跑腿等服务管理</p>
+      <h2 class="dashboard-title">黑科易购校园电商平台管理系统</h2>
+      <p class="dashboard-subtitle">为黑龙江科技大学师生提供便捷的校园电商服务</p>
     </div>
     <div class="dashboard-content">
       <!-- 加载状态 -->
@@ -206,7 +214,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import StatsCard from '@/components/StatsCard.vue'
@@ -555,49 +563,139 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/variables.scss';
+
 // 样式将从原组件迁移并适配Vue 3
 .dashboard-container {
   padding: 20px;
+  background-color: $background-color;
+}
+
+// 学校特色横幅
+.school-banner {
+  background: linear-gradient(135deg, $primary, $primary-dark);
+  color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: banner-shine 8s ease-in-out infinite;
+  }
+
+  .banner-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .school-slogan {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    font-family: 'Microsoft YaHei', sans-serif;
+    letter-spacing: 2px;
+  }
+
+  .school-motto {
+    font-size: 16px;
+    margin: 0;
+    opacity: 0.9;
+    font-style: italic;
+  }
+}
+
+// 动画效果
+@keyframes banner-shine {
+  0%,
+  100% {
+    transform: translateX(0) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100px) rotate(45deg);
+  }
 }
 
 .dashboard-header {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid $border-light;
 }
 
 .dashboard-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: bold;
   margin-bottom: 8px;
+  color: $primary;
+  font-family: 'Microsoft YaHei', sans-serif;
 }
 
 .dashboard-subtitle {
   font-size: 14px;
-  color: #666;
+  color: $text-secondary;
 }
 
 .loading-container {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .stats-card-group {
   display: flex;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   flex-wrap: wrap;
+
+  // 响应式设计
+  @media (max-width: $screen-sm) {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  @media (min-width: $screen-sm) and (max-width: $screen-md) {
+    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+  }
+  
+  @media (min-width: $screen-md) {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .charts-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+
+  // 响应式设计
+  @media (max-width: $screen-md) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chart-card {
   background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid $border-light;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
 }
 
 .chart-header {
@@ -605,20 +703,55 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid $border-light;
 }
 
 .chart-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   margin: 0;
+  color: $text-primary;
+  font-family: 'Microsoft YaHei', sans-serif;
 }
 
 .chart-content {
-  height: 300px;
+  height: 320px;
 }
 
 .recent-requests-container {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+
+  // 响应式设计
+  .order-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    .el-table {
+      min-width: 768px;
+      
+      @media (max-width: $screen-sm) {
+        font-size: 12px;
+        
+        .el-table__column {
+          padding: 8px 4px;
+        }
+      }
+    }
+  }
+  
+  .el-tabs {
+    @media (max-width: $screen-sm) {
+      .el-tabs__header {
+        margin-bottom: 10px;
+      }
+      
+      .el-tabs__nav-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+  }
 }
 
 .quick-entry-container {
@@ -627,7 +760,7 @@ onBeforeUnmount(() => {
 
 .quick-entry {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
 }
 
@@ -635,63 +768,79 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  background: #f7f7f7;
-  border-radius: 8px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 
   &:hover {
-    background: #e6f7ff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: $hover-background;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    border-color: $primary;
+  }
+
+  .entry-icon {
+    margin-bottom: 12px;
+
+    &.primary {
+      background-color: rgba(0, 51, 102, 0.1);
+      color: $primary;
+    }
+
+    &.success {
+      background-color: rgba(0, 153, 102, 0.1);
+      color: $success;
+    }
+
+    &.warning {
+      background-color: rgba(255, 153, 0, 0.1);
+      color: $warning;
+    }
+
+    &.danger {
+      background-color: rgba(204, 0, 0, 0.1);
+      color: $danger;
+    }
+
+    &.info {
+      background-color: rgba(102, 102, 102, 0.1);
+      color: $info;
+    }
+  }
+
+  .entry-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: $text-primary;
+  }
+
+  .entry-desc {
+    font-size: 12px;
+    color: $text-secondary;
+    text-align: center;
+    line-height: 1.4;
   }
 }
 
 .entry-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 8px;
   font-size: 24px;
   margin-bottom: 12px;
-  color: #fff;
-
-  &.primary {
-    background: #409eff;
-  }
-
-  &.success {
-    background: #67c23a;
-  }
-
-  &.warning {
-    background: #e6a23c;
-  }
-
-  &.danger {
-    background: #f56c6c;
-  }
-
-  &.info {
-    background: #909399;
-  }
-}
-
-.entry-name {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.entry-desc {
-  font-size: 12px;
-  color: #909399;
 }
 
 .order-table-container {
+  max-height: 400px;
+  overflow-y: auto;
   overflow-x: auto;
 }
 </style>

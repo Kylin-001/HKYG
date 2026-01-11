@@ -29,7 +29,7 @@ public class PermissionAspect {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionAspect.class);
 
-    @Autowired
+    @Autowired(required = false)
     private PermissionService permissionService;
 
     /**
@@ -51,6 +51,12 @@ public class PermissionAspect {
         // 获取RequiresPermission注解
         RequiresPermission requiresPermission = method.getAnnotation(RequiresPermission.class);
         if (requiresPermission == null) {
+            return point.proceed();
+        }
+        
+        // 如果permissionService未注入，直接放行
+        if (permissionService == null) {
+            log.warn("PermissionService未注入，跳过权限校验：{}.{}", method.getDeclaringClass().getName(), method.getName());
             return point.proceed();
         }
         

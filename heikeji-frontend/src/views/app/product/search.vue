@@ -10,11 +10,31 @@
           class="search-input"
           placeholder="搜索商品"
           @keyup.enter="handleSearch"
+          @input="handleInputChange"
           ref="searchInput"
         />
         <i v-if="searchKeyword" class="el-icon-circle-close clear-icon" @click="clearSearch"></i>
       </div>
       <div class="search-action" @click="handleSearch">搜索</div>
+    </div>
+
+    <!-- 搜索建议列表 -->
+    <div v-if="showSuggestions" class="search-suggestions">
+      <div
+        v-for="(suggestion, index) in searchSuggestions"
+        :key="index"
+        class="suggestion-item"
+        @click="handleSuggestionClick(suggestion)"
+      >
+        <i class="el-icon-search suggestion-icon"></i>
+        <span class="suggestion-text">
+          <span v-if="suggestion.highlight" v-html="suggestion.highlight"></span>
+          <span v-else>{{ suggestion.text }}</span>
+        </span>
+      </div>
+      <div v-if="searchSuggestions.length === 0" class="no-suggestions">
+        <span>暂无搜索建议</span>
+      </div>
     </div>
 
     <!-- 搜索前显示搜索历史和热门搜索 -->
@@ -141,7 +161,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { searchProducts, getHotSearchWords } from '@/api/app/product'
+import { searchProducts, getHotSearchWords, getSearchSuggestions } from '@/api/app/product'
 
 // 定义类型
 interface Product {
@@ -178,6 +198,11 @@ const currentSort = ref('default') // default, sales, price_asc, price_desc
 
 const searchInput = ref<HTMLInputElement | null>(null)
 
+// 搜索建议相关数据
+const searchSuggestions = ref<any[]>([])
+const showSuggestions = ref(false)
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
 const sortOptions: SortOption[] = [
   { label: '综合', value: 'default' },
   { label: '销量', value: 'sales' },
@@ -206,6 +231,44 @@ const handleSearch = () => {
 const clearSearch = () => {
   searchKeyword.value = ''
   searchInput.value?.focus()
+  showSuggestions.value = false
+  searchSuggestions.value = []
+}
+
+// 处理输入变化，获取搜索建议（带防抖）
+const handleInputChange = () => {
+  // 如果输入为空，不显示搜索建议
+  if (!searchKeyword.value.trim()) {
+    showSuggestions.value = false
+    searchSuggestions.value = []
+    return
+  }
+
+  // 防抖处理，500ms内只发送一次请求
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+
+  debounceTimer = setTimeout(async () => {
+    try {
+      // 调用搜索建议API
+      const response = await getSearchSuggestions({ keyword: searchKeyword.value })
+      searchSuggestions.value = response.data || []
+      showSuggestions.value = true
+    } catch (error) {
+      console.error('获取搜索建议失败:', error)
+      searchSuggestions.value = []
+    }
+  }, 500)
+}
+
+// 处理搜索建议点击
+const handleSuggestionClick = (suggestion: any) => {
+  // 使用搜索建议进行搜索
+  searchKeyword.value = suggestion.text
+  showSuggestions.value = false
+  searchSuggestions.value = []
+  handleSearch()
 }
 
 // 清空搜索历史
@@ -397,6 +460,58 @@ onMounted(() => {
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+/* 搜索建议列表 */
+.search-suggestions {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  position: sticky;
+  top: 56px;
+  z-index: 9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.suggestion-icon {
+  color: #999;
+  margin-right: 12px;
+  font-size: 14px;
+}
+
+.suggestion-text {
+  font-size: 14px;
+  color: #333;
+  flex: 1;
+}
+
+.suggestion-text .highlight {
+  color: #409eff;
+  font-weight: 500;
+}
+
+.no-suggestions {
+  padding: 16px 0;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
 }
 
 .search-input-container {

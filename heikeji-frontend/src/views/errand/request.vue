@@ -49,97 +49,88 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapActions } from 'vuex'
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useCampusStore } from '@/store/modules/campus'
+import { ElMessage } from 'element-plus'
 
-export default {
-  name: 'ErrandRequestList',
-  data() {
-    return {
-      loading: false,
-      searchForm: {
-        requestNo: '',
-        userName: '',
-      },
-      pagination: {
-        currentPage: 1,
-        pageSize: 10,
-      },
+// 初始化store
+const campusStore = useCampusStore()
+
+// 状态定义
+const loading = ref(false)
+const searchForm = reactive({
+  requestNo: '',
+  userName: '',
+})
+const pagination = reactive({
+  currentPage: 1,
+  pageSize: 10,
+})
+
+// 计算属性
+const total = computed(() => campusStore.deliveryRequestTotal)
+const requestList = computed(() => campusStore.deliveryRequestList)
+
+// 生命周期钩子
+onMounted(() => {
+  loadData()
+})
+
+// 加载数据
+async function loadData() {
+  loading.value = true
+  try {
+    await loadRequestList()
+  } catch (error) {
+    ElMessage.error('数据加载失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 加载请求列表
+async function loadRequestList() {
+  try {
+    const searchParams = {
+      ...searchForm,
+      page: pagination.currentPage,
+      pageSize: pagination.pageSize,
     }
-  },
-  computed: {
-    ...mapState('campus', ['errandRequestList', 'errandRequestTotal']),
-    total() {
-      return this.errandRequestTotal
-    },
-    requestList() {
-      return this.errandRequestList
-    },
-  },
-  created() {
-    this.loadData()
-  },
-  methods: {
-    ...mapActions('campus', ['getErrandRequests']),
+    await campusStore.getDeliveryRequests(searchParams)
+  } catch (error) {
+    ElMessage.error('获取请求列表失败')
+  }
+}
 
-    // 加载数据
-    async loadData() {
-      this.loading = true
-      try {
-        await this.loadRequestList()
-      } catch (error) {
-        this.$message.error('数据加载失败')
-      } finally {
-        this.loading = false
-      }
-    },
+// 搜索
+function handleSearch() {
+  pagination.currentPage = 1
+  loadRequestList()
+}
 
-    // 加载请求列表
-    async loadRequestList() {
-      try {
-        const searchParams = {
-          ...this.searchForm,
-          page: this.pagination.currentPage,
-          pageSize: this.pagination.pageSize,
-        }
-        await this.getErrandRequests(searchParams)
-      } catch (error) {
-        this.$message.error('获取请求列表失败')
-      }
-    },
+// 重置搜索
+function resetSearch() {
+  searchForm.requestNo = ''
+  searchForm.userName = ''
+  handleSearch()
+}
 
-    // 搜索
-    handleSearch() {
-      this.pagination.currentPage = 1
-      this.loadRequestList()
-    },
+// 分页大小变化
+function handleSizeChange(size: number) {
+  pagination.pageSize = size
+  loadRequestList()
+}
 
-    // 重置搜索
-    resetSearch() {
-      this.searchForm = {
-        requestNo: '',
-        userName: '',
-      }
-      this.handleSearch()
-    },
+// 分页页码变化
+function handleCurrentChange(current: number) {
+  pagination.currentPage = current
+  loadRequestList()
+}
 
-    // 分页大小变化
-    handleSizeChange(size) {
-      this.pagination.pageSize = size
-      this.loadRequestList()
-    },
-
-    // 分页页码变化
-    handleCurrentChange(current) {
-      this.pagination.currentPage = current
-      this.loadRequestList()
-    },
-
-    // 查看请求详情
-    handleViewDetail(row) {
-      this.$message.info('查看详情功能待实现')
-    },
-  },
+// 查看请求详情
+function handleViewDetail(row: any) {
+  ElMessage.info('查看详情功能待实现')
 }
 </script>
 

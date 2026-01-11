@@ -1,0 +1,349 @@
+/* 快递代取首页样式 */
+.courier-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 页面标题 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  background-color: #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.page-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.publish-btn {
+  font-size: 28rpx;
+  color: #3cc51f;
+  background-color: #f0f9eb;
+  padding: 8rpx 24rpx;
+  border-radius: 20rpx;
+}
+
+/* 搜索栏 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.search-bar input {
+  flex: 1;
+  height: 60rpx;
+  background-color: #f5f5f5;
+  border-radius: 30rpx;
+  padding: 0 30rpx;
+  font-size: 26rpx;
+}
+
+.search-btn {
+  margin-left: 20rpx;
+  background-color: #3cc51f;
+  color: #fff;
+  font-size: 26rpx;
+  border-radius: 30rpx;
+  padding: 0 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  border: none;
+}
+
+.search-btn::after {
+  border-radius: 30rpx;
+  border: none;
+}
+
+/* 服务类型导航 */
+.service-nav {
+  display: flex;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.nav-item {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  position: relative;
+}
+
+.nav-item.active {
+  color: #3cc51f;
+  font-weight: bold;
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #3cc51f;
+  border-radius: 3rpx;
+}
+
+/* 内容区域 */
+.content-section {
+  padding: 0 20rpx;
+}
+
+/* 任务列表 */
+.task-list {
+  max-height: calc(100vh - 320rpx);
+}
+
+.task-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  padding: 24rpx 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 任务头部 */
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.task-type-tag {
+  font-size: 24rpx;
+  color: #3cc51f;
+  background-color: #f0f9eb;
+  padding: 2rpx 16rpx;
+  border-radius: 12rpx;
+}
+
+.task-status {
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.task-status.pending {
+  color: #ff9500;
+}
+
+.task-status.claimed {
+  color: #34aadc;
+}
+
+.task-status.completed {
+  color: #3cc51f;
+}
+
+.task-status.cancelled {
+  color: #999;
+}
+
+/* 任务内容 */
+.task-content {
+  margin-bottom: 20rpx;
+}
+
+.task-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.info-item {
+  font-size: 24rpx;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.info-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+/* 任务底部 */
+.task-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.task-location {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.footer-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.task-price {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #f4333c;
+}
+
+/* 快递柜列表 */
+.locker-list {
+  max-height: calc(100vh - 320rpx);
+}
+
+.locker-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  padding: 24rpx 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 快递柜头部 */
+.locker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.locker-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.locker-status {
+  font-size: 24rpx;
+  padding: 2rpx 16rpx;
+  border-radius: 12rpx;
+}
+
+.locker-status.online {
+  color: #3cc51f;
+  background-color: #f0f9eb;
+}
+
+.locker-status.offline {
+  color: #999;
+  background-color: #f5f5f5;
+}
+
+/* 快递柜信息 */
+.locker-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.locker-location {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.locker-stats {
+  display: flex;
+  gap: 30rpx;
+}
+
+.stat-item {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 我的任务 */
+.my-task-tabs {
+  display: flex;
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #3cc51f;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #3cc51f;
+  border-radius: 3rpx;
+}
+
+.my-task-list {
+  max-height: calc(100vh - 400rpx);
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 浮动发布按钮 */
+.float-publish-btn {
+  position: fixed;
+  right: 40rpx;
+  bottom: 40rpx;
+  width: 100rpx;
+  height: 100rpx;
+  background-color: #3cc51f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 60rpx;
+  box-shadow: 0 4rpx 12rpx rgba(60, 197, 31, 0.3);
+  z-index: 1000;
+}
+
+.float-publish-btn::after {
+  content: none;
+}

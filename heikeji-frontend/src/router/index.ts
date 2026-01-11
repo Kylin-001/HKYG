@@ -68,10 +68,63 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/app/product/search.vue'),
     meta: { hidden: true },
   },
+  // 购物车路由
+  {
+    path: '/app/cart',
+    name: 'AppCart',
+    component: () => import('@/views/app/cart/index.vue'),
+    meta: { hidden: true },
+  },
+  // 用户登录注册路由
+  {
+    path: '/app/user/login',
+    name: 'AppUserLogin',
+    component: () => import('@/views/app/user/login.vue'),
+    meta: { hidden: true },
+  },
+  {
+    path: '/app/user/register',
+    name: 'AppUserRegister',
+    component: () => import('@/views/app/user/register.vue'),
+    meta: { hidden: true },
+  },
+  // 订单相关路由
+  {
+    path: '/app/order/confirm',
+    name: 'AppOrderConfirm',
+    component: () => import('@/views/app/order/confirm.vue'),
+    meta: { hidden: true },
+  },
+  {
+    path: '/app/order/list',
+    name: 'AppOrderList',
+    component: () => import('@/views/app/order/list.vue'),
+    meta: { hidden: true },
+  },
+  {
+    path: '/app/order/detail/:id',
+    name: 'AppOrderDetail',
+    component: () => import('@/views/app/order/detail.vue'),
+    meta: { hidden: true },
+    props: true,
+  },
 ]
 
-// 导入用户管理路由模块
-import { userRoutes } from './modules/user'
+// 动态导入路由模块
+const getUserRoutes = async () => {
+  const { userRoutes } = await import('./modules/user.js')
+  return userRoutes
+}
+
+const getPermissionRoutes = async () => {
+  const { permissionRoutes } = await import('./modules/permission.ts')
+  return permissionRoutes
+}
+
+const getStatsRoutes = async () => {
+  const { statsRoutes } = await import('./modules/stats.ts')
+  return statsRoutes
+}
 
 // 动态路由 - 需要根据用户权限动态加载的路由
 export const asyncRoutes: RouteRecordRaw[] = [
@@ -82,7 +135,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/dashboard/index.vue'),
     meta: {
       title: '首页',
-      icon: 'el-icon-s-home',
+      icon: 'House',
       affix: true,
     },
   },
@@ -92,7 +145,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
     name: 'Product',
     meta: {
       title: '商品管理',
-      icon: 'el-icon-goods',
+      icon: 'Goods',
     },
     children: [
       {
@@ -101,7 +154,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/product/list.vue'),
         meta: {
           title: '商品列表',
-          icon: 'el-icon-s-grid',
+          icon: 'Grid',
         },
       },
       {
@@ -110,7 +163,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/product/add.vue'),
         meta: {
           title: '添加商品',
-          icon: 'el-icon-circle-plus-outline',
+          icon: 'CirclePlus',
         },
       },
       {
@@ -129,7 +182,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/product/category.vue'),
         meta: {
           title: '商品分类',
-          icon: 'el-icon-folder',
+          icon: 'Folder',
         },
       },
       {
@@ -138,13 +191,17 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/product/brand.vue'),
         meta: {
           title: '品牌管理',
-          icon: 'el-icon-shopping-bag-1',
+          icon: 'ShoppingBag',
         },
       },
     ],
   },
   // 用户管理
   ...userRoutes,
+  // 权限管理
+  ...permissionRoutes,
+  // 数据统计
+  ...statsRoutes,
   // 404路由必须放在最后
   { path: '/:pathMatch(.*)*', redirect: '/404', meta: { hidden: true } },
 ]

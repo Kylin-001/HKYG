@@ -28,9 +28,19 @@ public interface UserService extends IService<User> {
     Map<String, Object> login(LoginDTO loginDTO);
 
     /**
+     * 用户名/密码登录
+     */
+    Map<String, Object> login(String username, String password);
+
+    /**
      * 微信登录
      */
     Map<String, Object> wechatLogin(String code);
+
+    /**
+     * 手机号验证码登录
+     */
+    Map<String, Object> phoneLogin(String phone, String code);
 
     /**
      * 用户登出
@@ -105,7 +115,7 @@ public interface UserService extends IService<User> {
     /**
      * 发送验证码
      */
-    void sendVerificationCode(String phone);
+    boolean sendVerificationCode(String phone);
 
     /**
      * 验证验证码
@@ -121,6 +131,26 @@ public interface UserService extends IService<User> {
      * 获取用户积分
      */
     Integer getPoints(Long userId);
+
+    /**
+     * 获取用户余额
+     */
+    java.math.BigDecimal getBalance(Long userId);
+
+    /**
+     * 更新用户余额
+     */
+    void updateBalance(Long userId, java.math.BigDecimal amount);
+
+    /**
+     * 扣除用户余额
+     */
+    boolean deductBalance(Long userId, java.math.BigDecimal amount);
+
+    /**
+     * 充值用户余额
+     */
+    void rechargeBalance(Long userId, java.math.BigDecimal amount);
 
     /**
      * 禁用用户

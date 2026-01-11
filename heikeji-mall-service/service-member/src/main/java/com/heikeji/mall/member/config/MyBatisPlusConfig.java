@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member.config;
+package com.heikeji.mall.member.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

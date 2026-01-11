@@ -1,0 +1,144 @@
+<!-- 快递代取首页 -->
+<view class="courier-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">快递代取</text>
+    <text class="publish-btn" bindtap="navigateToPublish">发布代取</text>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input type="text" placeholder="搜索快递代取任务" bindinput="onSearchInput" bindconfirm="onSearch" />
+    <button bindtap="onSearch" class="search-btn">搜索</button>
+  </view>
+
+  <!-- 服务类型导航 -->
+  <view class="service-nav">
+    <view class="nav-item {{currentNav === 'tasks' ? 'active' : ''}}" bindtap="switchNav" data-nav="tasks">
+      <text>待接任务</text>
+    </view>
+    <view class="nav-item {{currentNav === 'express' ? 'active' : ''}}" bindtap="switchNav" data-nav="express">
+      <text>快递柜</text>
+    </view>
+    <view class="nav-item {{currentNav === 'my' ? 'active' : ''}}" bindtap="switchNav" data-nav="my">
+      <text>我的任务</text>
+    </view>
+  </view>
+
+  <!-- 待接任务列表 -->
+  <view class="content-section" wx:if="{{currentNav === 'tasks'}}">
+    <scroll-view scroll-y="true" class="task-list" bindscrolltolower="onLoadMore">
+      <view class="task-item" 
+            wx:for="{{tasks}}" 
+            wx:key="id" 
+            bindtap="navigateToDetail" 
+            data-id="{{item.id}}">
+        <view class="task-header">
+          <view class="task-type-tag">快递代取</view>
+          <text class="task-status {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        
+        <view class="task-content">
+          <text class="task-title">{{item.expressCompany}} {{item.trackingNumber}}</text>
+          <view class="task-info">
+            <text class="info-item">
+              <image src="/assets/icons/locker.png" mode="aspectFit" class="info-icon" />{{item.lockerName}}
+            </text>
+            <text class="info-item">
+              <image src="/assets/icons/code.png" mode="aspectFit" class="info-icon" />{{item.pickupCode}}
+            </text>
+          </view>
+        </view>
+        
+        <view class="task-footer">
+          <view class="task-location">
+            <image src="/assets/icons/location.png" mode="aspectFit" class="footer-icon" />
+            <text>{{item.deliveryLocation}}</text>
+          </view>
+          <view class="task-price">¥{{item.price}}</view>
+        </view>
+      </view>
+      
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore}}">
+        <text>加载中...</text>
+      </view>
+      <view class="load-more" wx:else>
+        <text>已加载全部</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 快递柜列表 -->
+  <view class="content-section" wx:elif="{{currentNav === 'express'}}">
+    <scroll-view scroll-y="true" class="locker-list">
+      <view class="locker-item" 
+            wx:for="{{lockers}}" 
+            wx:key="id" 
+            bindtap="navigateToLockerDetail" 
+            data-id="{{item.id}}">
+        <view class="locker-header">
+          <text class="locker-name">{{item.name}}</text>
+          <text class="locker-status {{item.status === 'online' ? 'online' : 'offline'}}">
+            {{item.status === 'online' ? '在线' : '离线'}}
+          </text>
+        </view>
+        
+        <view class="locker-info">
+          <text class="locker-location">{{item.location}}</text>
+          <view class="locker-stats">
+            <text class="stat-item">可用柜格: {{item.availableSlots}}</text>
+            <text class="stat-item">总柜格: {{item.totalSlots}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 我的任务 -->
+  <view class="content-section" wx:elif="{{currentNav === 'my'}}">
+    <view class="my-task-tabs">
+      <view class="tab-item {{currentMyTab === 'published' ? 'active' : ''}}" bindtap="switchMyTab" data-tab="published">
+        <text>我发布的</text>
+      </view>
+      <view class="tab-item {{currentMyTab === 'claimed' ? 'active' : ''}}" bindtap="switchMyTab" data-tab="claimed">
+        <text>我接单的</text>
+      </view>
+    </view>
+    
+    <scroll-view scroll-y="true" class="my-task-list">
+      <view class="task-item" 
+            wx:for="{{myTasks}}" 
+            wx:key="id" 
+            bindtap="navigateToDetail" 
+            data-id="{{item.id}}">
+        <view class="task-header">
+          <view class="task-type-tag">快递代取</view>
+          <text class="task-status {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        
+        <view class="task-content">
+          <text class="task-title">{{item.expressCompany}} {{item.trackingNumber}}</text>
+          <view class="task-info">
+            <text class="info-item">
+              <image src="/assets/icons/locker.png" mode="aspectFit" class="info-icon" />{{item.lockerName}}
+            </text>
+            <text class="info-item">
+              <image src="/assets/icons/code.png" mode="aspectFit" class="info-icon" />{{item.pickupCode}}
+            </text>
+          </view>
+        </view>
+        
+        <view class="task-footer">
+          <text class="task-time">{{item.createTime}}</text>
+          <view class="task-price">¥{{item.price}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 浮动发布按钮 -->
+  <view class="float-publish-btn" bindtap="navigateToPublish">
+    <text>+</text>
+  </view>
+</view>

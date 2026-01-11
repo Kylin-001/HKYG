@@ -1,5 +1,6 @@
 package com.heikeji.mall.user.controller;
 
+import com.heikeji.common.core.security.UserContextHolderAdapter;
 import com.heikeji.mall.common.response.R;
 import com.heikeji.mall.user.entity.Address;
 import com.heikeji.mall.user.service.AddressService;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -55,12 +57,17 @@ public class AddressControllerTest {
     public void testSaveAddress_Success() throws Exception {
         Address address = createTestAddress();
         when(addressService.addAddress(any(Address.class))).thenReturn(true);
-
-        mockMvc.perform(post("/api/address/add/{userId}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"receiverName\":\"张三\",\"receiverPhone\":\"13800138000\",\"campusArea\":\"东区\",\"building\":\"1号楼A座\",\"room\":\"501\",\"detailAddress\":\"详细地址\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
+        
+        // 模拟UserContextHolder获取当前用户ID
+        try (MockedStatic<UserContextHolderAdapter> mockedStatic = mockStatic(UserContextHolderAdapter.class)) {
+            mockedStatic.when(UserContextHolderAdapter::getCurrentUserId).thenReturn(1L);
+            
+            mockMvc.perform(post("/api/address/add")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"receiverName\":\"张三\",\"phoneNumber\":\"13800138000\",\"province\":\"江苏省\",\"city\":\"南京市\",\"district\":\"江宁区\",\"detailAddress\":\"详细地址\"}"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value(200));
+        }
     }
 
     @Test
@@ -69,10 +76,15 @@ public class AddressControllerTest {
         List<Address> addresses = new ArrayList<>();
         addresses.add(createTestAddress());
         when(addressService.getUserAddresses(userId)).thenReturn(addresses);
-
-        mockMvc.perform(get("/api/address/list/{userId}", userId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data.length()").value(1));
+        
+        // 模拟UserContextHolder获取当前用户ID
+        try (MockedStatic<UserContextHolderAdapter> mockedStatic = mockStatic(UserContextHolderAdapter.class)) {
+            mockedStatic.when(UserContextHolderAdapter::getCurrentUserId).thenReturn(userId);
+            
+            mockMvc.perform(get("/api/address/list"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value(200))
+                    .andExpect(jsonPath("$.data.length()").value(1));
+        }
     }
 }

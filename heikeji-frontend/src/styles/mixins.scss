@@ -1,0 +1,124 @@
+/**
+ * 全局混合宏定义
+ */
+
+// 清除浮动
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+// 弹性布局
+@mixin flex($direction: row, $justify: flex-start, $align: center) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+// 网格布局
+@mixin grid($columns: 12, $gap: 0) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+}
+
+// 响应式断点
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == sm {
+    @media (max-width: 576px) {
+      @content;
+    }
+  } @else if $breakpoint == md {
+    @media (max-width: 768px) {
+      @content;
+    }
+  } @else if $breakpoint == lg {
+    @media (max-width: 992px) {
+      @content;
+    }
+  } @else if $breakpoint == xl {
+    @media (max-width: 1200px) {
+      @content;
+    }
+  } @else if $breakpoint == xxl {
+    @media (max-width: 1600px) {
+      @content;
+    }
+  }
+}
+
+// 阴影效果
+@mixin box-shadow($level: 1) {
+  @if $level == 1 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  } @else if $level == 2 {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  } @else if $level == 3 {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  } @else if $level == 4 {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16);
+  }
+}
+
+// 过渡效果
+@mixin transition($properties: all, $duration: 0.3s, $ease: ease-in-out) {
+  transition: $properties $duration $ease;
+}
+
+// 背景渐变
+@mixin gradient($direction: 135deg, $start-color: #409EFF, $end-color: #67C23A) {
+  background: linear-gradient($direction, $start-color, $end-color);
+}
+
+// 文本溢出省略
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+  }
+}
+
+// 圆角
+@mixin border-radius($radius: 4px) {
+  border-radius: $radius;
+}
+
+// 绝对定位居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 相对定位居中
+@mixin relative-center {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 生成 CSS 变量
+@mixin generate-css-variables($prefix, $theme-map) {
+  #{$prefix} {
+    @each $key, $value in $theme-map {
+      --#{$key}: #{$value};
+    }
+  }
+}
+
+// 主题色函数
+@function theme-color($key) {
+  @return map-get($current-theme, $key);
+}

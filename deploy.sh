@@ -234,30 +234,17 @@ start_backend_services() {
     # 进入后端服务目录
     cd "${PROJECT_ROOT}/heikeji-mall-service"
     
-    # 创建启动脚本
-    cat > start_services.sh << 'EOF'
-#!/bin/bash
-
-# 服务列表
-SERVICES=("service-user" "service-product" "service-payment" "service-takeout" "service-order" "service-delivery" "service-campus" "service-secondhand" "service-lostfound")
-
-# 启动所有服务
-for service in "${SERVICES[@]}"; do
-    echo "启动 ${service}..."
-    nohup java -jar ${service}/target/${service}-1.0.0-exec.jar > ${service}.log 2>&1 &
-    echo "${service} 启动成功，PID: $!"
-    sleep 2
-done
-
-EOF
-    
-    # 赋予执行权限
-    chmod +x start_services.sh
-    
-    # 启动服务
-    ./start_services.sh 2>&1 | tee -a ${LOG_FILE}
-    if [ $? -ne 0 ]; then
-        log "ERROR" "后端服务启动失败"
+    # 检查start_services_final.sh是否存在
+    if [ -f "start_services_final.sh" ]; then
+        # 执行现有的start_services_final.sh脚本
+        chmod +x start_services_final.sh
+        ./start_services_final.sh 2>&1 | tee -a ${LOG_FILE}
+        if [ $? -ne 0 ]; then
+            log "ERROR" "后端服务启动失败"
+            return 1
+        fi
+    else
+        log "ERROR" "start_services_final.sh脚本不存在"
         return 1
     fi
     

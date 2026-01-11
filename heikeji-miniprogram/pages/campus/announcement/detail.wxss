@@ -1,0 +1,132 @@
+/* 校园公告详情页面样式 */
+
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  background-color: #fff;
+  padding: 0 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn {
+  padding: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.share-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 公告详情 */
+.announcement-detail {
+  background-color: #fff;
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* 公告标题 */
+.announcement-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  padding: 20px;
+  line-height: 1.4;
+}
+
+/* 公告信息 */
+.announcement-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #999;
+}
+
+.announcement-source {
+  margin-right: 20px;
+}
+
+/* 公告正文 */
+.announcement-content {
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* 富文本内容样式 */
+.announcement-content :first-child {
+  margin-top: 0;
+}
+
+.announcement-content :last-child {
+  margin-bottom: 0;
+}
+
+.announcement-content p {
+  margin: 15px 0;
+}
+
+.announcement-content h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin: 20px 0 15px;
+}
+
+.announcement-content h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin: 18px 0 12px;
+}
+
+.announcement-content ul,
+.announcement-content ol {
+  padding-left: 25px;
+  margin: 15px 0;
+}
+
+.announcement-content li {
+  margin: 8px 0;
+}
+
+/* 加载中 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.loading text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #999;
+}

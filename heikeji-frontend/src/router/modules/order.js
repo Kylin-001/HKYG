@@ -8,7 +8,7 @@ export const orderRoutes = [
     name: 'Order',
     meta: {
       title: '订单管理',
-      icon: 'el-icon-document',
+      icon: 'Document',
     },
     children: [
       {
@@ -17,7 +17,7 @@ export const orderRoutes = [
         component: () => import('@/views/order/list'),
         meta: {
           title: '订单列表',
-          icon: 'el-icon-document-checked',
+          icon: 'DocumentChecked',
         },
       },
       {
@@ -44,7 +44,7 @@ export const orderRoutes = [
         component: () => import('@/views/order/refund'),
         meta: {
           title: '退款管理',
-          icon: 'el-icon-s-goods',
+          icon: 'Goods',
         },
       },
     ],

@@ -1,0 +1,166 @@
+/* pages/user/address.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding-bottom: 100rpx;
+}
+
+/* 页面标题 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  background-color: #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 20rpx;
+}
+
+.page-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.add-btn {
+  font-size: 28rpx;
+  color: #3cc51f;
+  background-color: #f0f9eb;
+  padding: 8rpx 24rpx;
+  border-radius: 20rpx;
+}
+
+/* 地址列表 */
+.address-list {
+  padding: 0 20rpx;
+}
+
+.address-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  padding: 24rpx 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 地址头部 */
+.address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.contact-info {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+}
+
+.contact-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.contact-phone {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.address-tags {
+  display: flex;
+  gap: 10rpx;
+}
+
+.default-tag {
+  font-size: 20rpx;
+  color: #3cc51f;
+  background-color: #f0f9eb;
+  padding: 2rpx 12rpx;
+  border-radius: 10rpx;
+}
+
+/* 地址详情 */
+.address-detail {
+  margin-bottom: 20rpx;
+}
+
+.detail-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 40rpx;
+}
+
+/* 地址操作 */
+.address-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.action-text.default {
+  color: #3cc51f;
+}
+
+.action-text.danger {
+  color: #f4333c;
+}
+
+.action-divider {
+  width: 1rpx;
+  height: 28rpx;
+  background-color: #e5e5e5;
+}
+
+/* 空地址提示 */
+.empty-address {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+  background-color: #fff;
+  margin: 20rpx;
+  border-radius: 12rpx;
+}
+
+.empty-icon {
+  width: 180rpx;
+  height: 180rpx;
+  margin-bottom: 40rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 50rpx;
+}
+
+.add-first-btn {
+  background-color: #3cc51f;
+  color: #fff;
+  border: none;
+  border-radius: 30rpx;
+  padding: 20rpx 60rpx;
+  font-size: 28rpx;
+  box-shadow: 0 4rpx 12rpx rgba(60, 197, 31, 0.3);
+}
+
+.add-first-btn::after {
+  border-radius: 30rpx;
+}

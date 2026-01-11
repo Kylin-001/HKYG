@@ -87,6 +87,11 @@ public class PaymentStrategyFactory {
             supportedTypes.put(PaymentConstants.PAYMENT_TYPE.BALANCE_PAY, "余额支付");
         }
         
+        // 添加校园卡支付
+        if (supportsPaymentType(PaymentConstants.PAYMENT_TYPE.CAMPUS_CARD_PAY)) {
+            supportedTypes.put(PaymentConstants.PAYMENT_TYPE.CAMPUS_CARD_PAY, "校园卡支付");
+        }
+        
         return supportedTypes;
     }
 }

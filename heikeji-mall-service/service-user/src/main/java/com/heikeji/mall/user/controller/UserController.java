@@ -5,9 +5,14 @@ import com.heikeji.common.core.annotation.RequiresAdmin;
 import com.heikeji.common.core.security.UserContextHolderAdapter;
 import com.heikeji.mall.common.auth.PublicApi;
 import com.heikeji.mall.common.response.R;
+import com.heikeji.mall.user.dto.LoginDTO;
+import com.heikeji.mall.user.dto.RegisterDTO;
+import com.heikeji.mall.user.dto.ResetPasswordDTO;
+import com.heikeji.mall.user.dto.UserDTO;
+import com.heikeji.mall.user.dto.UserUpdateDTO;
+import com.heikeji.mall.user.dto.UserVO;
 import com.heikeji.mall.user.entity.User;
 import com.heikeji.mall.user.entity.UserAuth;
-import com.heikeji.mall.user.dto.UserDTO;
 import com.heikeji.mall.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,11 +25,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.heikeji.common.core.validation.annotation.StudentNo;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import com.heikeji.common.core.security.JwtUtils;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +46,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
 
     /**
      * 微信登录
@@ -54,6 +64,69 @@ public class UserController {
         }
         return R.error("登录失败");
     }
+    
+    /**
+     * 用户名/密码登录
+     */
+    @PostMapping("/login")
+    @PublicApi
+    @Operation(summary = "用户名/密码登录")
+    public R<Map<String, Object>> login(@Valid @RequestBody LoginDTO loginDTO) {
+        log.info("用户进行用户名/密码登录");
+        Map<String, Object> result = userService.login(loginDTO);
+        if (result != null && !result.isEmpty()) {
+            return R.success("登录成功", result);
+        }
+        return R.error("用户名或密码错误");
+    }
+    
+    /**
+     * 手机号验证码登录
+     */
+    @PostMapping("/phoneLogin")
+    @PublicApi
+    @Operation(summary = "手机号验证码登录")
+    public R<Map<String, Object>> phoneLogin(@Valid @NotBlank @RequestParam String phone, 
+                                            @Valid @NotBlank @RequestParam String code) {
+        log.info("用户进行手机号验证码登录");
+        Map<String, Object> result = userService.phoneLogin(phone, code);
+        if (result != null && !result.isEmpty()) {
+            return R.success("登录成功", result);
+        }
+        return R.error("验证码错误或已过期");
+    }
+    
+    /**
+     * 发送验证码
+     */
+    @PostMapping("/sendCode")
+    @PublicApi
+    @Operation(summary = "发送验证码")
+    public R<String> sendCode(@Valid @NotBlank @RequestParam String phone) {
+        log.info("发送验证码到手机号: {}", phone);
+        boolean result = userService.sendVerificationCode(phone);
+        if (result) {
+            return R.success("验证码发送成功");
+        }
+        return R.error("验证码发送失败");
+    }
+    
+    /**
+     * 用户注册
+     */
+    @PostMapping("/register")
+    @PublicApi
+    @Operation(summary = "用户注册")
+    public R<UserVO> register(@Valid @RequestBody RegisterDTO registerDTO) {
+        log.info("用户注册: {}", registerDTO.getUsername());
+        User user = userService.register(registerDTO);
+        if (user != null) {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success("注册成功", userVO);
+        }
+        return R.error("注册失败");
+    }
 
     /**
      * 获取当前用户信息
@@ -61,13 +134,18 @@ public class UserController {
     @GetMapping("/me")
     @RequiresLogin
     @Operation(summary = "获取当前用户信息")
-    public R<User> getCurrentUserInfo() {
+    public R<UserVO> getCurrentUserInfo() {
         Long userId = UserContextHolderAdapter.getCurrentUserId();
         if (userId == null) {
             return R.error(400, "用户未登录");
         }
         User user = userService.getById(userId);
-        return R.success("查询成功", user != null ? user : null);
+        if (user != null) {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success("查询成功", userVO);
+        }
+        return R.success("查询成功", null);
     }
 
     /**
@@ -76,7 +154,7 @@ public class UserController {
     @PostMapping("/bindStudentNo")
     @RequiresLogin
     @Operation(summary = "绑定学号")
-    public R<User> bindStudentNo(@Valid @StudentNo @RequestParam String studentNo,
+    public R<UserVO> bindStudentNo(@Valid @StudentNo @RequestParam String studentNo,
                                  @RequestParam(required = false) String realName,
                                  @RequestParam(required = false) String college,
                                  @RequestParam(required = false) String major,
@@ -93,7 +171,9 @@ public class UserController {
         User user = userService.bindStudentId(studentNo, realName, college, major, grade);
         
         if (user != null) {
-            return R.success("学号绑定成功", user);
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success("学号绑定成功", userVO);
         }
         return R.error(409, "学号已被其他用户绑定");
     }
@@ -104,11 +184,16 @@ public class UserController {
     @GetMapping("/admin/getByPhone/{phone}")
     @RequiresAdmin
     @Operation(summary = "根据手机号获取用户信息")
-    public R<User> getUserByPhone(@Valid @NotBlank @PathVariable String phone) {
+    public R<UserVO> getUserByPhone(@Valid @NotBlank @PathVariable String phone) {
         Long adminId = UserContextHolderAdapter.getCurrentUserId();
         log.info("管理员{}根据手机号获取用户信息: phone = {}", adminId, phone);
         User user = userService.getUserByPhone(phone);
-        return user != null ? R.success("查询成功", user) : R.error(R.USER_NOT_FOUND, "用户不存在");
+        if (user != null) {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success("查询成功", userVO);
+        }
+        return R.error(R.USER_NOT_FOUND, "用户不存在");
     }
 
     /**
@@ -117,11 +202,16 @@ public class UserController {
     @GetMapping("/admin/getByStudentNo/{studentNo}")
     @RequiresAdmin
     @Operation(summary = "根据学号获取用户信息")
-    public R<User> getUserByStudentNo(@Valid @StudentNo @PathVariable String studentNo) {
+    public R<UserVO> getUserByStudentNo(@Valid @StudentNo @PathVariable String studentNo) {
         Long adminId = UserContextHolderAdapter.getCurrentUserId();
         log.info("管理员{}根据学号获取用户信息: studentNo = {}", adminId, studentNo);
         User user = userService.getUserByStudentNo(studentNo);
-        return user != null ? R.success(user) : R.error(R.USER_NOT_FOUND, "用户不存在");
+        if (user != null) {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success(userVO);
+        }
+        return R.error(R.USER_NOT_FOUND, "用户不存在");
     }
 
     /**
@@ -130,9 +220,14 @@ public class UserController {
     @GetMapping("/info/{userId}")
     @RequiresLogin
     @Operation(summary = "获取用户信息")
-    public R<User> getUserInfo(@PathVariable Long userId) {
+    public R<UserVO> getUserInfo(@PathVariable Long userId) {
         User user = userService.getById(userId);
-        return user != null ? R.success(user) : R.error(R.USER_NOT_FOUND, "用户不存在");
+        if (user != null) {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success(userVO);
+        }
+        return R.error(R.USER_NOT_FOUND, "用户不存在");
     }
 
     /**
@@ -142,8 +237,22 @@ public class UserController {
     @RequiresLogin
     @Operation(summary = "更新用户信息")
     public R<Boolean> updateUserInfo(@PathVariable Long userId, @Valid @RequestBody UserDTO userDTO) {
-        // TODO: 将UserDTO转换为UserUpdateDTO
-        return R.error(501, "此功能尚未实现");
+        try {
+            // 获取当前登录用户ID，确保只能更新自己的信息
+            Long currentUserId = UserContextHolderAdapter.getCurrentUserId();
+            if (!currentUserId.equals(userId)) {
+                return R.error(403, "无权更新其他用户信息");
+            }
+            
+            // 转换为UserUpdateDTO
+            UserUpdateDTO userUpdateDTO = new UserUpdateDTO();
+            BeanUtils.copyProperties(userDTO, userUpdateDTO);
+            
+            User updatedUser = userService.updateUser(userUpdateDTO);
+            return R.success("更新成功", updatedUser != null);
+        } catch (RuntimeException e) {
+            return R.error(400, e.getMessage());
+        }
     }
 
     /**
@@ -153,8 +262,12 @@ public class UserController {
     @RequiresLogin
     @Operation(summary = "获取用户余额")
     public R<BigDecimal> getBalance(@PathVariable Long userId) {
-        // TODO: 实现获取用户余额逻辑
-        return R.error(501, "此功能尚未实现");
+        try {
+            BigDecimal balance = userService.getBalance(userId);
+            return R.success("查询成功", balance);
+        } catch (RuntimeException e) {
+            return R.error(400, e.getMessage());
+        }
     }
 
     /**
@@ -164,8 +277,12 @@ public class UserController {
     @RequiresLogin
     @Operation(summary = "更新用户余额")
     public R<Boolean> updateBalance(@PathVariable Long userId, @RequestParam BigDecimal amount) {
-        // TODO: 实现余额更新逻辑
-        return R.error(501, "此功能尚未实现");
+        try {
+            userService.updateBalance(userId, amount);
+            return R.success("更新成功", true);
+        } catch (RuntimeException e) {
+            return R.error(400, e.getMessage());
+        }
     }
 
     /**
@@ -185,9 +302,14 @@ public class UserController {
     @GetMapping("/detail")
     @RequiresLogin
     @Operation(summary = "查询用户详情")
-    public R<User> getUserDetail(@RequestParam Long userId) {
+    public R<UserVO> getUserDetail(@RequestParam Long userId) {
         User user = userService.getById(userId);
-        return R.success(user);
+        if (user != null) {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return R.success(userVO);
+        }
+        return R.success(null);
     }
     
     /**
@@ -197,8 +319,16 @@ public class UserController {
     @RequiresLogin
     @Operation(summary = "扣除用户余额")
     public R<Boolean> deductBalance(@PathVariable Long userId, @RequestParam BigDecimal amount) {
-        // TODO: 实现余额扣除逻辑
-        return R.error(501, "此功能尚未实现");
+        try {
+            boolean success = userService.deductBalance(userId, amount);
+            if (success) {
+                return R.success("扣除成功", true);
+            } else {
+                return R.error(400, "余额不足");
+            }
+        } catch (RuntimeException e) {
+            return R.error(400, e.getMessage());
+        }
     }
     
     /**
@@ -208,8 +338,12 @@ public class UserController {
     @RequiresLogin
     @Operation(summary = "充值用户余额")
     public R<Boolean> rechargeBalance(@PathVariable Long userId, @RequestParam BigDecimal amount) {
-        // TODO: 实现余额充值逻辑
-        return R.error(501, "此功能尚未实现");
+        try {
+            userService.rechargeBalance(userId, amount);
+            return R.success("充值成功", true);
+        } catch (RuntimeException e) {
+            return R.error(400, e.getMessage());
+        }
     }
     
     /**
@@ -220,7 +354,67 @@ public class UserController {
     @Operation(summary = "检查余额")
     public R<Boolean> checkBalance(@PathVariable Long userId, @RequestParam BigDecimal amount) {
         User user = userService.getById(userId);
-        // 注意：User实体类中没有balance字段，只有points字段
-        return R.success(false);
+        if (user == null) {
+            return R.error(400, "用户不存在");
+        }
+        BigDecimal balance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+        return R.success(balance.compareTo(amount) >= 0);
+    }
+    
+    /**
+     * 重置密码
+     */
+    @PostMapping("/resetPassword")
+    @PublicApi
+    @Operation(summary = "重置密码")
+    public R<String> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        log.info("用户重置密码: {}", resetPasswordDTO.getPhone());
+        userService.resetPassword(resetPasswordDTO);
+        return R.success("密码重置成功");
+    }
+    
+    /**
+     * 刷新Token
+     */
+    @PostMapping("/refresh")
+    @PublicApi
+    @Operation(summary = "刷新Token")
+    public R<Map<String, Object>> refreshToken(@RequestParam String refreshToken) {
+        log.info("用户请求刷新Token");
+        try {
+            // 调用JWT工具类刷新Token
+            String newToken = jwtUtils.refreshToken(refreshToken);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("token", newToken);
+            result.put("refreshToken", refreshToken); // 保留原刷新Token，直到其过期
+            
+            return R.success("Token刷新成功", result);
+        } catch (RuntimeException e) {
+            log.error("刷新Token失败: {}", e.getMessage());
+            return R.error("刷新Token失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 登出
+     */
+    @PostMapping("/logout")
+    @RequiresLogin
+    @Operation(summary = "登出")
+    public R<String> logout(@RequestHeader("Authorization") String authorizationHeader) {
+        log.info("用户请求登出");
+        try {
+            // 从请求头中提取Token
+            String token = jwtUtils.extractTokenFromHeader(authorizationHeader);
+            if (token != null) {
+                userService.logout(token);
+                return R.success("登出成功");
+            }
+            return R.error("无效的Token");
+        } catch (RuntimeException e) {
+            log.error("登出失败: {}", e.getMessage());
+            return R.error("登出失败: " + e.getMessage());
+        }
     }
 }

@@ -1,0 +1,46 @@
+<!-- 商品分类页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left" bindtap="onBack">
+      <image src="/assets/icons/back.png" class="back-icon" mode="aspectFit"></image>
+    </view>
+    <text class="header-title">商品分类</text>
+    <view class="header-right">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit" bindtap="onSearch"></image>
+    </view>
+  </view>
+
+  <!-- 分类内容区域 -->
+  <view class="category-content">
+    <!-- 左侧分类列表 -->
+    <scroll-view scroll-y class="left-scroll">
+      <view class="category-item {{currentCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="onCategoryChange">
+        <text class="category-name">{{item.name}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧分类详情 -->
+    <scroll-view scroll-y class="right-scroll">
+      <!-- 分类标题 -->
+      <view class="right-header">
+        <text class="right-title">{{currentCategoryName}}</text>
+      </view>
+
+      <!-- 分类商品列表 -->
+      <view class="category-goods" wx:if="{{currentCategoryGoods.length > 0}}">
+        <view class="goods-item" wx:for="{{currentCategoryGoods}}" wx:key="id" data-id="{{item.id}}" bindtap="onGoodsClick">
+          <image src="{{item.imageUrl || '/assets/icons/default-product.png'}}" class="goods-image" mode="aspectFit"></image>
+          <text class="goods-name">{{item.name}}</text>
+          <text class="goods-price">¥{{item.price}}</text>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:else>
+        <image src="/assets/icons/empty.png" class="empty-image" mode="aspectFit"></image>
+        <text class="empty-text">该分类下暂无商品</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

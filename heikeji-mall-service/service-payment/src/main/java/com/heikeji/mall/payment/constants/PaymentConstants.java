@@ -35,6 +35,8 @@ public class PaymentConstants {
         public static final Integer ALIPAY = 2;
         // 余额支付
         public static final Integer BALANCE_PAY = 3;
+        // 校园卡支付
+        public static final Integer CAMPUS_CARD_PAY = 4;
     }
     
     /**

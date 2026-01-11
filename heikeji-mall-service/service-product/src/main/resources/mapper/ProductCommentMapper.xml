@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.product.mapper.ProductCommentMapper">
+    
+    <!-- 基础查询字段 -->
+    <sql id="Base_Column_List">
+        id, product_id, user_id, username, order_id, score, content, images, 
+        status, reply_status, reply_content, reply_time, create_time, update_time, del_flag
+    </sql>
+    
+    <!-- 获取商品评价统计 -->
+    <select id="getCommentStats" resultType="com.heikeji.mall.product.entity.ProductCommentStats">
+        SELECT
+            p.id,
+            p.product_id,
+            COUNT(c.id) AS total_count,
+            SUM(CASE WHEN c.score = 5 THEN 1 ELSE 0 END) AS five_star_count,
+            SUM(CASE WHEN c.score = 4 THEN 1 ELSE 0 END) AS four_star_count,
+            SUM(CASE WHEN c.score = 3 THEN 1 ELSE 0 END) AS three_star_count,
+            SUM(CASE WHEN c.score = 2 THEN 1 ELSE 0 END) AS two_star_count,
+            SUM(CASE WHEN c.score = 1 THEN 1 ELSE 0 END) AS one_star_count,
+            ROUND(AVG(c.score), 1) AS average_score,
+            SUM(CASE WHEN c.images IS NOT NULL AND c.images != '' THEN 1 ELSE 0 END) AS has_image_count,
+            NOW() AS update_time
+        FROM
+            product p
+        LEFT JOIN
+            product_comment c ON p.id = c.product_id AND c.del_flag = 0 AND c.status = 1
+        WHERE
+            p.id = #{productId}
+        GROUP BY
+            p.id
+    </select>
+    
+    <!-- 获取商品评价列表 -->
+    <select id="getCommentList" resultType="com.heikeji.mall.product.entity.ProductComment">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            product_comment
+        WHERE
+            product_id = #{productId}
+            AND del_flag = 0
+            AND status = 1
+            <if test="score != null">
+                AND score = #{score}
+            </if>
+            <if test="hasImage != null and hasImage == 1">
+                AND images IS NOT NULL AND images != ''
+            </if>
+        ORDER BY
+            create_time DESC
+        LIMIT #{page}, #{size}
+    </select>
+    
+    <!-- 获取用户评价列表 -->
+    <select id="getUserCommentList" resultType="com.heikeji.mall.product.entity.ProductComment">
+        SELECT
+            <include refid="Base_Column_List" />
+        FROM
+            product_comment
+        WHERE
+            user_id = #{userId}
+            AND del_flag = 0
+        ORDER BY
+            create_time DESC
+        LIMIT #{page}, #{size}
+    </select>
+    
+    <!-- 统计评价数量 -->
+    <select id="countComments" resultType="java.lang.Integer">
+        SELECT
+            COUNT(id)
+        FROM
+            product_comment
+        WHERE
+            product_id = #{productId}
+            AND del_flag = 0
+            AND status = 1
+            <if test="score != null">
+                AND score = #{score}
+            </if>
+            <if test="hasImage != null and hasImage == 1">
+                AND images IS NOT NULL AND images != ''
+            </if>
+    </select>
+    
+    <!-- 计算商品评价统计 -->
+    <select id="calculateCommentStats" resultType="java.util.Map">
+        SELECT
+            COUNT(id) AS totalCount,
+            SUM(CASE WHEN score = 5 THEN 1 ELSE 0 END) AS fiveStarCount,
+            SUM(CASE WHEN score = 4 THEN 1 ELSE 0 END) AS fourStarCount,
+            SUM(CASE WHEN score = 3 THEN 1 ELSE 0 END) AS threeStarCount,
+            SUM(CASE WHEN score = 2 THEN 1 ELSE 0 END) AS twoStarCount,
+            SUM(CASE WHEN score = 1 THEN 1 ELSE 0 END) AS oneStarCount,
+            AVG(score) AS averageScore,
+            SUM(CASE WHEN images IS NOT NULL AND images != '' THEN 1 ELSE 0 END) AS hasImageCount
+        FROM
+            product_comment
+        WHERE
+            product_id = #{productId}
+            AND del_flag = 0
+            AND status = 1
+    </select>
+    
+    <!-- 更新商品评价统计 -->
+    <update id="updateCommentStats">
+        INSERT INTO product_comment_stats (product_id, total_count, five_star_count, four_star_count, three_star_count, two_star_count, one_star_count, average_score, has_image_count, update_time)
+        VALUES (
+            #{productId},
+            (SELECT COUNT(id) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT SUM(CASE WHEN score = 5 THEN 1 ELSE 0 END) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT SUM(CASE WHEN score = 4 THEN 1 ELSE 0 END) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT SUM(CASE WHEN score = 3 THEN 1 ELSE 0 END) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT SUM(CASE WHEN score = 2 THEN 1 ELSE 0 END) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT SUM(CASE WHEN score = 1 THEN 1 ELSE 0 END) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT AVG(score) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            (SELECT SUM(CASE WHEN images IS NOT NULL AND images != '' THEN 1 ELSE 0 END) FROM product_comment WHERE product_id = #{productId} AND del_flag = 0 AND status = 1),
+            NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            total_count = VALUES(total_count),
+            five_star_count = VALUES(five_star_count),
+            four_star_count = VALUES(four_star_count),
+            three_star_count = VALUES(three_star_count),
+            two_star_count = VALUES(two_star_count),
+            one_star_count = VALUES(one_star_count),
+            average_score = VALUES(average_score),
+            has_image_count = VALUES(has_image_count),
+            update_time = NOW()
+    </update>
+</mapper>

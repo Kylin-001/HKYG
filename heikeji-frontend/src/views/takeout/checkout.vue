@@ -257,249 +257,227 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+// 导入Vue 3组合式API
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+// 导入Pinia store
+import { useCartStore } from '@/store/modules/cart'
 // 导入日志工具
 import logger from '@/utils/logger'
-import { mapState, mapGetters, mapActions } from 'vuex'
 
-export default {
-  name: 'CheckoutPage',
-  data() {
-    return {
-      // 收货地址相关
-      showAddressDialog: false,
-      selectedAddress: null,
-      addressList: [],
+// 初始化路由
+const router = useRouter()
+// 初始化Pinia store
+const cartStore = useCartStore()
 
-      // 送达时间
-      deliveryTime: 'asap',
-      selectedDeliveryTime: null,
-      deliveryTimePickerOptions: {
-        disabledDate(time) {
-          const today = new Date()
-          today.setHours(0, 0, 0, 0)
-          const maxDate = new Date()
-          maxDate.setDate(maxDate.getDate() + 7) // 最多7天内
-          return time.getTime() < today.getTime() || time.getTime() > maxDate.getTime()
-        },
-        selectableRange: ['09:00:00 - 22:00:00'],
-      },
+// 收货地址相关
+const showAddressDialog = ref(false)
+const selectedAddress = ref(null)
+const addressList = ref([])
 
-      // 订单备注
-      orderRemark: '',
-
-      // 优惠券相关
-      showCouponDialog: false,
-      selectedCoupon: null,
-      availableCoupons: [],
-
-      // 支付方式
-      paymentMethod: 'wechat',
-
-      // 提交状态
-      submitting: false,
-    }
+// 送达时间
+const deliveryTime = ref('asap')
+const selectedDeliveryTime = ref(null)
+const deliveryTimePickerOptions = {
+  disabledDate(time: Date) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const maxDate = new Date()
+    maxDate.setDate(maxDate.getDate() + 7) // 最多7天内
+    return time.getTime() < today.getTime() || time.getTime() > maxDate.getTime()
   },
-
-  computed: {
-    // 从 Vuex 获取购物车数据
-    ...mapState('cart', {
-      cartProducts: 'products',
-    }),
-
-    ...mapGetters('cart', {
-      goodsAmount: 'goodsAmount',
-      totalDeliveryFee: 'totalDeliveryFee',
-      finalAmountGetter: 'finalAmount',
-    }),
-
-    // 按商家分组的购物车商品
-    groupedCartProducts() {
-      const groups = {}
-
-      this.cartProducts.forEach(product => {
-        const { merchantId } = product
-        const { merchantName } = product
-
-        if (!groups[merchantId]) {
-          groups[merchantId] = {
-            merchantId,
-            merchantName,
-            deliveryFee: 2,
-            deliveryTime: 25 + Math.floor(Math.random() * 20), // 25-45分钟
-            products: [],
-          }
-        }
-
-        groups[merchantId].products.push(product)
-      })
-
-      return Object.values(groups)
-    },
-
-    // 最终应付金额
-    finalAmount() {
-      const discount = this.selectedCoupon ? this.selectedCoupon.amount : 0
-      return Math.max(0, this.goodsAmount + this.totalDeliveryFee - discount)
-    },
-
-    // 优惠金额
-    discountAmount() {
-      return this.selectedCoupon ? this.selectedCoupon.amount : 0
-    },
-
-    // 是否可以提交订单
-    canSubmit() {
-      return this.selectedAddress && this.cartProducts.length > 0 && this.finalAmount >= 0
-    },
-  },
-
-  mounted() {
-    this.loadAddresses()
-    this.loadCoupons()
-    this.selectDefaultAddress()
-  },
-
-  methods: {
-    // 加载收货地址
-    loadAddresses() {
-      // 模拟地址数据
-      this.addressList = [
-        {
-          id: 1,
-          name: '张三',
-          phone: '13800138000',
-          province: '北京市',
-          city: '海淀区',
-          area: '中关村大街',
-          detail: '北京大学学生公寓1号楼101室',
-          isDefault: true,
-        },
-        {
-          id: 2,
-          name: '李四',
-          phone: '13900139000',
-          province: '北京市',
-          city: '海淀区',
-          area: '中关村大街',
-          detail: '清华大学东门附近学生宿舍',
-          isDefault: false,
-        },
-      ]
-    },
-
-    // 选择默认地址
-    selectDefaultAddress() {
-      const defaultAddress = this.addressList.find(addr => addr.isDefault)
-      if (defaultAddress) {
-        this.selectedAddress = defaultAddress
-      }
-    },
-
-    // 加载优惠券
-    loadCoupons() {
-      // 模拟优惠券数据
-      this.availableCoupons = [
-        {
-          id: 1,
-          title: '新用户专享',
-          amount: 5,
-          condition: 20,
-          expireDate: '2024-12-31',
-        },
-        {
-          id: 2,
-          title: '满30减8',
-          amount: 8,
-          condition: 30,
-          expireDate: '2024-12-15',
-        },
-        {
-          id: 3,
-          title: '周五特惠',
-          amount: 10,
-          condition: 40,
-          expireDate: '2024-11-30',
-        },
-      ]
-    },
-
-    // 选择地址
-    selectAddress(address) {
-      this.selectedAddress = address
-    },
-
-    // 设为默认地址
-    setDefaultAddress(address) {
-      this.addressList.forEach(addr => {
-        addr.isDefault = addr.id === address.id
-      })
-      this.selectedAddress = address
-    },
-
-    // 添加新地址
-    addNewAddress() {
-      this.$message.info('添加地址功能开发中...')
-    },
-
-    // 选择优惠券
-    selectCoupon(coupon) {
-      this.selectedCoupon = coupon
-    },
-
-    // 确认优惠券选择
-    confirmCoupon() {
-      this.showCouponDialog = false
-    },
-
-    // 提交订单
-    async submitOrder() {
-      if (!this.canSubmit) return
-
-      this.submitting = true
-      try {
-        // 模拟订单提交
-        await new Promise(resolve => setTimeout(resolve, 2000))
-
-        const orderData = {
-          addressId: this.selectedAddress.id,
-          deliveryTime: this.deliveryTime === 'asap' ? 'ASAP' : this.selectedDeliveryTime,
-          remark: this.orderRemark,
-          paymentMethod: this.paymentMethod,
-          couponId: this.selectedCoupon ? this.selectedCoupon.id : null,
-          products: this.cartProducts,
-          totalAmount: this.finalAmount,
-        }
-
-        // 清空购物车
-        this.clearCart()
-
-        // 跳转到订单详情页面
-        this.$router.push({
-          path: '/takeout/order-success',
-          query: { orderNo: `TK${Date.now()}` },
-        })
-
-        this.$message.success('订单提交成功！')
-      } catch (error) {
-        this.$message.error('订单提交失败，请重试')
-        logger.error('订单提交失败', error)
-      } finally {
-        this.submitting = false
-      }
-    },
-
-    // 返回
-    goBack() {
-      this.$router.go(-1)
-    },
-
-    // Vuex actions
-    ...mapActions('cart', {
-      clearCart: 'clearCart',
-    }),
-  },
+  selectableRange: ['09:00:00 - 22:00:00'],
 }
+
+// 订单备注
+const orderRemark = ref('')
+
+// 优惠券相关
+const showCouponDialog = ref(false)
+const selectedCoupon = ref(null)
+const availableCoupons = ref([])
+
+// 支付方式
+const paymentMethod = ref('wechat')
+
+// 提交状态
+const submitting = ref(false)
+
+// 从 Pinia 获取购物车数据
+const cartProducts = computed(() => cartStore.products)
+const goodsAmount = computed(() => cartStore.goodsAmount)
+const totalDeliveryFee = computed(() => cartStore.totalDeliveryFee)
+
+// 按商家分组的购物车商品
+const groupedCartProducts = computed(() => {
+  const groups: Record<string, any> = {}
+
+  cartProducts.value.forEach((product: any) => {
+    const { merchantId, merchantName } = product
+
+    if (!groups[merchantId]) {
+      groups[merchantId] = {
+        merchantId,
+        merchantName,
+        deliveryFee: 2,
+        deliveryTime: 25 + Math.floor(Math.random() * 20), // 25-45分钟
+        products: [],
+      }
+    }
+
+    groups[merchantId].products.push(product)
+  })
+
+  return Object.values(groups)
+})
+
+// 最终应付金额
+const finalAmount = computed(() => {
+  const discount = selectedCoupon.value ? selectedCoupon.value.amount : 0
+  return Math.max(0, goodsAmount.value + totalDeliveryFee.value - discount)
+})
+
+// 优惠金额
+const discountAmount = computed(() => {
+  return selectedCoupon.value ? selectedCoupon.value.amount : 0
+})
+
+// 是否可以提交订单
+const canSubmit = computed(() => {
+  return !!selectedAddress.value && cartProducts.value.length > 0 && finalAmount.value >= 0
+})
+
+// 加载收货地址
+const loadAddresses = () => {
+  // 模拟地址数据
+  addressList.value = [
+    {
+      id: 1,
+      name: '张三',
+      phone: '13800138000',
+      province: '北京市',
+      city: '海淀区',
+      area: '中关村大街',
+      detail: '北京大学学生公寓1号楼101室',
+      isDefault: true,
+    },
+    {
+      id: 2,
+      name: '李四',
+      phone: '13900139000',
+      province: '北京市',
+      city: '海淀区',
+      area: '中关村大街',
+      detail: '清华大学东门附近学生宿舍',
+      isDefault: false,
+    },
+  ]
+}
+
+// 选择默认地址
+const selectDefaultAddress = () => {
+  const defaultAddress = addressList.value.find((addr: any) => addr.isDefault)
+  if (defaultAddress) {
+    selectedAddress.value = defaultAddress
+  }
+}
+
+// 加载优惠券
+const loadCoupons = () => {
+  // 模拟优惠券数据
+  availableCoupons.value = [
+    {
+      id: 1,
+      title: '新用户专享',
+      amount: 5,
+      condition: 20,
+      expireDate: '2024-12-31',
+    },
+    {
+      id: 2,
+      title: '满30减8',
+      amount: 8,
+      condition: 30,
+      expireDate: '2024-12-15',
+    },
+    {
+      id: 3,
+      title: '周五特惠',
+      amount: 10,
+      condition: 40,
+      expireDate: '2024-11-30',
+    },
+  ]
+}
+
+// 选择地址
+const selectAddress = (address: any) => {
+  selectedAddress.value = address
+}
+
+// 设为默认地址
+const setDefaultAddress = (address: any) => {
+  addressList.value.forEach((addr: any) => {
+    addr.isDefault = addr.id === address.id
+  })
+  selectedAddress.value = address
+}
+
+// 添加新地址
+const addNewAddress = () => {
+  ElMessage.info('添加地址功能开发中...')
+}
+
+// 选择优惠券
+const selectCoupon = (coupon: any) => {
+  selectedCoupon.value = coupon
+}
+
+// 确认优惠券选择
+const confirmCoupon = () => {
+  showCouponDialog.value = false
+}
+
+// 提交订单
+const submitOrder = async () => {
+  if (!canSubmit.value) return
+
+  submitting.value = true
+  try {
+    // 模拟订单提交
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // 清空购物车
+    await cartStore.clearCart()
+
+    // 跳转到订单详情页面
+    router.push({
+      path: '/takeout/order-success',
+      query: { orderNo: `TK${Date.now()}` },
+    })
+
+    ElMessage.success('订单提交成功！')
+  } catch (error) {
+    ElMessage.error('订单提交失败，请重试')
+    logger.error('订单提交失败', error)
+  } finally {
+    submitting.value = false
+  }
+}
+
+// 返回
+const goBack = () => {
+  router.go(-1)
+}
+
+// 组件挂载时执行
+onMounted(() => {
+  loadAddresses()
+  loadCoupons()
+  selectDefaultAddress()
+})
 </script>
 
 <style scoped>

@@ -10,6 +10,7 @@ import com.heikeji.mall.takeout.entity.Merchant;
 import com.heikeji.mall.takeout.entity.TakeoutOrder;
 import com.heikeji.mall.takeout.entity.TakeoutOrderItem;
 import com.heikeji.mall.takeout.entity.TakeoutProduct;
+import com.heikeji.mall.takeout.entity.TakeoutDeliveryTrack;
 import com.heikeji.mall.takeout.exception.TakeoutException;
 import com.heikeji.mall.takeout.mapper.DeliveryLockerMapper;
 import com.heikeji.mall.takeout.mapper.MerchantMapper;
@@ -18,8 +19,11 @@ import com.heikeji.mall.takeout.mapper.TakeoutOrderMapper;
 import com.heikeji.mall.takeout.mapper.TakeoutProductMapper;
 import com.heikeji.mall.takeout.service.TakeoutService;
 import com.heikeji.mall.takeout.service.PaymentService;
+import com.heikeji.mall.takeout.service.TakeoutDeliveryTrackService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,8 +61,11 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
 
     @Autowired
     private PaymentService paymentService;
-
+    
+    @Autowired
+    private TakeoutDeliveryTrackService deliveryTrackService;
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"takeoutCache"}, allEntries = true)
     @Override
     public TakeoutOrder createTakeoutOrder(CreateTakeoutOrderDTO dto) {
         // 验证参数
@@ -199,10 +206,19 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
             takeoutProductMapper.updateById(product);
         }
         
+        // 创建初始配送轨迹
+        TakeoutDeliveryTrack track = new TakeoutDeliveryTrack();
+        track.setTakeoutOrderId(order.getId());
+        track.setOrderNo(order.getOrderNo());
+        track.setStatus(order.getStatus());
+        track.setStatusDesc("订单已创建，等待配送员接单");
+        deliveryTrackService.createTrack(track);
+        
         return order;
     }
 
     @Override
+    @Cacheable(value = "takeoutCache", key = "'order_' + #id", unless = "#result == null")
     public TakeoutOrder getTakeoutOrderById(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("订单ID不能为空");
@@ -215,6 +231,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Override
+    @Cacheable(value = "takeoutCache", key = "'user_orders_' + #userId + '_' + (#status == null ? 'all' : #status)")
     public List<TakeoutOrder> getUserTakeoutOrders(Long userId, Integer status) {
         LambdaQueryWrapper<TakeoutOrder> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(TakeoutOrder::getUserId, userId);
@@ -226,6 +243,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"takeoutCache"}, allEntries = true)
     @Override
     public boolean updateOrderStatus(Long orderId, Integer status) {
         if (orderId == null) {
@@ -256,10 +274,17 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
             releaseLockerCell(order.getDeliveryLockerCode());
         }
         
-        return takeoutOrderMapper.updateById(order) > 0;
+        boolean updated = takeoutOrderMapper.updateById(order) > 0;
+        if (updated) {
+            // 添加配送轨迹记录
+            String statusDesc = getStatusDescription(status);
+            deliveryTrackService.updateTrackStatus(order.getId(), status, statusDesc);
+        }
+        return updated;
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"takeoutCache"}, allEntries = true)
     @Override
     public boolean cancelOrder(Long orderId, Long userId) {
         if (orderId == null) {
@@ -299,6 +324,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"takeoutCache"}, allEntries = true)
     @Override
     public boolean acceptOrder(Long orderId, Long deliveryPersonId) {
         if (orderId == null || deliveryPersonId == null) {
@@ -323,6 +349,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"takeoutCache"}, allEntries = true)
     @Override
     public boolean updateDeliveryInfo(Long orderId, Long deliveryPersonId, String deliveryPersonName, String deliveryPersonPhone) {
         if (orderId == null) {
@@ -343,6 +370,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"takeoutCache"}, allEntries = true)
     @Override
     public boolean markAsDelivered(Long orderId) {
         if (orderId == null) {
@@ -366,6 +394,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Override
+    @Cacheable(value = "takeoutCache", key = "'available_lockers'")
     public List<DeliveryLocker> getAvailableLockers() {
         LambdaQueryWrapper<DeliveryLocker> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DeliveryLocker::getStatus, TakeoutConstants.LOCKER_STATUS_NORMAL);
@@ -375,6 +404,7 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
     }
 
     @Override
+    @Cacheable(value = "takeoutCache", key = "'locker_' + #lockerCode", unless = "#result == null")
     public DeliveryLocker getLockerByCode(String lockerCode) {
         if (lockerCode == null || lockerCode.trim().isEmpty()) {
             throw new IllegalArgumentException("外卖柜编码不能为空");
@@ -436,6 +466,22 @@ public class TakeoutServiceImpl extends ServiceImpl<TakeoutOrderMapper, TakeoutO
                 throw new TakeoutException(TakeoutConstants.ERROR_CODE_INVALID_STATUS, "已取消状态不能转换");
             default:
                 throw new TakeoutException(TakeoutConstants.ERROR_CODE_INVALID_STATUS, "无效的当前状态");
+        }
+    }
+    
+    /**
+     * 获取订单状态描述
+     */
+    private String getStatusDescription(Integer status) {
+        switch (status) {
+            case OrderStatusConstant.TAKEOUT_STATUS_PENDING_ACCEPT: return "订单已创建，等待配送员接单";
+            case OrderStatusConstant.TAKEOUT_STATUS_ACCEPTED: return "配送员已接单";
+            case OrderStatusConstant.TAKEOUT_STATUS_DELIVERING: return "订单正在配送中";
+            case OrderStatusConstant.TAKEOUT_STATUS_DELIVERED: return "订单已送达";
+            case OrderStatusConstant.TAKEOUT_STATUS_USER_PICKED: return "用户已取货";
+            case OrderStatusConstant.TAKEOUT_STATUS_TIMEOUT_NOT_PICKED: return "订单超时未取货";
+            case OrderStatusConstant.TAKEOUT_STATUS_CANCELLED: return "订单已取消";
+            default: return "未知状态";
         }
     }
 

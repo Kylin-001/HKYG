@@ -1,0 +1,313 @@
+/* 优惠券详情页面样式 */
+
+/* 页面容器 */
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 头部样式 */
+.header {
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+  height: 88rpx;
+  border-bottom: 1rpx solid #e8e8e8;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header .back-btn {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header .back-btn icon {
+  width: 44rpx;
+  height: 44rpx;
+  color: #333;
+}
+
+.header .title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.header .header-right {
+  width: 44rpx;
+}
+
+/* 优惠券详情内容 */
+.coupon-detail {
+  padding: 20rpx;
+}
+
+/* 优惠券主体信息 */
+.coupon-main {
+  background-color: #fff;
+  border-radius: 12rpx;
+  display: flex;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+}
+
+/* 已使用优惠券样式 */
+.coupon-main.used {
+  opacity: 0.7;
+}
+
+/* 已过期优惠券样式 */
+.coupon-main.expired {
+  opacity: 0.7;
+}
+
+/* 优惠券左侧金额区域 */
+.coupon-left {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  padding: 48rpx 32rpx;
+  width: 220rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* 已使用优惠券左侧区域 */
+.coupon-main.used .coupon-left {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+/* 已过期优惠券左侧区域 */
+.coupon-main.expired .coupon-left {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+/* 金额容器 */
+.amount-container {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 12rpx;
+}
+
+/* 货币符号 */
+.currency-symbol {
+  font-size: 32rpx;
+  font-weight: 400;
+  margin-right: 8rpx;
+}
+
+/* 金额数字 */
+.amount {
+  font-size: 80rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 金额描述 */
+.amount-desc {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+/* 优惠券右侧信息区域 */
+.coupon-right {
+  flex: 1;
+  padding: 32rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 优惠券名称 */
+.coupon-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+/* 优惠券描述 */
+.coupon-desc {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+  line-height: 40rpx;
+  display: block;
+}
+
+/* 优惠券使用条件 */
+.coupon-conditions {
+  margin-bottom: 16rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+/* 条件文本 */
+.condition {
+  font-size: 24rpx;
+  color: #999;
+  background-color: #f5f5f5;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+/* 优惠券有效期 */
+.coupon-expire {
+  display: flex;
+  align-items: center;
+}
+
+/* 有效期标签 */
+.expire-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 8rpx;
+}
+
+/* 有效期日期 */
+.expire-date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 优惠券状态标签 */
+.status-tag {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.status-tag.used {
+  background-color: #e17055;
+  color: #fff;
+}
+
+.status-tag.expired {
+  background-color: #636e72;
+  color: #fff;
+}
+
+/* 操作按钮区域 */
+.action-buttons {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 操作按钮 */
+.action-btn {
+  width: 100%;
+  height: 96rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 12rpx;
+  margin: 0;
+  line-height: 96rpx;
+}
+
+.action-btn.primary {
+  background-color: #1989fa;
+  color: #fff;
+  border: none;
+}
+
+.action-btn.disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  border: 1rpx solid #e8e8e8;
+}
+
+/* 优惠券使用规则 */
+.coupon-rules {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 规则标题 */
+.rules-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+/* 规则内容 */
+.rules-content {
+  padding-left: 8rpx;
+}
+
+/* 规则项 */
+.rule-item {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 44rpx;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+/* 适用范围 */
+.applicable-range {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 适用范围标题 */
+.range-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+/* 适用范围内容 */
+.range-content {
+  padding-left: 8rpx;
+}
+
+/* 适用范围文本 */
+.range-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 40rpx;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}

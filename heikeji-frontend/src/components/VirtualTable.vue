@@ -121,9 +121,8 @@
             ></el-table-column>
 
             <!-- 自定义列 -->
-            <template v-for="column in columns">
+            <template v-for="column in columns" :key="column.key">
               <el-table-column
-                :key="column.key"
                 :prop="column.key"
                 :label="column.label"
                 :width="column.width"
@@ -243,96 +242,96 @@ interface Column {
 }
 
 // 定义props
-const props = defineProps<{
-  // 数据相关
-  data: any[]
-  columns: Column[]
-  total: number
+const props = withDefaults(
+  defineProps<{
+    // 数据相关
+    data: any[]
+    columns: Column[]
+    total: number
 
-  // 配置相关
-  rowKey?: (row: any, index: number) => any
-  rowHeight?: number
-  tableHeight?: number
+    // 配置相关
+    rowKey?: (row: any, index: number) => any
+    rowHeight?: number
+    tableHeight?: number
 
-  // 功能开关
-  showToolbar?: boolean
-  showSearch?: boolean
-  showBatchToolbar?: boolean
-  showSelection?: boolean
-  showIndex?: boolean
-  showActions?: boolean
-  showPagination?: boolean
-  showRefresh?: boolean
-  showAdd?: boolean
-  showExport?: boolean
+    // 功能开关
+    showToolbar?: boolean
+    showSearch?: boolean
+    showBatchToolbar?: boolean
+    showSelection?: boolean
+    showIndex?: boolean
+    showActions?: boolean
+    showPagination?: boolean
+    showRefresh?: boolean
+    showAdd?: boolean
+    showExport?: boolean
 
-  // 分页配置
-  pageSize?: number
-  currentPage?: number
-  pageSizes?: number[]
-  paginationLayout?: string
+    // 分页配置
+    pageSize?: number
+    currentPage?: number
+    pageSizes?: number[]
+    paginationLayout?: string
 
-  // 操作配置
-  actions?: Action[]
-  actionsColumnWidth?: number
-  actionsFixed?: string
-  batchActions?: BatchAction[]
+    // 操作配置
+    actions?: Action[]
+    actionsColumnWidth?: number
+    actionsFixed?: string
+    batchActions?: BatchAction[]
 
-  // 搜索配置
-  searchFields?: SearchField[]
+    // 搜索配置
+    searchFields?: SearchField[]
 
-  // 其他配置
-  loading?: boolean
-  loadingText?: string
+    // 其他配置
+    loading?: boolean
+    loadingText?: string
 
-  // 事件处理函数
-  addHandler?: () => void
-  exportHandler?: () => void
-  refreshHandler?: () => void
-}>()
-
-// 定义默认值
-const defaultProps = {
-  rowKey: (row: any, index: number) => index,
-  rowHeight: 60,
-  tableHeight: 500,
-  total: 0,
-  showToolbar: true,
-  showSearch: false,
-  showBatchToolbar: false,
-  showSelection: false,
-  showIndex: false,
-  showActions: true,
-  showPagination: true,
-  showRefresh: true,
-  showAdd: false,
-  showExport: false,
-  pageSize: 20,
-  currentPage: 1,
-  pageSizes: [10, 20, 50, 100],
-  paginationLayout: 'total, prev, pager, next, jumper',
-  actions: [],
-  actionsColumnWidth: 200,
-  actionsFixed: 'right',
-  batchActions: [],
-  searchFields: [],
-  loading: false,
-  loadingText: '',
-  data: [],
-}
+    // 事件处理函数
+    addHandler?: () => void
+    exportHandler?: () => void
+    refreshHandler?: () => void
+  }>(),
+  {
+    rowKey: (row: any, index: number) => index,
+    rowHeight: 60,
+    tableHeight: 500,
+    total: 0,
+    showToolbar: true,
+    showSearch: false,
+    showBatchToolbar: false,
+    showSelection: false,
+    showIndex: false,
+    showActions: true,
+    showPagination: true,
+    showRefresh: true,
+    showAdd: false,
+    showExport: false,
+    pageSize: 20,
+    currentPage: 1,
+    pageSizes: () => [10, 20, 50, 100],
+    paginationLayout: 'total, prev, pager, next, jumper',
+    actions: () => [],
+    actionsColumnWidth: 200,
+    actionsFixed: 'right',
+    batchActions: () => [],
+    searchFields: () => [],
+    loading: false,
+    loadingText: '',
+    data: () => [],
+  }
+)
 
 // 定义响应式数据
 const tableWrapper = ref<HTMLElement | null>(null)
 const selectedRows = ref<any[]>([])
 const searchForm = reactive<Record<string, any>>({})
 const scrollTop = ref(0)
-const containerHeight = ref(props.tableHeight || defaultProps.tableHeight)
+const containerHeight = ref(props.tableHeight)
 const visibleStart = ref(0)
 const visibleEnd = ref(0)
 
 // 定义computed
 const totalHeight = computed(() => {
-  return (props.data || []).length * (props.rowHeight || defaultProps.rowHeight)
+  return props.data.length * props.rowHeight
 })
 
 const visibleData = computed(() => {
@@ -374,12 +373,10 @@ const initSearchForm = () => {
 
 // 计算可见范围
 const calculateVisibleRange = () => {
-  visibleStart.value = Math.floor(scrollTop.value / (props.rowHeight || defaultProps.rowHeight))
+  visibleStart.value = Math.floor(scrollTop.value / props.rowHeight)
   visibleEnd.value = Math.min(
     (props.data || []).length,
-    visibleStart.value +
-      Math.ceil(containerHeight.value / (props.rowHeight || defaultProps.rowHeight)) +
-      1
+    visibleStart.value + Math.ceil(containerHeight.value / props.rowHeight) + 1
   )
 }
 
@@ -393,12 +390,7 @@ const handleScroll = (event: Event) => {
 
 // 获取列索引
 const getIndex = (index: number) => {
-  return (
-    index +
-    (props.currentPage || defaultProps.currentPage) * (props.pageSize || defaultProps.pageSize) -
-    (props.pageSize || defaultProps.pageSize) +
-    1
-  )
+  return index + props.currentPage * props.pageSize - props.pageSize + 1
 }
 
 // 获取搜索组件
@@ -433,11 +425,19 @@ const formatCellValue = (value: any, column: Column) => {
   }
 
   if (column.type === 'date') {
-    return new Date(value).toLocaleDateString()
+    try {
+      return new Date(value).toLocaleDateString()
+    } catch (error) {
+      return '--'
+    }
   }
 
   if (column.type === 'datetime') {
-    return new Date(value).toLocaleString()
+    try {
+      return new Date(value).toLocaleString()
+    } catch (error) {
+      return '--'
+    }
   }
 
   if (column.type === 'boolean') {
@@ -453,9 +453,7 @@ const handleSelectionChange = (selection: any[]) => {
   const currentRow = selection[selection.length - 1]
   if (currentRow) {
     const index = selectedRows.value.findIndex(
-      row =>
-        (props.rowKey || defaultProps.rowKey)(row) ===
-        (props.rowKey || defaultProps.rowKey)(currentRow)
+      row => props.rowKey(row) === props.rowKey(currentRow)
     )
     if (index > -1) {
       selectedRows.value.splice(index, 1)
@@ -560,9 +558,7 @@ const clearSelection = () => {
 }
 
 const toggleRowSelection = (row: any, selected: boolean) => {
-  const index = selectedRows.value.findIndex(
-    r => (props.rowKey || defaultProps.rowKey)(r) === (props.rowKey || defaultProps.rowKey)(row)
-  )
+  const index = selectedRows.value.findIndex(r => props.rowKey(r) === props.rowKey(row))
   if (selected && index === -1) {
     selectedRows.value.push(row)
   } else if (!selected && index > -1) {

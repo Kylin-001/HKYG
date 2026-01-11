@@ -30,4 +30,44 @@ public interface TakeoutProductService extends IService<TakeoutProduct> {
      */
     TakeoutProduct getProductById(Long productId);
 
+    /**
+     * 创建菜品
+     */
+    boolean createProduct(TakeoutProduct product);
+
+    /**
+     * 更新菜品
+     */
+    boolean updateProduct(TakeoutProduct product);
+
+    /**
+     * 删除菜品
+     */
+    boolean deleteProduct(Long productId);
+
+    /**
+     * 批量删除菜品
+     */
+    boolean batchDeleteProducts(List<Long> productIds);
+
+    /**
+     * 更新菜品状态（上架/下架）
+     */
+    boolean updateProductStatus(Long productId, Integer status);
+
+    /**
+     * 更新菜品库存
+     */
+    boolean updateProductStock(Long productId, Integer stock);
+
+    /**
+     * 批量更新菜品库存
+     */
+    boolean batchUpdateProductStock(List<Long> productIds, Integer stock);
+
+    /**
+     * 更新菜品推荐状态
+     */
+    boolean updateProductRecommendation(Long productId, Integer isRecommended);
+
 }

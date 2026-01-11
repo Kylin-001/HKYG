@@ -1,12 +1,14 @@
 package com.heikeji.mall.takeout.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.heikeji.mall.takeout.entity.DeliveryLocker;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 外卖柜服务接口
  */
-public interface DeliveryLockerService {
+public interface DeliveryLockerService extends IService<DeliveryLocker> {
     
     /**
      * 获取所有可用的外卖柜
@@ -41,4 +43,25 @@ public interface DeliveryLockerService {
 
     /** 编辑外卖柜 */
     boolean update(DeliveryLocker locker);
+
+    /** 删除外卖柜 */
+    boolean delete(Long id);
+
+    /** 批量删除外卖柜 */
+    boolean batchDelete(List<Long> ids);
+
+    /** 更新外卖柜状态 */
+    boolean updateStatus(Long id, Integer status);
+
+    /** 根据ID获取外卖柜详情 */
+    DeliveryLocker getById(Long id);
+
+    /** 根据校区获取外卖柜 */
+    List<DeliveryLocker> getByCampusArea(String campusArea);
+
+    /** 获取外卖柜统计信息 */
+    Map<String, Object> getLockerStats();
+
+    /** 批量更新外卖柜状态 */
+    boolean batchUpdateStatus(List<Long> ids, Integer status);
 }

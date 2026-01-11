@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 外卖柜服务实现类
@@ -233,7 +235,125 @@ public class DeliveryLockerServiceImpl extends ServiceImpl<DeliveryLockerMapper,
         return true;
     }
 
-    // 移除未在接口中定义的deleteDeliveryLocker方法
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean delete(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("外卖柜ID不能为空");
+        }
+        
+        // 检查是否存在
+        DeliveryLocker locker = deliveryLockerMapper.selectById(id);
+        if (locker == null) {
+            throw new TakeoutException(TakeoutConstants.ERROR_CODE_ORDER_NOT_FOUND, "外卖柜不存在");
+        }
+        
+        return deliveryLockerMapper.deleteById(id) > 0;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean batchDelete(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("外卖柜ID列表不能为空");
+        }
+        
+        return deliveryLockerMapper.deleteBatchIds(ids) > 0;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean updateStatus(Long id, Integer status) {
+        if (id == null) {
+            throw new IllegalArgumentException("外卖柜ID不能为空");
+        }
+        if (status == null || (status != 1 && status != 0)) {
+            throw new IllegalArgumentException("无效的状态值，状态必须为0（禁用）或1（可用）");
+        }
+        
+        DeliveryLocker locker = deliveryLockerMapper.selectById(id);
+        if (locker == null) {
+            throw new TakeoutException(TakeoutConstants.ERROR_CODE_ORDER_NOT_FOUND, "外卖柜不存在");
+        }
+        
+        locker.setStatus(status);
+        return deliveryLockerMapper.updateById(locker) > 0;
+    }
+
+    @Override
+    public DeliveryLocker getById(Long id) {
+        return getDeliveryLockerById(id);
+    }
+
+    @Override
+    public List<DeliveryLocker> getByCampusArea(String campusArea) {
+        if (campusArea == null || campusArea.trim().isEmpty()) {
+            throw new IllegalArgumentException("校区不能为空");
+        }
+        LambdaQueryWrapper<DeliveryLocker> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DeliveryLocker::getCampusArea, campusArea);
+        return deliveryLockerMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public Map<String, Object> getLockerStats() {
+        Map<String, Object> stats = new HashMap<>();
+        
+        // 总外卖柜数
+        long total = deliveryLockerMapper.selectCount(null);
+        
+        // 可用外卖柜数
+        LambdaQueryWrapper<DeliveryLocker> availableQuery = new LambdaQueryWrapper<>();
+        availableQuery.eq(DeliveryLocker::getStatus, 1);
+        long available = deliveryLockerMapper.selectCount(availableQuery);
+        
+        // 故障外卖柜数
+        LambdaQueryWrapper<DeliveryLocker> faultQuery = new LambdaQueryWrapper<>();
+        faultQuery.eq(DeliveryLocker::getStatus, 0);
+        long fault = deliveryLockerMapper.selectCount(faultQuery);
+        
+        // 总柜口数
+        long totalCells = 0;
+        // 可用柜口数
+        long availableCells = 0;
+        
+        List<DeliveryLocker> allLockers = deliveryLockerMapper.selectList(null);
+        for (DeliveryLocker locker : allLockers) {
+            totalCells += locker.getTotalCells();
+            availableCells += locker.getAvailableCount();
+        }
+        
+        stats.put("totalLockers", total);
+        stats.put("availableLockers", available);
+        stats.put("faultLockers", fault);
+        stats.put("totalCells", totalCells);
+        stats.put("availableCells", availableCells);
+        stats.put("utilizationRate", totalCells > 0 ? (double) (totalCells - availableCells) / totalCells : 0);
+        
+        return stats;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean batchUpdateStatus(List<Long> ids, Integer status) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("外卖柜ID列表不能为空");
+        }
+        if (status == null || (status != 1 && status != 0)) {
+            throw new IllegalArgumentException("无效的状态值，状态必须为0（禁用）或1（可用）");
+        }
+        
+        // 批量更新状态
+        for (Long id : ids) {
+            DeliveryLocker locker = deliveryLockerMapper.selectById(id);
+            if (locker != null) {
+                locker.setStatus(status);
+                deliveryLockerMapper.updateById(locker);
+            }
+        }
+        
+        return true;
+    }
 
     /**
      * 验证外卖柜信息

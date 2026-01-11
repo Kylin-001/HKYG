@@ -122,83 +122,22 @@
 
     <!-- 商品列表表格 -->
     <el-card class="product-table-card">
-      <el-table
+      <VirtualTable
         v-loading="loading"
         :data="products"
+        :columns="columns"
+        :total="total"
+        :show-selection="true"
+        :show-actions="true"
+        :actions="tableActions"
+        :actions-column-width="180"
+        :row-key="row => row.id"
+        :row-height="60"
+        :table-height="500"
+        :show-pagination="false"
         @selection-change="handleSelectionChange"
-        border
-        style="width: 100%"
-      >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="productName" label="商品名称" min-width="200">
-          <template #default="scope">
-            <div class="product-name">
-              <el-image
-                v-if="scope.row.coverImage"
-                :src="scope.row.coverImage"
-                :preview-src-list="scope.row.images || []"
-                fit="cover"
-                style="width: 40px; height: 40px; margin-right: 10px"
-              />
-              <span>{{ scope.row.productName }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="categoryName" label="分类" width="120" />
-        <el-table-column prop="price" label="价格" width="100" align="right">
-          <template #default="scope"> ¥{{ scope.row.price.toFixed(2) }} </template>
-        </el-table-column>
-        <el-table-column prop="stock" label="库存" width="100" align="center" />
-        <el-table-column prop="sales" label="销量" width="100" align="center" />
-        <el-table-column prop="status" label="状态" width="100" align="center">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-              {{ scope.row.status === 1 ? '上架' : '下架' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="160" />
-        <el-table-column label="操作" width="180" align="center">
-          <template #default="scope">
-            <el-button
-              type="primary"
-              size="small"
-              circle
-              @click="handleView(scope.row.id)"
-              :title="'查看商品: ' + scope.row.productName"
-            >
-              <el-icon><View /></el-icon>
-            </el-button>
-            <el-button
-              type="success"
-              size="small"
-              circle
-              @click="handleEdit(scope.row.id)"
-              :title="'编辑商品: ' + scope.row.productName"
-            >
-              <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-button
-              type="danger"
-              size="small"
-              circle
-              @click="handleDelete(scope.row.id, scope.row.productName)"
-              :title="'删除商品: ' + scope.row.productName"
-            >
-              <el-icon><Delete /></el-icon>
-            </el-button>
-            <el-button
-              :type="scope.row.status === 1 ? 'warning' : 'success'"
-              size="small"
-              circle
-              :title="scope.row.status === 1 ? '下架商品' : '上架商品'"
-            >
-              <el-icon>{{ scope.row.status === 1 ? 'Close' : 'Check' }}</el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+        @action="handleTableAction"
+      />
 
       <!-- 分页 -->
       <div class="pagination-container">
@@ -219,6 +158,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import VirtualTable from '@/components/VirtualTable.vue'
 import { useProductStore } from '@/store/modules/product'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // 导入图标
@@ -234,13 +174,91 @@ import {
   Check,
   Close,
   Delete,
-  View,
-  Edit,
 } from '@element-plus/icons-vue'
 
 // 初始化路由和store
 const router = useRouter()
 const productStore = useProductStore()
+
+// 表格列配置
+const columns = ref([
+  { key: 'id', label: 'ID', width: 80, align: 'center' },
+  {
+    key: 'productName',
+    label: '商品名称',
+    minWidth: 200,
+    formatter: (value: any, row: any) => {
+      return `
+        <div class="product-name">
+          <img 
+            src="${row.coverImage}" 
+            alt="${row.productName}" 
+            class="product-image"
+            style="width: 40px; height: 40px; margin-right: 10px; display: inline-block; vertical-align: middle;"
+          />
+          <span>${row.productName}</span>
+        </div>
+      `
+    },
+  },
+  { key: 'categoryName', label: '分类', width: 120 },
+  {
+    key: 'price',
+    label: '价格',
+    width: 100,
+    align: 'right',
+    formatter: (value: number) => `¥${value.toFixed(2)}`,
+  },
+  { key: 'stock', label: '库存', width: 100, align: 'center' },
+  { key: 'sales', label: '销量', width: 100, align: 'center' },
+  {
+    key: 'status',
+    label: '状态',
+    width: 100,
+    align: 'center',
+    formatter: (value: number) => {
+      return `<el-tag type="${value === 1 ? 'success' : 'danger'}">${value === 1 ? '上架' : '下架'}</el-tag>`
+    },
+  },
+  {
+    key: 'createTime',
+    label: '创建时间',
+    width: 160,
+    formatter: (value: string) => new Date(value).toLocaleString(),
+  },
+])
+
+// 表格操作配置
+const tableActions = ref([
+  {
+    key: 'view',
+    label: '查看',
+    type: 'primary',
+    size: 'small',
+    icon: 'el-icon-view',
+  },
+  {
+    key: 'edit',
+    label: '编辑',
+    type: 'success',
+    size: 'small',
+    icon: 'el-icon-edit',
+  },
+  {
+    key: 'delete',
+    label: '删除',
+    type: 'danger',
+    size: 'small',
+    icon: 'el-icon-delete',
+  },
+  {
+    key: 'toggle-status',
+    label: '切换状态',
+    type: 'warning',
+    size: 'small',
+    icon: 'el-icon-refresh',
+  },
+])
 
 // 搜索参数
 const searchParams = ref({
@@ -379,11 +397,12 @@ const handleDelete = async (id: number, name: string) => {
 
 // 批量删除商品
 const handleBatchDelete = async () => {
-  if (selectedProductIds.value.length === 0) return
+  const currentSelectedIds = [...selectedProductIds.value] // 创建当前选中ID的副本
+  if (currentSelectedIds.length === 0) return
 
   try {
     await ElMessageBox.confirm(
-      `确定要删除选中的${selectedProductIds.value.length}个商品吗？`,
+      `确定要删除选中的${currentSelectedIds.length}个商品吗？`,
       '删除确认',
       {
         confirmButtonText: '确定',
@@ -391,11 +410,10 @@ const handleBatchDelete = async () => {
         type: 'warning',
       }
     )
-    // 这里需要实现批量删除接口，目前store中只有单个删除方法
-    for (const id of selectedProductIds.value) {
-      await productStore.deleteProduct(id)
-    }
+    // 使用Promise.all优化批量删除
+    await Promise.all(currentSelectedIds.map(id => productStore.deleteProduct(id)))
     ElMessage.success('批量删除成功')
+    // eslint-disable-next-line require-atomic-updates
     selectedProductIds.value = []
     loadProductList()
   } catch (error) {
@@ -409,6 +427,27 @@ const handleBatchDelete = async () => {
 const handleExport = () => {
   // 实现导出功能
   ElMessage.info('导出功能开发中')
+}
+
+// 处理表格操作
+const handleTableAction = ({ action, row }: { action: any; row: any }) => {
+  switch (action.key) {
+    case 'view':
+      handleView(row.id)
+      break
+    case 'edit':
+      handleEdit(row.id)
+      break
+    case 'delete':
+      handleDelete(row.id, row.productName)
+      break
+    case 'toggle-status':
+      // 这里可以实现切换状态的逻辑
+      ElMessage.info(`切换商品${row.productName}的状态`)
+      break
+    default:
+      break
+  }
 }
 
 // 分页变化
@@ -432,6 +471,21 @@ onMounted(() => {
 <style scoped>
 .product-list-container {
   padding: 20px;
+}
+
+// 商品图片样式
+.product-image {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+// 商品名称容器
+.product-name {
+  display: flex;
+  align-items: center;
 }
 
 .page-header {

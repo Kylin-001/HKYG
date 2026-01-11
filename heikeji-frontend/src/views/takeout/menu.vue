@@ -91,7 +91,7 @@
                     <!-- 产品图片 -->
                     <div class="product-image">
                       <img
-                        :src="product.image || '/static/images/default-product.jpg'"
+                        v-lazy="product.image || '/static/images/default-product.jpg'"
                         :alt="product.name"
                       />
                       <div class="product-badges">
@@ -236,246 +236,250 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapActions } from 'vuex'
+<script setup lang="ts">
+import { ref, computed, onMounted, watchEffect } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useCartStore } from '@/store/modules/cart'
+import { ElMessage } from 'element-plus'
 
-export default {
-  name: 'MenuPage',
-  data() {
-    return {
-      // 商家信息
-      merchant: {
-        id: 0,
-        name: '',
-        description: '',
-        rating: 0,
-        monthlySales: 0,
-        minOrderAmount: 0,
-        deliveryFee: 0,
-        deliveryTime: 0,
-        image: '',
-      },
+// 初始化路由和状态管理
+const route = useRoute()
+const router = useRouter()
+const cartStore = useCartStore()
 
-      // 分类
-      categories: [
-        { id: 1, name: '招牌主食' },
-        { id: 2, name: '热销菜品' },
-        { id: 3, name: '汤品小食' },
-        { id: 4, name: '饮品甜点' },
-      ],
+// 商家信息
+const merchant = ref({
+  id: 0,
+  name: '',
+  description: '',
+  rating: 0,
+  monthlySales: 0,
+  minOrderAmount: 0,
+  deliveryFee: 0,
+  deliveryTime: 0,
+  image: '',
+})
 
-      // 当前选中的分类
-      activeCategory: '1',
+// 分类
+const categories = ref([
+  { id: 1, name: '招牌主食' },
+  { id: 2, name: '热销菜品' },
+  { id: 3, name: '汤品小食' },
+  { id: 4, name: '饮品甜点' },
+])
 
-      // 菜品列表
-      products: [],
+// 当前选中的分类
+const activeCategory = ref('1')
 
-      // 产品详情对话框
-      productDialogVisible: false,
-      selectedProduct: null,
-      selectedSpec: null,
-      selectedQuantity: 1,
+// 菜品列表
+const products = ref([])
 
-      // 购物车商品数量
-      cartItemCount: 0,
-    }
-  },
+// 产品详情对话框
+const productDialogVisible = ref(false)
+const selectedProduct = ref(null)
+const selectedSpec = ref(null)
+const selectedQuantity = ref(1)
 
-  computed: {
-    // 当前分类的菜品
-    currentProducts() {
-      return this.products.filter(product => product.categoryId.toString() === this.activeCategory)
-    },
+// 购物车商品数量
+const cartItemCount = ref(0)
 
-    // 从 Vuex 获取购物车商品
-    ...mapState('cart', {
-      cartProducts: 'products',
-    }),
-  },
+// 当前分类的菜品
+const currentProducts = computed(() => {
+  return products.value.filter(
+    (product: any) => product.categoryId.toString() === activeCategory.value
+  )
+})
 
-  mounted() {
-    this.loadMerchantInfo()
-    this.loadProducts()
-    this.updateCartCount()
-  },
+// 从 Pinia 获取购物车商品
+const cartProducts = computed(() => cartStore.products)
 
-  methods: {
-    // 加载商家信息
-    loadMerchantInfo() {
-      const { merchantId } = this.$route.params
-      // 模拟商家数据
-      const mockMerchant = {
-        id: merchantId,
-        name: '兰州拉面',
-        description: '正宗兰州拉面，香味浓郁，汤汁鲜美',
-        rating: 4.5,
-        monthlySales: 1200,
-        minOrderAmount: 15,
-        deliveryFee: 2,
-        deliveryTime: 25,
-        image: '/static/images/default-merchant.jpg',
-      }
-      this.merchant = mockMerchant
-    },
+// 监听购物车变化，更新购物车数量
+watchEffect(() => {
+  updateCartCount()
+})
 
-    // 加载菜品
-    loadProducts() {
-      // 模拟菜品数据
-      this.products = this.generateMockProducts()
-    },
-
-    // 生成模拟菜品数据
-    generateMockProducts() {
-      const categories = [1, 2, 3, 4]
-      const productNames = {
-        1: ['牛肉拉面', '羊肉拉面', '鸡蛋拉面', '酸菜牛肉面', '红烧牛肉面'],
-        2: ['宫保鸡丁', '麻婆豆腐', '回锅肉', '鱼香肉丝', '青椒肉丝'],
-        3: ['紫菜蛋花汤', '冬瓜排骨汤', '酸辣汤', '小笼包', '蒸饺'],
-        4: ['柠檬蜂蜜茶', '红豆奶茶', '布丁', '双皮奶', '杨枝甘露'],
-      }
-
-      const products = []
-      let productId = 1
-
-      for (const categoryId of categories) {
-        const names = productNames[categoryId]
-        for (const name of names) {
-          const price = 8 + Math.random() * 20
-          const originalPrice = price + 3 + Math.random() * 5
-
-          products.push({
-            id: productId++,
-            name,
-            description: `精选${name}，新鲜制作，口感丰富`,
-            price: Math.round(price * 100) / 100,
-            originalPrice: Math.round(originalPrice * 100) / 100,
-            categoryId,
-            monthlySales: Math.floor(Math.random() * 500) + 50,
-            stock: Math.floor(Math.random() * 50) + 10,
-            image: '/static/images/default-product.jpg',
-            isRecommended: Math.random() < 0.3,
-            isSpicy: Math.random() < 0.4,
-            isVegetarian: Math.random() < 0.2,
-            specs:
-              categoryId === 1
-                ? [
-                    { id: 1, name: '小份', price: price - 2, stock: 20 },
-                    { id: 2, name: '中份', price, stock: 30 },
-                    { id: 3, name: '大份', price: price + 3, stock: 25 },
-                  ]
-                : [],
-          })
-        }
-      }
-
-      return products
-    },
-
-    // 分类切换
-    handleCategoryChange() {
-      // 可以在这里添加分类切换的逻辑
-    },
-
-    // 选择产品
-    selectProduct(product) {
-      this.selectedProduct = product
-      this.selectedSpec = product.specs && product.specs.length > 0 ? product.specs[0].id : null
-      this.selectedQuantity = 1
-      this.productDialogVisible = true
-    },
-
-    // 添加到购物车
-    addToCart(product) {
-      if (product.specs && product.specs.length > 0) {
-        this.selectProduct(product)
-      } else {
-        this.addProductToCart(product, 1)
-      }
-    },
-
-    // 确认添加到购物车
-    confirmAddToCart() {
-      if (!this.selectedProduct) return
-
-      const spec =
-        this.selectedProduct.specs && this.selectedProduct.specs.length > 0
-          ? this.selectedProduct.specs.find(s => s.id === this.selectedSpec)
-          : null
-
-      const cartProduct = {
-        id: this.selectedProduct.id,
-        name: this.selectedProduct.name,
-        price: spec ? spec.price : this.selectedProduct.price,
-        image: this.selectedProduct.image,
-        merchantId: this.merchant.id,
-        merchantName: this.merchant.name,
-        specId: spec ? spec.id : null,
-        specName: spec ? spec.name : null,
-        stock: spec ? spec.stock : this.selectedProduct.stock,
-      }
-
-      this.addProductToCart(cartProduct, this.selectedQuantity)
-      this.productDialogVisible = false
-    },
-
-    // 添加商品到购物车（Vuex action）
-    ...mapActions('cart', {
-      addProductToCart: 'addProduct',
-    }),
-
-    // 获取购物车中商品数量
-    getCartQuantity(productId) {
-      const product = this.cartProducts.find(p => p.id === productId)
-      return product ? product.quantity : 0
-    },
-
-    // 获取总价
-    getTotalPrice() {
-      if (!this.selectedProduct) return 0
-
-      let basePrice = this.selectedProduct.price
-      if (
-        this.selectedProduct.specs &&
-        this.selectedProduct.specs.length > 0 &&
-        this.selectedSpec
-      ) {
-        const spec = this.selectedProduct.specs.find(s => s.id === this.selectedSpec)
-        if (spec) basePrice = spec.price
-      }
-
-      return (basePrice * this.selectedQuantity).toFixed(2)
-    },
-
-    // 显示购物车数量
-    showCartQuantity(productId) {
-      const quantity = this.getCartQuantity(productId)
-      this.$message.info(`购物车中已有 ${quantity} 份`)
-    },
-
-    // 更新购物车数量
-    updateCartCount() {
-      // 计算购物车商品总数
-      this.cartItemCount = this.cartProducts.reduce((total, product) => {
-        return total + product.quantity
-      }, 0)
-    },
-
-    // 返回
-    goBack() {
-      this.$router.push('/takeout/merchants')
-    },
-  },
-
-  watch: {
-    // 监听购物车变化
-    cartProducts: {
-      handler() {
-        this.updateCartCount()
-      },
-      deep: true,
-    },
-  },
+// 加载商家信息
+const loadMerchantInfo = () => {
+  const { merchantId } = route.params
+  // 模拟商家数据
+  const mockMerchant = {
+    id: merchantId,
+    name: '兰州拉面',
+    description: '正宗兰州拉面，香味浓郁，汤汁鲜美',
+    rating: 4.5,
+    monthlySales: 1200,
+    minOrderAmount: 15,
+    deliveryFee: 2,
+    deliveryTime: 25,
+    image: '/static/images/default-merchant.jpg',
+  }
+  merchant.value = mockMerchant
 }
+
+// 加载菜品
+const loadProducts = () => {
+  // 模拟菜品数据
+  products.value = generateMockProducts()
+}
+
+// 生成模拟菜品数据
+const generateMockProducts = () => {
+  const categories = [1, 2, 3, 4]
+  const productNames = {
+    1: ['牛肉拉面', '羊肉拉面', '鸡蛋拉面', '酸菜牛肉面', '红烧牛肉面'],
+    2: ['宫保鸡丁', '麻婆豆腐', '回锅肉', '鱼香肉丝', '青椒肉丝'],
+    3: ['紫菜蛋花汤', '冬瓜排骨汤', '酸辣汤', '小笼包', '蒸饺'],
+    4: ['柠檬蜂蜜茶', '红豆奶茶', '布丁', '双皮奶', '杨枝甘露'],
+  }
+
+  const products = []
+  let productId = 1
+
+  for (const categoryId of categories) {
+    const names = productNames[categoryId as keyof typeof productNames]
+    for (const name of names) {
+      const price = 8 + Math.random() * 20
+      const originalPrice = price + 3 + Math.random() * 5
+
+      products.push({
+        id: productId++,
+        name,
+        description: `精选${name}，新鲜制作，口感丰富`,
+        price: Math.round(price * 100) / 100,
+        originalPrice: Math.round(originalPrice * 100) / 100,
+        categoryId,
+        monthlySales: Math.floor(Math.random() * 500) + 50,
+        stock: Math.floor(Math.random() * 50) + 10,
+        image: '/static/images/default-product.jpg',
+        isRecommended: Math.random() < 0.3,
+        isSpicy: Math.random() < 0.4,
+        isVegetarian: Math.random() < 0.2,
+        specs:
+          categoryId === 1
+            ? [
+                { id: 1, name: '小份', price: price - 2, stock: 20 },
+                { id: 2, name: '中份', price, stock: 30 },
+                { id: 3, name: '大份', price: price + 3, stock: 25 },
+              ]
+            : [],
+      })
+    }
+  }
+
+  return products
+}
+
+// 分类切换
+const handleCategoryChange = () => {
+  // 可以在这里添加分类切换的逻辑
+}
+
+// 选择产品
+const selectProduct = (product: any) => {
+  selectedProduct.value = product
+  selectedSpec.value = product.specs && product.specs.length > 0 ? product.specs[0].id : null
+  selectedQuantity.value = 1
+  productDialogVisible.value = true
+}
+
+// 添加到购物车
+const addToCart = async (product: any) => {
+  if (product.specs && product.specs.length > 0) {
+    selectProduct(product)
+  } else {
+    await addProductToCart(product, 1)
+  }
+}
+
+// 确认添加到购物车
+const confirmAddToCart = async () => {
+  if (!selectedProduct.value) return
+
+  const spec =
+    selectedProduct.value.specs && selectedProduct.value.specs.length > 0
+      ? selectedProduct.value.specs.find((s: any) => s.id === selectedSpec.value)
+      : null
+
+  const cartProduct = {
+    productId: selectedProduct.value.id,
+    quantity: selectedQuantity.value,
+    specification: spec ? spec.name : '',
+  }
+
+  try {
+    await cartStore.addProduct(cartProduct)
+    productDialogVisible.value = false
+    ElMessage.success('商品已加入购物车')
+  } catch (error) {
+    ElMessage.error('添加到购物车失败')
+    console.error('添加到购物车失败:', error)
+  }
+}
+
+// 添加商品到购物车（Pinia action）
+const addProductToCart = async (product: any, quantity: number) => {
+  try {
+    await cartStore.addProduct({
+      productId: product.id,
+      quantity,
+      specification: '',
+    })
+    ElMessage.success('商品已加入购物车')
+  } catch (error) {
+    ElMessage.error('添加到购物车失败')
+    console.error('添加到购物车失败:', error)
+  }
+}
+
+// 获取购物车中商品数量
+const getCartQuantity = (productId: number) => {
+  const product = cartProducts.value.find((p: any) => p.productId === productId)
+  return product ? product.quantity : 0
+}
+
+// 获取总价
+const getTotalPrice = () => {
+  if (!selectedProduct.value) return 0
+
+  let basePrice = selectedProduct.value.price
+  if (selectedProduct.value.specs && selectedProduct.value.specs.length > 0 && selectedSpec.value) {
+    const spec = selectedProduct.value.specs.find((s: any) => s.id === selectedSpec.value)
+    if (spec) basePrice = spec.price
+  }
+
+  return (basePrice * selectedQuantity.value).toFixed(2)
+}
+
+// 显示购物车数量
+const showCartQuantity = (productId: number) => {
+  const quantity = getCartQuantity(productId)
+  ElMessage.info(`购物车中已有 ${quantity} 份`)
+}
+
+// 更新购物车数量
+const updateCartCount = () => {
+  // 计算购物车商品总数
+  cartItemCount.value = cartProducts.value.reduce((total: number, product: any) => {
+    return total + product.quantity
+  }, 0)
+}
+
+// 返回
+const goBack = () => {
+  router.push('/takeout/merchants')
+}
+
+// 组件挂载时执行
+onMounted(() => {
+  loadMerchantInfo()
+  loadProducts()
+  updateCartCount()
+})
+
+// 监听购物车变化
+watchEffect(() => {
+  updateCartCount()
+})
 </script>
 
 <style scoped>

@@ -1,0 +1,147 @@
+<!-- pages/activity/detail/index.wxml -->
+<view class="detail-container">
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 活动详情 -->
+  <view class="activity-detail" wx:else>
+    <!-- 活动封面 -->
+    <image class="activity-cover" src="{{activityDetail.cover || '/assets/images/default-activity.jpg'}}" mode="aspectFill"></image>
+
+    <!-- 活动标题 -->
+    <view class="activity-header">
+      <text class="activity-title">{{activityDetail.title}}</text>
+      <view class="status-tag {{activityDetail.status}}">
+        <text>{{activityDetail.status === 'upcoming' ? '即将开始' : activityDetail.status === 'ongoing' ? '进行中' : '已结束'}}</text>
+      </view>
+    </view>
+
+    <!-- 活动基本信息 -->
+    <view class="activity-info">
+      <view class="info-item">
+        <image class="info-icon" src="/assets/icons/calendar.png" mode="aspectFit"></image>
+        <view class="info-content">
+          <text class="info-label">活动时间</text>
+          <text class="info-value">{{activityDetail.startTime}} 至 {{activityDetail.endTime}}</text>
+        </view>
+      </view>
+      <view class="info-item">
+        <image class="info-icon" src="/assets/icons/location.png" mode="aspectFit"></image>
+        <view class="info-content">
+          <text class="info-label">活动地点</text>
+          <text class="info-value">{{activityDetail.location}}</text>
+        </view>
+      </view>
+      <view class="info-item">
+        <image class="info-icon" src="/assets/icons/user.png" mode="aspectFit"></image>
+        <view class="info-content">
+          <text class="info-label">组织方</text>
+          <text class="info-value">{{activityDetail.organizer}}</text>
+        </view>
+      </view>
+      <view class="info-item">
+        <image class="info-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>
+        <view class="info-content">
+          <text class="info-label">联系方式</text>
+          <text class="info-value">{{activityDetail.contact}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 互动按钮 -->
+    <view class="action-bar">
+      <view class="action-item">
+        <image class="action-icon" src="/assets/icons/user-group.png" mode="aspectFit"></image>
+        <text class="action-text">{{joinedCount}}/{{activityDetail.maxParticipants}} 人报名</text>
+      </view>
+      <view class="action-item">
+        <image class="action-icon {{isFavorited ? 'active' : ''}}" src="/assets/icons/favorite.png" mode="aspectFit"></image>
+        <text class="action-text {{isFavorited ? 'active' : ''}}">{{favoriteCount}} 收藏</text>
+      </view>
+    </view>
+
+    <!-- 主要操作按钮 -->
+    <view class="main-actions">
+      <view class="action-btn join-btn" wx:if="{{!isJoined && activityDetail.status !== 'ended'}}" bindtap="onJoinActivity">
+        <text>立即报名</text>
+      </view>
+      <view class="action-btn cancel-btn" wx:elif="{{isJoined && activityDetail.status !== 'ended'}}" bindtap="onCancelJoin">
+        <text>取消报名</text>
+      </view>
+      <view class="action-btn ended-btn" wx:else>
+        <text>活动已结束</text>
+      </view>
+      <view class="action-btn sign-btn" wx:if="{{isJoined && activityDetail.status === 'ongoing'}}" bindtap="onSignActivity">
+        <text>立即签到</text>
+      </view>
+      <view class="action-btn favorite-btn" bindtap="onFavoriteActivity">
+        <text>{{isFavorited ? '取消收藏' : '收藏活动'}}</text>
+      </view>
+    </view>
+
+    <!-- 活动描述 -->
+    <view class="activity-description">
+      <view class="section-title">
+        <text>活动详情</text>
+      </view>
+      <text class="description-text">{{activityDetail.description}}</text>
+    </view>
+
+    <!-- 评论区域 -->
+    <view class="comments-section">
+      <view class="section-title">
+        <text>用户评论</text>
+      </view>
+
+      <view class="comments-list">
+        <view 
+          class="comment-item" 
+          wx:for="{{comments}}" 
+          wx:key="id"
+        >
+          <image class="comment-avatar" src="{{item.avatar || '/assets/images/default-avatar.png'}}" mode="aspectFit"></image>
+          <view class="comment-content">
+            <view class="comment-header">
+              <text class="comment-author">{{item.author}}</text>
+              <text class="comment-time">{{item.createTime}}</text>
+            </view>
+            <text class="comment-text">{{item.content}}</text>
+            <view class="comment-rating" wx:if="{{item.rating}}">
+              <text class="rating-label">评分：</text>
+              <view class="stars">
+                <text class="star {{index < item.rating ? 'active' : ''}}" wx:for="[1, 2, 3, 4, 5]" wx:key="*this">★</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载更多评论 -->
+      <view class="loading-more" wx:if="{{commentLoading}}">
+        <text>加载中...</text>
+      </view>
+      <view class="no-more" wx:if="{{!hasMoreComments && comments.length > 0}}">
+        <text>没有更多评论了</text>
+      </view>
+      <view class="empty-comments" wx:if="{{!commentLoading && comments.length === 0}}">
+        <text>暂无评论，快来发表你的看法吧~</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评论输入框 -->
+  <view class="comment-input-bar">
+    <input 
+      class="comment-input" 
+      placeholder="写下你的评论..." 
+      value="{{commentContent}}" 
+      bindinput="onCommentInput" 
+      bindconfirm="onSubmitComment"
+    ></input>
+    <view class="submit-btn" bindtap="onSubmitComment">
+      <text>发送</text>
+    </view>
+  </view>
+</view>

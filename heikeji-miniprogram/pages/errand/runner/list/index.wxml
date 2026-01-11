@@ -1,0 +1,114 @@
+<!-- 跑腿员接单页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left" bindtap="onBack">
+      <image src="/assets/icons/back.png" class="back-icon" mode="aspectFit"></image>
+    </view>
+    <text class="header-title">任务列表</text>
+    <view class="header-right"></view>
+  </view>
+
+  <!-- 筛选条件 -->
+  <view class="filter-section">
+    <view class="filter-row">
+      <view class="filter-item">
+        <text class="filter-label">任务类型</text>
+        <picker bindchange="onTypeChange" value="{{typeIndex}}" range="{{taskTypes}}">
+          <view class="filter-picker">
+            <text>{{taskTypes[typeIndex]}}</text>
+            <image src="/assets/icons/arrow-down.png" class="filter-arrow" mode="aspectFit"></image>
+          </view>
+        </picker>
+      </view>
+      <view class="filter-item">
+        <text class="filter-label">任务状态</text>
+        <picker bindchange="onStatusChange" value="{{statusIndex}}" range="{{taskStatuses}}">
+          <view class="filter-picker">
+            <text>{{taskStatuses[statusIndex]}}</text>
+            <image src="/assets/icons/arrow-down.png" class="filter-arrow" mode="aspectFit"></image>
+          </view>
+        </picker>
+      </view>
+    </view>
+    
+    <!-- 搜索框 -->
+    <view class="search-box">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit"></image>
+      <input 
+        class="search-input" 
+        placeholder="搜索任务" 
+        placeholder-class="search-placeholder"
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      ></input>
+      <image src="/assets/icons/clear.png" class="clear-icon" mode="aspectFit" wx:if="{{searchKeyword}}" bindtap="onClearSearch"></image>
+    </view>
+  </view>
+
+  <!-- 任务列表 -->
+  <scroll-view class="task-list" scroll-y bindscrolltolower="onLoadMore">
+    <!-- 任务项 -->
+    <block wx:for="{{taskList}}" wx:key="id">
+      <view class="task-item">
+        <!-- 任务类型标签 -->
+        <view class="task-type-tag" style="background-color: {{item.typeColor}}">
+          {{item.typeName}}
+        </view>
+        
+        <!-- 任务内容 -->
+        <view class="task-content" bindtap="goToTaskDetail" data-id="{{item.id}}">
+          <!-- 任务标题和价格 -->
+          <view class="task-header">
+            <text class="task-title">{{item.title}}</text>
+            <text class="task-price">¥{{item.price}}</text>
+          </view>
+          
+          <!-- 任务描述 -->
+          <text class="task-description">{{item.description}}</text>
+          
+          <!-- 任务地点 -->
+          <view class="task-locations">
+            <view class="location-item">
+              <image src="/assets/icons/pickup.png" class="location-icon" mode="aspectFit"></image>
+              <text class="location-text">{{item.pickupLocation}}</text>
+            </view>
+            <image src="/assets/icons/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+            <view class="location-item">
+              <image src="/assets/icons/delivery.png" class="location-icon" mode="aspectFit"></image>
+              <text class="location-text">{{item.deliveryLocation}}</text>
+            </view>
+          </view>
+          
+          <!-- 任务信息 -->
+          <view class="task-info">
+            <text class="info-item">{{item.createTime}}</text>
+            <text class="info-item">{{item.distance}}km</text>
+          </view>
+        </view>
+        
+        <!-- 操作按钮 -->
+        <view class="task-actions">
+          <view class="action-btn primary" bindtap="claimTask" data-id="{{item.id}}">接单</view>
+        </view>
+      </view>
+    </block>
+    
+    <!-- 空列表提示 -->
+    <view class="empty-list" wx:if="{{taskList.length === 0}}">
+      <image src="/assets/icons/empty-task.png" class="empty-icon" mode="aspectFit"></image>
+      <text class="empty-text">暂无任务</text>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view class="loading-more" wx:if="{{hasMore}}">
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <!-- 没有更多数据 -->
+    <view class="no-more" wx:if="{{!hasMore && taskList.length > 0}}">
+      <text class="no-more-text">没有更多任务了</text>
+    </view>
+  </scroll-view>
+</view>

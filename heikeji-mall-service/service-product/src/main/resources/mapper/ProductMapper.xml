@@ -33,7 +33,7 @@
 
     <update id="updateStock">
         update product set stock = stock + #{quantity}, update_time = now() 
-        where id = #{id} and (stock + #{quantity}) >= 0
+        where id = #{id} and (stock + #{quantity}) &gt;= 0
     </update>
     
     <!-- 锁定库存 -->
@@ -44,7 +44,7 @@
             update_time = now(),
             version = version + 1
         where id = #{id} 
-            and stock >= #{quantity} 
+            and stock &gt;= #{quantity} 
             and version = #{version}
     </update>
     
@@ -52,11 +52,11 @@
     <update id="unlockStock">
         update product set 
             stock = stock + #{quantity}, 
-            locked_stock = case when locked_stock >= #{quantity} then locked_stock - #{quantity} else 0 end, 
+            locked_stock = case when locked_stock &gt;= #{quantity} then locked_stock - #{quantity} else 0 end, 
             update_time = now(),
             version = version + 1
         where id = #{id}
-            and locked_stock >= #{quantity}
+            and locked_stock &gt;= #{quantity}
             and version = #{version}
     </update>
 
@@ -72,14 +72,14 @@
             version = version + 1, 
             update_time = now() 
         where id = #{id} 
-            and locked_stock >= #{quantity} 
+            and locked_stock &gt;= #{quantity} 
             and version = #{version}
     </update>
     
     <update id="restoreStock">
         update product set 
             stock = stock + #{quantity}, 
-            sales = case when sales >= #{quantity} then sales - #{quantity} else 0 end, 
+            sales = case when sales &gt;= #{quantity} then sales - #{quantity} else 0 end, 
             version = version + 1, 
             update_time = now() 
         where id = #{id}
@@ -133,18 +133,25 @@
     
     <!-- 根据用户个性化信息推荐商品 -->
     <select id="selectPersonalizedRecommendProducts" resultType="com.heikeji.mall.product.entity.Product">
-        select p.*
+        select p.*, 
+            -- 计算商品与用户购买历史的相关性分数
+            (case 
+                when exists (select 1 from `order` o join order_item oi on o.order_no = oi.order_no where o.user_id = #{userId} and oi.product_id = p.id) then 100
+                when exists (select 1 from `order` o join order_item oi on o.order_no = oi.order_no join product op on oi.product_id = op.id where o.user_id = #{userId} and op.category_id = p.category_id) then 50
+                else 0
+            end) as relevance_score
         from product p
         where p.del_flag = 0 and p.status = 1
         <if test="excludedProductIds != null and !excludedProductIds.isEmpty()">
             and p.id not in <foreach item="id" collection="excludedProductIds" open="(" separator="," close=")">#{id}</foreach>
         </if>
-        <!-- 优先推荐用户浏览过的相同分类的商品 -->
+        <!-- 优先推荐用户浏览和购买过的相同分类的商品 -->
         <if test="categoryIds != null and !categoryIds.isEmpty()">
             and p.category_id in <foreach item="cid" collection="categoryIds" open="(" separator="," close=")">#{cid}</foreach>
         </if>
-        <!-- 按相关性排序：销量、是否推荐、更新时间 -->
+        <!-- 按相关性排序：相关性分数、分类匹配度、销量、是否推荐、更新时间 -->
         order by 
+            relevance_score desc,
             <if test="categoryIds != null and !categoryIds.isEmpty()">
                 field(p.category_id, <foreach item="cid" collection="categoryIds" separator=",">#{cid}</foreach>),
             </if>
@@ -204,16 +211,16 @@
         
         <!-- 价格区间 -->
         <if test="search.minPrice != null">
-            and price >= #{search.minPrice}
+            and price &gt;= #{search.minPrice}
         </if>
         
         <if test="search.maxPrice != null">
-            and price <= #{search.maxPrice}
+            and price &lt;= #{search.maxPrice}
         </if>
         
         <!-- 库存筛选 -->
         <if test="search.hasStock != null and search.hasStock == true">
-            and stock > 0
+            and stock &gt; 0
         </if>
         
         <!-- 新品筛选 -->
@@ -227,38 +234,27 @@
         </if>
         
         <!-- 排序 -->
-        <choose>
-            <when test="search.sortBy != null and search.sortOrder != null">
+        order by 
+            <if test="search.sortBy != null and search.sortOrder != null">
                 <choose>
                     <when test="search.sortBy == 'price'">
-                        order by price ${search.sortOrder},
-                                sort_order asc, update_time desc
+                        price <if test="search.sortOrder == 'desc'">desc</if><if test="search.sortOrder == 'asc'">asc</if>,
                     </when>
                     <when test="search.sortBy == 'sales'">
-                        order by sales ${search.sortOrder},
-                                sort_order asc, update_time desc
+                        sales <if test="search.sortOrder == 'desc'">desc</if><if test="search.sortOrder == 'asc'">asc</if>,
                     </when>
                     <when test="search.sortBy == 'update_time'">
-                        order by update_time ${search.sortOrder},
-                                sort_order asc
+                        update_time <if test="search.sortOrder == 'desc'">desc</if><if test="search.sortOrder == 'asc'">asc</if>,
                     </when>
                     <when test="search.sortBy == 'create_time'">
-                        order by create_time ${search.sortOrder},
-                                sort_order asc
+                        create_time <if test="search.sortOrder == 'desc'">desc</if><if test="search.sortOrder == 'asc'">asc</if>,
                     </when>
                     <when test="search.sortBy == 'stock'">
-                        order by stock ${search.sortOrder},
-                                sort_order asc, update_time desc
+                        stock <if test="search.sortOrder == 'desc'">desc</if><if test="search.sortOrder == 'asc'">asc</if>,
                     </when>
-                    <otherwise>
-                        order by sort_order asc, update_time desc
-                    </otherwise>
                 </choose>
-            </when>
-            <otherwise>
-                order by sort_order asc, update_time desc
-            </otherwise>
-        </choose>
+            </if>
+            sort_order asc, update_time desc
     </select>
     
     <!-- 根据分类和子分类查询商品 -->

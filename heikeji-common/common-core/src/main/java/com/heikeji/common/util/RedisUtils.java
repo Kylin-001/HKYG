@@ -3,7 +3,7 @@ package com.heikeji.common.util;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**

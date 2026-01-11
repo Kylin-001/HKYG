@@ -1,0 +1,250 @@
+/* 校园地图页面样式 */
+
+.page-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  background-color: #fff;
+  padding: 0 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.back-btn {
+  padding: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-right {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.location-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* 地图容器 */
+.map-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+}
+
+/* 建筑分类选择 */
+.building-categories {
+  background-color: #fff;
+  padding: 10px 16px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.categories-scroll {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+
+.category-item {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.category-item.active {
+  background-color: #3cc51f;
+  color: #fff;
+}
+
+/* 建筑列表 */
+.building-list {
+  position: absolute;
+  bottom: 70px;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 5;
+}
+
+.building-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.building-item:last-child {
+  border-bottom: none;
+}
+
+.building-name {
+  font-size: 16px;
+  color: #333;
+}
+
+.building-type {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 建筑详情弹窗 */
+.building-detail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+.detail-content {
+  background-color: #fff;
+  width: 100%;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.detail-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+}
+
+.close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border-radius: 50%;
+  margin-left: 15px;
+}
+
+.close-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.detail-info {
+  margin-bottom: 25px;
+}
+
+.info-item {
+  display: block;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #3cc51f;
+  color: #fff;
+  border: none;
+  outline: none;
+}
+
+.action-btn.secondary {
+  background-color: #fff;
+  color: #3cc51f;
+  border: 1px solid #3cc51f;
+}
+
+/* 加载状态 */
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.loading text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* 适配不同屏幕尺寸 */
+@media (max-width: 375px) {
+  .category-item {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .detail-title {
+    font-size: 18px;
+  }
+  
+  .info-item {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .detail-content {
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 16px;
+    margin-bottom: 100px;
+  }
+}

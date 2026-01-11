@@ -235,10 +235,26 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
      * 创建UserDetails对象
      */
     private UserDetails createUserDetails(AdminUser user) {
-        // TODO: 从数据库获取用户权限
+        // 从roleIds字段获取角色ID列表
+        Set<String> authorities = new HashSet<>();
+        
+        // 添加默认管理员角色和权限
+        authorities.add("ROLE_ADMIN");
+        authorities.add("*:*:*");
+        
+        // 解析roleIds获取具体角色权限（这里可以根据实际需求从数据库查询）
+        if (StringUtils.hasText(user.getRoleIds())) {
+            String[] roleIdArray = user.getRoleIds().split(",");
+            // 这里可以根据角色ID从数据库查询对应的权限
+            // 暂时添加角色标识作为权限
+            for (String roleId : roleIdArray) {
+                authorities.add("ROLE_" + roleId);
+            }
+        }
+        
         return User.withUsername(user.getUsername())
                 .password(user.getPassword())
-                .authorities("ROLE_ADMIN", "*:*:*")
+                .authorities(authorities.toArray(new String[0]))
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)

@@ -3,6 +3,8 @@ package com.heikeji.mall.product.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.heikeji.common.core.annotation.RateLimiter;
 import com.heikeji.common.core.domain.R;
+import com.heikeji.mall.product.dto.ProductDetailVO;
+import com.heikeji.mall.product.dto.ProductListVO;
 import com.heikeji.mall.product.dto.ProductSearchDTO;
 import com.heikeji.mall.product.entity.Product;
 import com.heikeji.mall.product.entity.ProductHotWord;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 商品控制器
@@ -35,7 +38,7 @@ public class ProductController {
     @GetMapping("/page")
     @ApiOperation("分页查询商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
-    public R<Page<Product>> pageQuery(
+    public R<Page<ProductListVO>> pageQuery(
             @RequestParam Integer pageNo,
             @RequestParam Integer pageSize,
             @RequestParam(required = false) String keyword,
@@ -49,7 +52,34 @@ public class ProductController {
         product.setMerchantId(merchantId);
         product.setStatus(status);
         Page<Product> result = productService.pageProduct(page, product);
-        return R.success(result);
+        
+        // 转换为ProductListVO列表
+        Page<ProductListVO> voPage = new Page<>();
+        voPage.setCurrent(result.getCurrent());
+        voPage.setSize(result.getSize());
+        voPage.setTotal(result.getTotal());
+        voPage.setPages(result.getPages());
+        
+        List<ProductListVO> voList = result.getRecords().stream().map(item -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(item.getId());
+            vo.setMerchantId(item.getMerchantId());
+            vo.setCategoryId(item.getCategoryId());
+            vo.setName(item.getName());
+            vo.setSubtitle(item.getSubtitle());
+            vo.setMainImage(item.getMainImage());
+            vo.setPrice(item.getPrice());
+            vo.setOriginalPrice(item.getOriginalPrice());
+            vo.setStock(item.getStock());
+            vo.setSales(item.getSales());
+            vo.setStatus(item.getStatus());
+            vo.setIsNew(item.getIsNew());
+            vo.setIsRecommend(item.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        
+        voPage.setRecords(voList);
+        return R.success(voPage);
     }
 
     /**
@@ -58,9 +88,29 @@ public class ProductController {
     @GetMapping("/detail/{id}")
     @ApiOperation("查询商品详情")
     @RateLimiter(timeWindow = 1, maxCount = 50)
-    public R<Product> getProductDetail(@PathVariable Long id) {
+    public R<ProductDetailVO> getProductDetail(@PathVariable Long id) {
         Product product = productService.getById(id);
-        return R.success(product);
+        ProductDetailVO vo = new ProductDetailVO();
+        // 手动转换
+        vo.setId(product.getId());
+        vo.setMerchantId(product.getMerchantId());
+        vo.setCategoryId(product.getCategoryId());
+        vo.setName(product.getName());
+        vo.setSubtitle(product.getSubtitle());
+        vo.setMainImage(product.getMainImage());
+        vo.setImages(product.getImages());
+        vo.setPrice(product.getPrice());
+        vo.setOriginalPrice(product.getOriginalPrice());
+        vo.setStock(product.getStock());
+        vo.setLockedStock(product.getLockedStock());
+        vo.setSales(product.getSales());
+        vo.setDetail(product.getDetail());
+        vo.setStatus(product.getStatus());
+        vo.setIsNew(product.getIsNew());
+        vo.setIsRecommend(product.getIsRecommend());
+        vo.setCreateTime(product.getCreateTime());
+        vo.setUpdateTime(product.getUpdateTime());
+        return R.success(vo);
     }
 
     /**
@@ -69,9 +119,27 @@ public class ProductController {
     @GetMapping("/category/{categoryId}")
     @ApiOperation("根据分类查询商品")
     @RateLimiter(timeWindow = 1, maxCount = 40)
-    public R<List<Product>> getProductsByCategory(@PathVariable Long categoryId) {
+    public R<List<ProductListVO>> getProductsByCategory(@PathVariable Long categoryId) {
         List<Product> products = productService.getByCategoryId(categoryId);
-        return R.success(products);
+        // 转换为ProductListVO列表
+        List<ProductListVO> voList = products.stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        return R.success(voList);
     }
 
     /**
@@ -151,12 +219,7 @@ public class ProductController {
     @ApiOperation("批量删除商品")
     @RateLimiter(timeWindow = 1, maxCount = 5)
     public R<Boolean> deleteBatch(@RequestBody List<Long> ids) {
-        for (Long id : ids) {
-            Product product = new Product();
-            product.setId(id);
-            product.setDelFlag(1);
-            productService.updateById(product);
-        }
+        productService.batchDeleteByIds(ids);
         return R.success(true);
     }
     
@@ -166,7 +229,7 @@ public class ProductController {
     @PostMapping("/advancedSearch")
     @ApiOperation("高级搜索商品")
     @RateLimiter(timeWindow = 1, maxCount = 20)
-    public R<Page<Product>> advancedSearch(
+    public R<Page<ProductListVO>> advancedSearch(
             @RequestParam(defaultValue = "1") Integer pageNo,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestBody ProductSearchDTO searchDTO) {
@@ -176,7 +239,34 @@ public class ProductController {
         }
         Page<Product> page = new Page<>(pageNo, pageSize);
         Page<Product> result = productService.advancedSearch(page, searchDTO);
-        return R.success(result);
+        
+        // 转换为ProductListVO
+        Page<ProductListVO> voPage = new Page<>();
+        voPage.setCurrent(result.getCurrent());
+        voPage.setSize(result.getSize());
+        voPage.setTotal(result.getTotal());
+        voPage.setPages(result.getPages());
+        
+        List<ProductListVO> voList = result.getRecords().stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        
+        voPage.setRecords(voList);
+        return R.success(voPage);
     }
     
     /**
@@ -185,9 +275,27 @@ public class ProductController {
     @GetMapping("/listByCategoryAndChildren/{categoryId}")
     @ApiOperation("获取分类及其子分类下的商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 40)
-    public R<List<Product>> listByCategoryAndChildren(@PathVariable Long categoryId) {
+    public R<List<ProductListVO>> listByCategoryAndChildren(@PathVariable Long categoryId) {
         List<Product> productList = productService.getByCategoryAndChildren(categoryId);
-        return R.success(productList);
+        // 转换为ProductListVO列表
+        List<ProductListVO> voList = productList.stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        return R.success(voList);
     }
     
     /**
@@ -196,10 +304,28 @@ public class ProductController {
     @GetMapping("/hotList")
     @ApiOperation("获取热门商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
-    public R<List<Product>> hotList(
+    public R<List<ProductListVO>> hotList(
             @RequestParam(defaultValue = "10") Integer limit) {
         List<Product> hotProducts = productService.getHotProductList(limit);
-        return R.success(hotProducts);
+        // 转换为ProductListVO列表
+        List<ProductListVO> voList = hotProducts.stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        return R.success(voList);
     }
     
     /**
@@ -208,10 +334,28 @@ public class ProductController {
     @GetMapping("/newList")
     @ApiOperation("获取新品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
-    public R<List<Product>> newList(
+    public R<List<ProductListVO>> newList(
             @RequestParam(defaultValue = "10") Integer limit) {
         List<Product> newProducts = productService.getNewProductList(limit);
-        return R.success(newProducts);
+        // 转换为ProductListVO列表
+        List<ProductListVO> voList = newProducts.stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        return R.success(voList);
     }
     
     /**
@@ -220,10 +364,28 @@ public class ProductController {
     @GetMapping("/recommendList")
     @ApiOperation("获取推荐商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
-    public R<List<Product>> recommendList(
+    public R<List<ProductListVO>> recommendList(
             @RequestParam(defaultValue = "10") Integer limit) {
         List<Product> recommendProducts = productService.getRecommendProductList(limit);
-        return R.success(recommendProducts);
+        // 转换为ProductListVO列表
+        List<ProductListVO> voList = recommendProducts.stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        return R.success(voList);
     }
     
     /**
@@ -232,11 +394,29 @@ public class ProductController {
     @GetMapping("/personalizedRecommendList")
     @ApiOperation("获取个性化推荐商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
-    public R<List<Product>> getPersonalizedRecommendProductList(
+    public R<List<ProductListVO>> getPersonalizedRecommendProductList(
             @RequestParam(defaultValue = "10") Integer limit,
             @RequestParam(required = false) Long userId) {
         List<Product> personalizedRecommendProducts = productService.getPersonalizedRecommendProductList(userId, limit);
-        return R.success(personalizedRecommendProducts);
+        // 转换为ProductListVO列表
+        List<ProductListVO> voList = personalizedRecommendProducts.stream().map(product -> {
+            ProductListVO vo = new ProductListVO();
+            vo.setId(product.getId());
+            vo.setMerchantId(product.getMerchantId());
+            vo.setCategoryId(product.getCategoryId());
+            vo.setName(product.getName());
+            vo.setSubtitle(product.getSubtitle());
+            vo.setMainImage(product.getMainImage());
+            vo.setPrice(product.getPrice());
+            vo.setOriginalPrice(product.getOriginalPrice());
+            vo.setStock(product.getStock());
+            vo.setSales(product.getSales());
+            vo.setStatus(product.getStatus());
+            vo.setIsNew(product.getIsNew());
+            vo.setIsRecommend(product.getIsRecommend());
+            return vo;
+        }).collect(Collectors.toList());
+        return R.success(voList);
     }
 
     /**
@@ -272,5 +452,15 @@ public class ProductController {
             @RequestParam(defaultValue = "5") Integer limit) {
         List<String> suggestions = productHotWordService.getSearchSuggestions(keyword, limit);
         return R.success(suggestions);
+    }
+    
+    /**
+     * 获取商品总数
+     */
+    @GetMapping("/count")
+    @ApiOperation("获取商品总数")
+    public R<Integer> getProductCount() {
+        Integer count = productService.getProductCount();
+        return R.success(count);
     }
 }

@@ -8,7 +8,7 @@ export const systemRoutes = [
     name: 'System',
     meta: {
       title: '系统管理',
-      icon: 'el-icon-setting',
+      icon: 'Setting',
     },
     children: [
       {
@@ -17,7 +17,7 @@ export const systemRoutes = [
         component: () => import('@/views/system/admin'),
         meta: {
           title: '管理员列表',
-          icon: 'el-icon-user-solid',
+          icon: 'User',
         },
       },
       {
@@ -26,7 +26,7 @@ export const systemRoutes = [
         component: () => import('@/views/system/role'),
         meta: {
           title: '角色管理',
-          icon: 'el-icon-s-custom',
+          icon: 'UserFilled',
         },
       },
       {
@@ -35,7 +35,7 @@ export const systemRoutes = [
         component: () => import('@/views/system/menu'),
         meta: {
           title: '菜单管理',
-          icon: 'el-icon-menu',
+          icon: 'Menu',
         },
       },
       {
@@ -44,7 +44,7 @@ export const systemRoutes = [
         component: () => import('@/views/system/log'),
         meta: {
           title: '操作日志',
-          icon: 'el-icon-document-copy',
+          icon: 'DocumentCopy',
         },
       },
     ],

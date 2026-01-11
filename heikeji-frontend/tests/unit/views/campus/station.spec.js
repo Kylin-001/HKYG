@@ -1,89 +1,71 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
-import ElementUI from 'element-ui'
+import { shallowMount } from '@vue/test-utils'
+import { createTestingPinia } from '@pinia/testing'
+import ElementPlus from 'element-plus'
+import { useCampusStore } from '@/store/modules/campus'
 import Station from '@/views/campus/station.vue'
 
-const localVue = createLocalVue()
-localVue.use(Vuex)
-localVue.use(ElementUI)
-
 describe('Station Management Component', () => {
-  let store
-  let mutations
-  let actions
   let wrapper
+  let pinia
 
   beforeEach(() => {
-    // Mock Vuex store
-    mutations = {
-      SET_STATION_LIST: jest.fn(),
-    }
-    actions = {
-      getStations: jest.fn(),
-      getCampuses: jest.fn(),
-      addNewStation: jest.fn(),
-      updateExistingStation: jest.fn(),
-      updateStationEnabledStatus: jest.fn(),
-    }
-
-    store = new Vuex.Store({
-      modules: {
+    // Create testing Pinia
+    pinia = createTestingPinia({
+      stubActions: true,
+      initialState: {
         campus: {
-          namespaced: true,
-          state: {
-            stationList: [],
-            stationTotal: 0,
-            campusList: [{ id: 1, name: '测试校区' }],
-          },
-          mutations,
-          actions,
+          stationList: [],
+          stationTotal: 0,
+          campusList: [{ id: 1, name: '测试校区' }],
         },
       },
     })
 
-    // Mock Element UI message and confirm
-    ElementUI.Message = {
-      success: jest.fn(),
-      error: jest.fn(),
+    // Mock Element Plus message and confirm
+    ElementPlus.ElMessage = {
+      success: vi.fn(),
+      error: vi.fn(),
     }
-    ElementUI.MessageBox = {
-      confirm: jest.fn(),
+    ElementPlus.ElMessageBox = {
+      confirm: vi.fn(),
     }
 
     wrapper = shallowMount(Station, {
-      localVue,
-      store,
-      stubs: [
-        'el-table',
-        'el-table-column',
-        'el-pagination',
-        'el-dialog',
-        'el-form',
-        'el-form-item',
-        'el-input',
-        'el-select',
-        'el-option',
-        'el-button',
-        'el-tag',
-        'el-radio-group',
-        'el-radio',
-      ],
+      global: {
+        plugins: [pinia, ElementPlus],
+        stubs: [
+          'el-table',
+          'el-table-column',
+          'el-pagination',
+          'el-dialog',
+          'el-form',
+          'el-form-item',
+          'el-input',
+          'el-select',
+          'el-option',
+          'el-button',
+          'el-tag',
+          'el-radio-group',
+          'el-radio',
+        ],
+      },
     })
   })
 
   afterEach(() => {
-    wrapper.destroy()
+    wrapper.unmount()
   })
 
   it('should initialize correctly', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
     expect(wrapper.vm.pagination.currentPage).toBe(1)
     expect(wrapper.vm.pagination.pageSize).toBe(10)
   })
 
   it('should load data on created', () => {
-    expect(actions.getCampuses).toHaveBeenCalled()
-    expect(actions.getStations).toHaveBeenCalled()
+    // 获取campus store的actions
+    const campusStore = useCampusStore(pinia)
+    expect(campusStore.getCampuses).toHaveBeenCalled()
+    expect(campusStore.getSites).toHaveBeenCalled()
   })
 
   it('should get correct station type text', () => {
@@ -104,8 +86,8 @@ describe('Station Management Component', () => {
     wrapper.vm.searchForm.name = '测试站点'
     wrapper.vm.handleSearch()
     expect(wrapper.vm.pagination.currentPage).toBe(1)
-    expect(actions.getStations).toHaveBeenCalledWith(
-      expect.anything(),
+    const campusStore = useCampusStore(pinia)
+    expect(campusStore.getSites).toHaveBeenCalledWith(
       expect.objectContaining({
         name: '测试站点',
         page: 1,

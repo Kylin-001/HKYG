@@ -149,129 +149,115 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapActions, mapGetters } from 'vuex'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useCartStore } from '@/store/modules/cart'
 
-export default {
-  name: 'CartPage',
-  data() {
-    return {
-      // 最小起送金额
-      minOrderAmount: 15,
+// 获取 Pinia store 实例
+const cartStore = useCartStore()
+const router = useRouter()
+
+// 最小起送金额
+const minOrderAmount = ref(15)
+
+// 计算属性
+const cartProducts = computed(() => cartStore.products)
+const totalCount = computed(() => cartStore.totalCount)
+const totalAmount = computed(() => cartStore.totalAmount)
+const goodsAmount = computed(() => cartStore.goodsAmount)
+const totalDeliveryFee = computed(() => cartStore.totalDeliveryFee)
+
+// 按商家分组的购物车商品
+const groupedCartProducts = computed(() => {
+  const groups: Record<
+    number,
+    {
+      merchantId: number
+      merchantName: string
+      deliveryFee: number
+      minOrderAmount: number
+      products: any[]
     }
-  },
+  > = {}
 
-  computed: {
-    // 从 Vuex 获取购物车数据
-    ...mapState('cart', {
-      cartProducts: 'products',
-    }),
+  cartProducts.value.forEach(product => {
+    const { merchantId, merchantName } = product
 
-    ...mapGetters('cart', {
-      totalCount: 'totalCount',
-      totalAmount: 'totalAmount',
-      goodsAmount: 'goodsAmount',
-      totalDeliveryFee: 'totalDeliveryFee',
-    }),
-
-    // 按商家分组的购物车商品
-    groupedCartProducts() {
-      const groups = {}
-
-      this.cartProducts.forEach(product => {
-        const { merchantId } = product
-        const { merchantName } = product
-
-        if (!groups[merchantId]) {
-          groups[merchantId] = {
-            merchantId,
-            merchantName,
-            deliveryFee: 2, // 模拟配送费
-            minOrderAmount: this.minOrderAmount,
-            products: [],
-          }
-        }
-
-        groups[merchantId].products.push(product)
-      })
-
-      return Object.values(groups)
-    },
-  },
-
-  methods: {
-    // Vuex actions
-    ...mapActions('cart', {
-      updateQuantity: 'updateQuantity',
-      removeProduct: 'removeProduct',
-      clearCartAction: 'clearCart',
-    }),
-
-    // 增加商品数量
-    increaseQuantity(product) {
-      this.updateQuantity({
-        productId: product.id,
-        quantity: product.quantity + 1,
-      })
-    },
-
-    // 减少商品数量
-    decreaseQuantity(product) {
-      if (product.quantity > 1) {
-        this.updateQuantity({
-          productId: product.id,
-          quantity: product.quantity - 1,
-        })
+    if (!groups[merchantId]) {
+      groups[merchantId] = {
+        merchantId,
+        merchantName,
+        deliveryFee: 2, // 模拟配送费
+        minOrderAmount: minOrderAmount.value,
+        products: [],
       }
-    },
+    }
 
-    // 从购物车移除商品
-    removeFromCart(product) {
-      this.$confirm(`确定要从购物车中移除"${product.name}"吗？`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(() => {
-          this.removeProduct(product.id)
-          this.$message.success('已从购物车中移除')
-        })
-        .catch(() => {
-          // 用户取消操作
-        })
-    },
+    groups[merchantId].products.push(product)
+  })
 
-    // 清空购物车
-    clearCart() {
-      this.$confirm('确定要清空购物车吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(() => {
-          this.clearCartAction()
-          this.$message.success('购物车已清空')
-        })
-        .catch(() => {
-          // 用户取消操作
-        })
-    },
+  return Object.values(groups)
+})
 
-    // 继续购物
-    continueShopping(merchantId) {
-      this.$router.push(`/takeout/menu/${merchantId}`)
-    },
+// 增加商品数量
+const increaseQuantity = (product: any) => {
+  cartStore.updateQuantity(product.id, product.quantity + 1)
+}
 
-    // 去结算
-    proceedToCheckout() {
-      this.$router.push('/takeout/checkout')
-    },
+// 减少商品数量
+const decreaseQuantity = (product: any) => {
+  if (product.quantity > 1) {
+    cartStore.updateQuantity(product.id, product.quantity - 1)
+  }
+}
 
-    // 返回
-    goBack() {
-      this.$router.go(-1)
-    },
-  },
+// 从购物车移除商品
+const removeFromCart = (product: any) => {
+  ElMessageBox.confirm(`确定要从购物车中移除"${product.name}"吗？`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      cartStore.removeProduct(product.id)
+      ElMessage.success('已从购物车中移除')
+    })
+    .catch(() => {
+      // 用户取消操作
+    })
+}
+
+// 清空购物车
+const clearCart = () => {
+  ElMessageBox.confirm('确定要清空购物车吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      cartStore.clearCart()
+      ElMessage.success('购物车已清空')
+    })
+    .catch(() => {
+      // 用户取消操作
+    })
+}
+
+// 继续购物
+const continueShopping = (merchantId: number) => {
+  router.push(`/takeout/menu/${merchantId}`)
+}
+
+// 去结算
+const proceedToCheckout = () => {
+  router.push('/takeout/checkout')
+}
+
+// 返回
+const goBack = () => {
+  router.go(-1)
 }
 </script>
 

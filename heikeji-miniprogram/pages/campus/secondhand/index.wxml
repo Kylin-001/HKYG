@@ -1,0 +1,78 @@
+<!-- 二手市场首页 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left" bindtap="onBack">
+      <image src="/assets/icons/back.png" class="back-icon" mode="aspectFit"></image>
+    </view>
+    <text class="header-title">二手市场</text>
+    <view class="header-right">
+      <image src="/assets/icons/publish.png" class="publish-icon" mode="aspectFit" bindtap="onPublish"></image>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input" bindtap="onSearch">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit"></image>
+      <text class="placeholder">搜索商品...</text>
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <scroll-view scroll-x class="filter-scroll">
+    <view class="filter-item {{currentFilter === 'all' ? 'active' : ''}}" data-filter="all" bindtap="onFilterChange">
+      <text class="filter-text">全部</text>
+    </view>
+    <view class="filter-item {{currentFilter === 'electronics' ? 'active' : ''}}" data-filter="electronics" bindtap="onFilterChange">
+      <text class="filter-text">电子产品</text>
+    </view>
+    <view class="filter-item {{currentFilter === 'books' ? 'active' : ''}}" data-filter="books" bindtap="onFilterChange">
+      <text class="filter-text">书籍</text>
+    </view>
+    <view class="filter-item {{currentFilter === 'clothes' ? 'active' : ''}}" data-filter="clothes" bindtap="onFilterChange">
+      <text class="filter-text">服装</text>
+    </view>
+    <view class="filter-item {{currentFilter === 'daily' ? 'active' : ''}}" data-filter="daily" bindtap="onFilterChange">
+      <text class="filter-text">日用品</text>
+    </view>
+    <view class="filter-item {{currentFilter === 'sports' ? 'active' : ''}}" data-filter="sports" bindtap="onFilterChange">
+      <text class="filter-text">运动用品</text>
+    </view>
+    <view class="filter-item {{currentFilter === 'other' ? 'active' : ''}}" data-filter="other" bindtap="onFilterChange">
+      <text class="filter-text">其他</text>
+    </view>
+  </scroll-view>
+
+  <!-- 商品列表 -->
+  <scroll-view scroll-y class="goods-scroll" bindscrolltolower="onLoadMore">
+    <view class="goods-list" wx:if="{{goodsList.length > 0}}">
+      <view class="goods-item" wx:for="{{goodsList}}" wx:key="id" data-id="{{item.id}}" bindtap="onGoodsClick">
+        <image src="{{item.imageUrl || '/assets/icons/default-product.png'}}" class="goods-image" mode="aspectFit"></image>
+        <view class="goods-info">
+          <text class="goods-title">{{item.title}}</text>
+          <text class="goods-price">¥{{item.price}}</text>
+          <view class="goods-meta">
+            <text class="goods-location">{{item.location}}</text>
+            <text class="goods-time">{{item.createTime}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+      <image src="/assets/icons/empty.png" class="empty-image" mode="aspectFit"></image>
+      <text class="empty-text">暂无商品</text>
+      <button class="publish-btn" bindtap="onPublish">发布商品</button>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore}}">
+      <text>加载中...</text>
+    </view>
+    <view class="no-more" wx:elif="{{goodsList.length > 0}}">
+      <text>没有更多商品了</text>
+    </view>
+  </scroll-view>
+</view>

@@ -1,4 +1,4 @@
-﻿package com.heikeji.mall.member.entity;
+package com.heikeji.mall.member.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

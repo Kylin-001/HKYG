@@ -17,10 +17,10 @@ import java.util.List;
 @Service
 public class CartServiceImpl implements CartService {
 
-    @Autowired
+    @Autowired(required = false)
     private CartFeignService cartFeignService;
     
-    @Autowired
+    @Autowired(required = false)
     private MemberFeignService memberFeignService;
 
     /**

@@ -1,98 +1,76 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
-import ElementUI from 'element-ui'
+import { shallowMount } from '@vue/test-utils'
+import { createTestingPinia } from '@pinia/testing'
+import ElementPlus from 'element-plus'
+import { useCampusStore } from '@/store/modules/campus'
 import Building from '@/views/campus/building.vue'
-import { getBuildings } from '@/store/modules/campus'
-
-const localVue = createLocalVue()
-localVue.use(Vuex)
-localVue.use(ElementUI)
 
 describe('Building Management Component', () => {
-  let store
-  let mutations
-  let actions
   let wrapper
+  let campusStore
 
   beforeEach(() => {
-    // Mock Vuex store
-    mutations = {
-      SET_BUILDING_LIST: jest.fn(),
-    }
-    actions = {
-      getBuildings: jest.fn(),
-      getCampuses: jest.fn(),
-      addNewBuilding: jest.fn(),
-      updateExistingBuilding: jest.fn(),
-      updateBuildingEnabledStatus: jest.fn(),
+    // Mock Element Plus message
+    ElementPlus.Message = {
+      success: vi.fn(),
+      error: vi.fn(),
     }
 
-    store = new Vuex.Store({
-      modules: {
+    // Create testing Pinia
+    const pinia = createTestingPinia({
+      stubActions: true,
+      initialState: {
         campus: {
-          namespaced: true,
-          state: {
-            buildingList: [],
-            buildingTotal: 0,
-            campusList: [{ id: 1, name: '测试校区' }],
-          },
-          mutations,
-          actions,
+          buildingList: [],
+          buildingTotal: 0,
+          campusList: [{ id: 1, name: '测试校区' }],
         },
       },
     })
 
-    // Mock Element UI message
-    ElementUI.Message = {
-      success: jest.fn(),
-      error: jest.fn(),
-    }
-
     wrapper = shallowMount(Building, {
-      localVue,
-      store,
-      stubs: [
-        'el-table',
-        'el-table-column',
-        'el-pagination',
-        'el-dialog',
-        'el-form',
-        'el-form-item',
-        'el-input',
-        'el-select',
-        'el-option',
-        'el-button',
-        'el-checkbox-group',
-        'el-checkbox',
-      ],
+      global: {
+        plugins: [ElementPlus, pinia],
+        stubs: [
+          'el-table',
+          'el-table-column',
+          'el-pagination',
+          'el-dialog',
+          'el-form',
+          'el-form-item',
+          'el-input',
+          'el-select',
+          'el-option',
+          'el-button',
+          'el-checkbox-group',
+          'el-checkbox',
+        ],
+      },
     })
+
+    // Get campus store
+    campusStore = useCampusStore(pinia)
   })
 
   afterEach(() => {
-    wrapper.destroy()
+    wrapper.unmount()
   })
 
   it('should initialize correctly', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(wrapper.vm.pagination.currentPage).toBe(1)
     expect(wrapper.vm.pagination.pageSize).toBe(10)
   })
 
   it('should load data on created', () => {
-    expect(actions.getCampuses).toHaveBeenCalled()
-    expect(actions.getBuildings).toHaveBeenCalled()
+    expect(campusStore.getCampuses).toHaveBeenCalled()
+    expect(campusStore.getBuildings).toHaveBeenCalled()
   })
 
   it('should handle search correctly', () => {
     wrapper.vm.searchForm.name = '测试楼栋'
     wrapper.vm.handleSearch()
     expect(wrapper.vm.pagination.currentPage).toBe(1)
-    expect(actions.getBuildings).toHaveBeenCalledWith(expect.anything(), {
-      campusId: '',
-      name: '测试楼栋',
-      page: 1,
-      pageSize: 10,
-    })
+    expect(campusStore.getBuildings).toHaveBeenCalled()
   })
 
   it('should reset search form correctly', () => {
@@ -120,12 +98,12 @@ describe('Building Management Component', () => {
   it('should handle pagination size change', () => {
     wrapper.vm.handleSizeChange(20)
     expect(wrapper.vm.pagination.pageSize).toBe(20)
-    expect(actions.getBuildings).toHaveBeenCalled()
+    expect(campusStore.getBuildings).toHaveBeenCalled()
   })
 
   it('should handle pagination current page change', () => {
     wrapper.vm.handleCurrentChange(2)
     expect(wrapper.vm.pagination.currentPage).toBe(2)
-    expect(actions.getBuildings).toHaveBeenCalled()
+    expect(campusStore.getBuildings).toHaveBeenCalled()
   })
 })

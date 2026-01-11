@@ -78,34 +78,17 @@ public class OrderServiceImplTestSimple {
      * 测试订单取消功能
      */
     @Test
-    void testDoCancelOrder() {
-        try {
-            // 使用反射调用私有方法
-            java.lang.reflect.Method method = OrderServiceImpl.class.getDeclaredMethod(
-                "doCancelOrder", Order.class, String.class);
-            method.setAccessible(true);
-            
-            // 设置订单状态为待支付
-            Order order = new Order();
-            order.setId(100L);
-            order.setOrderNo("TEST_CANCEL");
-            order.setStatus(OrderConstant.ORDER_STATUS_PENDING_PAYMENT);
-            order.setPayStatus(OrderConstant.PAY_STATUS_UNPAID);
-            order.setTotalAmount(new BigDecimal(100));
-            
-            // 模拟订单更新
-            when(orderMapper.updateById(any(Order.class))).thenReturn(1);
-            
-            // 调用取消订单方法
-            boolean result = (boolean) method.invoke(orderService, order, "测试取消");
-            
-            // 验证结果
-            assertTrue(result);
-            assertEquals(OrderConstant.ORDER_STATUS_CANCELLED, order.getStatus());
-            verify(orderMapper, times(1)).updateById(order);
-        } catch (Exception e) {
-            fail("订单取消测试失败: " + e.getMessage());
-        }
+    void testCancelOrder() {
+        // 模拟订单查询
+        when(orderMapper.selectOne(any())).thenReturn(testOrder);
+        when(orderMapper.updateById(any(Order.class))).thenReturn(1);
+        
+        // 调用取消订单方法
+        boolean result = orderService.cancelOrder("TEST123456");
+        
+        // 验证结果
+        assertTrue(result);
+        verify(orderMapper, times(1)).updateById(any(Order.class));
     }
 
     /**

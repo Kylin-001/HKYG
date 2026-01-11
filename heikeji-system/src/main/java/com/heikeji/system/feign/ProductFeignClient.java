@@ -22,4 +22,10 @@ public interface ProductFeignClient {
      */
     @GetMapping("/api/product/stock")
     R<Integer> getProductStock(@RequestParam("productId") Long productId);
+    
+    /**
+     * 获取商品总数
+     */
+    @GetMapping("/api/product/count")
+    R<Integer> getProductCount();
 }

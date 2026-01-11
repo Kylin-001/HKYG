@@ -1,0 +1,137 @@
+<!-- 快递代取详情页面 -->
+<view class="detail-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="header-left" bindtap="onBack">返回</text>
+    <text class="page-title">订单详情</text>
+  </view>
+
+  <!-- 任务状态卡片 -->
+  <view class="status-card">
+    <view class="status-info">
+      <text class="status-text {{task.statusClass}}">{{task.statusText}}</text>
+      <text class="status-desc">{{task.statusDesc}}</text>
+    </view>
+    <image src="/assets/icons/status-{{task.status}}.png" mode="aspectFit" class="status-icon" />
+  </view>
+
+  <!-- 任务详情 -->
+  <view class="detail-section">
+    <view class="section-title">任务信息</view>
+    <view class="detail-item">
+      <text class="detail-label">任务编号</text>
+      <text class="detail-value">{{task.id}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">发布时间</text>
+      <text class="detail-value">{{task.createTime}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">预计完成时间</text>
+      <text class="detail-value">{{task.expectedCompleteTime}}</text>
+    </view>
+  </view>
+
+  <!-- 快递信息 -->
+  <view class="detail-section">
+    <view class="section-title">快递信息</view>
+    <view class="detail-item">
+      <text class="detail-label">快递公司</text>
+      <text class="detail-value">{{task.expressCompany}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">快递单号</text>
+      <text class="detail-value">{{task.trackingNumber}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">快递柜</text>
+      <text class="detail-value">{{task.lockerName}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">取件码</text>
+      <text class="detail-value code">{{task.pickupCode}}</text>
+    </view>
+  </view>
+
+  <!-- 配送信息 -->
+  <view class="detail-section">
+    <view class="section-title">配送信息</view>
+    <view class="detail-item">
+      <text class="detail-label">配送地址</text>
+      <text class="detail-value">{{task.deliveryLocation}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">联系电话</text>
+      <text class="detail-value">{{task.phone}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">紧急程度</text>
+      <text class="detail-value">{{task.urgencyText}}</text>
+    </view>
+  </view>
+
+  <!-- 费用信息 -->
+  <view class="detail-section">
+    <view class="section-title">费用信息</view>
+    <view class="detail-item">
+      <text class="detail-label">代取费用</text>
+      <text class="detail-value price">¥{{task.price}}</text>
+    </view>
+  </view>
+
+  <!-- 备注信息 -->
+  <view class="detail-section" wx:if="{{task.remark}}">
+    <view class="section-title">备注信息</view>
+    <text class="remark-content">{{task.remark}}</text>
+  </view>
+
+  <!-- 状态跟踪 -->
+  <view class="detail-section">
+    <view class="section-title">状态跟踪</view>
+    <view class="timeline">
+      <view class="timeline-item" wx:for="{{task.timeline}}" wx:key="index" wx:for-item="item">
+        <view class="timeline-line" wx:if="{{index !== task.timeline.length - 1}}"></view>
+        <view class="timeline-dot {{item.isCurrent ? 'current' : ''}}"></view>
+        <view class="timeline-content">
+          <text class="timeline-title">{{item.title}}</text>
+          <text class="timeline-time">{{item.time}}</text>
+          <text class="timeline-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button 
+      class="action-btn cancel-btn" 
+      wx:if="{{task.canCancel}}" 
+      bindtap="onCancel">
+      取消任务
+    </button>
+    <button 
+      class="action-btn primary-btn" 
+      wx:if="{{task.canClaim}}" 
+      bindtap="onClaim">
+      接单
+    </button>
+    <button 
+      class="action-btn primary-btn" 
+      wx:if="{{task.canComplete}}" 
+      bindtap="onComplete">
+      完成任务
+    </button>
+    <button 
+      class="action-btn primary-btn" 
+      wx:if="{{task.canConfirm}}" 
+      bindtap="onConfirm">
+      确认完成
+    </button>
+    <button 
+      class="action-btn default-btn" 
+      wx:if="{{task.canRate}}" 
+      bindtap="onRate">
+      评价
+    </button>
+  </view>
+</view>

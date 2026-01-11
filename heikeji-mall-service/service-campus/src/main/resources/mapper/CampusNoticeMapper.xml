@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heikeji.mall.campus.mapper.CampusNoticeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.heikeji.mall.campus.entity.CampusNotice">
+        <id column="id" property="id"/>
+        <result column="campus_id" property="campusId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="type" property="type"/>
+        <result column="publisher" property="publisher"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="status" property="status"/>
+        <result column="is_top" property="isTop"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="click_count" property="clickCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 根据校区ID获取公告列表 -->
+    <select id="selectByCampusId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT * FROM campus_notice WHERE campus_id = #{campusId} ORDER BY is_top DESC, publish_time DESC
+    </select>
+
+    <!-- 根据类型获取公告列表 -->
+    <select id="selectByType" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT * FROM campus_notice WHERE type = #{type} ORDER BY is_top DESC, publish_time DESC
+    </select>
+
+    <!-- 获取已发布的公告列表 -->
+    <select id="selectPublishedNotices" resultMap="BaseResultMap">
+        SELECT * FROM campus_notice 
+        WHERE status = 1 AND publish_time IS NOT NULL 
+        AND (expire_time IS NULL OR expire_time > NOW())
+        ORDER BY is_top DESC, publish_time DESC
+    </select>
+
+    <!-- 获取置顶公告 -->
+    <select id="selectTopNotices" resultMap="BaseResultMap">
+        SELECT * FROM campus_notice 
+        WHERE is_top = 1 AND status = 1 AND publish_time IS NOT NULL 
+        AND (expire_time IS NULL OR expire_time > NOW())
+        ORDER BY publish_time DESC
+    </select>
+
+    <!-- 增加点击量 -->
+    <update id="incrementClickCount" parameterType="java.lang.Long">
+        UPDATE campus_notice SET click_count = click_count + 1 WHERE id = #{id}
+    </update>
+
+</mapper>

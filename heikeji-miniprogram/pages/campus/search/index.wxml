@@ -1,0 +1,94 @@
+<!-- 校园搜索页面 -->
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-header">
+    <view class="search-input-wrapper">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit"></image>
+      <input 
+        class="search-input" 
+        placeholder="搜索公告、空教室..." 
+        value="{{keyword}}" 
+        bindinput="onInput" 
+        bindconfirm="onSearch" 
+        focus="{{isFocus}}"
+      ></input>
+      <view class="clear-btn" wx:if="{{keyword}}" bindtap="onClear">
+        <image src="/assets/icons/close.png" class="clear-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+    <text class="cancel-btn" bindtap="onCancel">取消</text>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{hasSearched}}">
+    <!-- 搜索结果为空 -->
+    <view class="no-results" wx:if="{{searchResults.length === 0}}">
+      <image src="/assets/icons/no-result.png" class="no-result-icon" mode="aspectFit"></image>
+      <text class="no-result-text">未找到相关结果</text>
+      <text class="no-result-tip">换个关键词试试</text>
+    </view>
+    
+    <!-- 搜索结果列表 -->
+    <view class="results-list" wx:else>
+      <!-- 搜索结果分类标题 -->
+      <view class="result-category" wx:if="{{searchResults.announcements && searchResults.announcements.length > 0}}">
+        公告
+      </view>
+      <!-- 公告搜索结果 -->
+      <view class="result-item announcement" 
+        wx:for="{{searchResults.announcements}}" 
+        wx:key="id" 
+        bindtap="navigateToAnnouncementDetail" 
+        data-id="{{item.id}}"
+      >
+        <text class="result-title">{{item.title}}</text>
+        <text class="result-summary">{{item.summary}}</text>
+        <view class="result-info">
+          <text class="result-source">{{item.source}}</text>
+          <text class="result-time">{{item.createTime}}</text>
+        </view>
+      </view>
+      
+      <!-- 搜索结果分类标题 -->
+      <view class="result-category" wx:if="{{searchResults.classrooms && searchResults.classrooms.length > 0}}">
+        空教室
+      </view>
+      <!-- 空教室搜索结果 -->
+      <view class="result-item classroom" 
+        wx:for="{{searchResults.classrooms}}" 
+        wx:key="id" 
+        bindtap="navigateToClassroomDetail" 
+        data-id="{{item.id}}"
+      >
+        <text class="result-title">{{item.name}}</text>
+        <view class="result-info">
+          <text class="result-location">{{item.building}} {{item.floor}}层</text>
+          <text class="result-capacity">{{item.capacity}}人</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 搜索历史 -->
+  <view class="search-history" wx:else>
+    <view class="history-header">
+      <text class="history-title">搜索历史</text>
+      <text class="clear-history" bindtap="onClearHistory">清空</text>
+    </view>
+    <view class="history-tags">
+      <view class="history-tag" wx:for="{{searchHistory}}" wx:key="index" bindtap="onHistoryTagClick" data-keyword="{{item}}">
+        {{item}}
+      </view>
+    </view>
+    
+    <!-- 热门搜索 -->
+    <view class="hot-search">
+      <text class="hot-title">热门搜索</text>
+      <view class="hot-tags">
+        <view class="hot-tag" wx:for="{{hotKeywords}}" wx:key="index" bindtap="onHotTagClick" data-keyword="{{item}}">
+          {{item}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

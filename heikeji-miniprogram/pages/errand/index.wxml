@@ -1,0 +1,73 @@
+<!-- 校园跑腿首页 -->
+<view class="errand-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input type="text" placeholder="搜索跑腿任务" bindinput="onSearchInput" bindconfirm="onSearch" />
+    <button bindtap="onSearch" class="search-btn">搜索</button>
+  </view>
+
+  <!-- 服务类型导航 -->
+  <scroll-view scroll-x="true" class="service-scroll">
+    <view class="service-item {{currentService == item.type ? 'active' : ''}}" 
+          wx:for="{{serviceTypes}}" 
+          wx:key="type" 
+          bindtap="onServiceChange" 
+          data-type="{{item.type}}">
+      <image src="{{item.icon}}" mode="aspectFit" class="service-icon" />
+      <text>{{item.name}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 任务列表 -->
+  <scroll-view scroll-y="true" class="task-list" bindscrolltolower="onLoadMore">
+    <view class="task-section-header">
+      <text class="section-title">{{currentServiceName}}任务</text>
+      <text class="publish-btn" bindtap="navigateToPublish">发布任务</text>
+    </view>
+    
+    <view class="task-item" 
+          wx:for="{{tasks}}" 
+          wx:key="id" 
+          bindtap="navigateToDetail" 
+          data-id="{{item.id}}">
+      <view class="task-header">
+        <view class="task-type-tag">{{item.typeName}}</view>
+        <text class="task-status {{item.statusClass}}">{{item.statusText}}</text>
+      </view>
+      
+      <view class="task-content">
+        <text class="task-title">{{item.title}}</text>
+        <text class="task-desc">{{item.description}}</text>
+      </view>
+      
+      <view class="task-info">
+        <view class="task-location">
+          <image src="/assets/icons/location.png" mode="aspectFit" class="info-icon" />
+          <text>{{item.pickupLocation}} → {{item.deliveryLocation}}</text>
+        </view>
+        <view class="task-price">
+          <text class="price-value">¥{{item.price}}</text>
+          <text class="price-tip">跑腿费</text>
+        </view>
+      </view>
+      
+      <view class="task-footer">
+        <text class="task-time">{{item.createTime}}</text>
+        <text class="task-claims">{{item.claimCount}}人已接单</text>
+      </view>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore}}">
+      <text>加载中...</text>
+    </view>
+    <view class="load-more" wx:else>
+      <text>已加载全部</text>
+    </view>
+  </scroll-view>
+
+  <!-- 浮动发布按钮 -->
+  <view class="float-publish-btn" bindtap="navigateToPublish">
+    <text>+</text>
+  </view>
+</view>

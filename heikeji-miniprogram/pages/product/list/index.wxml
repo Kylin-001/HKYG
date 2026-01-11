@@ -1,0 +1,126 @@
+<!-- 商品商城列表页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-left"></view>
+    <text class="header-title">商品商城</text>
+    <view class="header-right">
+      <image src="/assets/icons/cart.png" class="cart-icon" mode="aspectFit" bindtap="navigateToCart"></image>
+    </view>
+  </view>
+
+  <!-- 搜索区域 -->
+  <view class="search-section">
+    <view class="search-container">
+      <image src="/assets/icons/search.png" class="search-icon" mode="aspectFit"></image>
+      <input 
+        class="search-input" 
+        placeholder="搜索商品" 
+        placeholder-class="placeholder" 
+        value="{{searchKeyword}}" 
+        bindinput="onSearchInput" 
+        bindconfirm="onSearch"
+      ></input>
+      <view wx:if="{{searchKeyword}}" class="clear-btn" bindtap="onClearSearch">
+        <image src="/assets/icons/clear.png" class="clear-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类导航 -->
+  <view class="category-section">
+    <scroll-view scroll-x="true" enable-flex class="category-scroll">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="id" 
+        class="category-item {{currentCategory === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onCategoryChange"
+      >
+        <image src="{{item.icon}}" class="category-icon" mode="aspectFit"></image>
+        <text class="category-name">{{item.name}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="product-section">
+    <view class="filter-bar">
+      <text class="filter-title">商品列表</text>
+      <view class="sort-options">
+        <view 
+          class="sort-item {{currentSort === 'default' ? 'active' : ''}}"
+          data-sort="default"
+          bindtap="onSortChange"
+        >
+          默认
+        </view>
+        <view 
+          class="sort-item {{currentSort === 'price_asc' ? 'active' : ''}}"
+          data-sort="price_asc"
+          bindtap="onSortChange"
+        >
+          价格 ↑
+        </view>
+        <view 
+          class="sort-item {{currentSort === 'price_desc' ? 'active' : ''}}"
+          data-sort="price_desc"
+          bindtap="onSortChange"
+        >
+          价格 ↓
+        </view>
+        <view 
+          class="sort-item {{currentSort === 'sales' ? 'active' : ''}}"
+          data-sort="sales"
+          bindtap="onSortChange"
+        >
+          销量
+        </view>
+      </view>
+    </view>
+    
+    <view class="product-grid">
+      <block wx:if="{{products.length === 0}}">
+        <view class="empty-state">
+          <image src="/assets/icons/empty.png" class="empty-icon" mode="aspectFit"></image>
+          <text class="empty-text">暂无商品</text>
+        </view>
+      </block>
+      <block wx:else>
+        <view 
+          wx:for="{{products}}" 
+          wx:key="id" 
+          class="product-item"
+          data-id="{{item.id}}"
+          bindtap="navigateToDetail"
+        >
+          <view class="product-image">
+            <image src="{{item.imageUrl}}" mode="aspectFill"></image>
+            <view wx:if="{{item.discount > 0}}" class="discount-tag">
+              {{item.discount}}折
+            </view>
+          </view>
+          <view class="product-info">
+            <text class="product-name">{{item.name}}</text>
+            <text class="product-description">{{item.description}}</text>
+            <view class="product-price">
+              <text class="current-price">¥{{item.price}}</text>
+              <text wx:if="{{item.originalPrice}}" class="original-price">¥{{item.originalPrice}}</text>
+            </view>
+            <view class="product-footer">
+              <text class="sales-count">销量 {{item.sales}}+</text>
+              <view class="add-to-cart" data-id="{{item.id}}" bindtap="addCart">
+                <image src="/assets/icons/add-to-cart.png" class="add-cart-icon" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore}}" class="load-more" bindtap="loadMore">
+      <text class="load-more-text">加载更多</text>
+    </view>
+  </view>
+</view>

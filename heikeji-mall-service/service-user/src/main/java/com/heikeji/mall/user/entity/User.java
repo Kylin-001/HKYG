@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -108,6 +109,11 @@ public class User {
      * 积分
      */
     private Integer points;
+
+    /**
+     * 余额
+     */
+    private BigDecimal balance;
 
     /**
      * 创建时间

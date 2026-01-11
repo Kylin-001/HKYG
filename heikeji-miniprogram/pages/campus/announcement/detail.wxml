@@ -1,0 +1,36 @@
+<!-- 校园公告详情页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <icon type="back" size="22"></icon>
+    </view>
+    <text class="title">公告详情</text>
+    <view class="header-right">
+      <image src="/assets/icons/share.png" class="share-icon" mode="aspectFit" bindtap="onShare"></image>
+    </view>
+  </view>
+
+  <!-- 公告内容 -->
+  <view class="announcement-detail">
+    <!-- 公告标题 -->
+    <view class="announcement-title">{{announcement.title}}</view>
+    
+    <!-- 公告信息 -->
+    <view class="announcement-info">
+      <text class="announcement-source">{{announcement.source}}</text>
+      <text class="announcement-time">{{announcement.createTime}}</text>
+    </view>
+    
+    <!-- 公告正文 -->
+    <view class="announcement-content" wx:if="{{!isLoading}}">
+      <rich-text nodes="{{announcement.content}}"></rich-text>
+    </view>
+    
+    <!-- 加载中 -->
+    <view class="loading" wx:if="{{isLoading}}">
+      <loading></loading>
+      <text>正在加载...</text>
+    </view>
+  </view>
+</view>

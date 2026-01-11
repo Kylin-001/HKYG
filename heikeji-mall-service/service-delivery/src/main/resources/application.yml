@@ -1,30 +1,118 @@
 server:
-  port: 8004
+  port: 8085
+  servlet:
+    context-path: /delivery
 
 spring:
   application:
-    name: service-delivery
-  datasource:
-    url: jdbc:mysql://192.168.110.162:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    name: heikeji-delivery-service
+  profiles:
+    active: dev
+  # 允许bean定义覆盖，解决rateLimiterAspect冲突问题
+  main:
+    allow-bean-definition-overriding: true
+    # 允许循环引用，解决jwtAuthenticationFilter循环依赖问题
+    allow-circular-references: true
+  # 禁用Nacos服务发现和配置检查，避免启动错误
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
-        namespace: public
-        group: DEFAULT_GROUP
+        enabled: false
+      config:
+        import-check:
+          enabled: false
+        enabled: false
+  # 数据源配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: Mysql@8Root!2025
+    druid:
+      initial-size: 10
+      min-idle: 10
+      max-active: 100
+      max-wait: 30000
+      time-between-eviction-runs-millis: 30000
+      min-evictable-idle-time-millis: 600000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 50
+      filters: stat,wall,log4j2
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=3000
+      # 启用慢SQL日志
+      use-global-data-source-stat: true
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        login-username: admin
+        login-password: admin
+        allow: 127.0.0.1
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: Redis@hkyg
+    database: 2
+    timeout: 5000
+    lettuce:
+      pool:
+        max-active: 100
+        max-wait: 10000
+        max-idle: 50
+        min-idle: 10
 
+# MyBatis Plus配置
 mybatis-plus:
-  mapper-locations: classpath*:mapper/**/*.xml
+  mapper-locations: classpath*:mapper/*.xml
   type-aliases-package: com.heikeji.mall.delivery.entity
   configuration:
     map-underscore-to-camel-case: true
+    cache-enabled: true
+    call-setters-on-nulls: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: AUTO
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# OpenFeign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+  compression:
+    request:
+      enabled: true
+      mime-types: text/xml,application/xml,application/json
+      min-request-size: 2048
+    response:
+      enabled: true
+
+# Sleuth配置
+spring.sleuth:
+  sampler:
+    probability: 1.0
 
 # 日志配置
 logging:
   level:
-    com.heikeji.mall.delivery: debug
     root: info
+    com.heikeji.mall.delivery: debug
+    org.springframework.cloud.openfeign: debug
+  file:
+    name: logs/delivery-service.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 10GB
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
