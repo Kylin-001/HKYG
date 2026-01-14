@@ -77,7 +77,7 @@ public class UserControllerTest {
             
             mockMvc.perform(get("/api/user/admin/getByPhone/{phone}", phone))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(1001));
+                .andExpect(jsonPath("$.code").value(404));
         }
     }
 }

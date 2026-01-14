@@ -5,7 +5,7 @@ import com.heikeji.mall.product.service.ProductHotWordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

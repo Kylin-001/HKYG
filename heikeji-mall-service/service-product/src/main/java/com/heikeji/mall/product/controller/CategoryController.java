@@ -3,9 +3,9 @@ package com.heikeji.mall.product.controller;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.product.entity.Category;
 import com.heikeji.mall.product.service.CategoryService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/category")
-@Api(tags = "商品分类管理")
+@Tag(name = "商品分类管理")
 @Validated
 public class CategoryController {
 
@@ -28,7 +28,7 @@ public class CategoryController {
      * 获取所有分类列表（按排序字段排序）
      */
     @GetMapping
-    @ApiOperation("获取所有分类列表")
+    @Operation(summary = "获取所有分类列表")
     public R<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getCategoriesBySort();
         return R.success(categories);
@@ -38,7 +38,7 @@ public class CategoryController {
      * 获取分类树结构
      */
     @GetMapping("/tree")
-    @ApiOperation("获取分类树结构")
+    @Operation(summary = "获取分类树结构")
     public R<List<Category>> getCategoryTree() {
         List<Category> categories = categoryService.getAllCategoryTree();
         return R.success(categories);
@@ -48,9 +48,9 @@ public class CategoryController {
      * 根据父分类ID获取子分类
      */
     @GetMapping("/parent/{parentId}")
-    @ApiOperation("获取子分类")
+    @Operation(summary = "获取子分类")
     public R<List<Category>> getCategoriesByParentId(
-            @ApiParam("父分类ID，0表示顶级分类") @PathVariable Long parentId) {
+            @Parameter(description = "父分类ID，0表示顶级分类") @PathVariable Long parentId) {
         List<Category> categories = categoryService.getSubCategories(parentId);
         return R.success(categories);
     }
@@ -59,7 +59,7 @@ public class CategoryController {
      * 获取启用状态的分类列表
      */
     @GetMapping("/enabled")
-    @ApiOperation("获取启用的分类")
+    @Operation(summary = "获取启用的分类")
     public R<List<Category>> getEnabledCategories() {
         List<Category> categories = categoryService.getEnabledCategories();
         return R.success(categories);
@@ -69,7 +69,7 @@ public class CategoryController {
      * 获取启用的分类树结构
      */
     @GetMapping("/enabled/tree")
-    @ApiOperation("获取启用的分类树结构")
+    @Operation(summary = "获取启用的分类树结构")
     public R<List<Category>> getEnabledCategoryTree() {
         List<Category> categories = categoryService.getEnabledCategoryTree();
         return R.success(categories);
@@ -79,9 +79,9 @@ public class CategoryController {
      * 根据分类ID获取所有父分类（从顶级到当前）
      */
     @GetMapping("/path/{categoryId}")
-    @ApiOperation("获取分类路径")
+    @Operation(summary = "获取分类路径")
     public R<List<Category>> getCategoryPath(
-            @ApiParam("分类ID") @PathVariable Long categoryId) {
+            @Parameter(description = "分类ID") @PathVariable Long categoryId) {
         List<Category> categories = categoryService.getParentCategories(categoryId);
         return R.success(categories);
     }
@@ -90,9 +90,9 @@ public class CategoryController {
      * 获取完整分类路径（包含当前分类）
      */
     @GetMapping("/full-path/{categoryId}")
-    @ApiOperation("获取完整分类路径")
+    @Operation(summary = "获取完整分类路径")
     public R<List<Category>> getFullCategoryPath(
-            @ApiParam("分类ID") @PathVariable Long categoryId) {
+            @Parameter(description = "分类ID") @PathVariable Long categoryId) {
         List<Category> categories = ((com.heikeji.mall.product.service.impl.CategoryServiceImpl)categoryService).getCompleteCategoryPath(categoryId);
         return R.success(categories);
     }
@@ -101,8 +101,8 @@ public class CategoryController {
      * 根据ID获取分类详情
      */
     @GetMapping("/{id}")
-    @ApiOperation("获取分类详情")
-    public R<Category> getCategoryById(@ApiParam("分类ID") @PathVariable Long id) {
+    @Operation(summary = "获取分类详情")
+    public R<Category> getCategoryById(@Parameter(description = "分类ID") @PathVariable Long id) {
         Category category = categoryService.getById(id);
         return R.success(category);
     }
@@ -111,8 +111,8 @@ public class CategoryController {
      * 新增分类
      */
     @PostMapping
-    @ApiOperation("新增分类")
-    public R<Boolean> addCategory(@ApiParam("分类信息") @RequestBody Category category) {
+    @Operation(summary = "新增分类")
+    public R<Boolean> addCategory(@Parameter(description = "分类信息") @RequestBody Category category) {
         try {
             validateCategoryParams(category);
             boolean result = categoryService.save(category);
@@ -126,8 +126,8 @@ public class CategoryController {
      * 批量新增分类
      */
     @PostMapping("/batch")
-    @ApiOperation("批量新增分类")
-    public R<Boolean> batchAddCategories(@ApiParam("分类信息列表") @RequestBody List<Category> categories) {
+    @Operation(summary = "批量新增分类")
+    public R<Boolean> batchAddCategories(@Parameter(description = "分类信息列表") @RequestBody List<Category> categories) {
         try {
             for (Category category : categories) {
                 validateCategoryParams(category);
@@ -143,8 +143,8 @@ public class CategoryController {
      * 更新分类
      */
     @PutMapping
-    @ApiOperation("更新分类")
-    public R<Boolean> updateCategory(@ApiParam("分类信息") @RequestBody Category category) {
+    @Operation(summary = "更新分类")
+    public R<Boolean> updateCategory(@Parameter(description = "分类信息") @RequestBody Category category) {
         try {
             if (category.getId() == null) {
                 return R.error("分类ID不能为空");
@@ -161,8 +161,8 @@ public class CategoryController {
      * 批量更新分类
      */
     @PutMapping("/batch")
-    @ApiOperation("批量更新分类")
-    public R<Boolean> batchUpdateCategories(@ApiParam("分类信息列表") @RequestBody List<Category> categories) {
+    @Operation(summary = "批量更新分类")
+    public R<Boolean> batchUpdateCategories(@Parameter(description = "分类信息列表") @RequestBody List<Category> categories) {
         try {
             for (Category category : categories) {
                 if (category.getId() == null) {
@@ -181,8 +181,8 @@ public class CategoryController {
      * 启用分类
      */
     @PutMapping("/enable/{id}")
-    @ApiOperation("启用分类")
-    public R<Boolean> enableCategory(@ApiParam("分类ID") @PathVariable Long id) {
+    @Operation(summary = "启用分类")
+    public R<Boolean> enableCategory(@Parameter(description = "分类ID") @PathVariable Long id) {
         boolean result = categoryService.enableCategory(id);
         return R.success(result);
     }
@@ -191,8 +191,8 @@ public class CategoryController {
      * 批量启用分类
      */
     @PutMapping("/enable/batch")
-    @ApiOperation("批量启用分类")
-    public R<Boolean> batchEnableCategories(@ApiParam("分类ID列表") @RequestBody List<Long> ids) {
+    @Operation(summary = "批量启用分类")
+    public R<Boolean> batchEnableCategories(@Parameter(description = "分类ID列表") @RequestBody List<Long> ids) {
         boolean allSuccess = true;
         for (Long id : ids) {
             boolean success = categoryService.enableCategory(id);
@@ -207,8 +207,8 @@ public class CategoryController {
      * 禁用分类
      */
     @PutMapping("/disable/{id}")
-    @ApiOperation("禁用分类")
-    public R<Boolean> disableCategory(@ApiParam("分类ID") @PathVariable Long id) {
+    @Operation(summary = "禁用分类")
+    public R<Boolean> disableCategory(@Parameter(description = "分类ID") @PathVariable Long id) {
         try {
             boolean result = categoryService.disableCategory(id);
             if (!result) {
@@ -224,8 +224,8 @@ public class CategoryController {
      * 批量禁用分类
      */
     @PutMapping("/disable/batch")
-    @ApiOperation("批量禁用分类")
-    public R<Boolean> batchDisableCategories(@ApiParam("分类ID列表") @RequestBody List<Long> ids) {
+    @Operation(summary = "批量禁用分类")
+    public R<Boolean> batchDisableCategories(@Parameter(description = "分类ID列表") @RequestBody List<Long> ids) {
         boolean allSuccess = true;
         for (Long id : ids) {
             boolean success = categoryService.disableCategory(id);
@@ -243,8 +243,8 @@ public class CategoryController {
      * 删除分类
      */
     @DeleteMapping("/{id}")
-    @ApiOperation("删除分类")
-    public R<Boolean> deleteCategory(@ApiParam("分类ID") @PathVariable Long id) {
+    @Operation(summary = "删除分类")
+    public R<Boolean> deleteCategory(@Parameter(description = "分类ID") @PathVariable Long id) {
         try {
             boolean result = categoryService.removeById(id);
             return R.success(result);
@@ -257,8 +257,8 @@ public class CategoryController {
      * 批量删除分类
      */
     @DeleteMapping("/batch")
-    @ApiOperation("批量删除分类")
-    public R<Boolean> deleteCategories(@ApiParam("分类ID列表") @RequestBody List<Long> ids) {
+    @Operation(summary = "批量删除分类")
+    public R<Boolean> deleteCategories(@Parameter(description = "分类ID列表") @RequestBody List<Long> ids) {
         try {
             boolean result = categoryService.removeByIds(ids);
             return R.success(result);
@@ -286,8 +286,8 @@ public class CategoryController {
      * 检查分类层级是否合法
      */
     @GetMapping("/check-level/{parentId}")
-    @ApiOperation("检查分类层级是否合法")
-    public R<Boolean> checkCategoryLevel(@ApiParam("父分类ID") @PathVariable Long parentId) {
+    @Operation(summary = "检查分类层级是否合法")
+    public R<Boolean> checkCategoryLevel(@Parameter(description = "父分类ID") @PathVariable Long parentId) {
         boolean isValid = ((com.heikeji.mall.product.service.impl.CategoryServiceImpl)categoryService).checkCategoryLevel(parentId);
         return R.success(isValid);
     }
@@ -296,7 +296,7 @@ public class CategoryController {
      * 获取分类层级限制
      */
     @GetMapping("/max-level")
-    @ApiOperation("获取分类最大层级限制")
+    @Operation(summary = "获取分类最大层级限制")
     public R<Integer> getMaxCategoryLevel() {
         return R.success(3); // 最大支持3级分类
     }

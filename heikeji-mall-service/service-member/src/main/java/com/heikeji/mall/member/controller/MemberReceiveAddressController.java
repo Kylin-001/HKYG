@@ -3,8 +3,8 @@ package com.heikeji.mall.member.controller;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.member.entity.MemberReceiveAddress;
 import com.heikeji.mall.member.service.MemberReceiveAddressService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * 浼氬憳鏀惰揣鍦板潃鎺у埗鍣? */
 @RestController
 @RequestMapping("/api/member/address")
-@Api(tags = "鏀惰揣鍦板潃绠＄悊")
+@Tag(name = "收货地址管理")
 public class MemberReceiveAddressController {
 
     @Autowired
@@ -24,7 +24,7 @@ public class MemberReceiveAddressController {
      * 鑾峰彇鐢ㄦ埛鍦板潃鍒楄〃
      */
     @GetMapping("/list")
-    @ApiOperation("鑾峰彇鐢ㄦ埛鍦板潃鍒楄〃")
+    @Operation(summary = "获取用户地址列表")
     public R<List<MemberReceiveAddress>> getAddressList() {
         // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旇浠巘oken鎴杝ession涓幏鍙栫敤鎴稩D
         Long userId = 1L;
@@ -36,7 +36,7 @@ public class MemberReceiveAddressController {
      * 鑾峰彇鍦板潃璇︽儏
      */
     @GetMapping("/{id}")
-    @ApiOperation("鑾峰彇鍦板潃璇︽儏")
+    @Operation(summary = "获取地址详情")
     public R<MemberReceiveAddress> getAddressDetail(@PathVariable Long id) {
         MemberReceiveAddress address = memberReceiveAddressService.getById(id);
         if (address == null) {
@@ -49,7 +49,7 @@ public class MemberReceiveAddressController {
      * 娣诲姞鏀惰揣鍦板潃
      */
     @PostMapping
-    @ApiOperation("娣诲姞鏀惰揣鍦板潃")
+    @Operation(summary = "添加收货地址")
     public R<Boolean> addAddress(@RequestBody MemberReceiveAddress address) {
         // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旇浠巘oken鎴杝ession涓幏鍙栫敤鎴稩D
         Long userId = 1L;
@@ -62,7 +62,7 @@ public class MemberReceiveAddressController {
      * 鏇存柊鏀惰揣鍦板潃
      */
     @PutMapping
-    @ApiOperation("鏇存柊鏀惰揣鍦板潃")
+    @Operation(summary = "更新收货地址")
     public R<Boolean> updateAddress(@RequestBody MemberReceiveAddress address) {
         // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旇浠巘oken鎴杝ession涓幏鍙栫敤鎴稩D
         Long userId = 1L;
@@ -75,7 +75,7 @@ public class MemberReceiveAddressController {
      * 鍒犻櫎鏀惰揣鍦板潃
      */
     @DeleteMapping("/{id}")
-    @ApiOperation("鍒犻櫎鏀惰揣鍦板潃")
+    @Operation(summary = "删除收货地址")
     public R<Boolean> deleteAddress(@PathVariable Long id) {
         // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旇浠巘oken鎴杝ession涓幏鍙栫敤鎴稩D
         Long userId = 1L;
@@ -87,7 +87,7 @@ public class MemberReceiveAddressController {
      * 璁剧疆榛樿鍦板潃
      */
     @PutMapping("/default/{id}")
-    @ApiOperation("璁剧疆榛樿鍦板潃")
+    @Operation(summary = "设置默认地址")
     public R<Boolean> setDefaultAddress(@PathVariable Long id) {
         // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旇浠巘oken鎴杝ession涓幏鍙栫敤鎴稩D
         Long userId = 1L;
@@ -99,7 +99,7 @@ public class MemberReceiveAddressController {
      * 鑾峰彇鐢ㄦ埛榛樿鍦板潃
      */
     @GetMapping("/default")
-    @ApiOperation("鑾峰彇鐢ㄦ埛榛樿鍦板潃")
+    @Operation(summary = "获取用户默认地址")
     public R<MemberReceiveAddress> getDefaultAddress() {
         // 杩欓噷绠€鍖栧鐞嗭紝瀹為檯搴旇浠巘oken鎴杝ession涓幏鍙栫敤鎴稩D
         Long userId = 1L;

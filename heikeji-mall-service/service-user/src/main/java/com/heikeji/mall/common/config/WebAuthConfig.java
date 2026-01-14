@@ -99,13 +99,17 @@ public class WebAuthConfig {
                 // 配置请求授权
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许所有OPTIONS请求
-                        .antMatchers("/api/**", "/user/**").permitAll()
+                        .requestMatchers("/api/**", "/user/**").permitAll()
                         // 允许登录注册接口
-                        .antMatchers("/api/user/login", "/api/user/register").permitAll()
+                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
                         // 允许获取验证码接口
-                        .antMatchers("/api/common/captcha").permitAll()
+                        .requestMatchers("/api/common/captcha").permitAll()
                         // 允许静态资源
-                        .antMatchers("/static/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/static/**", "/favicon.ico").permitAll()
+                        // 允许Actuator端点
+                        .requestMatchers("/actuator/**").permitAll()
+                        // 允许Swagger相关路径
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated()
                 )

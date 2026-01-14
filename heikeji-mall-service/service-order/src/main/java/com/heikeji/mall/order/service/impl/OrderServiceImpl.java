@@ -936,27 +936,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return new HashMap<>();
     }
     
-    @Override
-    public Boolean intelligentAssignOrder(Order order) {
-        return false;
-    }
-    
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "orderCache", allEntries = true)
-    public Boolean assignOrderById(Long orderId) {
-        return false;
-    }
-    
-    @Override
-    public Integer getMerchantOrderLoad(Long merchantId) {
-        return 0;
-    }
-    
-    @Override
-    public List<Map<String, Object>> getRecommendedMerchants(Order order, Integer limit) {
-        return new ArrayList<>();
-    }
+
     
     /**
      * 生成订单号

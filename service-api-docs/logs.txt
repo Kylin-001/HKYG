@@ -1,0 +1,53 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.heikeji:service-api-docs >--------------------
+[INFO] Building API文档聚合服务 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:2.7.18:run (default-cli) > test-compile @ service-api-docs >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ service-api-docs ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.12.1:compile (default-compile) @ service-api-docs ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 2 source files with javac [debug parameters target 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ service-api-docs ---
+[INFO] skip non existing resourceDirectory /home/heikeji/heikeji-mall/service-api-docs/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.12.1:testCompile (default-testCompile) @ service-api-docs ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:2.7.18:run (default-cli) < test-compile @ service-api-docs <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:2.7.18:run (default-cli) @ service-api-docs ---
+[INFO] Attaching agents: []
+2026-01-13 11:12:53.900  INFO 188197 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.18)
+
+2026-01-13 11:12:54.324  INFO 188197 --- [           main] com.heikeji.mall.docs.DocsApplication    : Starting DocsApplication using Java 17.0.17 on zky-virtual-machine with PID 188197 (/home/heikeji/heikeji-mall/service-api-docs/target/classes started by zky in /home/heikeji/heikeji-mall/service-api-docs)
+2026-01-13 11:12:54.327  INFO 188197 --- [           main] com.heikeji.mall.docs.DocsApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-01-13 11:12:56.902  INFO 188197 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bf95cdf4-a246-3928-9fbd-87f8968e3d2f
+2026-01-13 11:12:57.698  INFO 188197 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8089 (http)
+2026-01-13 11:12:57.724  INFO 188197 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-13 11:12:57.725  INFO 188197 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-01-13 11:12:57.988  INFO 188197 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-13 11:12:57.989  INFO 188197 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3541 ms
+2026-01-13 11:13:01.210  INFO 188197 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-01-13 11:13:01.325  INFO 188197 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8089 (http) with context path ''
+2026-01-13 11:13:01.572  INFO 188197 --- [           main] com.heikeji.mall.docs.DocsApplication    : Started DocsApplication in 9.044 seconds (JVM running for 9.946)
+2026-01-13 11:13:03.305  INFO 188197 --- [nio-8089-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-13 11:13:03.305  INFO 188197 --- [nio-8089-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-13 11:13:03.309  INFO 188197 --- [nio-8089-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+2026-01-13 11:13:03.767  INFO 188197 --- [nio-8089-exec-1] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 350 ms

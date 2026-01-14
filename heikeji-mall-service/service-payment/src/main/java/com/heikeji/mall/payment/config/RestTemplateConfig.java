@@ -1,9 +1,10 @@
 package com.heikeji.mall.payment.config;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.io.SocketConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +37,7 @@ public class RestTemplateConfig {
     }
 
     @Bean
-    public ClientHttpRequestFactory clientHttpRequestFactory(@Qualifier("httpClient") CloseableHttpClient httpClient) {
+    public ClientHttpRequestFactory clientHttpRequestFactory(@Qualifier("httpClient") HttpClient httpClient) {
         HttpComponentsClientHttpRequestFactory factory = 
                 new HttpComponentsClientHttpRequestFactory(httpClient);
         factory.setConnectTimeout(5000); // 连接超时时间：5秒
@@ -45,24 +46,29 @@ public class RestTemplateConfig {
     }
 
     @Bean
-    public CloseableHttpClient httpClient() {
+    public HttpClient httpClient() {
         // 创建连接池管理器
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(100); // 最大连接数
         connectionManager.setDefaultMaxPerRoute(20); // 每个路由的最大连接数
         
+        // 配置socket超时
+        SocketConfig socketConfig = SocketConfig.custom()
+                .setSoTimeout(org.apache.hc.core5.util.Timeout.ofSeconds(10)) // 读取超时时间：10秒
+                .build();
+        connectionManager.setDefaultSocketConfig(socketConfig);
+        
         // 配置请求超时
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectionRequestTimeout(3000) // 从连接池获取连接的超时时间：3秒
-                .setConnectTimeout(5000) // 连接超时时间：5秒
-                .setSocketTimeout(10000) // 读取超时时间：10秒
+                .setConnectionRequestTimeout(org.apache.hc.core5.util.Timeout.ofSeconds(3)) // 从连接池获取连接的超时时间：3秒
+                .setConnectTimeout(org.apache.hc.core5.util.Timeout.ofSeconds(5)) // 连接超时时间：5秒
                 .build();
         
         // 创建HttpClient
         return HttpClientBuilder.create()
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)
-                .evictIdleConnections(60, java.util.concurrent.TimeUnit.SECONDS) // 清理空闲连接
+                .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(60)) // 清理空闲连接
                 .disableAutomaticRetries() // 关闭自动重试，由应用层控制重试逻辑
                 .build();
     }

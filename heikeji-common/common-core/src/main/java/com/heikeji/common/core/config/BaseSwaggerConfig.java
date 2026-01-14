@@ -20,12 +20,9 @@ public class BaseSwaggerConfig {
     @Value("${app.description:黑科易购商城系统}")
     private String appDescription;
 
-    @Value("${server.url:http://localhost:8080}")
-    private String serverUrl;
-
     /**
      * 配置Swagger文档
-     * 注意：此方法需要添加springdoc-openapi依赖才能生效
+     * 注意：此方法需要添加SpringDoc OpenAPI依赖才能生效
      * @return Object 占位对象
      */
     @Bean
@@ -34,8 +31,8 @@ public class BaseSwaggerConfig {
         // 实际使用时需要添加以下依赖：
         // <dependency>
         //     <groupId>org.springdoc</groupId>
-        //     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        //     <version>2.2.0</version>
+        //     <artifactId>springdoc-openapi-ui</artifactId>
+        //     <version>${springdoc.version}</version>
         // </dependency>
         
         System.out.println("Swagger配置：" + appName + " v" + appVersion);

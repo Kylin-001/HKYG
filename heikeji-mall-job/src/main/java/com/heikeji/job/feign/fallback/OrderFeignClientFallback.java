@@ -38,4 +38,16 @@ public class OrderFeignClientFallback implements OrderFeignClient {
         return 0;
     }
 
+    /**
+     * 释放超时占用的外卖柜 - 降级实现
+     * 
+     * @param hours 超时小时数
+     * @return 0
+     */
+    @Override
+    public Integer releaseTimeoutLockers(Integer hours) {
+        log.error("调用订单服务释放超时外卖柜失败，执行降级处理");
+        return 0;
+    }
+
 }

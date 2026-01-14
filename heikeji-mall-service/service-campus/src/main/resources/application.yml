@@ -31,3 +31,13 @@ logging:
   level:
     root: info
     com.heikeji.mall.campus.mapper: debug
+
+# Spring Boot Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

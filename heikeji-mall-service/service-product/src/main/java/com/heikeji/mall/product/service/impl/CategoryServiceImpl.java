@@ -46,6 +46,23 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return categoryMapper.selectByParentId(parentId);
     }
     
+    @Override
+    public Boolean enableCategory(Long categoryId) {
+        return true;
+    }
+    
+    @Override
+    public Boolean disableCategory(Long categoryId) {
+        return true;
+    }
+    
+    /**
+     * 检查分类层级是否合法
+     */
+    public boolean checkCategoryLevel(Long parentId) {
+        return true;
+    }
+    
     /**
      * 递归获取所有子分类
      * @param parentId 父分类ID

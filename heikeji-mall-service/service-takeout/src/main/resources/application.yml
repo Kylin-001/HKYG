@@ -8,10 +8,11 @@ spring:
   application:
     name: service-takeout
   datasource:
-    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=60000&socketTimeout=60000&allowPublicKeyRetrieval=true
     username: root
     password: Mysql@8Root!2025
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
   # 禁用Nacos服务发现和配置检查，避免启动错误
   cloud:
     nacos:
@@ -28,6 +29,16 @@ spring:
       - io.github.resilience4j.autoconfigure.CircuitBreakerConfigurationOnMissingBean
       - io.github.resilience4j.autoconfigure.RetryAutoConfiguration
       - io.github.resilience4j.autoconfigure.RateLimiterAutoConfiguration
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
 
 
 mybatis-plus:

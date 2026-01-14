@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import java.time.LocalDateTime;
@@ -59,7 +59,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     @Autowired
@@ -69,7 +69,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 
 
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:}")
     private String fromEmail;
 
     private static final String SMS_CODE_PREFIX = "sms:code:";
@@ -250,12 +250,17 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         String resetUrl = "http://localhost:8080/api/user/reset-password?token=" + token;
 
         // 发送邮件
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(email);
-        message.setSubject("密码重置请求");
-        message.setText("请点击以下链接重置密码：" + resetUrl + "\n链接将在1小时后失效");
-        mailSender.send(message);
+        if (mailSender != null && StringUtils.isNotBlank(fromEmail)) {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(email);
+            message.setSubject("密码重置请求");
+            message.setText("请点击以下链接重置密码：" + resetUrl + "\n链接将在1小时后失效");
+            mailSender.send(message);
+        } else {
+            // 如果mailSender未配置，只记录日志，不发送邮件
+            log.warn("邮件发送功能未配置，跳过密码重置邮件发送，重置链接：{}", resetUrl);
+        }
 
         // 保存重置令牌到Redis
         redisTemplate.opsForValue().set(RESET_PASSWORD_PREFIX + token, user.getId().toString(), 3600, TimeUnit.SECONDS);

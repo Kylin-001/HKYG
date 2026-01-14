@@ -48,27 +48,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 // 禁用CSRF
-                .csrf().disable()
+                .csrf(csrf -> csrf.disable())
                 // 禁用Session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 请求授权配置
-                .authorizeRequests()
-                // 允许匿名访问的接口
-                .antMatchers("/api/app/auth/login", 
-                            "/api/app/auth/register", 
-                            "/api/app/auth/send-code",
-                            "/api/app/version/check",
-                            "/api/app/product/list",
-                            "/api/app/product/detail/**").permitAll()
-                // 其他所有请求都需要认证
-                .anyRequest().authenticated()
-                .and()
+                .authorizeHttpRequests(authorize -> authorize
+                    // 允许匿名访问的接口
+                    .requestMatchers("/api/app/auth/login", 
+                                "/api/app/auth/register", 
+                                "/api/app/auth/send-code",
+                                "/api/app/version/check",
+                                "/api/app/product/list",
+                                "/api/app/product/detail/**").permitAll()
+                    // 其他所有请求都需要认证
+                    .anyRequest().authenticated())
                 // 异常处理
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler)
-                .and()
+                .exceptionHandling(exception -> exception
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler))
                 // 添加JWT过滤器
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

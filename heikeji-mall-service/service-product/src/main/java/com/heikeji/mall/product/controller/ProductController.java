@@ -10,8 +10,8 @@ import com.heikeji.mall.product.entity.Product;
 import com.heikeji.mall.product.entity.ProductHotWord;
 import com.heikeji.mall.product.service.ProductHotWordService;
 import com.heikeji.mall.product.service.ProductService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/product")
-@Api(tags = "商品管理")
+@Tag(name = "商品管理")
 public class ProductController {
 
     @Autowired
@@ -36,7 +36,7 @@ public class ProductController {
      * 分页查询商品列表
      */
     @GetMapping("/page")
-    @ApiOperation("分页查询商品列表")
+    @Operation(summary = "分页查询商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
     public R<Page<ProductListVO>> pageQuery(
             @RequestParam Integer pageNo,
@@ -86,7 +86,7 @@ public class ProductController {
      * 查询商品详情
      */
     @GetMapping("/detail/{id}")
-    @ApiOperation("查询商品详情")
+    @Operation(summary = "查询商品详情")
     @RateLimiter(timeWindow = 1, maxCount = 50)
     public R<ProductDetailVO> getProductDetail(@PathVariable Long id) {
         Product product = productService.getById(id);
@@ -117,7 +117,7 @@ public class ProductController {
      * 根据分类ID查询商品列表
      */
     @GetMapping("/category/{categoryId}")
-    @ApiOperation("根据分类查询商品")
+    @Operation(summary = "根据分类查询商品")
     @RateLimiter(timeWindow = 1, maxCount = 40)
     public R<List<ProductListVO>> getProductsByCategory(@PathVariable Long categoryId) {
         List<Product> products = productService.getByCategoryId(categoryId);
@@ -146,7 +146,7 @@ public class ProductController {
      * 获取热门和新上架商品
      */
     @GetMapping("/hot")
-    @ApiOperation("获取热门和新商品")
+    @Operation(summary = "获取热门和新商品")
     @RateLimiter(timeWindow = 1, maxCount = 30)
     public R<?> getHotProducts(@RequestParam(defaultValue = "10") Integer limit) {
         return R.success(productService.getHotProducts(limit));
@@ -156,7 +156,7 @@ public class ProductController {
      * 新增商品
      */
     @PostMapping
-    @ApiOperation("新增商品")
+    @Operation(summary = "新增商品")
     @RateLimiter(timeWindow = 1, maxCount = 10)
     public R<Boolean> addProduct(@RequestBody Product product) {
         product.setDelFlag(0);
@@ -169,7 +169,7 @@ public class ProductController {
      * 更新商品信息
      */
     @PutMapping
-    @ApiOperation("更新商品信息")
+    @Operation(summary = "更新商品信息")
     @RateLimiter(timeWindow = 1, maxCount = 10)
     public R<Boolean> updateProduct(@RequestBody Product product) {
         boolean result = productService.updateById(product);
@@ -180,7 +180,7 @@ public class ProductController {
      * 商品上架
      */
     @PutMapping("/putOn/{id}")
-    @ApiOperation("商品上架")
+    @Operation(summary = "商品上架")
     @RateLimiter(timeWindow = 1, maxCount = 20)
     public R<Boolean> putOn(@PathVariable Long id) {
         boolean result = productService.putOn(id);
@@ -191,7 +191,7 @@ public class ProductController {
      * 商品下架
      */
     @PutMapping("/putOff/{id}")
-    @ApiOperation("商品下架")
+    @Operation(summary = "商品下架")
     @RateLimiter(timeWindow = 1, maxCount = 20)
     public R<Boolean> putOff(@PathVariable Long id) {
         boolean result = productService.putOff(id);
@@ -202,7 +202,7 @@ public class ProductController {
      * 删除商品（逻辑删除）
      */
     @DeleteMapping("/{id}")
-    @ApiOperation("删除商品")
+    @Operation(summary = "删除商品")
     @RateLimiter(timeWindow = 1, maxCount = 10)
     public R<Boolean> deleteProduct(@PathVariable Long id) {
         Product product = new Product();
@@ -216,7 +216,7 @@ public class ProductController {
      * 批量删除商品（逻辑删除）
      */
     @DeleteMapping("/batch")
-    @ApiOperation("批量删除商品")
+    @Operation(summary = "批量删除商品")
     @RateLimiter(timeWindow = 1, maxCount = 5)
     public R<Boolean> deleteBatch(@RequestBody List<Long> ids) {
         productService.batchDeleteByIds(ids);
@@ -227,7 +227,7 @@ public class ProductController {
      * 高级搜索商品
      */
     @PostMapping("/advancedSearch")
-    @ApiOperation("高级搜索商品")
+    @Operation(summary = "高级搜索商品")
     @RateLimiter(timeWindow = 1, maxCount = 20)
     public R<Page<ProductListVO>> advancedSearch(
             @RequestParam(defaultValue = "1") Integer pageNo,
@@ -273,7 +273,7 @@ public class ProductController {
      * 获取分类及其子分类下的商品列表
      */
     @GetMapping("/listByCategoryAndChildren/{categoryId}")
-    @ApiOperation("获取分类及其子分类下的商品列表")
+    @Operation(summary = "获取分类及其子分类下的商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 40)
     public R<List<ProductListVO>> listByCategoryAndChildren(@PathVariable Long categoryId) {
         List<Product> productList = productService.getByCategoryAndChildren(categoryId);
@@ -302,7 +302,7 @@ public class ProductController {
      * 获取热门商品列表
      */
     @GetMapping("/hotList")
-    @ApiOperation("获取热门商品列表")
+    @Operation(summary = "获取热门商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
     public R<List<ProductListVO>> hotList(
             @RequestParam(defaultValue = "10") Integer limit) {
@@ -332,7 +332,7 @@ public class ProductController {
      * 获取新品列表
      */
     @GetMapping("/newList")
-    @ApiOperation("获取新品列表")
+    @Operation(summary = "获取新品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
     public R<List<ProductListVO>> newList(
             @RequestParam(defaultValue = "10") Integer limit) {
@@ -362,7 +362,7 @@ public class ProductController {
      * 获取推荐商品列表
      */
     @GetMapping("/recommendList")
-    @ApiOperation("获取推荐商品列表")
+    @Operation(summary = "获取推荐商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
     public R<List<ProductListVO>> recommendList(
             @RequestParam(defaultValue = "10") Integer limit) {
@@ -392,7 +392,7 @@ public class ProductController {
      * 获取个性化推荐商品列表
      */
     @GetMapping("/personalizedRecommendList")
-    @ApiOperation("获取个性化推荐商品列表")
+    @Operation(summary = "获取个性化推荐商品列表")
     @RateLimiter(timeWindow = 1, maxCount = 30)
     public R<List<ProductListVO>> getPersonalizedRecommendProductList(
             @RequestParam(defaultValue = "10") Integer limit,
@@ -423,7 +423,7 @@ public class ProductController {
      * 获取热门搜索词列表
      */
     @GetMapping("/hotWords")
-    @ApiOperation("获取热门搜索词列表")
+    @Operation(summary = "获取热门搜索词列表")
     @RateLimiter(timeWindow = 1, maxCount = 50)
     public R<List<ProductHotWord>> getHotWords(@RequestParam(defaultValue = "10") Integer limit) {
         List<ProductHotWord> hotWords = productHotWordService.getHotWords(limit);
@@ -434,7 +434,7 @@ public class ProductController {
      * 获取首页展示的热词
      */
     @GetMapping("/homeHotWords")
-    @ApiOperation("获取首页展示的热词")
+    @Operation(summary = "获取首页展示的热词")
     @RateLimiter(timeWindow = 1, maxCount = 50)
     public R<List<ProductHotWord>> getHomeHotWords(@RequestParam(defaultValue = "10") Integer limit) {
         List<ProductHotWord> hotWords = productHotWordService.getHomeShowHotWords(limit);
@@ -445,7 +445,7 @@ public class ProductController {
      * 获取搜索建议
      */
     @GetMapping("/searchSuggestions")
-    @ApiOperation("获取搜索建议")
+    @Operation(summary = "获取搜索建议")
     @RateLimiter(timeWindow = 1, maxCount = 50)
     public R<List<String>> getSearchSuggestions(
             @RequestParam String keyword,
@@ -458,7 +458,7 @@ public class ProductController {
      * 获取商品总数
      */
     @GetMapping("/count")
-    @ApiOperation("获取商品总数")
+    @Operation(summary = "获取商品总数")
     public R<Integer> getProductCount() {
         Integer count = productService.getProductCount();
         return R.success(count);

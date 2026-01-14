@@ -10,6 +10,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
  * 缓存配置类
@@ -58,5 +60,18 @@ public class CacheConfig {
         logger.info("CacheManager bean created successfully");
         
         return cacheManager;
+    }
+    
+    /**
+     * 配置TaskScheduler，解决CacheWarmUpManager的依赖注入问题
+     */
+    @Bean
+    public TaskScheduler taskScheduler() {
+        logger.info("Creating TaskScheduler bean...");
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("cache-refresh-");
+        logger.info("TaskScheduler bean created successfully");
+        return scheduler;
     }
 }

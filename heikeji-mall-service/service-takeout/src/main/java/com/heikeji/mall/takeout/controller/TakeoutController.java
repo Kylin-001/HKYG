@@ -8,31 +8,43 @@ import com.heikeji.mall.takeout.entity.DeliveryLocker;
 import com.heikeji.mall.takeout.enums.OrderStatusEnum;
 import com.heikeji.mall.takeout.service.TakeoutService;
 import com.heikeji.mall.takeout.utils.ResultUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.stream.Collectors;
 
 /**
  * 外卖订单Controller
  */
 @RestController
 @RequestMapping("/api/takeout")
+@Tag(name = "外卖订单", description = "外卖订单管理接口")
 public class TakeoutController {
 
     @Autowired
+    @Qualifier("takeoutServiceImpl")
     private TakeoutService takeoutService;
 
     /**
      * 创建外卖订单
      */
     @PostMapping("/order")
-    public R createOrder(@RequestBody CreateTakeoutOrderDTO dto) {
+    @Operation(summary = "创建外卖订单", description = "根据请求参数创建外卖订单")
+    @ApiResponse(responseCode = "200", description = "创建成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TakeoutOrderResponseDTO.class)))
+    @ApiResponse(responseCode = "400", description = "请求参数错误")
+    @ApiResponse(responseCode = "500", description = "服务器内部错误")
+    public R createOrder(@Parameter(description = "创建外卖订单请求参数", required = true) @RequestBody CreateTakeoutOrderDTO dto) {
         try {
             // 验证配送信息
             validateDTO(dto);
@@ -51,7 +63,12 @@ public class TakeoutController {
      * 获取订单详情
      */
     @GetMapping("/order/{id}")
-    public R getOrderDetail(@PathVariable Long id) {
+    @Operation(summary = "获取订单详情", description = "根据订单ID获取订单详情")
+    @ApiResponse(responseCode = "200", description = "获取成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TakeoutOrderResponseDTO.class)))
+    @ApiResponse(responseCode = "400", description = "请求参数错误")
+    @ApiResponse(responseCode = "404", description = "订单不存在")
+    @ApiResponse(responseCode = "500", description = "服务器内部错误")
+    public R getOrderDetail(@Parameter(description = "订单ID", required = true) @PathVariable Long id) {
         TakeoutOrder order = takeoutService.getTakeoutOrderById(id);
         if (order == null) {
               return ResultUtil.error("订单不存在");
@@ -63,7 +80,13 @@ public class TakeoutController {
      * 获取用户订单列表
      */
     @GetMapping("/user/orders")
-    public R getUserOrders(@RequestParam Long userId, @RequestParam(required = false) Integer status) {
+    @Operation(summary = "获取用户订单列表", description = "根据用户ID和订单状态获取用户订单列表")
+    @ApiResponse(responseCode = "200", description = "获取成功", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TakeoutOrderResponseDTO.class, type = "array")))
+    @ApiResponse(responseCode = "400", description = "请求参数错误")
+    @ApiResponse(responseCode = "500", description = "服务器内部错误")
+    public R getUserOrders(
+            @Parameter(description = "用户ID", required = true) @RequestParam Long userId,
+            @Parameter(description = "订单状态，可选参数") @RequestParam(required = false) Integer status) {
         List<TakeoutOrder> orders = takeoutService.getUserTakeoutOrders(userId, status);
         List<TakeoutOrderResponseDTO> responseDTOs = orders.stream()
                 .map(this::convertToResponseDTO)

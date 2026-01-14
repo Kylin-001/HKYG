@@ -3,23 +3,20 @@ package com.heikeji.mall.payment.service.impl;
 import com.heikeji.mall.payment.entity.Reconciliation;
 import com.heikeji.mall.payment.entity.ReconciliationBatch;
 import com.heikeji.mall.payment.service.ReconciliationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 支付对账服务单元测试
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class ReconciliationServiceImplTest {
 

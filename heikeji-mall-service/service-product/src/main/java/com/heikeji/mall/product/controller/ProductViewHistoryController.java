@@ -4,8 +4,8 @@ import com.heikeji.common.core.annotation.RequiresLogin;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.common.core.security.UserContextHolderAdapter;
 import com.heikeji.mall.product.service.ProductViewHistoryService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/product/view-history")
-@Api(tags = "用户浏览历史管理")
+@Tag(name = "用户浏览历史管理")
 public class ProductViewHistoryController {
 
     @Autowired
@@ -30,7 +30,7 @@ public class ProductViewHistoryController {
      * @return 结果
      */
     @PostMapping("/record/{productId}")
-    @ApiOperation("记录商品浏览")
+    @Operation(summary = "记录商品浏览")
     public R<Boolean> recordView(@PathVariable Long productId) {
         Long userId = UserContextHolderAdapter.getCurrentUserId();
         if (userId == null) {
@@ -50,7 +50,7 @@ public class ProductViewHistoryController {
      */
     @DeleteMapping("/delete/{productId}")
     @RequiresLogin
-    @ApiOperation("删除单个浏览记录")
+    @Operation(summary = "删除单个浏览记录")
     public R<Boolean> deleteViewHistory(@PathVariable Long productId) {
         Long userId = UserContextHolderAdapter.getCurrentUserId();
         boolean result = productViewHistoryService.deleteViewHistory(userId, productId);
@@ -63,7 +63,7 @@ public class ProductViewHistoryController {
      */
     @DeleteMapping("/clear-all")
     @RequiresLogin
-    @ApiOperation("清空所有浏览记录")
+    @Operation(summary = "清空所有浏览记录")
     public R<Boolean> clearAllViewHistory() {
         Long userId = UserContextHolderAdapter.getCurrentUserId();
         boolean result = productViewHistoryService.clearAllViewHistory(userId);

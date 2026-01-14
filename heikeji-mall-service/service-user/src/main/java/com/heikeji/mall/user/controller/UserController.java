@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.*;
 
 import com.heikeji.common.core.validation.annotation.StudentNo;
 import com.heikeji.common.core.security.JwtUtils;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;

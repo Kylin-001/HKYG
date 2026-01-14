@@ -5,6 +5,8 @@ import com.heikeji.mall.order.domain.vo.OrderDetailVO;
 // import com.heikeji.mall.common.core.result.ResultCode; // 包不存在，暂时注释
 // import com.heikeji.mall.order.constant.OrderConstant; // 包不存在，暂时注释
 import com.heikeji.mall.order.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.Map;
 /**
  * 订单控制器
  */
+@Tag(name = "订单管理")
 @RestController
 @RequestMapping("/order")
 @Slf4j
@@ -27,6 +30,7 @@ public class OrderController {
      * @param paramMap 包含超时时间参数
      * @return 取消的订单数量
      */
+    @Operation(summary = "自动取消超时订单")
     @PostMapping("/auto-cancel")
     public R<Integer> autoCancelOrders(@RequestBody Map<String, Object> paramMap) {
         try {
@@ -48,6 +52,7 @@ public class OrderController {
      * @param paramMap 包含超时时间参数
      * @return 确认收货的订单数量
      */
+    @Operation(summary = "自动确认收货")
     @PostMapping("/auto-confirm")
     public R<Integer> autoConfirmOrders(@RequestBody Map<String, Object> paramMap) {
         try {
@@ -78,6 +83,7 @@ public class OrderController {
     /**
      * 获取订单列表
      */
+    @Operation(summary = "获取订单列表")
     @GetMapping("/list")
     public R<?> getOrderList(
             @RequestParam Long userId,
@@ -97,6 +103,7 @@ public class OrderController {
     /**
      * 获取订单详情
      */
+    @Operation(summary = "获取订单详情")
     @GetMapping("/detail")
     public R<?> getOrderDetail(
             @RequestParam String orderNo,
@@ -114,6 +121,7 @@ public class OrderController {
     /**
      * 取消订单
      */
+    @Operation(summary = "取消订单")
     @PostMapping("/cancel")
     public R<?> cancelOrder(
             @RequestParam String orderNo,
@@ -131,6 +139,7 @@ public class OrderController {
     /**
      * 确认收货
      */
+    @Operation(summary = "确认收货")
     @PostMapping("/confirm-receipt")
     public R<?> confirmReceipt(
             @RequestParam String orderNo,
@@ -148,6 +157,7 @@ public class OrderController {
     /**
      * 获取订单统计数据
      */
+    @Operation(summary = "获取订单统计数据")
     @GetMapping("/statistics")
     public R<?> getOrderStatistics() {
         try {
@@ -163,6 +173,7 @@ public class OrderController {
     /**
      * 按时间范围获取订单统计数据
      */
+    @Operation(summary = "按时间范围获取订单统计数据")
     @GetMapping("/statistics/time-range")
     public R<?> getOrderStatisticsByTimeRange(
             @RequestParam String startTime,
@@ -185,6 +196,7 @@ public class OrderController {
     /**
      * 获取订单状态分布
      */
+    @Operation(summary = "获取订单状态分布")
     @GetMapping("/statistics/status-distribution")
     public R<?> getOrderStatusDistribution() {
         try {
@@ -200,6 +212,7 @@ public class OrderController {
     /**
      * 获取订单金额区间分布
      */
+    @Operation(summary = "获取订单金额区间分布")
     @GetMapping("/statistics/amount-range-distribution")
     public R<?> getOrderAmountRangeDistribution() {
         try {
@@ -215,6 +228,7 @@ public class OrderController {
     /**
      * 获取订单趋势数据
      */
+    @Operation(summary = "获取订单趋势数据")
     @GetMapping("/statistics/trend")
     public R<?> getOrderTrend(
             @RequestParam(defaultValue = "day") String type,
@@ -232,6 +246,7 @@ public class OrderController {
     /**
      * 获取热门商品订单统计
      */
+    @Operation(summary = "获取热门商品订单统计")
     @GetMapping("/statistics/hot-products")
     public R<?> getHotProductsOrderStatistics(
             @RequestParam(defaultValue = "10") Integer limit) {
@@ -248,6 +263,7 @@ public class OrderController {
     /**
      * 获取用户订单统计
      */
+    @Operation(summary = "获取用户订单统计")
     @GetMapping("/statistics/user")
     public R<?> getUserOrderStatistics(
             @RequestParam Long userId) {

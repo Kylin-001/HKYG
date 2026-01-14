@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.takeout.entity.Merchant;
 import com.heikeji.mall.takeout.service.MerchantService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/takeout/merchant")
-@Api(tags = "外卖商家管理")
+@Tag(name = "外卖商家管理")
 public class MerchantController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class MerchantController {
      * 获取营业中的商家列表
      */
     @GetMapping("/active")
-    @ApiOperation("获取营业中的商家列表")
+    @Operation(summary = "获取营业中的商家列表")
     public R<List<Merchant>> getActiveMerchants() {
         List<Merchant> merchants = merchantService.getActiveMerchants();
         return R.success(merchants);
@@ -36,7 +36,7 @@ public class MerchantController {
      * 分页查询商家
      */
     @GetMapping("/page")
-    @ApiOperation("分页查询商家")
+    @Operation(summary = "分页查询商家")
     public R<Page<Merchant>> pageMerchants(@RequestParam Integer pageNum, @RequestParam Integer pageSize) {
         Page<Merchant> page = new Page<>(pageNum, pageSize);
         Page<Merchant> merchantPage = merchantService.pageMerchants(page);
@@ -47,7 +47,7 @@ public class MerchantController {
      * 搜索商家
      */
     @GetMapping("/search")
-    @ApiOperation("搜索商家")
+    @Operation(summary = "搜索商家")
     public R<List<Merchant>> searchMerchants(@RequestParam String keyword) {
         List<Merchant> merchants = merchantService.searchMerchants(keyword);
         return R.success(merchants);
@@ -57,7 +57,7 @@ public class MerchantController {
      * 获取商家详情
      */
     @GetMapping("/{id}")
-    @ApiOperation("获取商家详情")
+    @Operation(summary = "获取商家详情")
     public R<Merchant> getMerchantById(@PathVariable Long id) {
         Merchant merchant = merchantService.getById(id);
         return R.success(merchant);

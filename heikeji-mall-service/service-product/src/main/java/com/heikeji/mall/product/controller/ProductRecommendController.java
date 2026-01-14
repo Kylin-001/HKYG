@@ -2,8 +2,8 @@ package com.heikeji.mall.product.controller;
 
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.product.service.ProductRecommendService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * 商品推荐控制器
  */
-@Api(tags = "商品推荐")
+@Tag(name = "商品推荐")
 @RestController
 @RequestMapping("/api/product/recommend")
 public class ProductRecommendController {
@@ -24,7 +24,7 @@ public class ProductRecommendController {
     /**
      * 获取个性化商品推荐
      */
-    @ApiOperation("获取个性化商品推荐")
+    @Operation(summary = "获取个性化商品推荐")
     @GetMapping("/personalized")
     public R<List<Map<String, Object>>> getPersonalizedRecommendations(
             @RequestParam Long userId,
@@ -36,7 +36,7 @@ public class ProductRecommendController {
     /**
      * 获取热门商品推荐
      */
-    @ApiOperation("获取热门商品推荐")
+    @Operation(summary = "获取热门商品推荐")
     @GetMapping("/hot")
     public R<List<Map<String, Object>>> getHotProductRecommendations(
             @RequestParam(defaultValue = "10") int limit) {
@@ -47,7 +47,7 @@ public class ProductRecommendController {
     /**
      * 获取相似商品推荐
      */
-    @ApiOperation("获取相似商品推荐")
+    @Operation(summary = "获取相似商品推荐")
     @GetMapping("/similar/{productId}")
     public R<List<Map<String, Object>>> getSimilarProductRecommendations(
             @PathVariable Long productId,
@@ -59,7 +59,7 @@ public class ProductRecommendController {
     /**
      * 获取商品推荐理由
      */
-    @ApiOperation("获取商品推荐理由")
+    @Operation(summary = "获取商品推荐理由")
     @GetMapping("/reason")
     public R<String> getRecommendReason(
             @RequestParam Long userId,
@@ -71,7 +71,7 @@ public class ProductRecommendController {
     /**
      * 更新推荐模型
      */
-    @ApiOperation("更新推荐模型")
+    @Operation(summary = "更新推荐模型")
     @PostMapping("/update-model")
     public R<Boolean> updateRecommendModel() {
         boolean success = productRecommendService.updateRecommendModel();
@@ -81,7 +81,7 @@ public class ProductRecommendController {
     /**
      * 获取推荐统计信息
      */
-    @ApiOperation("获取推荐统计信息")
+    @Operation(summary = "获取推荐统计信息")
     @GetMapping("/statistics")
     public R<Map<String, Object>> getRecommendStatistics() {
         Map<String, Object> statistics = productRecommendService.getRecommendStatistics();

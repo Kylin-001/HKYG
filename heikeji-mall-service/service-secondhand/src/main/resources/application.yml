@@ -17,7 +17,7 @@ spring:
         enabled: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.186.129:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=60000&socketTimeout=60000&allowPublicKeyRetrieval=true
     username: root
     password: Mysql@8Root!2025
     type: com.alibaba.druid.pool.DruidDataSource
@@ -26,6 +26,16 @@ spring:
     port: 6379
     password: Redis@hkyg
     database: 0
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
 
 mybatis-plus:
   mapper-locations: classpath:mapper/secondhand/**/*.xml

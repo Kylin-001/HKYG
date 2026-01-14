@@ -13,7 +13,7 @@ import com.heikeji.mall.product.mapper.ProductMapper;
 import com.heikeji.mall.product.service.ProductService;
 import com.heikeji.mall.product.service.ProductViewHistoryService;
 import com.heikeji.mall.product.service.ProductElasticsearchService;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

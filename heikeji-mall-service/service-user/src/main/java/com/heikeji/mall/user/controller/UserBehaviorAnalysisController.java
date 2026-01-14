@@ -3,8 +3,8 @@ package com.heikeji.mall.user.controller;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.user.service.UserBehaviorAnalysisService;
 import com.heikeji.mall.user.vo.UserStatisticsVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * 用户行为分析控制器
  */
-@Api(tags = "用户行为分析")
+@Tag(name = "用户行为分析")
 @RestController
 @RequestMapping("/api/analysis/user-behavior")
 public class UserBehaviorAnalysisController {
@@ -30,7 +30,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户统计数据
      */
-    @ApiOperation("获取用户统计数据")
+    @Operation(summary = "获取用户统计数据")
     @GetMapping("/statistics")
     public R<UserStatisticsVO> getUserStatistics(
             @RequestParam Long userId,
@@ -43,7 +43,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户行为趋势
      */
-    @ApiOperation("获取用户行为趋势")
+    @Operation(summary = "获取用户行为趋势")
     @GetMapping("/trend")
     public R<List<Map<String, Object>>> getUserBehaviorTrend(
             @RequestParam Long userId,
@@ -56,7 +56,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户热门商品
      */
-    @ApiOperation("获取用户热门商品")
+    @Operation(summary = "获取用户热门商品")
     @GetMapping("/hot-products")
     public R<List<Map<String, Object>>> getUserHotProducts(
             @RequestParam Long userId,
@@ -68,7 +68,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户活跃度
      */
-    @ApiOperation("获取用户活跃度")
+    @Operation(summary = "获取用户活跃度")
     @GetMapping("/activity")
     public R<Map<String, Object>> getUserActivity(
             @RequestParam Long userId,
@@ -85,7 +85,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户偏好
      */
-    @ApiOperation("获取用户偏好")
+    @Operation(summary = "获取用户偏好")
     @GetMapping("/preferences")
     public R<Map<String, Object>> getUserPreferences(
             @RequestParam Long userId) {
@@ -96,7 +96,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户流失风险
      */
-    @ApiOperation("获取用户流失风险")
+    @Operation(summary = "获取用户流失风险")
     @GetMapping("/churn-risk")
     public R<Map<String, Object>> getUserChurnRisk(
             @RequestParam Long userId) {
@@ -107,7 +107,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 获取用户群体行为分析
      */
-    @ApiOperation("获取用户群体行为分析")
+    @Operation(summary = "获取用户群体行为分析")
     @GetMapping("/group-analysis")
     public R<Map<String, Object>> getUserGroupBehaviorAnalysis(
             @RequestParam String userGroup,
@@ -121,7 +121,7 @@ public class UserBehaviorAnalysisController {
     /**
      * 预测用户购买意向
      */
-    @ApiOperation("预测用户购买意向")
+    @Operation(summary = "预测用户购买意向")
     @GetMapping("/purchase-intent")
     public R<Map<String, Object>> predictPurchaseIntent(
             @RequestParam Long userId) {

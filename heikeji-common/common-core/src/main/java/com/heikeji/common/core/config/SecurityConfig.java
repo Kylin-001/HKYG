@@ -4,6 +4,7 @@ import com.heikeji.common.core.security.JwtAuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -13,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 /**
@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     
-    @Autowired
+    @Autowired(required = false)
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     
     @Bean(name = "commonSecurityConfig")
@@ -59,11 +59,11 @@ public class SecurityConfig {
             // 配置请求授权规则
             .authorizeHttpRequests(authorize -> authorize
                 // 允许公开访问的路径
-                .antMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/swagger-ui/**", "/api/v3/api-docs/**").permitAll()
                 // 允许健康检查路径
-                .antMatchers("/actuator/**").permitAll()
+                .requestMatchers("/actuator/**", "/api/actuator/**").permitAll()
                 // 允许OPTIONS请求
-                .antMatchers("/", "/favicon.ico", "/*.html", "/*.js", "/*.css").permitAll()
+                .requestMatchers("/", "/favicon.ico", "/*.html", "/*.js", "/*.css", "/api/", "/api/*.html", "/api/*.js", "/api/*.css").permitAll()
                 // 其他所有请求都需要认证
                 .anyRequest().authenticated()
             )
@@ -78,8 +78,14 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .logout(logout -> logout.disable());
 
-        // 在LogoutFilter之后添加JWT过滤器
-        http.addFilterAfter(jwtAuthenticationFilter, LogoutFilter.class);
+        // 仅当JWT过滤器存在时才添加
+        if (jwtAuthenticationFilter != null) {
+            // 在LogoutFilter之后添加JWT过滤器
+            http.addFilterAfter(jwtAuthenticationFilter, LogoutFilter.class);
+            logger.info("已添加JWT认证过滤器");
+        } else {
+            logger.warn("JWT认证过滤器不存在，跳过添加");
+        }
 
         logger.info("Spring Security配置完成");
         return http.build();

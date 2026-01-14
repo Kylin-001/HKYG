@@ -4,18 +4,15 @@ import com.heikeji.mall.payment.dto.PaymentContext;
 import com.heikeji.mall.payment.dto.RiskAssessmentResult;
 import com.heikeji.mall.payment.dto.SecurityCheckResult;
 import com.heikeji.mall.payment.service.RiskControlService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 风控服务单元测试
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class RiskControlServiceImplTest {
 

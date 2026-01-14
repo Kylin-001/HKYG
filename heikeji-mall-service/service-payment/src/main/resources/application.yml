@@ -12,6 +12,12 @@ spring:
     username: root
     password: Mysql@8Root!2025
     driver-class-name: com.mysql.cj.jdbc.Driver
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: Redis@hkyg
+    database: 0
   # 禁用Nacos服务发现和配置检查，避免启动错误
   cloud:
     nacos:
@@ -76,6 +82,25 @@ wx:
     privateCertPath: classpath:cert/apiclient_key.pem  # 私钥证书路径
     publicCertPath: classpath:cert/apiclient_cert.pem  # 公钥证书路径
     keyPath: classpath:cert/apiclient_cert.p12  # API证书路径
+
+# 支付宝支付配置
+alipay:
+  appId: alipay_appid_here  # 实际应用中替换为真实的appId
+  privateKey: alipay_private_key_here  # 实际应用中替换为真实的私钥
+  publicKey: alipay_public_key_here  # 实际应用中替换为真实的公钥
+  gateway: https://openapi.alipaydev.com/gateway.do  # 支付宝网关地址，沙箱环境
+  gatewayUrl: https://openapi.alipaydev.com/gateway.do  # 支付宝网关地址，沙箱环境
+  notifyUrl: http://your-domain/api/payment/notify/alipay  # 支付结果通知地址
+  returnUrl: http://your-domain/api/payment/return/alipay  # 支付返回地址
+  charset: UTF-8  # 字符集
+  signType: RSA2  # 签名类型
+  format: json  # 格式
+  timeout: 30000  # 超时时间（毫秒）
+
+# 支付安全配置
+payment:
+  security:
+    key: payment_security_key_here  # 实际应用中替换为真实的安全密钥
 
 # RabbitMQ队列配置
 rabbitmq:

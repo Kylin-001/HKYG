@@ -6,13 +6,13 @@ import org.springframework.http.HttpStatus;
 import com.heikeji.mall.payment.entity.Reconciliation;
 import com.heikeji.mall.payment.entity.ReconciliationBatch;
 import com.heikeji.mall.payment.service.ReconciliationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * 支付对账控制器
  */
-@Api(tags = "支付对账管理")
+@Tag(name = "支付对账管理")
 @RestController
 @RequestMapping("/reconciliation")
 public class ReconciliationController {
@@ -34,7 +34,7 @@ public class ReconciliationController {
     /**
      * 启动对账任务
      */
-    @ApiOperation("启动对账任务")
+    @Operation(summary = "启动对账任务")
     @PreAuthorize("hasAuthority('payment:reconciliation:start')")
     @PostMapping("/start")
     public ApiResult<String> startReconciliation(@RequestParam String reconciliationDate,
@@ -50,7 +50,7 @@ public class ReconciliationController {
     /**
      * 执行对账
      */
-    @ApiOperation("执行对账")
+    @Operation(summary = "执行对账")
     @PreAuthorize("hasAuthority('payment:reconciliation:execute')")
     @PostMapping("/execute/{batchNo}")
     public ApiResult<Void> executeReconciliation(@PathVariable String batchNo) {
@@ -65,7 +65,7 @@ public class ReconciliationController {
     /**
      * 查询对账批次详情
      */
-    @ApiOperation("查询对账批次详情")
+    @Operation(summary = "查询对账批次详情")
     @PreAuthorize("hasAuthority('payment:reconciliation:view')")
     @GetMapping("/batch/{batchNo}")
     public ApiResult<ReconciliationBatch> getBatchByNo(@PathVariable String batchNo) {
@@ -79,7 +79,7 @@ public class ReconciliationController {
     /**
      * 查询对账记录列表
      */
-    @ApiOperation("查询对账记录列表")
+    @Operation(summary = "查询对账记录列表")
     @PreAuthorize("hasAuthority('payment:reconciliation:list')")
     @GetMapping("/list")
     public ApiResult<List<Reconciliation>> getReconciliationList(@RequestParam String batchNo,
@@ -91,7 +91,7 @@ public class ReconciliationController {
     /**
      * 生成对账报表
      */
-    @ApiOperation("生成对账报表")
+    @Operation(summary = "生成对账报表")
     @PreAuthorize("hasAuthority('payment:reconciliation:report')")
     @GetMapping("/report/{batchNo}")
     public ApiResult<Map<String, Object>> generateReport(@PathVariable String batchNo) {
@@ -106,7 +106,7 @@ public class ReconciliationController {
     /**
      * 导出对账数据
      */
-    @ApiOperation("导出对账数据")
+    @Operation(summary = "导出对账数据")
     @PreAuthorize("hasAuthority('payment:reconciliation:export')")
     @GetMapping("/export/{batchNo}")
     public void exportData(@PathVariable String batchNo, HttpServletResponse response) {
@@ -150,7 +150,7 @@ public class ReconciliationController {
     /**
      * 解决对账差异
      */
-    @ApiOperation("解决对账差异")
+    @Operation(summary = "解决对账差异")
     @PreAuthorize("hasAuthority('payment:reconciliation:solve')")
     @PostMapping("/solve")
     public ApiResult<Void> solveReconciliationDiff(@RequestParam Long id,
@@ -167,7 +167,7 @@ public class ReconciliationController {
     /**
      * 查询未解决的对账差异
      */
-    @ApiOperation("查询未解决的对账差异")
+    @Operation(summary = "查询未解决的对账差异")
     @PreAuthorize("hasAuthority('payment:reconciliation:diff')")
     @GetMapping("/unresolved")
     public ApiResult<List<Reconciliation>> getUnresolvedDiffs(@RequestParam(defaultValue = "100") Integer limit) {
@@ -178,7 +178,7 @@ public class ReconciliationController {
     /**
      * 手动触发对账
      */
-    @ApiOperation("手动触发对账")
+    @Operation(summary = "手动触发对账")
     @PreAuthorize("hasAuthority('payment:reconciliation:trigger')")
     @PostMapping("/trigger")
     public ApiResult<String> triggerManualReconciliation(@RequestParam String startDate,
@@ -195,7 +195,7 @@ public class ReconciliationController {
     /**
      * 查询对账统计信息
      */
-    @ApiOperation("查询对账统计信息")
+    @Operation(summary = "查询对账统计信息")
     @PreAuthorize("hasAuthority('payment:reconciliation:statistics')")
     @GetMapping("/statistics")
     public ApiResult<Map<String, Object>> getReconciliationStatistics(@RequestParam String startDate,

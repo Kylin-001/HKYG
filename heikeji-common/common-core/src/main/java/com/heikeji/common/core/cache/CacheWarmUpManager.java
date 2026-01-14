@@ -8,7 +8,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -27,7 +27,7 @@ public class CacheWarmUpManager implements ApplicationRunner {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Autowired(required = false)
     private TaskScheduler taskScheduler;
 
 
@@ -84,7 +84,16 @@ public class CacheWarmUpManager implements ApplicationRunner {
         cancelRefreshTask(taskName);
         
         // 创建新的定时任务
-        ScheduledFuture<?> future = taskScheduler.schedule(refreshTask, new CronTrigger(cronExpression));
+        ScheduledFuture<?> future;
+        if (taskScheduler != null) {
+            // 使用Spring的TaskScheduler（如果可用）
+            future = taskScheduler.schedule(refreshTask, new CronTrigger(cronExpression));
+        } else {
+            // 使用Java内置的定时任务
+            // 简化实现，这里只支持固定间隔，不支持cron表达式
+            future = java.util.concurrent.Executors.newSingleThreadScheduledExecutor()
+                .scheduleAtFixedRate(refreshTask, 1, 60, TimeUnit.SECONDS); // 默认每分钟执行一次
+        }
         refreshTasks.put(taskName, future);
     }
 

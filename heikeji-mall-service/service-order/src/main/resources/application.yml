@@ -114,3 +114,21 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
   packages-to-scan: com.heikeji.mall.order.controller
+  # 配置API文档的上下文路径
+  server:
+    url: http://localhost:8083/api
+
+# Spring Boot Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    elasticsearch:
+      enabled: false
+    redis:
+      enabled: true

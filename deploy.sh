@@ -183,15 +183,15 @@ build_backend() {
     # 进入项目根目录
     cd ${PROJECT_ROOT}
     
-    # 构建所有服务
-    log "INFO" "使用Maven构建后端服务..."
-    mvn clean install '-Dmaven.test.skip=true' 2>&1 | tee -a ${LOG_FILE}
+    # 构建所有服务，包括修复后的heikeji-mall-job模块
+    log "INFO" "使用Maven构建后端所有服务..."
+    mvn clean install '-Dmaven.test.skip=true' -pl heikeji-common/common-core,heikeji-common/common-api,heikeji-common/common-security,heikeji-system,heikeji-mall-job,heikeji-mall-service/service-user,heikeji-mall-service/service-product,heikeji-mall-service/service-payment,heikeji-mall-service/service-takeout,heikeji-mall-service/service-order 2>&1 | tee -a ${LOG_FILE}
     if [ $? -ne 0 ]; then
-        log "ERROR" "后端服务构建失败"
+        log "ERROR" "后端核心服务构建失败"
         return 1
     fi
     
-    log "INFO" "后端服务构建完成"
+    log "INFO" "后端核心服务构建完成"
     return 0
 }
 
@@ -345,10 +345,8 @@ stop_docker_services() {
 traditional_deploy() {
     log "INFO" "开始传统部署..."
     
-    # 1. 初始化数据库
-    if ! init_database; then
-        return 1
-    fi
+    # 1. 跳过数据库初始化，由用户手动处理
+    log "INFO" "跳过数据库初始化步骤，由用户手动处理"
     
     # 2. 构建后端服务
     if ! build_backend; then

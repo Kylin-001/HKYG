@@ -9,6 +9,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 用户服务模块启动类
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Import;
 @MapperScan("com.heikeji.mall.user.mapper")
 @ComponentScan(basePackages = {"com.heikeji.mall.user", "com.heikeji.mall.common", "com.heikeji.common"}, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {com.heikeji.common.core.security.JwtAuthenticationFilter.class, com.heikeji.common.security.filter.JwtAuthenticationFilter.class, com.heikeji.common.core.config.SecurityConfig.class}))
 @Import(CacheConfig.class)
+@EnableScheduling
 public class UserServiceApplication {
 
     public static void main(String[] args) {

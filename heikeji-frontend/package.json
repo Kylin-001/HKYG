@@ -20,7 +20,6 @@
     "format": "prettier --write \"src/**/*.{vue,js,ts,jsx,tsx,css,scss}\"",
     "format:check": "prettier --check \"src/**/*.{vue,js,ts,jsx,tsx,css,scss}\"",
     "pre-commit": "lint-staged",
-    "prepare": "husky install",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test:performance": "lhci autorun --upload.target=temporary-public-storage",

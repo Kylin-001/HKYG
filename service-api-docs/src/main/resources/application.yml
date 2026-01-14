@@ -1,0 +1,74 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: service-api-docs
+  mvc:
+    cors:
+      enabled: true
+      mappings:
+        "/**":
+          allowed-origins: "*"
+          allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+          allowed-headers: "*"
+          allow-credentials: true
+  # 禁用Nacos注册
+  cloud:
+    nacos:
+      discovery:
+        register-enabled: false
+
+# SpringDoc OpenAPI配置
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    # 配置Swagger UI的品牌信息
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - name: 用户服务
+        url: http://localhost:8081/v3/api-docs
+        primaryName: service-user
+      - name: 商品服务
+        url: http://localhost:8082/v3/api-docs
+        primaryName: service-product
+      - name: 订单服务
+        url: http://localhost:8083/api/v3/api-docs
+        primaryName: service-order
+      - name: 配送服务
+        url: http://localhost:8001/v3/api-docs
+        primaryName: service-delivery
+      - name: 外卖服务
+        url: http://localhost:8005/v3/api-docs
+        primaryName: service-takeout
+      - name: 支付服务
+        url: http://localhost:8004/v3/api-docs
+        primaryName: service-payment
+      - name: 校园服务
+        url: http://localhost:8003/v3/api-docs
+        primaryName: service-campus
+      - name: 二手服务
+        url: http://localhost:8006/v3/api-docs
+        primaryName: service-secondhand
+      - name: 失物招领服务
+        url: http://localhost:8007/v3/api-docs
+        primaryName: service-lostfound
+
+# 应用信息配置
+app:
+  name: 黑科易购API文档中心
+  version: 1.0.0
+  description: 黑科易购商城系统API文档聚合中心
+  contact:
+    name: 黑科易购开发团队
+    url: http://www.heikeji.com
+    email: dev@heikeji.com
+
+# 日志配置
+logging:
+  level:
+    root: info
+    org.springdoc: debug

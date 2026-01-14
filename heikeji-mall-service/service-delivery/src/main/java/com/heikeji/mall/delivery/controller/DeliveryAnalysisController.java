@@ -2,8 +2,8 @@ package com.heikeji.mall.delivery.controller;
 
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.delivery.service.DeliveryAnalysisService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * 配送数据分析控制器
  */
-@Api(tags = "配送数据分析")
+@Tag(name = "配送数据分析")
 @RestController
 @RequestMapping("/api/analysis/delivery")
 public class DeliveryAnalysisController {
@@ -29,7 +29,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送概览数据
      */
-    @ApiOperation("获取配送概览数据")
+    @Operation(summary = "获取配送概览数据")
     @GetMapping("/overview")
     public R<Map<String, Object>> getDeliveryOverview(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -41,7 +41,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送趋势数据
      */
-    @ApiOperation("获取配送趋势数据")
+    @Operation(summary = "获取配送趋势数据")
     @GetMapping("/trend")
     public R<Map<String, Object>> getDeliveryTrend(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -54,7 +54,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送状态分布
      */
-    @ApiOperation("获取配送状态分布")
+    @Operation(summary = "获取配送状态分布")
     @GetMapping("/status-distribution")
     public R<Map<String, Object>> getDeliveryStatusDistribution(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -66,7 +66,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送效率分析
      */
-    @ApiOperation("获取配送效率分析")
+    @Operation(summary = "获取配送效率分析")
     @GetMapping("/efficiency")
     public R<Map<String, Object>> getDeliveryEfficiencyAnalysis(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -78,7 +78,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送员绩效分析
      */
-    @ApiOperation("获取配送员绩效分析")
+    @Operation(summary = "获取配送员绩效分析")
     @GetMapping("/performance")
     public R<List<Map<String, Object>>> getDeliverymanPerformance(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -90,7 +90,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送地域分布
      */
-    @ApiOperation("获取配送地域分布")
+    @Operation(summary = "获取配送地域分布")
     @GetMapping("/region-distribution")
     public R<List<Map<String, Object>>> getDeliveryRegionDistribution(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -102,7 +102,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送类型分布
      */
-    @ApiOperation("获取配送类型分布")
+    @Operation(summary = "获取配送类型分布")
     @GetMapping("/type-distribution")
     public R<Map<String, Object>> getDeliveryTypeDistribution(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -114,7 +114,7 @@ public class DeliveryAnalysisController {
     /**
      * 获取配送时间分析
      */
-    @ApiOperation("获取配送时间分析")
+    @Operation(summary = "获取配送时间分析")
     @GetMapping("/time-analysis")
     public R<Map<String, Object>> getDeliveryTimeAnalysis(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,

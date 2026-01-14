@@ -2,10 +2,9 @@ package com.heikeji.job.config;
 
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
-import org.quartz.CronTriggerImpl;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
-import org.quartz.JobDetailImpl;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
@@ -21,6 +20,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+
+import com.heikeji.job.service.impl.JobServiceImpl;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -189,22 +190,17 @@ public class QuartzConfig {
      */
     @Bean
     public void configureDeliveryLockerTimeoutJob(Scheduler scheduler) throws SchedulerException {
-        JobDetailImpl jobDetail = new JobDetailImpl();
-        jobDetail.setName("deliveryLockerTimeoutJob");
-        jobDetail.setGroup("takeoutJobs");
-        jobDetail.setJobClass(DeliveryLockerTimeoutJob.class);
-        jobDetail.setDurability(true);
-        
-        // 设置定时任务执行的执行类
-        jobDetail.getJobDataMap().put("jobService", jobService);
+        JobDetail jobDetail = JobBuilder.newJob(DeliveryLockerTimeoutJob.class)
+                .withIdentity("deliveryLockerTimeoutJob", "takeoutJobs")
+                .storeDurably()
+                .build();
         
         // 创建Cron触发器，每小时执行一次
-        CronTriggerImpl trigger = new CronTriggerImpl();
-        trigger.setName("deliveryLockerTimeoutTrigger");
-        trigger.setGroup("takeoutTriggers");
-        trigger.setJobGroup("takeoutJobs");
-        trigger.setJobName("deliveryLockerTimeoutJob");
-        trigger.setCronExpression("0 0 * * * ?"); // 每小时00分执行
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity("deliveryLockerTimeoutTrigger", "takeoutTriggers")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 * * * ?")) // 每小时00分执行
+                .forJob(jobDetail)
+                .build();
         
         // 添加到调度器
         scheduler.scheduleJob(jobDetail, trigger);
