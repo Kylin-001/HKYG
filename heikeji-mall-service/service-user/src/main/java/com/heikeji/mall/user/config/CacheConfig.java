@@ -1,17 +1,21 @@
 package com.heikeji.mall.user.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.heikeji.common.core.cache.CacheManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.TaskScheduler;
 
 /**
  * 缓存配置类
@@ -24,8 +28,10 @@ public class CacheConfig {
 
     /**
      * 显式配置RedisTemplate，解决依赖注入问题
+     * 仅当RedisConnectionFactory存在时才创建此bean
      */
     @Bean
+    @ConditionalOnBean(RedisConnectionFactory.class)
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
@@ -44,6 +50,7 @@ public class CacheConfig {
     }
 
     @Bean(name = "cacheManager")
+    @ConditionalOnBean(RedisTemplate.class)
     public CacheManager cacheManager(RedisTemplate<String, Object> redisTemplate, RedisCacheManager redisCacheManager) {
         logger.info("Creating CacheManager bean...");
         

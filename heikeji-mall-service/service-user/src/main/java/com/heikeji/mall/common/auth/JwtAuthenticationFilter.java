@@ -3,7 +3,7 @@ package com.heikeji.mall.common.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heikeji.mall.common.exception.AuthenticationException;
 import com.heikeji.mall.common.response.R;
-import com.heikeji.common.core.security.JwtUtils;
+import com.heikeji.common.security.utils.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -37,9 +37,6 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    @Autowired
-    private JwtUtils jwtUtils;
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -81,10 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = extractToken(request);
             if (token != null) {
                 // 验证令牌有效性
-                if (jwtUtils.validateToken(token)) {
+                if (JwtUtils.validateToken(token)) {
                     // 从令牌中获取用户ID
-                    String userIdStr = jwtUtils.getUserIdFromToken(token);
-                    Long userId = userIdStr != null ? Long.parseLong(userIdStr) : null;
+                    Long userId = JwtUtils.getUserIdFromToken(token);
                     
                     // 如果用户ID不为空且当前上下文没有认证信息
                     if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {

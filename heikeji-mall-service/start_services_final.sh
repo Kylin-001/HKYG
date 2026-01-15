@@ -19,6 +19,8 @@ for service in $SERVICES; do
     # 检查服务是否需要使用带-exec后缀的jar包
     if [[ "$service" == "service-product" || "$service" == "service-payment" || "$service" == "service-takeout" ]]; then
         JAR_FILE="${service}/target/${service}-1.0.0-exec.jar"
+    elif [[ "$service" == "service-campus" ]]; then
+        JAR_FILE="${service}/target/heikeji-mall-service-campus-1.0.0.jar"
     else
         JAR_FILE="${service}/target/${service}-1.0.0.jar"
     fi

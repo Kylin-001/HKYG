@@ -172,7 +172,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     
     @Override
     public Map<String, Object> login(String username, String password) {
+        log.info("开始登录流程，账号：{}", username);
+        
         // 查询用户
+        log.info("查询用户，账号：{}", username);
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .eq(User::getUsername, username)
                 .or()
@@ -181,26 +184,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getEmail, username));
         
         if (user == null) {
+            log.info("用户不存在，账号：{}", username);
             return null;
         }
         
+        log.info("找到用户，用户名：{}, 密码：{}, 用户状态：{}", user.getUsername(), user.getPassword(), user.getStatus());
+        
         // 验证密码
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        boolean passwordMatch = passwordEncoder.matches(password, user.getPassword());
+        log.info("密码验证结果：{}, 输入密码：{}, 数据库密码：{}", passwordMatch, password, user.getPassword());
+        
+        if (!passwordMatch) {
+            log.info("密码错误，账号：{}", username);
             return null;
         }
         
         // 检查用户状态
+        log.info("检查用户状态，当前状态：{}, 期望状态：1", user.getStatus());
         if (user.getStatus() != 1) {
+            log.info("用户状态异常，账号：{}, 状态：{}", username, user.getStatus());
             return null;
         }
         
         // 更新最后登录时间
         user.setLastLoginTime(LocalDateTime.now());
         userMapper.updateById(user);
+        log.info("更新用户最后登录时间成功，用户ID：{}", user.getId());
         
         // 生成token
         String token = jwtUtils.generateToken(user.getId().toString(), user.getUsername());
         String refreshToken = jwtUtils.generateRefreshToken(user.getId().toString(), user.getUsername());
+        log.info("生成token成功，用户ID：{}", user.getId());
         
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
@@ -210,6 +224,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         result.put("nickname", user.getNickname());
         result.put("avatar", user.getAvatar());
         
+        log.info("登录成功，用户ID：{}", user.getId());
         return result;
     }
     

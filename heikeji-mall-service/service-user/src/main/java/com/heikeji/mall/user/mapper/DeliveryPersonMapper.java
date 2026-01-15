@@ -20,6 +20,5 @@ public interface DeliveryPersonMapper extends BaseMapper<DeliveryPerson> {
      * @param userId 用户ID
      * @return 配送员信息
      */
-    @Select("select * from delivery_person where user_id = #{userId} and deleted = 0")
     DeliveryPerson selectByUserId(Long userId);
 }

@@ -31,7 +31,7 @@ public class UserLoginHistoryServiceImpl extends ServiceImpl<UserLoginHistoryMap
     @Autowired
     private UserLoginHistoryMapper loginHistoryMapper;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, String> redisTemplate;
 
     private static final Logger log = LoggerFactory.getLogger(UserLoginHistoryServiceImpl.class);
@@ -108,11 +108,13 @@ public class UserLoginHistoryServiceImpl extends ServiceImpl<UserLoginHistoryMap
     @Override
     public boolean forceLogout(Long userId, String reason) {
         try {
-            // 清除用户所有会话
-            String sessionPattern = USER_SESSION_KEY_PREFIX + userId + ":*";
-            Set<String> keys = redisTemplate.keys(sessionPattern);
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
+            // 清除用户所有会话（如果Redis可用）
+            if (redisTemplate != null) {
+                String sessionPattern = USER_SESSION_KEY_PREFIX + userId + ":*";
+                Set<String> keys = redisTemplate.keys(sessionPattern);
+                if (keys != null && !keys.isEmpty()) {
+                    redisTemplate.delete(keys);
+                }
             }
 
             // 记录强制下线历史

@@ -54,8 +54,15 @@ public class JwtUtils {
 
     // 使用强密钥生成器，提高安全性
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        try {
+            // 尝试从Base64解码密钥
+            byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            // 如果解码失败，直接使用原始字符串作为密钥
+            logger.warn("JWT密钥不是有效的Base64字符串，使用原始字符串作为密钥");
+            return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        }
     }
     
     /**
