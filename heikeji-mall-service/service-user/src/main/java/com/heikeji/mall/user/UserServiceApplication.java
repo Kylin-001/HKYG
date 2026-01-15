@@ -1,6 +1,6 @@
 package com.heikeji.mall.user;
 
-import com.heikeji.mall.user.config.CacheConfig;
+
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,11 +17,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author heikeji
  * @date 2024-12-19
  */
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication(exclude = {
+    SecurityAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration.class
+})
 @EnableDiscoveryClient
 @MapperScan("com.heikeji.mall.user.mapper")
 @ComponentScan(basePackages = {"com.heikeji.mall.user", "com.heikeji.mall.common", "com.heikeji.common"}, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {com.heikeji.common.core.security.JwtAuthenticationFilter.class, com.heikeji.common.security.filter.JwtAuthenticationFilter.class, com.heikeji.common.core.config.SecurityConfig.class}))
-@Import(CacheConfig.class)
 @EnableScheduling
 public class UserServiceApplication {
 

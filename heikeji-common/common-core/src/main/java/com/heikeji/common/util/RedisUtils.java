@@ -1,9 +1,9 @@
 package com.heikeji.common.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisUtils {
 
-    @Resource
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -22,7 +22,9 @@ public class RedisUtils {
      * @param value 值
      */
     public void set(String key, Object value) {
-        redisTemplate.opsForValue().set(key, value);
+        if (redisTemplate != null) {
+            redisTemplate.opsForValue().set(key, value);
+        }
     }
 
     /**
@@ -33,7 +35,9 @@ public class RedisUtils {
      * @param timeUnit 时间单位
      */
     public void set(String key, Object value, long expireTime, TimeUnit timeUnit) {
-        redisTemplate.opsForValue().set(key, value, expireTime, timeUnit);
+        if (redisTemplate != null) {
+            redisTemplate.opsForValue().set(key, value, expireTime, timeUnit);
+        }
     }
 
     /**
@@ -43,7 +47,10 @@ public class RedisUtils {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
-        return (T) redisTemplate.opsForValue().get(key);
+        if (redisTemplate != null) {
+            return (T) redisTemplate.opsForValue().get(key);
+        }
+        return null;
     }
 
     /**
@@ -51,7 +58,9 @@ public class RedisUtils {
      * @param key 键
      */
     public void delete(String key) {
-        redisTemplate.delete(key);
+        if (redisTemplate != null) {
+            redisTemplate.delete(key);
+        }
     }
 
     /**
@@ -62,8 +71,11 @@ public class RedisUtils {
      * @return 是否设置成功
      */
     public boolean expire(String key, long expireTime, TimeUnit timeUnit) {
-        Boolean result = redisTemplate.expire(key, expireTime, timeUnit);
-        return result != null && result;
+        if (redisTemplate != null) {
+            Boolean result = redisTemplate.expire(key, expireTime, timeUnit);
+            return result != null && result;
+        }
+        return false;
     }
 
     /**
@@ -73,8 +85,11 @@ public class RedisUtils {
      * @return 过期时间
      */
     public long getExpire(String key, TimeUnit timeUnit) {
-        Long result = redisTemplate.getExpire(key, timeUnit);
-        return result != null ? result : 0;
+        if (redisTemplate != null) {
+            Long result = redisTemplate.getExpire(key, timeUnit);
+            return result != null ? result : 0;
+        }
+        return 0;
     }
 
     /**
@@ -83,8 +98,11 @@ public class RedisUtils {
      * @return 是否存在
      */
     public boolean hasKey(String key) {
-        Boolean result = redisTemplate.hasKey(key);
-        return result != null && result;
+        if (redisTemplate != null) {
+            Boolean result = redisTemplate.hasKey(key);
+            return result != null && result;
+        }
+        return false;
     }
 
     /**
@@ -93,8 +111,11 @@ public class RedisUtils {
      * @return 递增后的值
      */
     public long increment(String key) {
-        Long result = redisTemplate.opsForValue().increment(key);
-        return result != null ? result : 0;
+        if (redisTemplate != null) {
+            Long result = redisTemplate.opsForValue().increment(key);
+            return result != null ? result : 0;
+        }
+        return 0;
     }
 
     /**
@@ -104,8 +125,11 @@ public class RedisUtils {
      * @return 递增后的值
      */
     public long increment(String key, long delta) {
-        Long result = redisTemplate.opsForValue().increment(key, delta);
-        return result != null ? result : 0;
+        if (redisTemplate != null) {
+            Long result = redisTemplate.opsForValue().increment(key, delta);
+            return result != null ? result : 0;
+        }
+        return 0;
     }
 
     /**
@@ -114,8 +138,11 @@ public class RedisUtils {
      * @return 递减后的值
      */
     public long decrement(String key) {
-        Long result = redisTemplate.opsForValue().decrement(key);
-        return result != null ? result : 0;
+        if (redisTemplate != null) {
+            Long result = redisTemplate.opsForValue().decrement(key);
+            return result != null ? result : 0;
+        }
+        return 0;
     }
 
     /**
@@ -125,7 +152,10 @@ public class RedisUtils {
      * @return 递减后的值
      */
     public long decrement(String key, long delta) {
-        Long result = redisTemplate.opsForValue().decrement(key, delta);
-        return result != null ? result : 0;
+        if (redisTemplate != null) {
+            Long result = redisTemplate.opsForValue().decrement(key, delta);
+            return result != null ? result : 0;
+        }
+        return 0;
     }
 }

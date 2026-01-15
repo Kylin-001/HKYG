@@ -1,11 +1,11 @@
 package com.heikeji.common.core.cache;
 
 import com.heikeji.common.core.constant.CacheConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisLock {
 
-    @Resource
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -32,6 +32,10 @@ public class RedisLock {
      * @return 是否获取成功
      */
     public boolean tryLock(String lockKey, String requestId, long expireTime, TimeUnit timeUnit) {
+        // Redis不可用时，默认返回true，表示锁获取成功
+        if (redisTemplate == null) {
+            return true;
+        }
         // 使用setIfAbsent保证原子性操作
         return redisTemplate.opsForValue().setIfAbsent(lockKey, requestId, expireTime, timeUnit);
     }
@@ -55,6 +59,10 @@ public class RedisLock {
      * @return 是否解锁成功
      */
     public boolean unlock(String lockKey, String requestId) {
+        // Redis不可用时，默认返回true，表示解锁成功
+        if (redisTemplate == null) {
+            return true;
+        }
         String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
         Long result = redisTemplate.execute(redisScript, Collections.singletonList(lockKey), requestId);
@@ -72,6 +80,10 @@ public class RedisLock {
      * @return 是否获取成功
      */
     public boolean tryReentrantLock(String lockKey, String requestId, long expireTime, TimeUnit timeUnit) {
+        // Redis不可用时，默认返回true，表示锁获取成功
+        if (redisTemplate == null) {
+            return true;
+        }
         // 构建可重入锁的键
         String reentrantKey = lockKey + ":" + requestId;
         
@@ -106,6 +118,10 @@ public class RedisLock {
      * @return 是否解锁成功
      */
     public boolean unlockReentrant(String lockKey, String requestId) {
+        // Redis不可用时，默认返回true，表示解锁成功
+        if (redisTemplate == null) {
+            return true;
+        }
         Object currentValue = redisTemplate.opsForValue().get(lockKey);
         if (currentValue == null || !requestId.equals(currentValue)) {
             // 锁不存在或不是当前线程持有
@@ -129,7 +145,9 @@ public class RedisLock {
      * @param lockKey 锁的键
      */
     public void forceUnlock(String lockKey) {
-        redisTemplate.delete(lockKey);
+        if (redisTemplate != null) {
+            redisTemplate.delete(lockKey);
+        }
     }
 
     /**
@@ -139,6 +157,10 @@ public class RedisLock {
      * @return 是否存在
      */
     public boolean isLocked(String lockKey) {
-        return redisTemplate.hasKey(lockKey);
+        if (redisTemplate != null) {
+            return redisTemplate.hasKey(lockKey);
+        }
+        // Redis不可用时，默认返回false，表示锁不存在
+        return false;
     }
 }

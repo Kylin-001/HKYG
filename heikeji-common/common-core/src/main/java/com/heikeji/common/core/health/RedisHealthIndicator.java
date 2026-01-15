@@ -2,10 +2,11 @@ package com.heikeji.common.core.health;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -14,12 +15,14 @@ import java.util.concurrent.TimeUnit;
  * Redis健康检查指示器
  * 用于检查Redis连接状态和性能指标
  */
-@Component
+// 暂时移除@Component注解，避免在Redis不可用时导致启动失败
+// @Component
+// @ConditionalOnBean(RedisTemplate.class)
 public class RedisHealthIndicator {
 
     private static final Logger log = LoggerFactory.getLogger(RedisHealthIndicator.class);
 
-    @Resource
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     /**

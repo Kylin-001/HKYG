@@ -1,9 +1,9 @@
 package com.heikeji.common.core.cache;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class BloomFilter {
 
-    @Resource
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -52,12 +52,14 @@ public class BloomFilter {
      * @param hashNumbers  哈希函数个数
      */
     public void add(String filterKey, String value, int expectedSize, int hashNumbers) {
-        for (int i = 0; i < hashNumbers; i++) {
-            int index = getIndex(value, i, expectedSize);
-            redisTemplate.opsForValue().setBit(filterKey, index, true);
+        if (redisTemplate != null) {
+            for (int i = 0; i < hashNumbers; i++) {
+                int index = getIndex(value, i, expectedSize);
+                redisTemplate.opsForValue().setBit(filterKey, index, true);
+            }
+            // 设置过期时间，默认30天
+            redisTemplate.expire(filterKey, 30, TimeUnit.DAYS);
         }
-        // 设置过期时间，默认30天
-        redisTemplate.expire(filterKey, 30, TimeUnit.DAYS);
     }
 
     /**
@@ -67,8 +69,10 @@ public class BloomFilter {
      * @param values    要添加的值数组
      */
     public void addBatch(String filterKey, String[] values) {
-        for (String value : values) {
-            add(filterKey, value);
+        if (redisTemplate != null) {
+            for (String value : values) {
+                add(filterKey, value);
+            }
         }
     }
 
@@ -93,6 +97,11 @@ public class BloomFilter {
      * @return 如果返回false，则元素一定不存在；如果返回true，则元素可能存在
      */
     public boolean mightContain(String filterKey, String value, int expectedSize, int hashNumbers) {
+        if (redisTemplate == null) {
+            // Redis不可用时，返回true，允许请求继续执行
+            return true;
+        }
+        
         for (int i = 0; i < hashNumbers; i++) {
             int index = getIndex(value, i, expectedSize);
             Boolean exists = redisTemplate.opsForValue().getBit(filterKey, index);
@@ -134,7 +143,9 @@ public class BloomFilter {
      * @param filterKey 过滤器的键
      */
     public void clear(String filterKey) {
-        redisTemplate.delete(filterKey);
+        if (redisTemplate != null) {
+            redisTemplate.delete(filterKey);
+        }
     }
 
     /**
@@ -144,7 +155,10 @@ public class BloomFilter {
      * @return 布隆过滤器是否存在
      */
     public boolean exists(String filterKey) {
-        return redisTemplate.hasKey(filterKey);
+        if (redisTemplate != null) {
+            return redisTemplate.hasKey(filterKey);
+        }
+        return false;
     }
 
     /**

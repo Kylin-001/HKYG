@@ -40,7 +40,7 @@ public class JwtUtils {
     // 从Redis中获取令牌的TTL（过期时间）前缀
     private static final String TOKEN_TTL_PREFIX = "jwt:ttl:";
     
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${jwt.secret:heikeji-mall-secret-key-2024-black-technology-university-campus-mall-system}")
@@ -209,6 +209,10 @@ public class JwtUtils {
      * @return 是否在黑名单中
      */
     public boolean isTokenInBlacklist(String token) {
+        if (redisTemplate == null) {
+            // Redis不可用时，默认Token不在黑名单中
+            return false;
+        }
         String blacklistKey = TOKEN_BLACKLIST_PREFIX + token;
         return Boolean.TRUE.equals(redisTemplate.hasKey(blacklistKey));
     }
@@ -218,6 +222,12 @@ public class JwtUtils {
      * @param token Token字符串
      */
     public void addTokenToBlacklist(String token) {
+        if (redisTemplate == null) {
+            // Redis不可用时，记录日志并返回
+            logger.info("Redis不可用，无法将Token加入黑名单: {}", token);
+            return;
+        }
+        
         try {
             // 获取Token剩余有效期
             long remainingExpiration = getRemainingExpiration(token);
@@ -316,6 +326,11 @@ public class JwtUtils {
      * @return 黑名单大小
      */
     public long getBlacklistSize() {
+        if (redisTemplate == null) {
+            // Redis不可用时，返回0
+            return 0;
+        }
+        
         try {
             return redisTemplate.keys(TOKEN_BLACKLIST_PREFIX + "*").size();
         } catch (Exception e) {

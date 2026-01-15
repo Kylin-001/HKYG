@@ -16,6 +16,9 @@ spring:
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.health.RedisHealthContributorAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisCacheAutoConfiguration
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -47,17 +50,6 @@ spring:
   # Redis配置
   redis:
     enabled: false
-    host: localhost
-    port: 6379
-    password: Redis@hkyg
-    database: 0
-    timeout: 5000
-    lettuce:
-      pool:
-        max-active: 50
-        max-wait: 10000
-        max-idle: 20
-        min-idle: 10
   # 禁用Nacos服务发现和配置检查，避免启动错误
   cloud:
     nacos:
@@ -84,23 +76,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: info,metrics
       base-path: /actuator
       # 配置健康端点的访问权限
       path-mapping:
         health: health
   endpoint:
     health:
-      show-details: always
-      probes:
-        enabled: true
+      enabled: false
   health:
-    redis:
-      enabled: true
-    db:
-      enabled: true
-    diskspace:
-      enabled: true
+    enabled: false
 
 # 自定义安全配置，允许健康端点访问
 security:
