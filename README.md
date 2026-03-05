@@ -13,16 +13,19 @@
 ## 技术栈
 
 ### 后端
-- **框架：** Spring Boot 2.7.x
-- **ORM：** MyBatis Plus 3.5.x
+- **框架：** Spring Boot 3.2.2
+- **微服务：** Spring Cloud 2023.0.0
+- **服务治理：** Spring Cloud Alibaba 2022.0.0.0-RC2
+- **ORM：** MyBatis Plus 3.5.5
 - **安全框架：** Spring Security + JWT
-- **数据库：** MySQL 8.0
-- **缓存：** Redis 3.2.0+
-- **工具类：** Hutool 5.8.20
+- **数据库：** MySQL 8.0.33
+- **缓存：** Redis 4.4.3
+- **工具类：** Hutool 5.8.26
+- **API文档：** SpringDoc 2.3.0
 
 ### 前端
 - **小程序：** 微信小程序
-- **管理后台：** Vue 3 + Element Plus
+- **管理后台：** Vue 3 + Element Plus + Vite + Pinia
 
 ## 项目结构
 
@@ -193,6 +196,9 @@ cd heikeji-mall-service
 
 ## 开发计划
 
+详细的开发计划请查看：[后续开发路线图](docs/project/后续开发路线图.md)
+
+### 已完成
 - [x] 项目结构搭建
 - [x] 数据库表设计
 - [x] 通用模块开发
@@ -203,6 +209,13 @@ cd heikeji-mall-service
 - [x] 支付服务集成
 - [x] 微信小程序前端
 - [x] 管理后台前端
+- [x] 技术栈升级（Java 17 + Spring Boot 3.2.2）
+
+### 进行中
+- [ ] 前端Vue 3全面迁移
+- [ ] 测试体系建设
+- [ ] 性能优化
+- [ ] 安全加固
 
 ## 贡献指南
 

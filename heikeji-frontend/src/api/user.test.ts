@@ -1,0 +1,104 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import request from '@/utils/request'
+import { userApi } from '@/api/user'
+
+vi.mock('@/utils/request', () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    upload: vi.fn(),
+  },
+}))
+
+describe('User API', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should call login API correctly', async () => {
+    const mockData = {
+      username: 'testuser',
+      password: 'password123'
+    }
+    const mockResponse = { code: 20000, data: { token: 'test-token-123' } }
+    ;(request.post as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.login(mockData)
+    expect(request.post).toHaveBeenCalledWith('/api/login', mockData)
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should call logout API correctly', async () => {
+    const mockResponse = { code: 20000, data: { success: true } }
+    ;(request.post as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.logout()
+    expect(request.post).toHaveBeenCalledWith('/api/logout')
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should call getUserInfo API correctly', async () => {
+    const mockResponse = { code: 20000, data: { userId: 1, username: 'testuser' } }
+    ;(request.get as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.getUserInfo()
+    expect(request.get).toHaveBeenCalledWith('/api/user/info')
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should call refreshToken API correctly', async () => {
+    const mockResponse = { code: 20000, data: { token: 'new-token-456' } }
+    ;(request.post as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.refreshToken()
+    expect(request.post).toHaveBeenCalledWith('/api/auth/refresh')
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should call getUserList API correctly', async () => {
+    const mockParams = { page: 1, pageSize: 10 }
+    const mockResponse = { code: 20000, data: { list: [], total: 0 } }
+    ;(request.get as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.getUserList(mockParams)
+    expect(request.get).toHaveBeenCalledWith('/api/system/user/list', mockParams)
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should call createUser API correctly', async () => {
+    const mockData = { username: 'newuser', password: 'password123' }
+    const mockResponse = { code: 20000, data: { userId: 2 } }
+    ;(request.post as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.createUser(mockData)
+    expect(request.post).toHaveBeenCalledWith('/api/system/user', mockData)
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should call updateUser API correctly', async () => {
+    const mockData = { userId: 1, username: 'updateduser' }
+    const mockResponse = { code: 20000, data: { success: true } }
+    ;(request.put as any).mockResolvedValue(mockResponse)
+    
+    const result = await userApi.updateUser(mockData)
+    expect(request.put).toHaveBeenCalledWith('/api/system/user', mockData)
+    expect(result).toEqual(mockResponse)
+  })
+
+  it('should handle login API error', async () => {
+    const mockData = { username: 'testuser', password: 'wrongpassword' }
+    const mockError = new Error('Invalid credentials')
+    ;(request.post as any).mockRejectedValue(mockError)
+    
+    await expect(userApi.login(mockData)).rejects.toThrow()
+  })
+
+  it('should handle getUserInfo API error', async () => {
+    const mockError = new Error('Unauthorized')
+    ;(request.get as any).mockRejectedValue(mockError)
+    
+    await expect(userApi.getUserInfo()).rejects.toThrow()
+  })
+})

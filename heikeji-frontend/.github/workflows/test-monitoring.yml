@@ -1,0 +1,198 @@
+name: 测试监控和报告
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  test-monitoring:
+    name: 测试监控
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 运行测试
+        run: npm run test:unit
+
+      - name: 生成测试报告
+        run: npm run test:coverage
+
+      - name: 上传测试结果到Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: 上传测试覆盖率报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      - name: 检查测试覆盖率
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | grep -o '"total":{"lines":{"pct":[^,]*' | grep -o '[0-9.]*')
+          echo "测试覆盖率: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "❌ 测试覆盖率低于70%"
+            exit 1
+          else
+            echo "✅ 测试覆盖率达标"
+          fi
+
+  test-failure-alert:
+    name: 测试失败告警
+    runs-on: ubuntu-latest
+    needs: test-monitoring
+    if: failure()
+    
+    steps:
+      - name: 发送Slack告警
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            ❌ 测试失败！
+            分支: ${{ github.ref }}
+            提交: ${{ github.sha }}
+            作者: ${{ github.actor }}
+            请检查测试日志并修复问题
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  coverage-trend:
+    name: 覆盖率趋势分析
+    runs-on: ubuntu-latest
+    needs: test-monitoring
+    if: always()
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载覆盖率报告
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: 分析覆盖率趋势
+        run: |
+          echo "分析覆盖率趋势..."
+          # 这里可以添加代码来分析覆盖率趋势
+          # 例如：与历史覆盖率数据对比
+          # 生成覆盖率趋势图表
+
+      - name: 上传覆盖率趋势报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-trend-report
+          path: coverage-trend-report/
+          retention-days: 90
+
+  performance-monitoring:
+    name: 性能监控
+    runs-on: ubuntu-latest
+    needs: test-monitoring
+    if: always()
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 运行性能测试
+        run: npm run test:performance
+
+      - name: 上传性能测试报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: benchmark-results/
+          retention-days: 30
+
+      - name: 检查性能指标
+        run: |
+          echo "检查性能指标..."
+          # 这里可以添加代码来检查性能指标
+          # 例如：渲染时间、内存使用等
+          # 如果性能指标超过阈值，发送告警
+
+      - name: 发送性能告警
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            ⚠️ 性能测试失败！
+            分支: ${{ github.ref }}
+            提交: ${{ github.sha }}
+            请检查性能指标并优化代码
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  test-report:
+    name: 生成测试报告
+    runs-on: ubuntu-latest
+    needs: [test-monitoring, coverage-trend, performance-monitoring]
+    if: always()
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载所有报告
+        uses: actions/download-artifact@v4
+        with:
+          path: reports/
+
+      - name: 生成综合测试报告
+        run: |
+          echo "生成综合测试报告..."
+          # 这里可以添加代码来生成综合测试报告
+          # 包括：单元测试、覆盖率、性能测试等
+          # 生成HTML格式的测试报告
+
+      - name: 上传综合测试报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-test-report
+          path: comprehensive-test-report/
+          retention-days: 90
+
+      - name: 发送测试报告通知
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            📊 测试报告已生成！
+            分支: ${{ github.ref }}
+            提交: ${{ github.sha }}
+            查看测试报告: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()

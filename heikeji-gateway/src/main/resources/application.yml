@@ -11,10 +11,18 @@ spring:
   application:
     name: heikeji-gateway
   
+  # 设置Web应用类型为reactive，解决Spring MVC与Spring Cloud Gateway不兼容问题
+  main:
+    web-application-type: reactive
+  
   # 服务发现配置
   cloud:
     nacos:
+      config:
+        import-check:
+          enabled: false
       discovery:
+        enabled: false
         server-addr: localhost:8848
         namespace: public
     gateway:
@@ -83,10 +91,6 @@ spring:
             - Path=/api/payment/**
           filters:
             - StripPrefix=0
-            - name: CircuitBreaker
-              args:
-                name: paymentCircuitBreaker
-                fallbackUri: forward:/fallback/payment
         
         # APP应用服务路由
         - id: heikeji-mall-app
@@ -106,11 +110,10 @@ spring:
 
       # 全局过滤器配置
       default-filters:
-        - name: GlobalFilter
         - name: AddResponseHeader
           args:
             name: X-Response-Time
-            value: #{T(System).currentTimeMillis()}
+            value: ${random.uuid}
         - name: DedupeResponseHeader
           args:
             name: Access-Control-Allow-Origin, Access-Control-Allow-Credentials

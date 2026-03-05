@@ -47,7 +47,7 @@
         <!-- 业务服务模块 -->
         <dependency>
             <groupId>com.heikeji</groupId>
-            <artifactId>service-member</artifactId>
+            <artifactId>service-user</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

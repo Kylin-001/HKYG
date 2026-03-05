@@ -1,0 +1,122 @@
+image: node:18
+
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  NODE_ENV: production
+  CI: "true"
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - npm ci
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+    - npm run format:check
+  only:
+    - main
+    - develop
+    - merge_requests
+
+test:unit:
+  stage: test
+  script:
+    - npm run test:unit
+    - npm run test:coverage
+  coverage: '/All files[^|]*\|[^|]*\|[^|]*\s+(\d+\.\d+)/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 30 days
+  only:
+    - main
+    - develop
+    - merge_requests
+
+test:e2e:
+  stage: test
+  before_script:
+    - npm ci
+    - npx playwright install --with-deps
+  script:
+    - npm run test:e2e
+  artifacts:
+    paths:
+      - playwright-report/
+      - test-results/
+    expire_in: 30 days
+    when: always
+  only:
+    - main
+    - develop
+    - merge_requests
+
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 30 days
+  only:
+    - main
+    - develop
+    - merge_requests
+
+deploy:staging:
+  stage: deploy
+  script:
+    - apt-get update -qq && apt-get install -y -qq sshpass
+    - export SSHPASS=$STAGING_SSH_PASSWORD
+    - sshpass -e scp -o StrictHostKeyChecking=no -r dist/ $STAGING_SSH_USER@$STAGING_SSH_HOST:$STAGING_DEPLOY_PATH
+    - sshpass -e ssh -o StrictHostKeyChecking=no $STAGING_SSH_USER@$STAGING_SSH_HOST "cd $STAGING_DEPLOY_PATH && pm2 restart heikeji-frontend"
+  environment:
+    name: staging
+    url: https://staging.heikeji.com
+  only:
+    - develop
+  when: manual
+
+deploy:production:
+  stage: deploy
+  script:
+    - apt-get update -qq && apt-get install -y -qq sshpass
+    - export SSHPASS=$PRODUCTION_SSH_PASSWORD
+    - sshpass -e scp -o StrictHostKeyChecking=no -r dist/ $PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST:$PRODUCTION_DEPLOY_PATH
+    - sshpass -e ssh -o StrictHostKeyChecking=no $PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST "cd $PRODUCTION_DEPLOY_PATH && pm2 restart heikeji-frontend"
+  environment:
+    name: production
+    url: https://www.heikeji.com
+  only:
+    - main
+  when: manual
+
+notify:
+  stage: deploy
+  script:
+    - |
+      curl -X POST $SLACK_WEBHOOK_URL \
+        -H 'Content-Type: application/json' \
+        -d "{
+          \"text\": \"部署完成！\n分支: $CI_COMMIT_REF_NAME\n提交: $CI_COMMIT_SHA\",
+          \"username\": \"GitLab CI\",
+          \"icon_emoji\": \":rocket:\"
+        }"
+  only:
+    - main
+    - develop
+  when: on_success

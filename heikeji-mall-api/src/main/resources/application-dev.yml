@@ -59,14 +59,50 @@ zuul:
   prefix: /api/v1
   sensitiveHeaders: # 允许传递所有头信息
 
-# 熔断配置
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 5000
+# 熔断器配置（基于Resilience4j）
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 60s
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 100
+        minimum-number-of-calls: 10
+        permitted-number-of-calls-in-half-open-state: 5
+      orderService:
+        failure-rate-threshold: 40
+        wait-duration-in-open-state: 90s
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 100
+        minimum-number-of-calls: 10
+        permitted-number-of-calls-in-half-open-state: 5
+      paymentService:
+        failure-rate-threshold: 30
+        wait-duration-in-open-state: 120s
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 100
+        minimum-number-of-calls: 10
+        permitted-number-of-calls-in-half-open-state: 5
+  retry:
+    instances:
+      defaultRetry:
+        max-attempts: 3
+        wait-duration: 500ms
+  ratelimiter:
+    instances:
+      productRateLimiter:
+        limit-refresh-period: 1s
+        limit-for-period: 30
+        timeout-duration: 100ms
+      orderRateLimiter:
+        limit-refresh-period: 1s
+        limit-for-period: 20
+        timeout-duration: 100ms
+      paymentRateLimiter:
+        limit-refresh-period: 1s
+        limit-for-period: 15
+        timeout-duration: 100ms
 
 # Ribbon配置
 ribbon:

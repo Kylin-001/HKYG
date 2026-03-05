@@ -19,11 +19,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * 安全配置
  */
-// 暂时注释掉配置，避免Bean冲突
-// @Configuration
-// @EnableWebSecurity
-// @EnableMethodSecurity
-// @ConditionalOnMissingBean(name = "commonSecurityConfig")
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@ConditionalOnMissingBean(name = "commonSecurityConfig")
 public class SecurityConfig {
 
     /**
@@ -68,6 +67,14 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * JWT工具类
+     */
+    @Bean
+    public com.heikeji.common.core.security.JwtUtils jwtUtils() {
+        return new com.heikeji.common.core.security.JwtUtils();
     }
 
     /**

@@ -51,7 +51,7 @@ public class CacheConfig {
 
     @Bean(name = "cacheManager")
     @ConditionalOnBean(RedisTemplate.class)
-    public CacheManager cacheManager(RedisTemplate<String, Object> redisTemplate, RedisCacheManager redisCacheManager) {
+    public CacheManager cacheManager(RedisTemplate<String, Object> redisTemplate) {
         logger.info("Creating CacheManager bean...");
         
         // 获取CacheManager的单例实例
@@ -60,10 +60,8 @@ public class CacheConfig {
         
         // 使用setter方法设置依赖
         cacheManager.setRedisTemplate(redisTemplate);
-        cacheManager.setRedisCacheManager(redisCacheManager);
         
         logger.info("Set redisTemplate: {}", redisTemplate);
-        logger.info("Set redisCacheManager: {}", redisCacheManager);
         logger.info("CacheManager bean created successfully");
         
         return cacheManager;

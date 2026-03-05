@@ -7,7 +7,7 @@ USE `heikeji_mall`;
 SOURCE ./category_data.sql;
 -- SOURCE ./delivery_locker_data.sql; -- 已存在
 SOURCE ./dict_data.sql;
-SOURCE ./merchant_data.sql;
+-- SOURCE ./merchant_data.sql;
 SOURCE ./product_data.sql;
 SOURCE ./role_permission_data.sql;
 SOURCE ./system_config_data.sql;

@@ -10,6 +10,13 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.springframework.context.annotation.Import;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import org.mybatis.spring.annotation.MapperScan;
 
 /**
  * 订单服务启动类 */
@@ -18,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
     "com.heikeji.mall.order"
     // 暂时移除common.core.cache包的扫描，避免缓存相关的启动问题
 })
+@MapperScan("com.heikeji.mall.order.mapper")
 public class OrderApplication {
 
     /**

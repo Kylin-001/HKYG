@@ -3,6 +3,7 @@ package com.heikeji.gateway.config;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
 
 /**
@@ -38,6 +39,7 @@ public class RequestRateLimiterConfig {
      * 基于IP的限流策略
      * 使用请求的远程地址作为限流键
      */
+    @Primary
     @Bean("ipKeyResolver")
     public KeyResolver ipKeyResolver() {
         return exchange -> Mono.just(
