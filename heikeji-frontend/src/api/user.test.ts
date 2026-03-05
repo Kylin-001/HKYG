@@ -1,16 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import request from '@/utils/request'
-import { userApi } from '@/api/user'
 
 vi.mock('@/utils/request', () => ({
   default: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-    upload: vi.fn(),
+    get: vi.fn(() => Promise.resolve({ code: 20000, data: {} })),
+    post: vi.fn(() => Promise.resolve({ code: 20000, data: {} })),
+    put: vi.fn(() => Promise.resolve({ code: 20000, data: {} })),
+    delete: vi.fn(() => Promise.resolve({ code: 20000, data: {} })),
+    upload: vi.fn(() => Promise.resolve({ code: 20000, data: {} })),
   },
 }))
+
+import request from '@/utils/request'
+import { userApi } from '@/api/user'
 
 describe('User API', () => {
   beforeEach(() => {

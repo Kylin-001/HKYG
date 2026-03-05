@@ -6,7 +6,7 @@ Vue.use(Router)
 // 路由懒加载优化 - 预加载常用组件
 const preloadComponents = () => {
   // 预加载首页和登录页面组件
-  Promise.all([import('@/views/dashboard/index'), import('@/views/login/index')])
+  Promise.all([import('@/views/dashboard/index.vue'), import('@/views/login/index.vue')])
 }
 
 // 应用启动时预加载核心组件

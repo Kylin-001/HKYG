@@ -149,7 +149,7 @@ describe('OrderCard Component Tests', () => {
       },
     })
     
-    expect(wrapper.find('.payment-status')).exists()).toBe(true)
+    expect(wrapper.find('.payment-status').exists()).toBe(true)
   })
 
   it('should display delivery status', () => {
