@@ -1,16 +1,18 @@
 <template>
   <div class="product-add-container">
     <el-card class="box-card">
-      <div slot="header" class="clearfix">
-        <span>添加商品</span>
-        <el-button-group>
-          <el-button size="small" @click="resetForm">重置表单</el-button>
-          <el-button size="small" @click="previewProduct">预览商品</el-button>
-          <el-button size="small" type="primary" @click="handleSubmit">保存商品</el-button>
-        </el-button-group>
-      </div>
+      <template #header>
+        <div class="clearfix">
+          <span>添加商品</span>
+          <el-button-group>
+            <el-button size="small" @click="resetForm">重置表单</el-button>
+            <el-button size="small" @click="previewProduct">预览商品</el-button>
+            <el-button size="small" type="primary" @click="handleSubmit">保存商品</el-button>
+          </el-button-group>
+        </div>
+      </template>
 
-      <el-form :model="formData" :rules="rules" ref="formData" label-width="100px">
+      <el-form :model="formData" :rules="rules" ref="formDataRef" label-width="100px">
         <el-steps :active="activeStep" finish-status="success" class="mb-20">
           <el-step title="基本信息" description="设置商品基本参数"></el-step>
           <el-step title="商品图片" description="上传商品主图和详情图"></el-step>
@@ -68,7 +70,7 @@
               style="width: 100%"
               placeholder="请输入商品售价"
             >
-              <template slot="prepend">¥</template>
+              <template #prepend>¥</template>
             </el-input-number>
           </el-form-item>
 
@@ -101,7 +103,7 @@
               style="width: 100%"
               placeholder="请输入商品重量(kg)"
             >
-              <template slot="append">kg</template>
+              <template #append>kg</template>
             </el-input-number>
           </el-form-item>
 
@@ -151,7 +153,7 @@
         <div v-if="activeStep === 1" class="step-content">
           <el-form-item label="商品主图" prop="mainImages">
             <el-upload
-              v-model="formData.mainImages"
+              v-model:file-list="formData.mainImages"
               action="#"
               list-type="picture-card"
               :auto-upload="false"
@@ -163,15 +165,15 @@
               accept="image/*"
             >
               <i class="el-icon-plus"></i>
-              <template slot="tip">
-                请上传商品主图，最多8张，支持jpg/png格式，单张图片不超过2MB
+              <template #tip>
+                <div>请上传商品主图，最多8张，支持jpg/png格式，单张图片不超过2MB</div>
               </template>
             </el-upload>
           </el-form-item>
 
           <el-form-item label="详情图片" prop="detailImages">
             <el-upload
-              v-model="formData.detailImages"
+              v-model:file-list="formData.detailImages"
               action="#"
               list-type="picture-card"
               :auto-upload="false"
@@ -183,8 +185,8 @@
               accept="image/*"
             >
               <i class="el-icon-plus"></i>
-              <template slot="tip">
-                请上传商品详情图片，最多20张，支持jpg/png格式，单张图片不超过2MB
+              <template #tip>
+                <div>请上传商品详情图片，最多20张，支持jpg/png格式，单张图片不超过2MB</div>
               </template>
             </el-upload>
           </el-form-item>
@@ -194,7 +196,6 @@
         <div v-if="activeStep === 2" class="step-content">
           <el-form-item label="商品描述" prop="description">
             <div class="editor-container">
-              <!-- 这里可以集成富文本编辑器，暂时用textarea代替 -->
               <el-input
                 v-model="formData.description"
                 type="textarea"
@@ -237,7 +238,6 @@
 
           <el-form-item label="商品规格" prop="specs">
             <div v-if="formData.specs.length > 0" class="spec-container">
-              <!-- 规格项 -->
               <div v-for="(spec, specIndex) in formData.specs" :key="specIndex" class="spec-item">
                 <h4 class="spec-title">规格{{ specIndex + 1 }}: {{ spec.name }}</h4>
                 <div class="spec-values">
@@ -254,7 +254,7 @@
                     v-model="spec.newValue"
                     placeholder="输入规格值"
                     style="width: 150px; margin-left: 10px"
-                    @keyup.enter.native="addSpecValue(specIndex)"
+                    @keyup.enter="addSpecValue(specIndex)"
                   ></el-input>
                   <el-button size="small" @click="addSpecValue(specIndex)">添加</el-button>
                 </div>
@@ -264,11 +264,9 @@
                 <i class="el-icon-plus"></i> 添加规格
               </el-button>
 
-              <!-- 规格组合SKU表格 -->
               <div v-if="hasSpecCombinations" class="sku-table-container">
                 <h4 class="spec-title">规格组合价格库存设置</h4>
                 <el-table :data="formData.skus" style="width: 100%" border>
-                  <!-- 动态生成规格列 -->
                   <el-table-column
                     v-for="(spec, index) in formData.specs"
                     :key="index"
@@ -276,7 +274,7 @@
                     min-width="120"
                   ></el-table-column>
                   <el-table-column prop="price" label="价格" width="100" align="center">
-                    <template slot-scope="scope">
+                    <template #default="scope">
                       <el-input-number
                         v-model="scope.row.price"
                         :min="0.01"
@@ -287,7 +285,7 @@
                     </template>
                   </el-table-column>
                   <el-table-column prop="stock" label="库存" width="100" align="center">
-                    <template slot-scope="scope">
+                    <template #default="scope">
                       <el-input-number
                         v-model="scope.row.stock"
                         :min="0"
@@ -297,7 +295,7 @@
                     </template>
                   </el-table-column>
                   <el-table-column prop="skuCode" label="SKU编码" width="180" align="center">
-                    <template slot-scope="scope">
+                    <template #default="scope">
                       <el-input v-model="scope.row.skuCode" placeholder="SKU编码" />
                     </template>
                   </el-table-column>
@@ -317,7 +315,7 @@
 
     <!-- 图片预览对话框 -->
     <el-dialog
-      :visible.sync="previewDialogVisible"
+      v-model="previewDialogVisible"
       :show-close="false"
       class="image-preview-dialog"
     >
@@ -326,434 +324,423 @@
     </el-dialog>
 
     <!-- 保存确认对话框 -->
-    <el-dialog title="保存确认" :visible.sync="saveConfirmVisible" width="400px">
+    <el-dialog title="保存确认" v-model="saveConfirmVisible" width="400px">
       <div class="save-confirm-content">
         <p>确认保存商品信息吗？</p>
       </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="saveConfirmVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmSave">确认保存</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="saveConfirmVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmSave">确认保存</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
 
-<script>
-// 导入日志工具
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import type { FormInstance, FormRules, UploadUserFile, UploadFile } from 'element-plus'
 import logger from '@/utils/logger'
-export default {
-  name: 'ProductAdd',
-  data() {
-    return {
-      // 当前步骤
-      activeStep: 0,
-      // 是否编辑模式
-      isEdit: false,
-      // 商品ID
-      productId: '',
-      // 表单数据
-      formData: {
-        // 基本信息
-        id: '',
-        name: '',
-        keywords: '',
-        categoryId: [],
-        brandId: '',
-        price: 0,
-        stock: 0,
-        sales: 0,
-        weight: 0,
-        status: '1',
-        isNew: '0',
-        isHot: '0',
-        brief: '',
-        // 图片信息
-        mainImages: [],
-        detailImages: [],
-        // 商品详情
-        description: '',
-        // 参数配置
-        params: [
-          {
-            name: '',
-            value: '',
-          },
-        ],
-        // 规格配置
-        specs: [],
-        skus: [],
-      },
-      // 表单验证规则
-      rules: {
-        name: [
-          { required: true, message: '请输入商品名称', trigger: 'blur' },
-          { max: 100, message: '名称长度不能超过100个字符', trigger: 'blur' },
-        ],
-        categoryId: [{ required: true, message: '请选择商品分类', trigger: 'change' }],
-        brandId: [{ required: true, message: '请选择商品品牌', trigger: 'change' }],
-        price: [
-          { required: true, message: '请输入商品售价', trigger: 'blur' },
-          { type: 'number', min: 0.01, message: '价格必须大于0', trigger: 'blur' },
-        ],
-        stock: [
-          { required: true, message: '请输入商品库存', trigger: 'blur' },
-          { type: 'number', min: 0, message: '库存不能小于0', trigger: 'blur' },
-        ],
-        mainImages: [{ required: true, message: '请至少上传一张商品主图', trigger: 'change' }],
-      },
-      // 分类选项
-      categoryOptions: [],
-      // 品牌选项
-      brandOptions: [],
-      // 图片预览
-      previewDialogVisible: false,
-      previewImageSrc: '',
-      // 保存确认
-      saveConfirmVisible: false,
-      // 上传的文件对象
-      uploadedFiles: {
-        main: [],
-        detail: [],
-      },
-    }
-  },
-  computed: {
-    // 是否有规格组合
-    hasSpecCombinations() {
-      return (
-        this.formData.specs.length > 0 &&
-        this.formData.specs.every(spec => spec.values.length > 0) &&
-        this.formData.skus.length > 0
-      )
-    },
-  },
-  mounted() {
-    // 初始化数据
-    this.initData()
-    // 检查是否为编辑模式
-    this.productId = this.$route.params.id || this.$route.query.id
-    if (this.productId) {
-      this.isEdit = true
-      this.fetchProductDetail()
-    }
-  },
-  methods: {
-    // 初始化数据
-    initData() {
-      // 模拟分类数据
-      this.categoryOptions = [
-        {
-          id: 1,
-          name: '手机数码',
-          children: [
-            {
-              id: 101,
-              name: '手机',
-              children: [
-                { id: 10101, name: 'iPhone' },
-                { id: 10102, name: 'Android手机' },
-              ],
-            },
-            {
-              id: 102,
-              name: '耳机音箱',
-              children: [
-                { id: 10201, name: '蓝牙耳机' },
-                { id: 10202, name: '有线耳机' },
-              ],
-            },
-          ],
-        },
-        {
-          id: 2,
-          name: '家用电器',
-          children: [
-            { id: 201, name: '冰箱', children: [] },
-            { id: 202, name: '空调', children: [] },
-          ],
-        },
-      ]
 
-      // 模拟品牌数据
-      this.brandOptions = [
-        { id: 1, name: 'Apple' },
-        { id: 2, name: 'Samsung' },
-        { id: 3, name: 'Huawei' },
-        { id: 4, name: 'Xiaomi' },
-        { id: 5, name: 'OPPO' },
-        { id: 6, name: 'vivo' },
-      ]
-    },
-
-    // 获取商品详情（编辑模式）
-    fetchProductDetail() {
-      // 模拟获取商品详情数据
-      setTimeout(() => {
-        this.formData = {
-          id: this.productId,
-          name: 'Apple iPhone 15 Pro',
-          keywords: 'iPhone,苹果,手机,Pro',
-          categoryId: [1, 101, 10101],
-          brandId: 1,
-          price: 8999.0,
-          stock: 100,
-          sales: 50,
-          weight: 0.2,
-          status: '1',
-          isNew: '1',
-          isHot: '1',
-          brief: '最新款iPhone，搭载A17 Pro芯片，钛金属设计，支持USB-C接口。',
-          mainImages: [
-            { url: 'https://via.placeholder.com/400' },
-            { url: 'https://via.placeholder.com/400' },
-          ],
-          detailImages: [
-            { url: 'https://via.placeholder.com/800x600' },
-            { url: 'https://via.placeholder.com/800x600' },
-          ],
-          description: '<p>这是商品详细描述，支持HTML格式</p>',
-          params: [
-            { name: '颜色', value: '钛原色' },
-            { name: '存储', value: '256GB' },
-          ],
-          specs: [
-            {
-              name: '颜色',
-              values: ['钛原色', '蓝色钛金属', '白色钛金属', '黑色钛金属'],
-              newValue: '',
-            },
-            {
-              name: '存储容量',
-              values: ['128GB', '256GB', '512GB', '1TB'],
-              newValue: '',
-            },
-          ],
-          skus: [],
-        }
-
-        // 生成规格组合SKU
-        this.generateSkuCombinations()
-      }, 500)
-    },
-
-    // 生成规格组合SKU
-    generateSkuCombinations() {
-      const specs = this.formData.specs.filter(spec => spec.values.length > 0)
-      if (specs.length === 0) {
-        this.formData.skus = []
-        return
-      }
-
-      // 递归生成所有规格组合
-      const combinations = this.getCombinations(specs.map(spec => spec.values))
-
-      this.formData.skus = combinations.map(combo => ({
-        id: Date.now() + Math.random(),
-        specs: combo,
-        price: this.formData.price,
-        stock: 0,
-        skuCode: combo.join('-'),
-      }))
-    },
-
-    // 获取数组的笛卡尔积
-    getCombinations(arrays) {
-      if (arrays.length === 0) return [[]]
-      if (arrays.length === 1) return arrays[0].map(item => [item])
-
-      const result = []
-      const rest = this.getCombinations(arrays.slice(1))
-
-      arrays[0].forEach(item => {
-        rest.forEach(combination => {
-          result.push([item].concat(combination))
-        })
-      })
-
-      return result
-    },
-
-    // 下一步
-    nextStep() {
-      // 验证当前步骤
-      if (this.validateCurrentStep()) {
-        if (this.activeStep < 3) {
-          this.activeStep++
-          // 如果是规格配置步骤，生成SKU组合
-          if (this.activeStep === 3) {
-            this.generateSkuCombinations()
-          }
-        }
-      }
-    },
-
-    // 上一步
-    prevStep() {
-      if (this.activeStep > 0) {
-        this.activeStep--
-      }
-    },
-
-    // 验证当前步骤
-    validateCurrentStep() {
-      const step = this.activeStep
-      let valid = true
-
-      if (step === 0) {
-        // 验证基本信息
-        this.$refs.formData.validateField(['name', 'categoryId', 'brandId', 'price', 'stock'])
-      } else if (step === 1) {
-        // 验证图片
-        if (this.formData.mainImages.length === 0) {
-          this.$message.warning('请至少上传一张商品主图')
-          valid = false
-        }
-      }
-
-      return valid
-    },
-
-    // 重置表单
-    resetForm() {
-      this.$refs.formData.resetFields()
-      this.activeStep = 0
-      this.formData = {
-        id: '',
-        name: '',
-        keywords: '',
-        categoryId: [],
-        brandId: '',
-        price: 0,
-        stock: 0,
-        sales: 0,
-        weight: 0,
-        status: '1',
-        isNew: '0',
-        isHot: '0',
-        brief: '',
-        mainImages: [],
-        detailImages: [],
-        description: '',
-        params: [
-          {
-            name: '',
-            value: '',
-          },
-        ],
-        specs: [],
-        skus: [],
-      }
-    },
-
-    // 预览商品
-    previewProduct() {
-      this.$message.info('预览功能开发中...')
-    },
-
-    // 提交表单
-    handleSubmit() {
-      this.saveConfirmVisible = true
-    },
-
-    // 确认保存
-    confirmSave() {
-      this.$refs.formData.validate(valid => {
-        if (valid) {
-          // 模拟保存
-          setTimeout(() => {
-            this.$message.success('商品保存成功！')
-            this.saveConfirmVisible = false
-            this.$router.push('/product/list')
-          }, 1000)
-        } else {
-          this.$message.error('请完善表单信息')
-          this.saveConfirmVisible = false
-        }
-      })
-    },
-
-    // 分类变化处理
-    handleCategoryChange(value) {
-      logger.log('分类选择:', value)
-    },
-
-    // 添加参数
-    addParam() {
-      this.formData.params.push({
-        name: '',
-        value: '',
-      })
-    },
-
-    // 删除参数
-    removeParam(index) {
-      this.formData.params.splice(index, 1)
-    },
-
-    // 添加规格
-    addSpec() {
-      this.formData.specs.push({
-        name: '',
-        values: [],
-        newValue: '',
-      })
-    },
-
-    // 删除规格
-    removeSpec(index) {
-      this.formData.specs.splice(index, 1)
-      this.generateSkuCombinations()
-    },
-
-    // 添加规格值
-    addSpecValue(specIndex) {
-      const spec = this.formData.specs[specIndex]
-      if (spec.newValue && !spec.values.includes(spec.newValue)) {
-        spec.values.push(spec.newValue)
-        spec.newValue = ''
-        this.generateSkuCombinations()
-      }
-    },
-
-    // 删除规格值
-    removeSpecValue(specIndex, valueIndex) {
-      this.formData.specs[specIndex].values.splice(valueIndex, 1)
-      this.generateSkuCombinations()
-    },
-
-    // 处理主图变化
-    handleMainImageChange(file, fileList) {
-      this.formData.mainImages = fileList
-    },
-
-    // 删除主图
-    handleMainImageRemove(file, fileList) {
-      this.formData.mainImages = fileList
-    },
-
-    // 预览主图
-    handleMainImagePreview(file) {
-      this.previewImageSrc = file.url
-      this.previewDialogVisible = true
-    },
-
-    // 处理详情图变化
-    handleDetailImageChange(file, fileList) {
-      this.formData.detailImages = fileList
-    },
-
-    // 删除详情图
-    handleDetailImageRemove(file, fileList) {
-      this.formData.detailImages = fileList
-    },
-
-    // 预览详情图
-    handleDetailImagePreview(file) {
-      this.previewImageSrc = file.url
-      this.previewDialogVisible = true
-    },
-  },
+interface ProductParam {
+  name: string
+  value: string
 }
+
+interface ProductSpec {
+  name: string
+  values: string[]
+  newValue: string
+}
+
+interface ProductSku {
+  id: number
+  specs: string[]
+  price: number
+  stock: number
+  skuCode: string
+}
+
+interface FormData {
+  id: string
+  name: string
+  keywords: string
+  categoryId: number[]
+  brandId: number | null
+  price: number
+  stock: number
+  sales: number
+  weight: number
+  status: string
+  isNew: string
+  isHot: string
+  brief: string
+  mainImages: UploadUserFile[]
+  detailImages: UploadUserFile[]
+  description: string
+  params: ProductParam[]
+  specs: ProductSpec[]
+  skus: ProductSku[]
+}
+
+interface Brand {
+  id: number
+  name: string
+}
+
+interface Category {
+  id: number
+  name: string
+  children?: Category[]
+}
+
+const route = useRoute()
+const router = useRouter()
+
+const formDataRef = ref<FormInstance>()
+const activeStep = ref(0)
+const isEdit = ref(false)
+const productId = ref('')
+const categoryOptions = ref<Category[]>([])
+const brandOptions = ref<Brand[]>([])
+const previewDialogVisible = ref(false)
+const previewImageSrc = ref('')
+const saveConfirmVisible = ref(false)
+
+const formData = reactive<FormData>({
+  id: '',
+  name: '',
+  keywords: '',
+  categoryId: [],
+  brandId: null,
+  price: 0,
+  stock: 0,
+  sales: 0,
+  weight: 0,
+  status: '1',
+  isNew: '0',
+  isHot: '0',
+  brief: '',
+  mainImages: [],
+  detailImages: [],
+  description: '',
+  params: [{ name: '', value: '' }],
+  specs: [],
+  skus: [],
+})
+
+const rules: FormRules = {
+  name: [
+    { required: true, message: '请输入商品名称', trigger: 'blur' },
+    { max: 100, message: '名称长度不能超过100个字符', trigger: 'blur' },
+  ],
+  categoryId: [{ required: true, message: '请选择商品分类', trigger: 'change' }],
+  brandId: [{ required: true, message: '请选择商品品牌', trigger: 'change' }],
+  price: [
+    { required: true, message: '请输入商品售价', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: '价格必须大于0', trigger: 'blur' },
+  ],
+  stock: [
+    { required: true, message: '请输入商品库存', trigger: 'blur' },
+    { type: 'number', min: 0, message: '库存不能小于0', trigger: 'blur' },
+  ],
+  mainImages: [{ required: true, message: '请至少上传一张商品主图', trigger: 'change' }],
+}
+
+const hasSpecCombinations = computed(() => {
+  return (
+    formData.specs.length > 0 &&
+    formData.specs.every((spec) => spec.values.length > 0) &&
+    formData.skus.length > 0
+  )
+})
+
+const initData = () => {
+  categoryOptions.value = [
+    {
+      id: 1,
+      name: '手机数码',
+      children: [
+        {
+          id: 101,
+          name: '手机',
+          children: [
+            { id: 10101, name: 'iPhone' },
+            { id: 10102, name: 'Android手机' },
+          ],
+        },
+        {
+          id: 102,
+          name: '耳机音箱',
+          children: [
+            { id: 10201, name: '蓝牙耳机' },
+            { id: 10202, name: '有线耳机' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 2,
+      name: '家用电器',
+      children: [
+        { id: 201, name: '冰箱', children: [] },
+        { id: 202, name: '空调', children: [] },
+      ],
+    },
+  ]
+
+  brandOptions.value = [
+    { id: 1, name: 'Apple' },
+    { id: 2, name: 'Samsung' },
+    { id: 3, name: 'Huawei' },
+    { id: 4, name: 'Xiaomi' },
+    { id: 5, name: 'OPPO' },
+    { id: 6, name: 'vivo' },
+  ]
+}
+
+const fetchProductDetail = () => {
+  setTimeout(() => {
+    Object.assign(formData, {
+      id: productId.value,
+      name: 'Apple iPhone 15 Pro',
+      keywords: 'iPhone,苹果,手机,Pro',
+      categoryId: [1, 101, 10101],
+      brandId: 1,
+      price: 8999.0,
+      stock: 100,
+      sales: 50,
+      weight: 0.2,
+      status: '1',
+      isNew: '1',
+      isHot: '1',
+      brief: '最新款iPhone，搭载A17 Pro芯片，钛金属设计，支持USB-C接口。',
+      mainImages: [
+        { url: 'https://via.placeholder.com/400' },
+        { url: 'https://via.placeholder.com/400' },
+      ],
+      detailImages: [
+        { url: 'https://via.placeholder.com/800x600' },
+        { url: 'https://via.placeholder.com/800x600' },
+      ],
+      description: '<p>这是商品详细描述，支持HTML格式</p>',
+      params: [
+        { name: '颜色', value: '钛原色' },
+        { name: '存储', value: '256GB' },
+      ],
+      specs: [
+        {
+          name: '颜色',
+          values: ['钛原色', '蓝色钛金属', '白色钛金属', '黑色钛金属'],
+          newValue: '',
+        },
+        {
+          name: '存储容量',
+          values: ['128GB', '256GB', '512GB', '1TB'],
+          newValue: '',
+        },
+      ],
+      skus: [],
+    })
+
+    generateSkuCombinations()
+  }, 500)
+}
+
+const getCombinations = (arrays: string[][]): string[][] => {
+  if (arrays.length === 0) return [[]]
+  if (arrays.length === 1) return arrays[0].map((item) => [item])
+
+  const result: string[][] = []
+  const rest = getCombinations(arrays.slice(1))
+
+  arrays[0].forEach((item) => {
+    rest.forEach((combination) => {
+      result.push([item].concat(combination))
+    })
+  })
+
+  return result
+}
+
+const generateSkuCombinations = () => {
+  const specs = formData.specs.filter((spec) => spec.values.length > 0)
+  if (specs.length === 0) {
+    formData.skus = []
+    return
+  }
+
+  const combinations = getCombinations(specs.map((spec) => spec.values))
+
+  formData.skus = combinations.map((combo) => ({
+    id: Date.now() + Math.random(),
+    specs: combo,
+    price: formData.price,
+    stock: 0,
+    skuCode: combo.join('-'),
+  }))
+}
+
+const nextStep = () => {
+  if (validateCurrentStep()) {
+    if (activeStep.value < 3) {
+      activeStep.value++
+      if (activeStep.value === 3) {
+        generateSkuCombinations()
+      }
+    }
+  }
+}
+
+const prevStep = () => {
+  if (activeStep.value > 0) {
+    activeStep.value--
+  }
+}
+
+const validateCurrentStep = (): boolean => {
+  const step = activeStep.value
+  let valid = true
+
+  if (step === 0) {
+    formDataRef.value?.validateField(['name', 'categoryId', 'brandId', 'price', 'stock'])
+  } else if (step === 1) {
+    if (formData.mainImages.length === 0) {
+      ElMessage.warning('请至少上传一张商品主图')
+      valid = false
+    }
+  }
+
+  return valid
+}
+
+const resetForm = () => {
+  formDataRef.value?.resetFields()
+  activeStep.value = 0
+  Object.assign(formData, {
+    id: '',
+    name: '',
+    keywords: '',
+    categoryId: [],
+    brandId: null,
+    price: 0,
+    stock: 0,
+    sales: 0,
+    weight: 0,
+    status: '1',
+    isNew: '0',
+    isHot: '0',
+    brief: '',
+    mainImages: [],
+    detailImages: [],
+    description: '',
+    params: [{ name: '', value: '' }],
+    specs: [],
+    skus: [],
+  })
+}
+
+const previewProduct = () => {
+  ElMessage.info('预览功能开发中...')
+}
+
+const handleSubmit = () => {
+  saveConfirmVisible.value = true
+}
+
+const confirmSave = async () => {
+  if (!formDataRef.value) return
+
+  await formDataRef.value.validate((valid) => {
+    if (valid) {
+      setTimeout(() => {
+        ElMessage.success('商品保存成功！')
+        saveConfirmVisible.value = false
+        router.push('/product/list')
+      }, 1000)
+    } else {
+      ElMessage.error('请完善表单信息')
+      saveConfirmVisible.value = false
+    }
+  })
+}
+
+const handleCategoryChange = (value: number[]) => {
+  logger.log('分类选择:', value)
+}
+
+const addParam = () => {
+  formData.params.push({ name: '', value: '' })
+}
+
+const removeParam = (index: number) => {
+  formData.params.splice(index, 1)
+}
+
+const addSpec = () => {
+  formData.specs.push({
+    name: '',
+    values: [],
+    newValue: '',
+  })
+}
+
+const removeSpec = (index: number) => {
+  formData.specs.splice(index, 1)
+  generateSkuCombinations()
+}
+
+const addSpecValue = (specIndex: number) => {
+  const spec = formData.specs[specIndex]
+  if (spec.newValue && !spec.values.includes(spec.newValue)) {
+    spec.values.push(spec.newValue)
+    spec.newValue = ''
+    generateSkuCombinations()
+  }
+}
+
+const removeSpecValue = (specIndex: number, valueIndex: number) => {
+  formData.specs[specIndex].values.splice(valueIndex, 1)
+  generateSkuCombinations()
+}
+
+const handleMainImageChange = (file: UploadFile, fileList: UploadUserFile[]) => {
+  formData.mainImages = fileList
+}
+
+const handleMainImageRemove = (file: UploadFile, fileList: UploadUserFile[]) => {
+  formData.mainImages = fileList
+}
+
+const handleMainImagePreview = (file: UploadFile) => {
+  previewImageSrc.value = file.url!
+  previewDialogVisible.value = true
+}
+
+const handleDetailImageChange = (file: UploadFile, fileList: UploadUserFile[]) => {
+  formData.detailImages = fileList
+}
+
+const handleDetailImageRemove = (file: UploadFile, fileList: UploadUserFile[]) => {
+  formData.detailImages = fileList
+}
+
+const handleDetailImagePreview = (file: UploadFile) => {
+  previewImageSrc.value = file.url!
+  previewDialogVisible.value = true
+}
+
+onMounted(() => {
+  initData()
+  productId.value = (route.params.id as string) || (route.query.id as string) || ''
+  if (productId.value) {
+    isEdit.value = true
+    fetchProductDetail()
+  }
+})
 </script>
 
 <style scoped>
@@ -854,7 +841,7 @@ export default {
   text-align: center;
 }
 
-.image-preview-dialog .el-dialog__body {
+.image-preview-dialog :deep(.el-dialog__body) {
   text-align: center;
 }
 
