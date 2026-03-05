@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as appAuthApi from '@/api/app/auth'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 
-// 用户信息接口定义
 interface UserInfo {
   id: number
   username: string
@@ -21,7 +21,6 @@ interface UserInfo {
   level?: number
 }
 
-// 定义user store的状态类型
 interface UserState {
   token: string
   userInfo: UserInfo | null
@@ -30,32 +29,26 @@ interface UserState {
   isLoading: boolean
 }
 
-// 创建并导出user store
 export const useUserStore = defineStore('user', () => {
-  // 状态定义
-  const token = ref(localStorage.getItem('token') || '')
+  const token = ref(getToken() || '')
   const userInfo = ref<UserInfo | null>(null)
   const roles = ref<string[]>([])
   const permissions = ref<string[]>([])
   const isLoading = ref(false)
 
-  // 计算属性
   const isAuthenticated = computed(() => !!token.value)
   const currentUser = computed(() => userInfo.value)
   const hasRole = computed(() => (role: string) => roles.value.includes(role))
   const hasPermission = computed(() => (perm: string) => permissions.value.includes(perm))
 
-  // 方法 - 手机号密码登录
   async function loginAction(phone: string, password: string) {
     try {
       isLoading.value = true
       const res = await appAuthApi.login({ phone, password })
 
-      // 存储token
       token.value = res.data.token
-      localStorage.setItem('token', res.data.token)
+      setToken(res.data.token)
 
-      // 获取用户信息
       await getUserInfoAction()
 
       ElMessage.success('登录成功')
@@ -68,17 +61,14 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  // 方法 - 验证码登录
   async function loginByCodeAction(phone: string, code: string) {
     try {
       isLoading.value = true
       const res = await appAuthApi.loginByCode({ phone, code })
 
-      // 存储token
       token.value = res.data.token
-      localStorage.setItem('token', res.data.token)
+      setToken(res.data.token)
 
-      // 获取用户信息
       await getUserInfoAction()
 
       ElMessage.success('登录成功')
