@@ -78,6 +78,13 @@ interface ProductState {
     isNew: boolean
     isHot: boolean
   }
+  recommendProducts: Product[]
+  personalizedProducts: Product[]
+  similarProducts: Product[]
+  hotProducts: Product[]
+  recommendLoading: boolean
+  recommendReason: string | null
+  recommendScore: number | null
 }
 
 // 创建并导出product store
@@ -99,6 +106,13 @@ export const useProductStore = defineStore('product', () => {
     isNew: false,
     isHot: false,
   })
+  const recommendProducts = ref<Product[]>([])
+  const personalizedProducts = ref<Product[]>([])
+  const similarProducts = ref<Product[]>([])
+  const hotProducts = ref<Product[]>([])
+  const recommendLoading = ref(false)
+  const recommendReason = ref<string | null>(null)
+  const recommendScore = ref<number | null>(null)
 
   // 计算属性
   const productList = computed(() => products.value)
@@ -382,10 +396,8 @@ export const useProductStore = defineStore('product', () => {
     try {
       loading.value = true
       error.value = null
-
       const res = await productApi.uploadBrandLogo(formData)
       ElMessage.success('上传Logo成功')
-
       return res
     } catch (err) {
       error.value = err instanceof Error ? err.message : '上传Logo失败'
@@ -396,7 +408,89 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
-  // 方法 - 重置商品状态
+  async function getRecommendProducts(limit: number = 10) {
+    try {
+      recommendLoading.value = true
+      error.value = null
+      const res = await productApi.getRecommendProducts(limit)
+      recommendProducts.value = res.data || []
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取推荐商品失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      recommendLoading.value = false
+    }
+  }
+
+  async function getPersonalizedRecommendations(userId: number, limit: number = 10) {
+    try {
+      recommendLoading.value = true
+      error.value = null
+      const res = await productApi.getPersonalizedRecommendations(userId, limit)
+      personalizedProducts.value = res.data || []
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取个性化推荐失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      recommendLoading.value = false
+    }
+  }
+
+  async function getSimilarProducts(productId: number, limit: number = 10) {
+    try {
+      recommendLoading.value = true
+      error.value = null
+      const res = await productApi.getSimilarProducts(productId, limit)
+      similarProducts.value = res.data || []
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取相似商品失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      recommendLoading.value = false
+    }
+  }
+
+  async function getHotProducts(limit: number = 10) {
+    try {
+      recommendLoading.value = true
+      error.value = null
+      const res = await productApi.getHotProducts(limit)
+      hotProducts.value = res.data || []
+      return res
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取热门商品失败'
+      ElMessage.error(error.value)
+      throw err
+    } finally {
+      recommendLoading.value = false
+    }
+  }
+
+  async function recordUserBehavior(productId: number, behaviorType: string, duration?: number) {
+    try {
+      await productApi.recordUserBehavior({ productId, behaviorType, duration })
+    } catch (err) {
+      console.error('记录用户行为失败:', err)
+    }
+  }
+
+  async function getRecommendReason(userId: number, productId: number) {
+    try {
+      const res = await productApi.getRecommendReason(userId, productId)
+      recommendReason.value = res.data?.reason || null
+      recommendScore.value = res.data?.score || null
+      return res
+    } catch (err) {
+      console.error('获取推荐理由失败:', err)
+    }
+  }
+
   function resetProductState() {
     products.value = []
     currentProduct.value = null
@@ -406,11 +500,15 @@ export const useProductStore = defineStore('product', () => {
     brandTotal.value = 0
     error.value = null
     resetFilterParams()
+    recommendProducts.value = []
+    personalizedProducts.value = []
+    similarProducts.value = []
+    hotProducts.value = []
+    recommendReason.value = null
+    recommendScore.value = null
   }
 
-  // 导出状态、计算属性和方法
   return {
-    // 状态
     products,
     currentProduct,
     categories,
@@ -420,12 +518,17 @@ export const useProductStore = defineStore('product', () => {
     loading,
     error,
     filterParams,
-    // 计算属性
+    recommendProducts,
+    personalizedProducts,
+    similarProducts,
+    hotProducts,
+    recommendLoading,
+    recommendReason,
+    recommendScore,
     productList,
     productCount,
     hasProducts,
     isProductLoading,
-    // 方法
     getProductList,
     getProductDetail,
     addProduct,
@@ -441,5 +544,11 @@ export const useProductStore = defineStore('product', () => {
     updateBrandStatus,
     deleteBrand,
     uploadBrandLogo,
+    getRecommendProducts,
+    getPersonalizedRecommendations,
+    getSimilarProducts,
+    getHotProducts,
+    recordUserBehavior,
+    getRecommendReason,
   }
 })
