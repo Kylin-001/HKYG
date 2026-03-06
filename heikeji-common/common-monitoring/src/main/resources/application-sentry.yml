@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: heikeji-mall
+
+sentry:
+  enabled: false
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:${spring.profiles.active:development}}
+  release: ${SENTRY_RELEASE:${spring.application.name}@1.0.0}
+  traces-sample-rate: 0.1
+  profiles-sample-rate: 0.1
+  debug: false
+  max-breadcrumbs: 50
+  attach-stacktrace: true
+  server-name: ${SERVER_NAME:heikeji-server}
+  
+logging:
+  level:
+    io.sentry: INFO
+    com.heikeji.mall.common.monitoring: DEBUG

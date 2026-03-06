@@ -19,6 +19,7 @@
         <module>common-core</module>
         <module>common-security</module>
         <module>common-third-party</module>
+        <module>common-monitoring</module>
     </modules>
 
     <dependencyManagement>
