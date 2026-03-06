@@ -23,52 +23,121 @@ spring:
 springdoc:
   api-docs:
     enabled: true
+    path: /v3/api-docs
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
     # 配置Swagger UI的品牌信息
     config-url: /v3/api-docs/swagger-config
+    # 默认展开所有标签
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    # 启用深度链接
+    deep-linking: true
+    # 显示请求持续时间
+    display-request-duration: true
+    # 启用过滤
+    display-operation-id: false
+    # 启用Try It Out
+    try-it-out-enabled: true
+    # 默认展开操作
+    default-operations-expand-depth: 1
+    # 启用验证
+    validator-url: ""
+    # 禁用语法高亮
+    syntax-highlight:
+      activated: true
+      theme: monokai
+    # 启用持久授权
+    persist-authorization: true
+    # 聚合所有服务的API文档
     urls:
       - name: 用户服务
-        url: http://localhost:8081/v3/api-docs
+        url: /v3/api-docs/service-user
         primaryName: service-user
+        display-name: 用户管理
+        description: 用户注册、登录、信息管理、地址管理等
       - name: 商品服务
-        url: http://localhost:8082/v3/api-docs
+        url: /v3/api-docs/service-product
         primaryName: service-product
+        display-name: 商品管理
+        description: 商品查询、分类管理、购物车、商品推荐等
       - name: 订单服务
-        url: http://localhost:8083/api/v3/api-docs
+        url: /v3/api-docs/service-order
         primaryName: service-order
+        display-name: 订单管理
+        description: 订单创建、查询、取消、支付、销售分析等
       - name: 配送服务
-        url: http://localhost:8001/v3/api-docs
+        url: /v3/api-docs/service-delivery
         primaryName: service-delivery
+        display-name: 配送管理
+        description: 配送请求、接单、配送跟踪等
       - name: 外卖服务
-        url: http://localhost:8005/v3/api-docs
+        url: /v3/api-docs/service-takeout
         primaryName: service-takeout
+        display-name: 外卖管理
+        description: 商家管理、商品管理、订单管理、评价管理等
       - name: 支付服务
-        url: http://localhost:8004/v3/api-docs
+        url: /v3/api-docs/service-payment
         primaryName: service-payment
+        display-name: 支付管理
+        description: 微信支付、支付宝支付、退款、对账等
       - name: 校园服务
-        url: http://localhost:8003/v3/api-docs
+        url: /v3/api-docs/service-campus
         primaryName: service-campus
+        display-name: 校园服务
+        description: 校园活动、通知公告等
       - name: 二手服务
-        url: http://localhost:8006/v3/api-docs
+        url: /v3/api-docs/service-secondhand
         primaryName: service-secondhand
+        display-name: 二手市场
+        description: 二手商品发布、查询、收藏等
       - name: 失物招领服务
-        url: http://localhost:8007/v3/api-docs
+        url: /v3/api-docs/service-lostfound
         primaryName: service-lostfound
+        display-name: 失物招领
+        description: 失物招领发布、查询、认领等
+      - name: 会员服务
+        url: /v3/api-docs/service-member
+        primaryName: service-member
+        display-name: 会员管理
+        description: 会员等级、积分、优惠券、营销活动等
+      - name: 系统管理
+        url: /v3/api-docs/heikeji-system
+        primaryName: heikeji-system
+        display-name: 系统管理
+        description: 用户管理、角色权限、仪表盘统计等
 
 # 应用信息配置
 app:
   name: 黑科易购API文档中心
   version: 1.0.0
-  description: 黑科易购商城系统API文档聚合中心
+  description: 黑科易购商城系统API文档聚合中心，提供完整的RESTful API文档
   contact:
     name: 黑科易购开发团队
     url: http://www.heikeji.com
     email: dev@heikeji.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# 服务器配置
+servers:
+  - url: http://localhost:8089
+    description: 本地开发环境
+  - url: https://api.heikeji.com
+    description: 生产环境
 
 # 日志配置
 logging:
   level:
     root: info
     org.springdoc: debug
+    com.heikeji.mall.docs: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/service-api-docs.log
+    max-size: 10MB
+    max-history: 30
