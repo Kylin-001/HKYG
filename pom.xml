@@ -29,6 +29,7 @@
         <module>heikeji-mall-service</module>
         <module>heikeji-system</module>
         <module>heikeji-gateway</module>
+        <module>service-api-docs</module>
     </modules>
 
     <!-- 属性配置 -->
