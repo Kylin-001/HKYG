@@ -70,71 +70,120 @@ export interface MarketingActivity {
   startTime: string
   endTime: string
   status: number
-  config: any
+  config: Record<string, unknown>
   description: string
 }
 
+interface CouponListParams {
+  page?: number
+  limit?: number
+  status?: number
+  type?: number
+}
+
+interface CouponUseParams {
+  couponId: number
+  orderNo?: string
+}
+
+interface BatchSendParams {
+  couponIds: number[]
+  userIds: number[]
+  message?: string
+}
+
+interface PointRecordsParams {
+  page?: number
+  limit?: number
+  type?: number
+  startDate?: string
+  endDate?: string
+}
+
+interface PointProductsParams {
+  page?: number
+  limit?: number
+  status?: number
+}
+
+interface ExchangeParams {
+  productId: number
+  quantity?: number
+}
+
+interface ActivityListParams {
+  page?: number
+  limit?: number
+  status?: number
+  type?: number
+}
+
+interface JoinActivityParams {
+  activityId: number
+  remark?: string
+}
+
 export const marketingApi = {
-  getCouponList: (params: any) => 
+  getCouponList: (params?: CouponListParams) =>
     request.get('/api/marketing/coupon/list', params),
 
-  createCoupon: (data: Coupon) => 
+  createCoupon: (data: Coupon) =>
     request.post('/api/marketing/coupon/create', data),
 
-  updateCoupon: (data: Coupon) => 
+  updateCoupon: (data: Coupon) =>
     request.put('/api/marketing/coupon/update', data),
 
-  deleteCoupon: (id: number) => 
+  deleteCoupon: (id: number) =>
     request.delete(`/api/marketing/coupon/${id}`),
 
-  batchSendCoupon: (data: any) => 
+  batchSendCoupon: (data: BatchSendParams) =>
     request.post('/api/marketing/coupon/batch-send', data),
 
-  generateCouponCode: () => 
+  generateCouponCode: () =>
     request.post('/api/marketing/coupon/generate-code'),
 
-  getUserCoupons: (params: any) => 
+  getUserCoupons: (params?: CouponListParams) =>
     request.get('/api/marketing/coupon/user/list', params),
 
-  useCoupon: (data: any) => 
+  useCoupon: (data: CouponUseParams) =>
     request.post('/api/marketing/coupon/use', data),
 
-  getUserPoints: () => 
+  getUserPoints: () =>
     request.get('/api/marketing/points/balance'),
 
-  getPointRecords: (params: any) => 
+  getPointRecords: (params?: PointRecordsParams) =>
     request.get('/api/marketing/points/records', params),
 
-  getPointProducts: (params: any) => 
+  getPointProducts: (params?: PointProductsParams) =>
     request.get('/api/marketing/points/products', params),
 
-  exchangeProduct: (data: any) => 
+  exchangeProduct: (data: ExchangeParams) =>
     request.post('/api/marketing/points/exchange', data),
 
-  checkIn: () => 
+  checkIn: () =>
     request.post('/api/marketing/points/check-in'),
 
-  getPointRanking: (limit: number) => 
+  getPointRanking: (limit: number = 10) =>
     request.get('/api/marketing/points/ranking', { limit }),
 
-  getUserLevel: () => 
+  getUserLevel: () =>
     request.get('/api/marketing/level/user'),
 
-  getAllLevels: () => 
+  getAllLevels: () =>
     request.get('/api/marketing/level/list'),
 
-  getLevelPrivileges: (levelId: number) => 
+  getLevelPrivileges: (levelId: number) =>
     request.get(`/api/marketing/level/${levelId}/privileges`),
 
-  getActivities: (params: any) => 
+  getActivities: (params?: ActivityListParams) =>
     request.get('/api/marketing/activity/list', params),
 
-  getActivityDetail: (activityId: number) => 
+  getActivityDetail: (activityId: number) =>
     request.get(`/api/marketing/activity/${activityId}`),
 
-  joinActivity: (data: any) => 
+  joinActivity: (data: JoinActivityParams) =>
     request.post('/api/marketing/activity/join', data),
 
-  getActivityStats: (activityId: number) => 
+  getActivityStats: (activityId: number) =>
     request.get(`/api/marketing/activity/${activityId}/stats`),
 }

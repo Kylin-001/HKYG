@@ -1,6 +1,58 @@
 import request from '@/utils/request'
 import { Product, Category, ProductQuery } from '@/types/api'
 
+interface Brand {
+  id: string
+  name: string
+  logo?: string
+  status: number
+  createTime: string
+}
+
+interface BrandQueryParams {
+  page?: number
+  limit?: number
+  keyword?: string
+  status?: number
+}
+
+interface CreateBrandParams {
+  name: string
+  logo?: string
+  status: number
+}
+
+interface UpdateBrandParams {
+  id: string
+  name?: string
+  logo?: string
+  status?: number
+}
+
+interface UpdateBrandStatusParams {
+  id: string
+  status: boolean
+}
+
+interface CategoryQueryParams {
+  page?: number
+  limit?: number
+  keyword?: string
+  status?: number
+}
+
+interface SearchParams {
+  keyword: string
+  page?: number
+  limit?: number
+}
+
+interface BehaviorRecordParams {
+  productId: number
+  behaviorType: string
+  duration?: number
+}
+
 export const productApi = {
   getProductList: (params: ProductQuery) => request.get('/api/product/list', params),
 
@@ -28,7 +80,7 @@ export const productApi = {
 
   getCategoryTree: () => request.get<Category[]>('/api/category/tree'),
 
-  getCategoryList: (params?: any) => request.get('/api/category/list', params),
+  getCategoryList: (params?: CategoryQueryParams) => request.get('/api/category/list', params),
 
   getCategoryDetail: (categoryId: number) => request.get<Category>(`/api/category/${categoryId}`),
 
@@ -38,7 +90,7 @@ export const productApi = {
 
   deleteCategory: (categoryId: number) => request.delete(`/api/category/${categoryId}`),
 
-  uploadImage: (formData: FormData) => request.upload('/api/product/upload/image', formData),
+  uploadImage: (formData: FormData) => request.upload<{ url: string }>('/api/product/upload/image', formData),
 
   getRecommendProducts: (limit: number = 10) =>
     request.get('/api/product/recommend', { limit }),
@@ -52,25 +104,25 @@ export const productApi = {
   getHotProducts: (limit: number = 10) =>
     request.get('/api/product/recommend/hot', { limit }),
 
-  recordUserBehavior: (data: { productId: number; behaviorType: string; duration?: number }) =>
+  recordUserBehavior: (data: BehaviorRecordParams) =>
     request.post('/api/user/behavior/record', data),
 
   getRecommendReason: (userId: number, productId: number) =>
     request.get('/api/product/recommend/reason', { userId, productId }),
 
-  searchProducts: (params: { keyword: string; page?: number; limit?: number }) =>
+  searchProducts: (params: SearchParams) =>
     request.get('/api/product/search', params),
 
-  getBrands: (params: any) => request.get('/api/brand/list', params),
+  getBrands: (params?: BrandQueryParams) => request.get('/api/brand/list', params),
 
-  createBrand: (data: any) => request.post('/api/brand', data),
+  createBrand: (data: CreateBrandParams) => request.post('/api/brand', data),
 
-  updateBrand: (data: any) => request.put('/api/brand', data),
+  updateBrand: (data: UpdateBrandParams) => request.put('/api/brand', data),
 
   deleteBrand: (brandId: string) => request.delete(`/api/brand/${brandId}`),
 
-  updateBrandStatus: (data: { id: string; status: boolean }) =>
+  updateBrandStatus: (data: UpdateBrandStatusParams) =>
     request.put('/api/brand/status', data),
 
-  uploadBrandLogo: (formData: FormData) => request.upload('/api/brand/upload/logo', formData),
+  uploadBrandLogo: (formData: FormData) => request.upload<{ url: string }>('/api/brand/upload/logo', formData),
 }

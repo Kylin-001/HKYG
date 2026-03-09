@@ -1,0 +1,70 @@
+{
+  "test": {
+    "coverage": {
+      "threshold": 70,
+      "reporters": ["text", "json", "html", "lcov", "cobertura"],
+      "include": ["src/**/*.{vue,js,ts}", "tests/api/**/*.{js,ts}"],
+      "exclude": [
+        "node_modules/**",
+        "**/*.d.ts",
+        "src/main.ts",
+        "src/App.vue",
+        "src/SimpleApp.vue",
+        "src/stories/**",
+        "src/views/**",
+        "src/layout/**",
+        "src/router/**",
+        "src/store/**",
+        "**/test/**",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.integration.test.ts"
+      ]
+    },
+    "unit": {
+      "environment": "jsdom",
+      "include": ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}", "tests/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}"],
+      "exclude": ["**/node_modules/**", "**/e2e/**", "**/dist/**"],
+      "timeout": 10000,
+      "reporters": ["default", "json", "html"],
+      "outputFile": {
+        "json": "./test-results/test-results.json",
+        "html": "./test-results/test-results.html"
+      }
+    },
+    "e2e": {
+      "browsers": ["chromium", "firefox", "webkit"],
+      "timeout": 30000,
+      "retries": 2,
+      "reporters": ["html", "json", "junit", "line", "allure-playwright"],
+      "trace": "on-first-retry",
+      "screenshot": "only-on-failure",
+      "viewport": { "width": 1280, "height": 720 }
+    },
+    "performance": {
+      "thresholds": {
+        "firstContentfulPaint": 1500,
+        "largestContentfulPaint": 2500,
+        "cumulativeLayoutShift": 0.1,
+        "totalBlockingTime": 300
+      },
+      "reporters": ["html", "json"]
+    },
+    "monitoring": {
+      "historySize": 100,
+      "reportsDir": "./test-reports",
+      "schedule": "0 2 * * *"
+    }
+  },
+  "ci": {
+    "nodeVersion": "18",
+    "cache": "npm",
+    "artifactsRetentionDays": 30,
+    "scheduledArtifactsRetentionDays": 7,
+    "slackWebhook": "${{ secrets.SLACK_WEBHOOK }}",
+    "sshPrivateKey": "${{ secrets.SSH_PRIVATE_KEY }}",
+    "remoteHost": "${{ secrets.REMOTE_HOST }}",
+    "remoteUser": "${{ secrets.REMOTE_USER }}",
+    "remotePath": "/var/www/heikeji-frontend"
+  }
+}

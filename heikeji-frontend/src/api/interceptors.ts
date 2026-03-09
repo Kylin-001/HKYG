@@ -54,14 +54,14 @@ class PerformanceMonitor {
   private maxDataPoints = 100
 
   recordRequest(config: AxiosRequestConfig): void {
-    if (!config.monitorPerformance) return // 记录请求开始时间
-    ;(config as any)._startTime = performance.now()
+    if (!config.monitorPerformance) return
+    ;(config as AxiosRequestConfig & { _startTime?: number })._startTime = performance.now()
   }
 
   recordResponse(config: AxiosRequestConfig, response: AxiosResponse): void {
     if (!config.monitorPerformance) return
 
-    const startTime = (config as any)._startTime
+    const startTime = (config as AxiosRequestConfig & { _startTime?: number })._startTime
     if (!startTime) return
 
     const endTime = performance.now()
@@ -76,15 +76,10 @@ class PerformanceMonitor {
       status: response.status,
     }
 
-    // 添加到性能数据数组
     this.performanceData.unshift(performanceData)
-    // 限制数据点数量
     this.performanceData = this.performanceData.slice(0, this.maxDataPoints)
-
-    // 记录API响应时间
     logger.logApiResponseTime(config.url || '', duration, response.status)
 
-    // 如果响应时间过长，记录警告
     if (duration > 2000) {
       logger.warn(`API响应时间过长: ${config.url || ''} - ${duration.toFixed(2)}ms`, {
         method: config.method,
@@ -97,7 +92,7 @@ class PerformanceMonitor {
   recordError(config: AxiosRequestConfig, error: AxiosError): void {
     if (!config.monitorPerformance) return
 
-    const startTime = (config as any)._startTime
+    const startTime = (config as AxiosRequestConfig & { _startTime?: number })._startTime
     if (!startTime) return
 
     const endTime = performance.now()

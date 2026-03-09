@@ -173,30 +173,30 @@
           <el-table-column prop="paymentId" label="支付ID" width="180" />
           <el-table-column prop="orderId" label="订单ID" width="180" />
           <el-table-column prop="amount" label="支付金额" width="120" align="right">
-            <template slot-scope="scope">¥{{ scope.row.amount.toFixed(2) }}</template>
+            <template #default="scope">¥{{ (scope.row.amount || 0).toFixed(2) }}</template>
           </el-table-column>
           <el-table-column prop="paymentMethod" label="支付方式" width="120">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="getPaymentMethodTagType(scope.row.paymentMethod)">
                 {{ getPaymentMethodText(scope.row.paymentMethod) }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="status" label="支付状态" width="100">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="getStatusTagType(scope.row.status)">
                 {{ getStatusText(scope.row.status) }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="payTime" label="支付时间" width="180">
-            <template slot-scope="scope">
+            <template #default="scope">
               {{ formatDateTime(scope.row.payTime) }}
             </template>
           </el-table-column>
           <el-table-column prop="transactionId" label="交易流水号" width="200" />
           <el-table-column label="操作" width="120" fixed="right">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-button
                 type="text"
                 size="small"
@@ -232,7 +232,7 @@
     </div>
 
     <!-- 详情弹窗 -->
-    <el-dialog title="支付详情" :visible.sync="detailDialogVisible" width="600px">
+    <el-dialog title="支付详情" v-model="detailDialogVisible" width="600px">
       <div class="detail-content" v-if="currentPayment">
         <el-descriptions :column="1" border>
           <el-descriptions-item label="支付ID">{{ currentPayment.paymentId }}</el-descriptions-item>
@@ -258,468 +258,482 @@
           }}</el-descriptions-item>
         </el-descriptions>
       </div>
-      <span slot="footer" class="dialog-footer">
+      <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
-      </span>
+      </template>
     </el-dialog>
   </div>
 </template>
 
-<script>
-import request from '@/utils/request'
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
+import request from '@/utils/request'
 import { formatDateTime } from '@/utils/date-utils'
 
-export default {
-  name: 'PaymentStatistics',
-  data() {
-    return {
-      // 筛选条件
-      filterForm: {
-        dateRange: [],
-        paymentMethod: '',
-        paymentStatus: '',
-      },
-
-      // 表格数据
-      paymentRecords: [],
-      total: 0,
-      currentPage: 1,
-      pageSize: 10,
-      loading: false,
-      selectedRows: [],
-
-      // 统计数据
-      totalAmount: 0,
-      totalOrders: 0,
-      successRate: 0,
-      refundAmount: 0,
-      refundRate: 0,
-      amountTrend: 0,
-      orderTrend: 0,
-      successRateTrend: 0,
-
-      // 图表配置
-      chartType: 'line',
-      trendChart: null,
-      paymentMethodChart: null,
-
-      // 弹窗状态
-      detailDialogVisible: false,
-      currentPayment: null,
-    }
-  },
-
-  mounted() {
-    // 初始化默认时间范围（最近7天）
-    this.initDefaultDateRange()
-    // 加载数据
-    this.loadStatisticsData()
-    // 初始化图表
-    this.$nextTick(() => {
-      this.initTrendChart()
-      this.initPaymentMethodChart()
-    })
-  },
-
-  beforeDestroy() {
-    // 销毁图表实例
-    if (this.trendChart) {
-      this.trendChart.dispose()
-    }
-    if (this.paymentMethodChart) {
-      this.paymentMethodChart.dispose()
-    }
-  },
-
-  methods: {
-    // 初始化默认时间范围
-    initDefaultDateRange() {
-      const end = new Date()
-      const start = new Date()
-      start.setDate(start.getDate() - 6) // 最近7天
-
-      this.filterForm.dateRange = [
-        start.toISOString().split('T')[0],
-        end.toISOString().split('T')[0],
-      ]
-    },
-
-    // 处理日期范围变化
-    handleDateRangeChange() {
-      this.currentPage = 1
-      this.loadStatisticsData()
-    },
-
-    // 处理查询
-    handleQuery() {
-      this.currentPage = 1
-      this.loadStatisticsData()
-    },
-
-    // 处理重置
-    handleReset() {
-      this.filterForm = {
-        dateRange: [],
-        paymentMethod: '',
-        paymentStatus: '',
-      }
-      this.initDefaultDateRange()
-      this.currentPage = 1
-      this.loadStatisticsData()
-    },
-
-    // 加载统计数据
-    async loadStatisticsData() {
-      this.loading = true
-      try {
-        // 获取统计概览数据
-        const overviewRes = await this.getPaymentOverview()
-        if (overviewRes && overviewRes.code === 200) {
-          const { data } = overviewRes
-          this.totalAmount = data.totalAmount || 0
-          this.totalOrders = data.totalOrders || 0
-          this.successRate = data.successRate || 0
-          this.refundAmount = data.refundAmount || 0
-          this.refundRate = data.refundRate || 0
-          this.amountTrend = data.amountTrend || 0
-          this.orderTrend = data.orderTrend || 0
-          this.successRateTrend = data.successRateTrend || 0
-        }
-
-        // 获取支付明细数据
-        await this.loadPaymentRecords()
-
-        // 获取图表数据
-        await this.loadChartData()
-      } catch (error) {
-        console.error('加载统计数据失败:', error)
-        this.$message.error('加载数据失败，请稍后重试')
-      } finally {
-        this.loading = false
-      }
-    },
-
-    // 获取支付概览数据
-    async getPaymentOverview() {
-      const params = this.getQueryParams()
-      return request({
-        url: '/statistics/payment/overview',
-        method: 'get',
-        params,
-      })
-    },
-
-    // 加载支付记录
-    async loadPaymentRecords() {
-      const params = {
-        ...this.getQueryParams(),
-        pageNum: this.currentPage,
-        pageSize: this.pageSize,
-      }
-
-      const res = await request({
-        url: '/payment/records',
-        method: 'get',
-        params,
-      })
-
-      if (res && res.code === 200) {
-        this.paymentRecords = res.data.list || []
-        this.total = res.data.total || 0
-      }
-    },
-
-    // 加载图表数据
-    async loadChartData() {
-      // 获取趋势图数据
-      const trendData = await this.getPaymentTrendData()
-      if (trendData && trendData.code === 200) {
-        this.updateTrendChart(trendData.data)
-      }
-
-      // 获取支付方式分布数据
-      const methodData = await this.getPaymentMethodData()
-      if (methodData && methodData.code === 200) {
-        this.updatePaymentMethodChart(methodData.data)
-      }
-    },
-
-    // 获取支付趋势数据
-    async getPaymentTrendData() {
-      const params = this.getQueryParams()
-      return request({
-        url: '/statistics/payment/trend',
-        method: 'get',
-        params,
-      })
-    },
-
-    // 获取支付方式分布数据
-    async getPaymentMethodData() {
-      const params = this.getQueryParams()
-      return request({
-        url: '/statistics/payment/method',
-        method: 'get',
-        params,
-      })
-    },
-
-    // 初始化趋势图
-    initTrendChart() {
-      const chartDom = this.$refs.trendChart
-      if (chartDom) {
-        this.trendChart = echarts.init(chartDom)
-        this.trendChart.setOption({
-          title: {
-            text: '',
-            left: 'center',
-          },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross',
-            },
-          },
-          legend: {
-            data: ['交易额', '订单数'],
-            top: 30,
-          },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true,
-          },
-          xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: [],
-          },
-          yAxis: [
-            {
-              type: 'value',
-              name: '交易额',
-              position: 'left',
-            },
-            {
-              type: 'value',
-              name: '订单数',
-              position: 'right',
-            },
-          ],
-          series: [
-            {
-              name: '交易额',
-              type: 'line',
-              yAxisIndex: 0,
-              data: [],
-              smooth: true,
-              areaStyle: {
-                opacity: 0.3,
-              },
-            },
-            {
-              name: '订单数',
-              type: 'line',
-              yAxisIndex: 1,
-              data: [],
-            },
-          ],
-        })
-      }
-    },
-
-    // 更新趋势图
-    updateTrendChart(data) {
-      if (this.trendChart && data) {
-        const option = this.trendChart.getOption()
-        option.xAxis[0].data = data.labels || []
-        option.series[0].type = this.chartType
-        option.series[1].type = this.chartType
-        option.series[0].data = data.amountData || []
-        option.series[1].data = data.orderData || []
-        this.trendChart.setOption(option)
-      }
-    },
-
-    // 初始化支付方式分布图
-    initPaymentMethodChart() {
-      const chartDom = this.$refs.paymentMethodChart
-      if (chartDom) {
-        this.paymentMethodChart = echarts.init(chartDom)
-        this.paymentMethodChart.setOption({
-          tooltip: {
-            trigger: 'item',
-            formatter: '{a} <br/>{b}: {c} ({d}%)',
-          },
-          legend: {
-            orient: 'vertical',
-            left: 10,
-            data: [],
-          },
-          series: [
-            {
-              name: '支付方式',
-              type: 'pie',
-              radius: ['40%', '70%'],
-              avoidLabelOverlap: false,
-              itemStyle: {
-                borderRadius: 10,
-                borderColor: '#fff',
-                borderWidth: 2,
-              },
-              label: {
-                show: false,
-                position: 'center',
-              },
-              emphasis: {
-                label: {
-                  show: true,
-                  fontSize: '18',
-                  fontWeight: 'bold',
-                },
-              },
-              labelLine: {
-                show: false,
-              },
-              data: [],
-            },
-          ],
-        })
-      }
-    },
-
-    // 更新支付方式分布图
-    updatePaymentMethodChart(data) {
-      if (this.paymentMethodChart && data) {
-        const option = this.paymentMethodChart.getOption()
-        option.legend[0].data = data.map(item => item.name)
-        option.series[0].data = data
-        this.paymentMethodChart.setOption(option)
-      }
-    },
-
-    // 获取查询参数
-    getQueryParams() {
-      const params = {}
-
-      if (this.filterForm.dateRange && this.filterForm.dateRange.length === 2) {
-        params.startDate = this.filterForm.dateRange[0]
-        params.endDate = this.filterForm.dateRange[1]
-      }
-
-      if (this.filterForm.paymentMethod) {
-        params.paymentMethod = this.filterForm.paymentMethod
-      }
-
-      if (this.filterForm.paymentStatus !== '') {
-        params.status = this.filterForm.paymentStatus
-      }
-
-      return params
-    },
-
-    // 处理图表类型切换
-    handleChartTypeChange() {
-      this.loadChartData()
-    },
-
-    // 获取支付方式文本
-    getPaymentMethodText(method) {
-      const methodMap = {
-        WECHAT_PAY: '微信支付',
-        ALIPAY: '支付宝',
-        BALANCE: '余额支付',
-      }
-      return methodMap[method] || '其他'
-    },
-
-    // 获取支付方式标签类型
-    getPaymentMethodTagType(method) {
-      const typeMap = {
-        WECHAT_PAY: 'success',
-        ALIPAY: 'primary',
-        BALANCE: 'warning',
-      }
-      return typeMap[method] || 'info'
-    },
-
-    // 获取状态文本
-    getStatusText(status) {
-      const statusMap = {
-        0: '未支付',
-        1: '已支付',
-        2: '已退款',
-        3: '支付失败',
-      }
-      return statusMap[status] || '未知'
-    },
-
-    // 获取状态标签类型
-    getStatusTagType(status) {
-      const typeMap = {
-        0: 'info',
-        1: 'success',
-        2: 'warning',
-        3: 'danger',
-      }
-      return typeMap[status] || 'default'
-    },
-
-    // 格式化日期时间
-    formatDateTime(time) {
-      return formatDateTime(time)
-    },
-
-    // 处理表格选择
-    handleSelectionChange(rows) {
-      this.selectedRows = rows
-    },
-
-    // 处理分页大小变化
-    handleSizeChange(size) {
-      this.pageSize = size
-      this.loadPaymentRecords()
-    },
-
-    // 处理当前页变化
-    handleCurrentChange(current) {
-      this.currentPage = current
-      this.loadPaymentRecords()
-    },
-
-    // 处理查看详情
-    handleViewDetail(row) {
-      this.currentPayment = row
-      this.detailDialogVisible = true
-    },
-
-    // 处理查看退款
-    handleViewRefund(row) {
-      this.$router.push({
-        path: '/order/refund/detail',
-        query: { orderId: row.orderId },
-      })
-    },
-
-    // 导出报表
-    handleExport() {
-      const params = this.getQueryParams()
-      const queryStr = Object.keys(params)
-        .map(key => `${key}=${params[key]}`)
-        .join('&')
-      window.open(`/api/v1/statistics/payment/export?${queryStr}`, '_blank')
-    },
-  },
-
-  watch: {
-    // 监听图表类型变化
-    chartType() {
-      this.handleChartTypeChange()
-    },
-  },
+interface FilterForm {
+  dateRange: string[]
+  paymentMethod: string
+  paymentStatus: string | number
 }
+
+interface PaymentRecord {
+  paymentId: string
+  orderId: string
+  amount: number
+  paymentMethod: string
+  status: number
+  payTime: string
+  transactionId: string
+  hasRefund?: boolean
+}
+
+interface PaymentOverview {
+  totalAmount: number
+  totalOrders: number
+  successRate: number
+  refundAmount: number
+  refundRate: number
+  amountTrend: number
+  orderTrend: number
+  successRateTrend: number
+}
+
+// 筛选条件
+const filterForm = reactive<FilterForm>({
+  dateRange: [],
+  paymentMethod: '',
+  paymentStatus: '',
+})
+
+// 表格数据
+const paymentRecords = ref<PaymentRecord[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
+const loading = ref(false)
+const selectedRows = ref<PaymentRecord[]>([])
+
+// 统计数据
+const totalAmount = ref(0)
+const totalOrders = ref(0)
+const successRate = ref(0)
+const refundAmount = ref(0)
+const refundRate = ref(0)
+const amountTrend = ref(0)
+const orderTrend = ref(0)
+const successRateTrend = ref(0)
+
+// 图表配置
+const chartType = ref('line')
+const trendChart = ref<HTMLElement | null>(null)
+const paymentMethodChart = ref<HTMLElement | null>(null)
+
+// 弹窗状态
+const detailDialogVisible = ref(false)
+const currentPayment = ref<PaymentRecord | null>(null)
+
+// 初始化默认时间范围（最近7天）
+const initDefaultDateRange = () => {
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - 6)
+
+  filterForm.dateRange = [
+    start.toISOString().split('T')[0],
+    end.toISOString().split('T')[0],
+  ]
+}
+
+// 处理日期范围变化
+const handleDateRangeChange = () => {
+  currentPage.value = 1
+  loadStatisticsData()
+}
+
+// 处理查询
+const handleQuery = () => {
+  currentPage.value = 1
+  loadStatisticsData()
+}
+
+// 处理重置
+const handleReset = () => {
+  filterForm.dateRange = []
+  filterForm.paymentMethod = ''
+  filterForm.paymentStatus = ''
+  initDefaultDateRange()
+  currentPage.value = 1
+  loadStatisticsData()
+}
+
+// 加载统计数据
+const loadStatisticsData = async () => {
+  loading.value = true
+  try {
+    const overviewRes = await getPaymentOverview()
+    if (overviewRes && overviewRes.code === 200) {
+      const { data } = overviewRes
+      totalAmount.value = data.totalAmount || 0
+      totalOrders.value = data.totalOrders || 0
+      successRate.value = data.successRate || 0
+      refundAmount.value = data.refundAmount || 0
+      refundRate.value = data.refundRate || 0
+      amountTrend.value = data.amountTrend || 0
+      orderTrend.value = data.orderTrend || 0
+      successRateTrend.value = data.successRateTrend || 0
+    }
+
+    await loadPaymentRecords()
+    await loadChartData()
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+    ElMessage.error('加载数据失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 获取支付概览数据
+const getPaymentOverview = async () => {
+  const params = getQueryParams()
+  return request({
+    url: '/statistics/payment/overview',
+    method: 'get',
+    params,
+  })
+}
+
+// 加载支付记录
+const loadPaymentRecords = async () => {
+  const params = {
+    ...getQueryParams(),
+    pageNum: currentPage.value,
+    pageSize: pageSize.value,
+  }
+
+  const res = await request({
+    url: '/payment/records',
+    method: 'get',
+    params,
+  })
+
+  if (res && res.code === 200) {
+    paymentRecords.value = res.data.list || []
+    total.value = res.data.total || 0
+  }
+}
+
+// 加载图表数据
+const loadChartData = async () => {
+  const trendData = await getPaymentTrendData()
+  if (trendData && trendData.code === 200) {
+    updateTrendChart(trendData.data)
+  }
+
+  const methodData = await getPaymentMethodData()
+  if (methodData && methodData.code === 200) {
+    updatePaymentMethodChart(methodData.data)
+  }
+}
+
+// 获取支付趋势数据
+const getPaymentTrendData = async () => {
+  const params = getQueryParams()
+  return request({
+    url: '/statistics/payment/trend',
+    method: 'get',
+    params,
+  })
+}
+
+// 获取支付方式分布数据
+const getPaymentMethodData = async () => {
+  const params = getQueryParams()
+  return request({
+    url: '/statistics/payment/method',
+    method: 'get',
+    params,
+  })
+}
+
+// 初始化趋势图
+const initTrendChart = () => {
+  const chartDom = trendChart.value
+  if (chartDom) {
+    const chart = echarts.init(chartDom)
+    chart.setOption({
+      title: {
+        text: '',
+        left: 'center',
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross',
+        },
+      },
+      legend: {
+        data: ['交易额', '订单数'],
+        top: 30,
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: [],
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: '交易额',
+          position: 'left',
+        },
+        {
+          type: 'value',
+          name: '订单数',
+          position: 'right',
+        },
+      ],
+      series: [
+        {
+          name: '交易额',
+          type: 'line',
+          yAxisIndex: 0,
+          data: [],
+          smooth: true,
+          areaStyle: {
+            opacity: 0.3,
+          },
+        },
+        {
+          name: '订单数',
+          type: 'line',
+          yAxisIndex: 1,
+          data: [],
+        },
+      ],
+    })
+  }
+}
+
+// 更新趋势图
+const updateTrendChart = (data: any) => {
+  const chartDom = trendChart.value
+  if (chartDom) {
+    const chart = echarts.getInstanceByDom(chartDom)
+    if (chart) {
+      const option = chart.getOption()
+      option.xAxis[0].data = data.labels || []
+      option.series[0].type = chartType.value
+      option.series[1].type = chartType.value
+      option.series[0].data = data.amountData || []
+      option.series[1].data = data.orderData || []
+      chart.setOption(option)
+    }
+  }
+}
+
+// 初始化支付方式分布图
+const initPaymentMethodChart = () => {
+  const chartDom = paymentMethodChart.value
+  if (chartDom) {
+    const chart = echarts.init(chartDom)
+    chart.setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)',
+      },
+      legend: {
+        orient: 'vertical',
+        left: 10,
+        data: [],
+      },
+      series: [
+        {
+          name: '支付方式',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2,
+          },
+          label: {
+            show: false,
+            position: 'center',
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '18',
+              fontWeight: 'bold',
+            },
+          },
+          labelLine: {
+            show: false,
+          },
+          data: [],
+        },
+      ],
+    })
+  }
+}
+
+// 更新支付方式分布图
+const updatePaymentMethodChart = (data: any) => {
+  const chartDom = paymentMethodChart.value
+  if (chartDom) {
+    const chart = echarts.getInstanceByDom(chartDom)
+    if (chart) {
+      const option = chart.getOption()
+      option.legend[0].data = data.map((item: any) => item.name)
+      option.series[0].data = data
+      chart.setOption(option)
+    }
+  }
+}
+
+// 获取查询参数
+const getQueryParams = () => {
+  const params: Record<string, any> = {}
+
+  if (filterForm.dateRange && filterForm.dateRange.length === 2) {
+    params.startDate = filterForm.dateRange[0]
+    params.endDate = filterForm.dateRange[1]
+  }
+
+  if (filterForm.paymentMethod) {
+    params.paymentMethod = filterForm.paymentMethod
+  }
+
+  if (filterForm.paymentStatus !== '') {
+    params.status = filterForm.paymentStatus
+  }
+
+  return params
+}
+
+// 获取支付方式文本
+const getPaymentMethodText = (method: string) => {
+  const methodMap: Record<string, string> = {
+    WECHAT_PAY: '微信支付',
+    ALIPAY: '支付宝',
+    BALANCE: '余额支付',
+  }
+  return methodMap[method] || '其他'
+}
+
+// 获取支付方式标签类型
+const getPaymentMethodTagType = (method: string) => {
+  const typeMap: Record<string, string> = {
+    WECHAT_PAY: 'success',
+    ALIPAY: 'primary',
+    BALANCE: 'warning',
+  }
+  return typeMap[method] || 'info'
+}
+
+// 获取状态文本
+const getStatusText = (status: number) => {
+  const statusMap: Record<number, string> = {
+    0: '未支付',
+    1: '已支付',
+    2: '已退款',
+    3: '支付失败',
+  }
+  return statusMap[status] || '未知'
+}
+
+// 获取状态标签类型
+const getStatusTagType = (status: number) => {
+  const typeMap: Record<number, string> = {
+    0: 'info',
+    1: 'success',
+    2: 'warning',
+    3: 'danger',
+  }
+  return typeMap[status] || 'default'
+}
+
+// 处理表格选择
+const handleSelectionChange = (rows: PaymentRecord[]) => {
+  selectedRows.value = rows
+}
+
+// 处理分页大小变化
+const handleSizeChange = (size: number) => {
+  pageSize.value = size
+  loadPaymentRecords()
+}
+
+// 处理当前页变化
+const handleCurrentChange = (current: number) => {
+  currentPage.value = current
+  loadPaymentRecords()
+}
+
+// 处理查看详情
+const handleViewDetail = (row: PaymentRecord) => {
+  currentPayment.value = row
+  detailDialogVisible.value = true
+}
+
+// 处理查看退款
+const handleViewRefund = (row: PaymentRecord) => {
+  window.location.href = `/order/refund/detail?orderId=${row.orderId}`
+}
+
+// 导出报表
+const handleExport = () => {
+  const params = getQueryParams()
+  const queryStr = Object.keys(params)
+    .map(key => `${key}=${params[key]}`)
+    .join('&')
+  window.open(`/api/v1/statistics/payment/export?${queryStr}`, '_blank')
+}
+
+// 监听图表类型变化
+watch(chartType, () => {
+  loadChartData()
+})
+
+// 组件挂载
+onMounted(async () => {
+  initDefaultDateRange()
+  await loadStatisticsData()
+  
+  await nextTick()
+  initTrendChart()
+  initPaymentMethodChart()
+})
+
+// 组件卸载前清理
+onBeforeUnmount(() => {
+  const chartDom1 = trendChart.value
+  const chartDom2 = paymentMethodChart.value
+  
+  if (chartDom1) {
+    const chart = echarts.getInstanceByDom(chartDom1)
+    if (chart) {
+      chart.dispose()
+    }
+  }
+  
+  if (chartDom2) {
+    const chart = echarts.getInstanceByDom(chartDom2)
+    if (chart) {
+      chart.dispose()
+    }
+  }
+})
 </script>
 
 <style scoped>

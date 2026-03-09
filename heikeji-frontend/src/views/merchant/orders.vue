@@ -170,13 +170,13 @@
         <el-table-column type="selection" width="55"></el-table-column>
 
         <el-table-column prop="orderNo" label="订单号" width="160">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <span class="order-no">{{ row.orderNo }}</span>
           </template>
         </el-table-column>
 
         <el-table-column prop="createTime" label="下单时间" width="140">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <div class="time-info">
               <div>{{ row.createTime.split(' ')[0] }}</div>
               <div>{{ row.createTime.split(' ')[1] }}</div>
@@ -185,7 +185,7 @@
         </el-table-column>
 
         <el-table-column label="客户信息" width="120">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <div class="customer-info">
               <div>{{ row.customerName }}</div>
               <div class="customer-phone">{{ row.customerPhone }}</div>
@@ -194,7 +194,7 @@
         </el-table-column>
 
         <el-table-column label="订单内容" min-width="200">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <div class="order-items">
               <div v-for="(item, index) in row.items.slice(0, 2)" :key="index" class="item-line">
                 {{ item.name }} x{{ item.quantity }}
@@ -207,13 +207,13 @@
         </el-table-column>
 
         <el-table-column prop="amount" label="订单金额" width="100">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <span class="amount">¥{{ row.amount }}</span>
           </template>
         </el-table-column>
 
         <el-table-column prop="status" label="状态" width="100">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small">
               {{ row.status }}
             </el-tag>
@@ -221,13 +221,13 @@
         </el-table-column>
 
         <el-table-column label="支付方式" width="80">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <span class="pay-type">{{ row.payType }}</span>
           </template>
         </el-table-column>
 
         <el-table-column label="操作" width="200" fixed="right">
-          <template slot-scope="{ row }">
+          <template #default="{ row }">
             <el-button
               v-if="row.status === '待接单'"
               type="primary"
@@ -280,7 +280,7 @@
     </el-card>
 
     <!-- 订单详情对话框 -->
-    <el-dialog title="订单详情" :visible.sync="detailDialogVisible" width="800px">
+    <el-dialog title="订单详情" v-model="detailDialogVisible" width="800px">
       <div v-if="currentOrder" class="order-detail">
         <!-- 基本信息 -->
         <div class="detail-section">
@@ -334,11 +334,11 @@
             <el-table-column prop="name" label="商品名称"></el-table-column>
             <el-table-column prop="spec" label="规格"></el-table-column>
             <el-table-column prop="price" label="单价" width="80">
-              <template slot-scope="{ row }"> ¥{{ row.price }} </template>
+              <template #default="{ row }"> ¥{{ row.price }} </template>
             </el-table-column>
             <el-table-column prop="quantity" label="数量" width="60"></el-table-column>
             <el-table-column prop="total" label="小计" width="80">
-              <template slot-scope="{ row }"> ¥{{ row.total }} </template>
+              <template #default="{ row }"> ¥{{ row.total }} </template>
             </el-table-column>
           </el-table>
         </div>
@@ -435,354 +435,400 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'MerchantOrders',
-  data() {
-    return {
-      loading: false,
-      orders: [],
-      orderStats: {
-        total: 0,
-        pending: 0,
-        cooking: 0,
-        delivering: 0,
-        ready: 0,
-        completed: 0,
-        revenue: 0,
-        avgRating: 4.8,
-        deliverymenCount: 5,
-      },
-      filterForm: {
-        status: '',
-        dateRange: [],
-        orderNo: '',
-      },
-      pagination: {
-        page: 1,
-        size: 20,
-        total: 0,
-      },
-      selectedOrders: [],
-      detailDialogVisible: false,
-      currentOrder: null,
-    }
-  },
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-  computed: {
-    // 计算完成率
-    completionRate() {
-      if (this.orderStats.total === 0) return 0
-      return Math.round((this.orderStats.completed / this.orderStats.total) * 100)
-    },
-  },
-
-  mounted() {
-    this.loadOrders()
-    this.loadOrderStats()
-  },
-
-  methods: {
-    // 加载订单列表
-    async loadOrders() {
-      this.loading = true
-      try {
-        // 模拟数据
-        this.orders = [
-          {
-            id: 1,
-            orderNo: 'TK20241121143001',
-            createTime: '2024-11-21 14:30:15',
-            customerName: '张三',
-            customerPhone: '138****8888',
-            items: [
-              { name: '兰州拉面', spec: '大碗', price: 15, quantity: 2, total: 30 },
-              { name: '小菜', spec: '凉拌', price: 5, quantity: 1, total: 5 },
-            ],
-            amount: 45.8,
-            status: '待接单',
-            payType: '微信支付',
-            deliveryAddress: '清华大学学生公寓1号楼101',
-            estimatedDelivery: '14:50-15:05',
-            remark: '不要香菜，多放醋',
-          },
-          {
-            id: 2,
-            orderNo: 'TK20241121142502',
-            createTime: '2024-11-21 14:25:30',
-            customerName: '李四',
-            customerPhone: '139****9999',
-            items: [
-              { name: '牛肉面', spec: '中碗', price: 18, quantity: 1, total: 18 },
-              { name: '卤蛋', spec: '单个', price: 3, quantity: 1, total: 3 },
-              { name: '酸奶', spec: '原味', price: 8, quantity: 1, total: 8 },
-            ],
-            amount: 32.5,
-            status: '制作中',
-            payType: '支付宝',
-            deliveryAddress: '北京大学学生公寓2号楼201',
-            estimatedDelivery: '14:45-15:00',
-            remark: '',
-          },
-        ]
-        this.pagination.total = this.orders.length
-      } catch (error) {
-        this.$message.error('加载订单失败')
-      } finally {
-        this.loading = false
-      }
-    },
-
-    // 加载订单统计
-    loadOrderStats() {
-      // 模拟统计数据
-      this.orderStats = {
-        total: 156,
-        pending: 8,
-        cooking: 12,
-        delivering: 5,
-        ready: 7,
-        completed: 124,
-        revenue: 8945.6,
-        avgRating: 4.8,
-        deliverymenCount: 5,
-      }
-    },
-
-    // 获取状态样式类型
-    getStatusType(status) {
-      const typeMap = {
-        待接单: 'warning',
-        已接单: 'primary',
-        制作中: 'primary',
-        配送中: 'info',
-        已送达: 'info',
-        用户已取货: 'success',
-        已取消: 'danger',
-        已退款: 'danger',
-        超时未取货: 'danger',
-      }
-      return typeMap[status] || 'info'
-    },
-
-    // 获取状态对应的常量值
-    getStatusConstant(status) {
-      const statusMap = {
-        待接单: 'TAKEOUT_STATUS_PENDING_ACCEPT',
-        已接单: 'TAKEOUT_STATUS_ACCEPTED',
-        制作中: 'TAKEOUT_STATUS_COOKING',
-        配送中: 'TAKEOUT_STATUS_DELIVERING',
-        已送达: 'TAKEOUT_STATUS_DELIVERED',
-        用户已取货: 'TAKEOUT_STATUS_USER_PICKED',
-        已取消: 'TAKEOUT_STATUS_CANCELLED',
-        已退款: 'TAKEOUT_STATUS_REFUNDED',
-        超时未取货: 'TAKEOUT_STATUS_TIMEOUT_NOT_PICKED',
-      }
-      return statusMap[status] || 'UNKNOWN'
-    },
-
-    // 处理筛选变化
-    handleFilterChange() {
-      this.pagination.page = 1
-      this.loadOrders()
-    },
-
-    // 处理搜索
-    handleSearch() {
-      this.pagination.page = 1
-      this.loadOrders()
-    },
-
-    // 重置筛选
-    resetFilter() {
-      this.filterForm = {
-        status: '',
-        dateRange: [],
-        orderNo: '',
-      }
-      this.loadOrders()
-    },
-
-    // 刷新订单
-    refreshOrders() {
-      this.loadOrders()
-      this.loadOrderStats()
-      this.$message.success('订单已刷新')
-    },
-
-    // 导出订单
-    exportOrders() {
-      this.$message.info('导出功能开发中...')
-    },
-
-    // 批量选择
-    handleSelectionChange(selection) {
-      this.selectedOrders = selection
-    },
-
-    // 接单
-    acceptOrder(order) {
-      this.$confirm(`确定要接单吗？订单号: ${order.orderNo}`, '提示', {
-        confirmButtonText: '确定接单',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        // 更新订单状态
-        order.status = '制作中'
-        this.$message.success('订单已接单')
-      })
-    },
-
-    // 更新订单状态
-    updateStatus(order, newStatus) {
-      order.status = newStatus
-      this.$message.success('订单状态已更新')
-      this.loadOrderStats()
-    },
-
-    // 取消订单
-    cancelOrder(order) {
-      this.$confirm(`确定要取消订单吗？订单号: ${order.orderNo}`, '提示', {
-        confirmButtonText: '确定取消',
-        cancelButtonText: '不取消',
-        type: 'warning',
-      }).then(() => {
-        order.status = '已取消'
-        this.$message.success('订单已取消')
-        this.loadOrderStats()
-      })
-    },
-
-    // 查看订单详情
-    viewOrderDetail(order) {
-      // 为订单添加状态流信息
-      order.statusFlow = this.generateStatusFlow(order)
-      this.currentOrder = order
-      this.detailDialogVisible = true
-    },
-
-    // 生成订单状态流
-    generateStatusFlow(order) {
-      const statusMap = {
-        待接单: { title: '待接单', icon: 'el-icon-time', desc: '等待商家接单' },
-        已接单: { title: '已接单', icon: 'el-icon-check', desc: '商家已接单' },
-        制作中: { title: '制作中', icon: 'el-icon-food', desc: '正在制作食物' },
-        配送中: { title: '配送中', icon: 'el-icon-truck', desc: '配送员取货中' },
-        已送达: { title: '已送达', icon: 'el-icon-location-outline', desc: '商品已送达' },
-        用户已取货: { title: '用户已取货', icon: 'el-icon-success', desc: '用户已确认收货' },
-        已取消: { title: '已取消', icon: 'el-icon-close', desc: '订单已取消' },
-      }
-
-      const flow = []
-      const statusSequence = this.getStatusSequence(order.status)
-
-      statusSequence.forEach((status, index) => {
-        const statusInfo = statusMap[status]
-        if (statusInfo) {
-          flow.push({
-            title: statusInfo.title,
-            icon: statusInfo.icon,
-            description: statusInfo.desc,
-            time: this.getStatusTime(order, status, index),
-            completed: index < statusSequence.indexOf(order.status),
-            current: status === order.status,
-          })
-        }
-      })
-
-      return flow
-    },
-
-    // 获取状态序列
-    getStatusSequence(currentStatus) {
-      const sequences = {
-        待接单: ['待接单'],
-        已接单: ['待接单', '已接单'],
-        制作中: ['待接单', '已接单', '制作中'],
-        配送中: ['待接单', '已接单', '制作中', '配送中'],
-        已送达: ['待接单', '已接单', '制作中', '配送中', '已送达'],
-        用户已取货: ['待接单', '已接单', '制作中', '配送中', '已送达', '用户已取货'],
-        已取消: ['待接单', '已取消'],
-      }
-      return sequences[currentStatus] || ['待接单']
-    },
-
-    // 获取状态时间
-    getStatusTime(order, status, index) {
-      const createTime = new Date(order.createTime)
-      const timeMap = {
-        0: order.createTime,
-        1: this.addMinutes(createTime, 2).toLocaleString(),
-        2: this.addMinutes(createTime, 25).toLocaleString(),
-        3: this.addMinutes(createTime, 35).toLocaleString(),
-        4: this.addMinutes(createTime, 45).toLocaleString(),
-        5: this.addMinutes(createTime, 50).toLocaleString(),
-        6: this.addMinutes(createTime, 10).toLocaleString(),
-      }
-      return timeMap[index] || ''
-    },
-
-    // 添加分钟
-    addMinutes(date, minutes) {
-      return new Date(date.getTime() + minutes * 60000)
-    },
-
-    // 快速接单
-    quickAcceptOrder(order) {
-      this.$confirm(`确认快速接单？订单号: ${order.orderNo}`, '提示', {
-        confirmButtonText: '确认接单',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        order.status = '已接单'
-        order.statusFlow = this.generateStatusFlow(order)
-        this.$message.success('订单已接单')
-        this.loadOrderStats()
-      })
-    },
-
-    // 快速完成制作
-    quickCompleteCooking(order) {
-      this.$confirm(`确认完成制作？订单号: ${order.orderNo}`, '提示', {
-        confirmButtonText: '确认完成',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        order.status = '配送中'
-        order.statusFlow = this.generateStatusFlow(order)
-        this.$message.success('制作已完成，订单进入配送')
-        this.loadOrderStats()
-      })
-    },
-
-    // 快速分配配送
-    quickAssignDelivery(order) {
-      this.$prompt('请输入配送员姓名', '分配配送', {
-        confirmButtonText: '确认分配',
-        cancelButtonText: '取消',
-        inputPattern: /.+/,
-        inputErrorMessage: '配送员姓名不能为空',
-      }).then(({ value }) => {
-        order.status = '配送中'
-        order.deliveryPerson = value
-        order.statusFlow = this.generateStatusFlow(order)
-        this.$message.success(`已分配配送员: ${value}`)
-        this.loadOrderStats()
-      })
-    },
-
-    // 分页处理
-    handleSizeChange(size) {
-      this.pagination.size = size
-      this.loadOrders()
-    },
-
-    handleCurrentChange(page) {
-      this.pagination.page = page
-      this.loadOrders()
-    },
-  },
+interface OrderItem {
+  name: string
+  spec: string
+  price: number
+  quantity: number
+  total: number
 }
+
+interface Order {
+  id: number
+  orderNo: string
+  createTime: string
+  customerName: string
+  customerPhone: string
+  items: OrderItem[]
+  amount: number
+  status: string
+  payType: string
+  deliveryAddress: string
+  estimatedDelivery: string
+  remark: string
+  subtotal?: number
+  deliveryFee?: number
+  discount?: number
+  statusFlow?: StatusFlowStep[]
+}
+
+interface OrderStats {
+  total: number
+  pending: number
+  cooking: number
+  delivering: number
+  ready: number
+  completed: number
+  revenue: number
+  avgRating: number
+  deliverymenCount: number
+}
+
+interface FilterForm {
+  status: string
+  dateRange: string[]
+  orderNo: string
+}
+
+interface Pagination {
+  page: number
+  size: number
+  total: number
+}
+
+interface StatusFlowStep {
+  title: string
+  icon: string
+  description: string
+  time: string
+  completed: boolean
+  current: boolean
+}
+
+// 状态
+const loading = ref(false)
+const orders = ref<Order[]>([])
+const orderStats = reactive<OrderStats>({
+  total: 0,
+  pending: 0,
+  cooking: 0,
+  delivering: 0,
+  ready: 0,
+  completed: 0,
+  revenue: 0,
+  avgRating: 4.8,
+  deliverymenCount: 5,
+})
+const filterForm = reactive<FilterForm>({
+  status: '',
+  dateRange: [],
+  orderNo: '',
+})
+const pagination = reactive<Pagination>({
+  page: 1,
+  size: 20,
+  total: 0,
+})
+const selectedOrders = ref<Order[]>([])
+const detailDialogVisible = ref(false)
+const currentOrder = ref<Order | null>(null)
+
+// 计算完成率
+const completionRate = computed(() => {
+  if (orderStats.total === 0) return 0
+  return Math.round((orderStats.completed / orderStats.total) * 100)
+})
+
+// 加载订单列表
+const loadOrders = async () => {
+  loading.value = true
+  try {
+    orders.value = [
+      {
+        id: 1,
+        orderNo: 'TK20241121143001',
+        createTime: '2024-11-21 14:30:15',
+        customerName: '张三',
+        customerPhone: '138****8888',
+        items: [
+          { name: '兰州拉面', spec: '大碗', price: 15, quantity: 2, total: 30 },
+          { name: '小菜', spec: '凉拌', price: 5, quantity: 1, total: 5 },
+        ],
+        amount: 45.8,
+        status: '待接单',
+        payType: '微信支付',
+        deliveryAddress: '清华大学学生公寓1号楼101',
+        estimatedDelivery: '14:50-15:05',
+        remark: '不要香菜，多放醋',
+      },
+      {
+        id: 2,
+        orderNo: 'TK20241121142502',
+        createTime: '2024-11-21 14:25:30',
+        customerName: '李四',
+        customerPhone: '139****9999',
+        items: [
+          { name: '牛肉面', spec: '中碗', price: 18, quantity: 1, total: 18 },
+          { name: '卤蛋', spec: '单个', price: 3, quantity: 1, total: 3 },
+          { name: '酸奶', spec: '原味', price: 8, quantity: 1, total: 8 },
+        ],
+        amount: 32.5,
+        status: '制作中',
+        payType: '支付宝',
+        deliveryAddress: '北京大学学生公寓2号楼201',
+        estimatedDelivery: '14:45-15:00',
+        remark: '',
+      },
+    ]
+    pagination.total = orders.value.length
+  } catch (error) {
+    ElMessage.error('加载订单失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 加载订单统计
+const loadOrderStats = () => {
+  orderStats.total = 156
+  orderStats.pending = 8
+  orderStats.cooking = 12
+  orderStats.delivering = 5
+  orderStats.ready = 7
+  orderStats.completed = 124
+  orderStats.revenue = 8945.6
+  orderStats.avgRating = 4.8
+  orderStats.deliverymenCount = 5
+}
+
+// 获取状态样式类型
+const getStatusType = (status: string) => {
+  const typeMap: Record<string, string> = {
+    待接单: 'warning',
+    已接单: 'primary',
+    制作中: 'primary',
+    配送中: 'info',
+    已送达: 'info',
+    用户已取货: 'success',
+    已取消: 'danger',
+    已退款: 'danger',
+    超时未取货: 'danger',
+  }
+  return typeMap[status] || 'info'
+}
+
+// 获取状态对应的常量值
+const getStatusConstant = (status: string) => {
+  const statusMap: Record<string, string> = {
+    待接单: 'TAKEOUT_STATUS_PENDING_ACCEPT',
+    已接单: 'TAKEOUT_STATUS_ACCEPTED',
+    制作中: 'TAKEOUT_STATUS_COOKING',
+    配送中: 'TAKEOUT_STATUS_DELIVERING',
+    已送达: 'TAKEOUT_STATUS_DELIVERED',
+    用户已取货: 'TAKEOUT_STATUS_USER_PICKED',
+    已取消: 'TAKEOUT_STATUS_CANCELLED',
+    已退款: 'TAKEOUT_STATUS_REFUNDED',
+    超时未取货: 'TAKEOUT_STATUS_TIMEOUT_NOT_PICKED',
+  }
+  return statusMap[status] || 'UNKNOWN'
+}
+
+// 处理筛选变化
+const handleFilterChange = () => {
+  pagination.page = 1
+  loadOrders()
+}
+
+// 处理搜索
+const handleSearch = () => {
+  pagination.page = 1
+  loadOrders()
+}
+
+// 重置筛选
+const resetFilter = () => {
+  filterForm.status = ''
+  filterForm.dateRange = []
+  filterForm.orderNo = ''
+  loadOrders()
+}
+
+// 刷新订单
+const refreshOrders = () => {
+  loadOrders()
+  loadOrderStats()
+  ElMessage.success('订单已刷新')
+}
+
+// 导出订单
+const exportOrders = () => {
+  ElMessage.info('导出功能开发中...')
+}
+
+// 批量选择
+const handleSelectionChange = (selection: Order[]) => {
+  selectedOrders.value = selection
+}
+
+// 接单
+const acceptOrder = (order: Order) => {
+  ElMessageBox.confirm(`确定要接单吗？订单号: ${order.orderNo}`, '提示', {
+    confirmButtonText: '确定接单',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    order.status = '制作中'
+    ElMessage.success('订单已接单')
+  })
+}
+
+// 更新订单状态
+const updateStatus = (order: Order, newStatus: string) => {
+  order.status = newStatus
+  ElMessage.success('订单状态已更新')
+  loadOrderStats()
+}
+
+// 取消订单
+const cancelOrder = (order: Order) => {
+  ElMessageBox.confirm(`确定要取消订单吗？订单号: ${order.orderNo}`, '提示', {
+    confirmButtonText: '确定取消',
+    cancelButtonText: '不取消',
+    type: 'warning',
+  }).then(() => {
+    order.status = '已取消'
+    ElMessage.success('订单已取消')
+    loadOrderStats()
+  })
+}
+
+// 查看订单详情
+const viewOrderDetail = (order: Order) => {
+  order.statusFlow = generateStatusFlow(order)
+  currentOrder.value = order
+  detailDialogVisible.value = true
+}
+
+// 生成订单状态流
+const generateStatusFlow = (order: Order): StatusFlowStep[] => {
+  const statusMap: Record<string, { title: string, icon: string, desc: string }> = {
+    待接单: { title: '待接单', icon: 'el-icon-time', desc: '等待商家接单' },
+    已接单: { title: '已接单', icon: 'el-icon-check', desc: '商家已接单' },
+    制作中: { title: '制作中', icon: 'el-icon-food', desc: '正在制作食物' },
+    配送中: { title: '配送中', icon: 'el-icon-truck', desc: '配送员取货中' },
+    已送达: { title: '已送达', icon: 'el-icon-location-outline', desc: '商品已送达' },
+    用户已取货: { title: '用户已取货', icon: 'el-icon-success', desc: '用户已确认收货' },
+    已取消: { title: '已取消', icon: 'el-icon-close', desc: '订单已取消' },
+  }
+
+  const flow: StatusFlowStep[] = []
+  const statusSequence = getStatusSequence(order.status)
+
+  statusSequence.forEach((status, index) => {
+    const statusInfo = statusMap[status]
+    if (statusInfo) {
+      flow.push({
+        title: statusInfo.title,
+        icon: statusInfo.icon,
+        description: statusInfo.desc,
+        time: getStatusTime(order, status, index),
+        completed: index < statusSequence.indexOf(order.status),
+        current: status === order.status,
+      })
+    }
+  })
+
+  return flow
+}
+
+// 获取状态序列
+const getStatusSequence = (currentStatus: string): string[] => {
+  const sequences: Record<string, string[]> = {
+    待接单: ['待接单'],
+    已接单: ['待接单', '已接单'],
+    制作中: ['待接单', '已接单', '制作中'],
+    配送中: ['待接单', '已接单', '制作中', '配送中'],
+    已送达: ['待接单', '已接单', '制作中', '配送中', '已送达'],
+    用户已取货: ['待接单', '已接单', '制作中', '配送中', '已送达', '用户已取货'],
+    已取消: ['待接单', '已取消'],
+  }
+  return sequences[currentStatus] || ['待接单']
+}
+
+// 获取状态时间
+const getStatusTime = (order: Order, status: string, index: number): string => {
+  const createTime = new Date(order.createTime)
+  const timeMap: Record<number, string> = {
+    0: order.createTime,
+    1: addMinutes(createTime, 2).toLocaleString(),
+    2: addMinutes(createTime, 25).toLocaleString(),
+    3: addMinutes(createTime, 35).toLocaleString(),
+    4: addMinutes(createTime, 45).toLocaleString(),
+    5: addMinutes(createTime, 50).toLocaleString(),
+    6: addMinutes(createTime, 10).toLocaleString(),
+  }
+  return timeMap[index] || ''
+}
+
+// 添加分钟
+const addMinutes = (date: Date, minutes: number): Date => {
+  return new Date(date.getTime() + minutes * 60000)
+}
+
+// 快速接单
+const quickAcceptOrder = (order: Order) => {
+  ElMessageBox.confirm(`确认快速接单？订单号: ${order.orderNo}`, '提示', {
+    confirmButtonText: '确认接单',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    order.status = '已接单'
+    order.statusFlow = generateStatusFlow(order)
+    ElMessage.success('订单已接单')
+    loadOrderStats()
+  })
+}
+
+// 快速完成制作
+const quickCompleteCooking = (order: Order) => {
+  ElMessageBox.confirm(`确认完成制作？订单号: ${order.orderNo}`, '提示', {
+    confirmButtonText: '确认完成',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    order.status = '配送中'
+    order.statusFlow = generateStatusFlow(order)
+    ElMessage.success('制作已完成，订单进入配送')
+    loadOrderStats()
+  })
+}
+
+// 快速分配配送
+const quickAssignDelivery = (order: Order) => {
+  ElMessageBox.prompt('请输入配送员姓名', '分配配送', {
+    confirmButtonText: '确认分配',
+    cancelButtonText: '取消',
+    inputPattern: /.+/,
+    inputErrorMessage: '配送员姓名不能为空',
+  }).then(({ value }) => {
+    order.status = '配送中'
+    order.deliveryPerson = value
+    order.statusFlow = generateStatusFlow(order)
+    ElMessage.success(`已分配配送员: ${value}`)
+    loadOrderStats()
+  })
+}
+
+// 分页处理
+const handleSizeChange = (size: number) => {
+  pagination.size = size
+  loadOrders()
+}
+
+const handleCurrentChange = (page: number) => {
+  pagination.page = page
+  loadOrders()
+}
+
+// 组件挂载
+onMounted(() => {
+  loadOrders()
+  loadOrderStats()
+})
 </script>
 
 <style scoped>
@@ -1053,7 +1099,7 @@ export default {
   color: #606266;
   border-left: 4px solid #409eff;
 }
-}
+
 .stat-card.revenue .stat-number {
   color: #ff4757;
 }

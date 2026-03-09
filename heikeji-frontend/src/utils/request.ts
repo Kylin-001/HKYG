@@ -8,6 +8,8 @@ import axios, {
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import logger from './logger'
+import { rateLimiters, RATE_LIMIT_CONFIGS } from './rate-limiter'
+import { defaultEncryption, sensitiveDataEncryption } from './encryption'
 
 // 扩展AxiosRequestConfig类型
 declare module 'axios' {
@@ -17,6 +19,11 @@ declare module 'axios' {
     retry?: number
     retryDelay?: number
     _retryCount?: number
+    rateLimit?: boolean
+    rateLimitKey?: string
+    encrypt?: boolean
+    encryptFields?: string[]
+    decryptResponse?: boolean
   }
 }
 
@@ -26,7 +33,11 @@ const DEFAULT_RETRY_DELAY = 1000
 
 // API缓存配置
 const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5分钟
-const API_CACHE = new Map<string, { data: any; timestamp: number }>()
+interface CacheItem {
+  data: unknown
+  timestamp: number
+}
+const API_CACHE = new Map<string, CacheItem>()
 
 // 生成缓存键
 const generateCacheKey = (config: InternalAxiosRequestConfig): string => {
@@ -35,7 +46,7 @@ const generateCacheKey = (config: InternalAxiosRequestConfig): string => {
 }
 
 // 缓存请求数据
-const cacheRequest = (config: InternalAxiosRequestConfig, data: any): void => {
+const cacheRequest = (config: InternalAxiosRequestConfig, data: unknown): void => {
   const cacheKey = generateCacheKey(config)
   API_CACHE.set(cacheKey, {
     data,
@@ -44,7 +55,7 @@ const cacheRequest = (config: InternalAxiosRequestConfig, data: any): void => {
 }
 
 // 获取缓存数据
-const getCachedData = (config: InternalAxiosRequestConfig): any | null => {
+const getCachedData = (config: InternalAxiosRequestConfig): unknown | null => {
   // 只缓存GET请求
   if (config.method?.toLowerCase() !== 'get') {
     return null
@@ -116,11 +127,67 @@ const service: AxiosInstance = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 速率限制检查
+    if (config.rateLimit !== false && import.meta.env.VITE_APP_ENABLE_RATE_LIMITING !== 'false') {
+      const rateLimitKey = config.rateLimitKey || config.url || 'default'
+      let rateLimiter = rateLimiters.general
+      
+      // 根据URL路径选择合适的速率限制器
+      if (config.url?.includes('/login')) {
+        rateLimiter = rateLimiters.login
+      } else if (config.url?.includes('/register')) {
+        rateLimiter = rateLimiters.register
+      } else if (config.url?.includes('/upload')) {
+        rateLimiter = rateLimiters.upload
+      } else if (config.url?.includes('/search')) {
+        rateLimiter = rateLimiters.search
+      } else if (config.url?.includes('/user') || config.url?.includes('/order') || config.url?.includes('/payment')) {
+        rateLimiter = rateLimiters.sensitive
+      }
+      
+      // 检查是否超过速率限制
+      if (!rateLimiter.isAllowed(rateLimitKey)) {
+        const resetTime = rateLimiter.getResetTime(rateLimitKey)
+        const waitTime = Math.ceil((resetTime - Date.now()) / 1000)
+        
+        const errorMessage = `请求过于频繁，请等待${waitTime}秒后再试`
+        ElMessage.error(errorMessage)
+        
+        return Promise.reject(new Error(errorMessage))
+      }
+    }
+    
     // 添加token
     const userStore = useUserStore()
     if (userStore.token) {
       config.headers = config.headers || {}
       config.headers['Authorization'] = `Bearer ${userStore.token}`
+    }
+
+    // 数据加密
+    if (config.encrypt && config.data && import.meta.env.VITE_APP_ENABLE_REQUEST_ENCRYPTION !== 'false') {
+      try {
+        // 如果指定了加密字段，只加密这些字段
+        if (config.encryptFields && config.encryptFields.length > 0) {
+          const encryptedData = { ...config.data }
+          config.encryptFields.forEach(field => {
+            if (encryptedData[field] && typeof encryptedData[field] === 'string') {
+              encryptedData[field] = sensitiveDataEncryption.encrypt(encryptedData[field])
+            }
+          })
+          config.data = encryptedData
+        } else {
+          // 加密整个数据对象
+          config.data = {
+            encrypted: true,
+            data: defaultEncryption.encryptObject(config.data)
+          }
+        }
+      } catch (error) {
+        logger.error('数据加密失败:', error)
+        ElMessage.error('数据加密失败')
+        return Promise.reject(error)
+      }
     }
 
     return config
@@ -132,7 +199,7 @@ service.interceptors.request.use(
 )
 
 // API响应数据结构
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   code: number
   message: string
   data: T
@@ -143,6 +210,42 @@ interface ApiResponse<T = any> {
 service.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const res = response.data
+
+    // 标记请求成功（用于速率限制）
+    const config = response.config as InternalAxiosRequestConfig
+    if (config.rateLimit !== false && import.meta.env.VITE_APP_ENABLE_RATE_LIMITING !== 'false') {
+      const rateLimitKey = config.rateLimitKey || config.url || 'default'
+      let rateLimiter = rateLimiters.general
+      
+      // 根据URL路径选择合适的速率限制器
+      if (config.url?.includes('/login')) {
+        rateLimiter = rateLimiters.login
+      } else if (config.url?.includes('/register')) {
+        rateLimiter = rateLimiters.register
+      } else if (config.url?.includes('/upload')) {
+        rateLimiter = rateLimiters.upload
+      } else if (config.url?.includes('/search')) {
+        rateLimiter = rateLimiters.search
+      } else if (config.url?.includes('/user') || config.url?.includes('/order') || config.url?.includes('/payment')) {
+        rateLimiter = rateLimiters.sensitive
+      }
+      
+      rateLimiter.markSuccess(rateLimitKey)
+    }
+
+    // 数据解密
+    if (config.decryptResponse && res.data && import.meta.env.VITE_APP_ENABLE_RESPONSE_DECRYPTION !== 'false') {
+      try {
+        // 如果响应数据是加密的
+        if (res.data && typeof res.data === 'object' && 'encrypted' in res.data) {
+          res.data = defaultEncryption.decryptObject(res.data.data)
+        }
+      } catch (error) {
+        logger.error('数据解密失败:', error)
+        ElMessage.error('数据解密失败')
+        return Promise.reject(error)
+      }
+    }
 
     // 状态码不是20000则判断为错误
     if (res.code !== 20000) {
@@ -172,7 +275,27 @@ service.interceptors.response.use(
   async (error: AxiosError) => {
     logger.error('响应错误:', error)
 
+    // 标记请求失败（用于速率限制）
     const config = error.config as InternalAxiosRequestConfig
+    if (config && config.rateLimit !== false) {
+      const rateLimitKey = config.rateLimitKey || config.url || 'default'
+      let rateLimiter = rateLimiters.general
+      
+      // 根据URL路径选择合适的速率限制器
+      if (config.url?.includes('/login')) {
+        rateLimiter = rateLimiters.login
+      } else if (config.url?.includes('/register')) {
+        rateLimiter = rateLimiters.register
+      } else if (config.url?.includes('/upload')) {
+        rateLimiter = rateLimiters.upload
+      } else if (config.url?.includes('/search')) {
+        rateLimiter = rateLimiters.search
+      } else if (config.url?.includes('/user') || config.url?.includes('/order') || config.url?.includes('/payment')) {
+        rateLimiter = rateLimiters.sensitive
+      }
+      
+      rateLimiter.markFailure(rateLimitKey)
+    }
 
     // 如果没有配置，直接返回错误
     if (!config) {
@@ -223,6 +346,9 @@ service.interceptors.response.use(
         case 404:
           errorMessage = '请求资源不存在'
           break
+        case 429:
+          errorMessage = '请求过于频繁，请稍后再试'
+          break
         case 500:
           errorMessage = '服务器内部错误'
           break
@@ -248,9 +374,9 @@ export default {
    * @param params 请求参数
    * @param config 额外配置
    */
-  async get<T = any>(
+  async get<T = unknown>(
     url: string,
-    params?: any,
+    params?: Record<string, unknown>,
     config?: InternalAxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     const response = await service.get<ApiResponse<T>>(url, { params, ...config })
@@ -267,7 +393,7 @@ export default {
    * @param data 请求数据
    * @param config 额外配置
    */
-  async post<T = any>(url: string, data?: any, config?: InternalAxiosRequestConfig): Promise<ApiResponse<T>> {
+  async post<T = unknown>(url: string, data?: Record<string, unknown>, config?: InternalAxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await service.post<ApiResponse<T>>(url, data, config)
     return response.data
   },
@@ -278,7 +404,7 @@ export default {
    * @param data 请求数据
    * @param config 额外配置
    */
-  async put<T = any>(url: string, data?: any, config?: InternalAxiosRequestConfig): Promise<ApiResponse<T>> {
+  async put<T = unknown>(url: string, data?: Record<string, unknown>, config?: InternalAxiosRequestConfig): Promise<ApiResponse<T>> {
     const response = await service.put<ApiResponse<T>>(url, data, config)
     return response.data
   },
@@ -289,9 +415,9 @@ export default {
    * @param params 请求参数
    * @param config 额外配置
    */
-  async delete<T = any>(
+  async delete<T = unknown>(
     url: string,
-    params?: any,
+    params?: Record<string, unknown>,
     config?: InternalAxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     const response = await service.delete<ApiResponse<T>>(url, { params, ...config })
@@ -304,7 +430,7 @@ export default {
    * @param formData FormData对象
    * @param onUploadProgress 上传进度回调
    */
-  async upload<T = any>(
+  async upload<T = unknown>(
     url: string,
     formData: FormData,
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
@@ -324,7 +450,7 @@ export default {
    * @param params 请求参数
    * @param fileName 文件名
    */
-  download(url: string, params?: any, fileName?: string): Promise<void> {
+  download(url: string, params?: Record<string, unknown>, fileName?: string): Promise<void> {
     return service
       .get(url, {
         params,

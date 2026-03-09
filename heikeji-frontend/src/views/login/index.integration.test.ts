@@ -42,7 +42,7 @@ describe('登录流程集成测试', () => {
     
     login.mockResolvedValue({ 
       data: { 
-        token: 'test-token-123',
+        token: testUserData.token,
         userInfo: {
           userId: 1,
           username: 'testuser',
@@ -71,7 +71,7 @@ describe('登录流程集成测试', () => {
     
     expect(login).toHaveBeenCalledWith({
       username: 'testuser',
-      password: 'password123'
+      password: testUserData.password
     })
     expect(setToken).toHaveBeenCalledWith('test-token-123')
     expect(router.currentRoute.value.path).toBe('/dashboard')
@@ -110,7 +110,7 @@ describe('登录流程集成测试', () => {
     
     login.mockResolvedValue({ 
       data: { 
-        token: 'test-token-123',
+        token: testUserData.token,
         userInfo: {
           userId: 1,
           username: 'testuser',
@@ -158,7 +158,7 @@ describe('登录流程集成测试', () => {
     
     login.mockResolvedValue({ 
       data: { 
-        token: 'test-token-123',
+        token: testUserData.token,
         userInfo: {
           userId: 1,
           username: 'testuser'
@@ -203,7 +203,7 @@ describe('登录流程集成测试', () => {
     
     login.mockResolvedValue({ 
       data: { 
-        token: 'test-token-123',
+        token: testUserData.token,
         userInfo: {
           userId: 1,
           username: 'testuser'
@@ -236,7 +236,7 @@ describe('登录流程集成测试', () => {
     
     expect(login).toHaveBeenCalledWith({
       username: 'testuser',
-      password: 'password123',
+      password: testUserData.password,
       captchaId: '123456',
       captchaCode: '123456'
     })
@@ -248,7 +248,7 @@ describe('登录流程集成测试', () => {
     
     login.mockResolvedValue({ 
       data: { 
-        token: 'test-token-123',
+        token: testUserData.token,
         userInfo: {
           userId: 1,
           username: 'testuser'

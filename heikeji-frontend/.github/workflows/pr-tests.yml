@@ -1,0 +1,157 @@
+name: Pull Request Tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-check:
+    name: PR检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 检查代码格式
+        run: npm run format:check
+
+      - name: 运行ESLint检查
+        run: npm run lint
+
+      - name: 运行类型检查
+        run: npm run type-check
+
+      - name: 运行单元测试
+        run: npm run test:unit
+
+      - name: 生成测试覆盖率报告
+        run: npm run test:coverage
+
+      - name: 检查测试覆盖率是否达标
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "测试覆盖率 $COVERAGE% 低于要求的70%"
+            exit 1
+          else
+            echo "测试覆盖率 $COVERAGE% 达到要求"
+          fi
+
+      - name: 运行关键E2E测试
+        run: |
+          npx playwright install --with-deps
+          npm run test:e2e:chrome
+
+      - name: 上传测试覆盖率报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: 上传E2E测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: 生成PR报告
+        run: |
+          # 获取覆盖率数据
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          
+          # 获取测试结果
+          UNIT_TESTS_PASSED=$?
+          E2E_TESTS_PASSED=$?
+          
+          # 生成报告
+          cat > pr-report.md << EOF
+          ## 📊 PR测试报告
+          
+          ### 🧪 测试结果
+          - **单元测试**: $([ $UNIT_TESTS_PASSED -eq 0 ] && echo "✅ 通过" || echo "❌ 失败")
+          - **E2E测试**: $([ $E2E_TESTS_PASSED -eq 0 ] && echo "✅ 通过" || echo "❌ 失败")
+          - **代码检查**: ✅ 通过
+          - **类型检查**: ✅ 通过
+          
+          ### 📈 测试覆盖率
+          - **当前覆盖率**: ${COVERAGE}%
+          - **目标覆盖率**: 70%
+          - **状态**: $(( $(echo "$COVERAGE >= 70" | bc -l) )) && echo "✅ 达标" || echo "❌ 不达标")
+          
+          ### 📝 详细报告
+          - [单元测试报告](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [E2E测试报告](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          EOF
+          
+          # 输出报告内容
+          cat pr-report.md
+
+      - name: 评论PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // 读取报告内容
+            const report = fs.readFileSync('pr-report.md', 'utf8');
+            
+            // 获取现有的PR评论
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            // 查找由机器人创建的评论
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('📊 PR测试报告')
+            );
+            
+            // 更新或创建评论
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: report,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report,
+              });
+            }
+
+      - name: 检查PR状态
+        run: |
+          # 获取覆盖率数据
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          
+          # 检查是否所有测试都通过
+          if (( $(echo "$COVERAGE >= 70" | bc -l) )); then
+            echo "✅ 所有检查通过，PR可以合并"
+            exit 0
+          else
+            echo "❌ 测试覆盖率不达标，PR不能合并"
+            exit 1
+          fi

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { testUserData } from '@/config/test';
 import { formatDate, debounce, throttle } from '@/utils'
 
 describe('Utils', () => {

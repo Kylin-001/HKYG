@@ -20,7 +20,7 @@ describe('User Store', () => {
 
   it('should set token correctly', () => {
     const store = useUserStore()
-    const testToken = 'test-token-123'
+    const testToken = testUserData.token
     
     store.setToken(testToken)
     expect(store.token).toBe(testToken)

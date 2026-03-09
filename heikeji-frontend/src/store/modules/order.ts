@@ -79,11 +79,11 @@ export const useOrderStore = defineStore('order', () => {
       total.value = result.total
 
       return result
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('获取订单列表失败:', err)
-      error.value = err.message || '获取订单列表失败'
+      const errorMessage = err instanceof Error ? err.message : '获取订单列表失败'
+      error.value = errorMessage
 
-      // 如果API调用失败，返回模拟数据作为备份
       const mockData = {
         list: [
           {
@@ -205,8 +205,9 @@ export const useOrderStore = defineStore('order', () => {
       detail.value = response as Order
 
       return response
-    } catch (err: any) {
-      error.value = err.message || '获取订单详情失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '获取订单详情失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
@@ -221,15 +222,15 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await shipOrder(orderId, logisticsInfo)
 
-      // 更新订单列表中的状态
       const index = list.value.findIndex(order => order.orderId === orderId)
       if (index !== -1) {
         list.value[index] = { ...list.value[index], orderStatus: 3 }
       }
 
       return response
-    } catch (err: any) {
-      error.value = err.message || '发货失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '发货失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
@@ -244,22 +245,21 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await cancelOrder(orderId)
 
-      // 更新订单列表中的状态
       const index = list.value.findIndex(order => order.orderId === orderId)
       if (index !== -1) {
         list.value[index] = { ...list.value[index], orderStatus: 5 }
       }
 
       return response
-    } catch (err: any) {
-      error.value = err.message || '取消订单失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '取消订单失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  // 确认收货
   async function handleConfirmReceive(orderId: string) {
     try {
       loading.value = true
@@ -267,22 +267,21 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await confirmReceive(orderId)
 
-      // 更新订单列表中的状态
       const index = list.value.findIndex(order => order.orderId === orderId)
       if (index !== -1) {
         list.value[index] = { ...list.value[index], orderStatus: 4 }
       }
 
       return response
-    } catch (err: any) {
-      error.value = err.message || '确认收货失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '确认收货失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  // 提醒付款
   async function handleRemindPay(orderId: string) {
     try {
       loading.value = true
@@ -290,15 +289,15 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await remindPay(orderId)
       return response
-    } catch (err: any) {
-      error.value = err.message || '提醒付款失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '提醒付款失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  // 获取物流详情
   async function fetchLogisticsDetail(orderId: string) {
     try {
       loading.value = true
@@ -306,15 +305,15 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await getLogisticsDetail(orderId)
       return response
-    } catch (err: any) {
-      error.value = err.message || '获取物流详情失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '获取物流详情失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  // 同意退款
   async function handleAgreeRefund(orderId: string, reason: string) {
     try {
       loading.value = true
@@ -322,22 +321,21 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await agreeRefund(orderId, reason)
 
-      // 更新订单列表中的状态
       const index = list.value.findIndex(order => order.orderId === orderId)
       if (index !== -1) {
         list.value[index] = { ...list.value[index], orderStatus: 7 }
       }
 
       return response
-    } catch (err: any) {
-      error.value = err.message || '同意退款失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '同意退款失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  // 拒绝退款
   async function handleRejectRefund(orderId: string, reason: string) {
     try {
       loading.value = true
@@ -345,15 +343,15 @@ export const useOrderStore = defineStore('order', () => {
 
       const response = await rejectRefund(orderId, reason)
 
-      // 更新订单列表中的状态
       const index = list.value.findIndex(order => order.orderId === orderId)
       if (index !== -1) {
         list.value[index] = { ...list.value[index], orderStatus: 4 }
       }
 
       return response
-    } catch (err: any) {
-      error.value = err.message || '拒绝退款失败'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '拒绝退款失败'
+      error.value = errorMessage
       throw err
     } finally {
       loading.value = false

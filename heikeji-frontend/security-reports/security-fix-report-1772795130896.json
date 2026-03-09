@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-03-06T11:05:30.895Z",
+  "summary": {
+    "totalFiles": 31,
+    "filesModified": 2,
+    "totalFixed": 3,
+    "totalErrors": 0
+  },
+  "fileResults": [
+    {
+      "filePath": "../..",
+      "fixed": [
+        {
+          "rule": "替换测试错误密码为配置变量"
+        },
+        {
+          "rule": "替换硬编码令牌 'new_test_token_456' 为测试配置变量"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "filePath": "../..",
+      "fixed": [
+        {
+          "rule": "替换硬编码令牌 'incomplete_test_token' 为测试配置变量"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

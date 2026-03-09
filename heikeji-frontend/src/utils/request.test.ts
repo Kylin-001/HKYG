@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { testUserData } from '@/config/test';
 import axios from 'axios'
 import request from '@/utils/request'
 

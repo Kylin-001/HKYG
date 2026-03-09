@@ -4,7 +4,13 @@
 
 declare module 'axios' {
   interface AxiosRequestConfig {
-    monitorPerformance?: boolean;
-    interceptorConfig?: any;
+    monitorPerformance?: boolean
+    interceptorConfig?: {
+      showLoading?: boolean
+      showError?: boolean
+      showErrorDetail?: boolean
+      showSuccess?: boolean
+      successMessage?: string
+    }
   }
 }

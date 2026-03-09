@@ -70,7 +70,7 @@ describe('Login Page', () => {
     const { login } = await import('@/api/login')
     const { setToken } = await import('@/utils/auth')
     
-    login.mockResolvedValue({ data: { token: 'test-token-123' } })
+    login.mockResolvedValue({ data: { token: testUserData.token } })
     
     const wrapper = mount(Login, {
       global: {
@@ -158,7 +158,7 @@ describe('Login Page', () => {
     const mockPush = vi.fn()
     
     useRouter.mockReturnValue({ push: mockPush })
-    login.mockResolvedValue({ data: { token: 'test-token' } })
+    login.mockResolvedValue({ data: { token: testConfig.user.incompleteToken || 'incomplete_test_token' } })
     
     const wrapper = mount(Login, {
       global: {

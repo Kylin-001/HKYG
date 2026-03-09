@@ -7,6 +7,7 @@ import { ElMessage } from 'element-plus'
 import Vue3Lazyload from 'vue3-lazyload'
 import { registerPermissionDirective } from './directives/permission'
 import i18n from './plugins/i18n'
+import securityPlugin from './plugins/security'
 import 'nprogress/nprogress.css'
 import 'normalize.css'
 import './styles/index.scss'
@@ -22,6 +23,7 @@ const pinia = createPinia()
 app.use(router)
 app.use(pinia)
 app.use(i18n)
+app.use(securityPlugin)
 
 // 配置Element Plus
 setupElementPlus(app)

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { testUserData } from '@/config/test';
 import { setActivePinia, createPinia } from 'pinia'
 import { useCartStore } from '@/store/modules/cart'
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { testUserData } from '@/config/test'
 
 vi.mock('@/utils/request', () => ({
   default: {
@@ -21,9 +22,9 @@ describe('User API', () => {
   it('should call login API correctly', async () => {
     const mockData = {
       username: 'testuser',
-      password: 'password123'
+      password: testUserData.password
     }
-    const mockResponse = { code: 20000, data: { token: 'test-token-123' } }
+    const mockResponse = { code: 20000, data: { token: testUserData.token } }
     ;(request.post as any).mockResolvedValue(mockResponse)
     
     const result = await userApi.login(mockData)
@@ -50,7 +51,7 @@ describe('User API', () => {
   })
 
   it('should call refreshToken API correctly', async () => {
-    const mockResponse = { code: 20000, data: { token: 'new-token-456' } }
+    const mockResponse = { code: 20000, data: { token: testConfig.user.newToken || 'new_test_token_456' } }
     ;(request.post as any).mockResolvedValue(mockResponse)
     
     const result = await userApi.refreshToken()
@@ -69,7 +70,7 @@ describe('User API', () => {
   })
 
   it('should call createUser API correctly', async () => {
-    const mockData = { username: 'newuser', password: 'password123' }
+    const mockData = { username: 'newuser', password: testUserData.password }
     const mockResponse = { code: 20000, data: { userId: 2 } }
     ;(request.post as any).mockResolvedValue(mockResponse)
     
@@ -89,7 +90,7 @@ describe('User API', () => {
   })
 
   it('should handle login API error', async () => {
-    const mockData = { username: 'testuser', password: 'wrongpassword' }
+    const mockData = { username: 'testuser', password: testConfig.user.wrongPassword || 'wrong_test_password' }
     const mockError = new Error('Invalid credentials')
     ;(request.post as any).mockRejectedValue(mockError)
     

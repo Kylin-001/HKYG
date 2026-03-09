@@ -1,0 +1,125 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # 每周一凌晨3点运行
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  security-audit:
+    name: 安全审计
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 运行npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: 运行安全审计脚本
+        run: npm run security:audit
+        continue-on-error: true
+
+      - name: 上传安全审计报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: security-reports/
+          retention-days: 30
+
+      - name: 运行ESLint安全检查
+        run: npm run lint:security
+        continue-on-error: true
+
+      - name: 检查高危安全问题
+        run: |
+          # 检查是否有高危问题
+          HIGH_VULNS=$(npm audit --json | jq '.metadata.vulnerabilities.high')
+          if [ "$HIGH_VULNS" -gt 0 ]; then
+            echo "发现 $HIGH_VULNS 个高危漏洞，请及时修复！"
+            exit 1
+          else
+            echo "未发现高危漏洞"
+          fi
+
+      - name: 发送安全审计结果通知
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            安全审计完成！
+            分支: ${{ github.ref }}
+            提交: ${{ github.sha }}
+            状态: ${{ job.status }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
+
+  security-scan:
+    name: 代码安全扫描
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 运行Snyk安全扫描
+        run: |
+          npm install -g snyk
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk test --severity-threshold=high
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: 运行CodeQL分析
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: javascript
+        continue-on-error: true
+
+      - name: 运行Semgrep代码扫描
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/javascript
+        continue-on-error: true
+
+      - name: 发送代码安全扫描结果通知
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            代码安全扫描完成！
+            分支: ${{ github.ref }}
+            提交: ${{ github.sha }}
+            状态: ${{ job.status }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()

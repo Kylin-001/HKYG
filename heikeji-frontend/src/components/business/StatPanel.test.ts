@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { testUserData } from '@/config/test';
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import StatPanel from '@/components/business/StatPanel.vue'

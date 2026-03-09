@@ -3,7 +3,7 @@
 // 声明Vue模块
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
+  const component: DefineComponent<{}, {}, Record<string, unknown>>
   export default component
 }
 
@@ -55,7 +55,7 @@ declare interface ImportMeta {
 // 全局工具函数类型声明
 declare namespace App {
   // API响应数据结构
-  interface ApiResponse<T = any> {
+  interface ApiResponse<T = unknown> {
     code: number
     message: string
     data: T
@@ -63,7 +63,7 @@ declare namespace App {
   }
 
   // 分页响应数据结构
-  interface PageResponse<T = any> {
+  interface PageResponse<T = unknown> {
     records: T[]
     total: number
     size: number
@@ -95,7 +95,7 @@ declare namespace App {
   }
 
   // 分页结果
-  interface PageResult<T = any> {
+  interface PageResult<T = unknown> {
     list: T[]
     total: number
     pageNum: number
@@ -104,14 +104,14 @@ declare namespace App {
   }
 
   // 树节点
-  interface TreeNode<T = any> {
+  interface TreeNode<T = unknown> {
     id: string | number
     label?: string
     title?: string
     children?: TreeNode<T>[]
     isLeaf?: boolean
     disabled?: boolean
-    [key: string]: any
+    [key: string]: unknown
   }
 
   // 表单验证规则
@@ -122,14 +122,28 @@ declare namespace App {
       trigger?: 'blur' | 'change'
       min?: number
       max?: number
-      validator?: (rule: any, value: any, callback: Function) => void
+      validator?: (rule: unknown, value: unknown, callback: (error?: Error) => void) => void
     }>
   }
 }
 
 // 全局方法扩展
 declare interface Window {
-  $message?: any
-  $notify?: any
-  $confirm?: any
+  $message?: {
+    success: (message: string) => void
+    error: (message: string) => void
+    warning: (message: string) => void
+    info: (message: string) => void
+  }
+  $notify?: {
+    success: (options: { title: string; message: string }) => void
+    error: (options: { title: string; message: string }) => void
+    warning: (options: { title: string; message: string }) => void
+    info: (options: { title: string; message: string }) => void
+  }
+  $confirm?: (message: string, title?: string, options?: {
+    confirmButtonText?: string
+    cancelButtonText?: string
+    type?: 'success' | 'warning' | 'info' | 'error'
+  }) => Promise<void>
 }

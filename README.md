@@ -36,7 +36,6 @@
 ## ✨ 功能特性
 
 ### 🛒 核心业务功能
-
 - **商品交易**：商品浏览、搜索、购买、评价
 - **外卖服务**：商家入驻、菜品管理、订单配送、外卖柜管理
 - **二手交易**：商品发布、交易管理、消息沟通、评价系统
@@ -44,28 +43,24 @@
 - **校园服务**：校园公告、活动管理、社团管理、场地预订
 
 ### 🎯 营销系统
-
 - **优惠券系统**：满减券、折扣券、优惠券领取和使用
 - **积分系统**：积分获取、积分兑换、积分商城、积分记录
 - **会员等级**：等级权益、等级升级、等级折扣
 - **营销活动**：活动发布、活动参与、活动奖励、效果分析
 
 ### 📊 数据分析
-
 - **用户行为分析**：浏览、点击、购买行为追踪
 - **销售数据分析**：销售趋势、热门商品、营收统计
 - **推荐效果分析**：点击率、转化率、推荐效果追踪
 - **数据可视化**：ECharts图表展示、实时数据更新
 
 ### 🤖 智能推荐
-
 - **User-CF算法**：基于用户的协同过滤推荐
 - **Item-CF算法**：基于物品的协同过滤推荐
 - **混合推荐**：结合多种推荐策略
 - **实时更新**：根据用户行为动态调整推荐
 
 ### 🔒 安全系统
-
 - **JWT认证**：基于Token的用户认证
 - **RBAC权限**：基于角色的访问控制
 - **密码加密**：BCrypt密码加密存储
@@ -73,21 +68,18 @@
 - **环境检测**：开发/生产环境安全检测
 
 ### 📈 性能优化
-
 - **代码分割**：按路由分割代码，减少首屏加载时间
 - **懒加载**：组件按需加载，提升性能
 - **缓存策略**：多级缓存机制（浏览器、Redis、CDN）
 - **Gzip压缩**：资源压缩传输，减少带宽占用
 
 ### 🧪 测试体系
-
 - **单元测试**：完善的单元测试覆盖
 - **集成测试**：服务间集成测试
 - **E2E测试**：端到端自动化测试
 - **性能测试**：性能监控和优化
 
 ### 📡 系统监控
-
 - **性能监控**：实时性能指标收集
 - **错误追踪**：Sentry错误监控和报警
 - **告警机制**：自动告警检查和通知
@@ -114,29 +106,23 @@
 ### 安装步骤
 
 #### 1. 克隆项目
-
 ```bash
 git clone <repository-url>
 cd HKYG
 ```
 
 #### 2. 数据库配置
-
 ```bash
 # 创建数据库
 mysql -u root -p
 CREATE DATABASE heikeji_mall CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 # 导入表结构
-mysql -u root -p heikeji_mall < sql/schema/tables/01_user.sql
-mysql -u root -p heikeji_mall < sql/schema/tables/02_user.sql
-mysql -u root -p heikeji_mall < sql/marketing_tables.sql
+mysql -u root -p heikeji_mall < sql/root_scripts/init/full_db.sql
 ```
 
 #### 3. 后端配置
-
 修改各模块的 `application.yml` 文件，配置数据库和Redis连接：
-
 ```yaml
 spring:
   datasource:
@@ -151,33 +137,35 @@ spring:
 
 #### 4. 启动服务
 
-**Linux/Mac系统：**
-
+**方式1：使用嵌入式Nacos启动（推荐，无需Docker）**
 ```bash
-# 启动全部服务
-./start-all.sh
+# 启动所有服务（Nacos + 微服务）
+./scripts/linux/start-with-embedded-nacos.sh start
 
-# 或选择启动方式
-./start-all.sh all      # 启动全部服务
-./start-all.sh backend  # 仅启动后端
-./start-all.sh frontend # 仅启动前端
+# 停止所有服务
+./scripts/linux/start-with-embedded-nacos.sh stop
 
-# 停止服务
-./stop-all.sh
+# 重启所有服务
+./scripts/linux/start-with-embedded-nacos.sh restart
+
+# 检查服务状态
+./scripts/linux/start-with-embedded-nacos.sh status
+
+# 仅管理Nacos
+./scripts/linux/start-with-embedded-nacos.sh nacos start
+./scripts/linux/start-with-embedded-nacos.sh nacos stop
 ```
 
-**Windows系统：**
+**方式2：传统启动方式**
+```bash
+# Linux/Mac系统
+./scripts/linux/start-all.sh
 
-```cmd
-# 启动全部服务
-start-all.bat
-
-# 停止服务
-stop-all.bat
+# Windows系统
+scripts\windows\start-all.bat
 ```
 
 #### 5. 访问应用
-
 - **前端**：http://localhost:5173
 - **后端API**：http://localhost:8080
 - **Nacos控制台**：http://localhost:8848/nacos
@@ -186,7 +174,6 @@ stop-all.bat
 - **API文档中心**：http://localhost:8089/swagger-ui.html
 
 #### 6. API文档使用
-
 项目提供了完整的API文档，支持在线测试和接口调试：
 
 **访问API文档：**
@@ -196,7 +183,7 @@ stop-all.bat
 open http://localhost:8089/swagger-ui.html
 
 # 方式2：使用快速访问工具
-./api-docs-tool.sh
+./scripts/linux/api-docs-tool.sh
 ```
 
 **API文档功能：**
@@ -210,17 +197,16 @@ open http://localhost:8089/swagger-ui.html
 
 ```bash
 # 运行API自动化测试
-./api-test.sh
+./scripts/linux/api-test.sh
 ```
 
-详细的API文档使用说明请参考：[API文档使用指南](file:///home/zky/HKYG/API_DOCS.md)
+详细的API文档使用说明请参考：[API文档使用指南](API_DOCS.md)
 
 ---
 
 ## 🏗 技术架构
 
 ### 后端技术栈
-
 | 技术 | 版本 | 说明 |
 |------|------|------|
 | Spring Boot | 3.2.2 | 基础框架 |
@@ -237,7 +223,6 @@ open http://localhost:8089/swagger-ui.html
 | Sentry | 7.6.0 | 错误追踪 |
 
 ### 前端技术栈
-
 | 技术 | 版本 | 说明 |
 |------|------|------|
 | Vue | 3.5.1 | 前端框架 |
@@ -251,7 +236,6 @@ open http://localhost:8089/swagger-ui.html
 | TypeScript | 5.2.2 | 类型检查 |
 
 ### 微服务架构
-
 ```
 ┌─────────────────────────────────────────────────┐
 │              Nacos (服务注册中心)              │
@@ -321,18 +305,60 @@ HKYG/
 │   │   └── views/            # 页面组件
 │   ├── public/              # 公共资源
 │   └── package.json
+├── heikeji-miniprogram/       # 小程序项目
 ├── sql/                     # 数据库脚本
+│   ├── root_scripts/        # 根脚本
+│   │   ├── init/           # 初始化脚本
+│   │   └── updates/        # 更新脚本
+│   ├── schema/              # 数据库结构
+│   ├── migrations/         # 数据库迁移
+│   ├── data/               # 数据文件
+│   ├── test_data/          # 测试数据
+│   ├── security/           # 安全相关
+│   ├── deployment/         # 部署脚本
+│   └── maintenance/        # 维护脚本
 ├── docs/                    # 项目文档
-├── start-all.sh              # Linux/Mac启动脚本
-├── stop-all.sh              # Linux/Mac停止脚本
-├── start-all.bat            # Windows启动脚本
-├── stop-all.bat            # Windows停止脚本
-├── api-docs-tool.sh         # API文档快速访问工具
-├── api-test.sh              # API自动化测试脚本
+│   ├── project/            # 项目文档
+│   ├── development/        # 开发文档
+│   ├── frontend/           # 前端文档
+│   ├── backend/            # 后端文档
+│   ├── architecture/        # 架构文档
+│   ├── database/           # 数据库文档
+│   ├── deployment/         # 部署文档
+│   ├── api/               # API文档
+│   ├── module/            # 模块文档
+│   ├── payment/            # 支付文档
+│   ├── features/           # 功能文档
+│   ├── monitoring/         # 监控文档
+│   ├── troubleshooting/    # 故障排除
+│   ├── security/           # 安全文档
+│   ├── nacos/             # Nacos文档
+│   ├── project-status/     # 项目状态文档
+│   └── archive/            # 归档文档
+├── scripts/                 # 脚本文件
+│   ├── linux/              # Linux脚本
+│   ├── windows/            # Windows脚本
+│   ├── powershell/         # PowerShell脚本
+│   └── README.md
+├── logs/                    # 日志文件
+│   └── archive/           # 归档日志
+├── downloads/               # 下载文件
+├── reports/                 # 报告文件
+├── tools/                   # 工具文件
+├── test/                    # 测试文件
+├── config/                  # 配置文件
+├── pom.xml                  # Maven配置
+├── docker-compose.yml        # Docker编排配置
+├── docker-compose-nacos.yml  # Nacos Docker配置
+├── Dockerfile               # Docker镜像构建文件
+├── README.md                # 项目说明
 ├── DEPLOYMENT.md            # 部署文档
 ├── PROJECT_SUMMARY.md        # 项目总结
+├── PROJECT_PROGRESS.md       # 项目进展
 ├── API_DOCS.md              # API文档使用指南
-└── README.md                # 项目说明
+├── SERVICE_PORTS.md          # 服务端口配置
+├── SERVICE_STARTUP.md        # 服务启动指南
+└── NACOS_INSTALL_GUIDE.md   # Nacos安装指南
 ```
 
 ---
@@ -362,7 +388,6 @@ npm run build
 ```
 
 #### 2. 部署后端
-
 ```bash
 # 复制JAR文件到服务器
 scp target/*.jar user@server:/opt/heikeji/
@@ -374,7 +399,6 @@ java -jar heikeji-admin-1.0.0.jar
 ```
 
 #### 3. 部署前端
-
 ```bash
 # 复制dist目录到服务器
 scp -r dist/* user@server:/var/www/html/
@@ -399,7 +423,6 @@ server {
 ```
 
 ### Docker部署
-
 ```bash
 # 构建镜像
 docker build -t heikeji-mall:latest .
@@ -412,16 +435,39 @@ docker-compose up -d
 
 ## 📚 项目文档
 
+### 核心文档
 - [项目总结](PROJECT_SUMMARY.md) - 详细的项目总结报告
+- [项目进展](PROJECT_PROGRESS.md) - 项目开发进展总结
 - [部署指南](DEPLOYMENT.md) - 完整的部署文档
 - [API文档使用指南](API_DOCS.md) - API接口文档使用说明
-- [系统监控文档](docs/monitoring/Sentry错误追踪集成文档.md) - Sentry集成指南
-- [API文档中心](http://localhost:8089/swagger-ui.html) - Swagger API文档聚合中心
+
+### 服务文档
+- [服务端口配置](SERVICE_PORTS.md) - 服务端口配置说明
+- [服务启动指南](SERVICE_STARTUP.md) - 服务启动顺序和依赖关系
+- [Nacos安装指南](NACOS_INSTALL_GUIDE.md) - Nacos安装和配置指南
+
+### 文档目录
+- [项目文档](docs/project/) - 项目规划、总结、验收报告等
+- [开发文档](docs/development/) - 开发规范、开发计划等
+- [前端文档](docs/frontend/) - 前端开发、优化、测试等
+- [后端文档](docs/backend/) - 后端模块说明
+- [架构文档](docs/architecture/) - 系统架构设计
+- [数据库文档](docs/database/) - 数据库设计、导入、优化等
+- [部署文档](docs/deployment/) - 部署和运维相关文档
+- [API文档](docs/api/) - API接口文档
+- [模块文档](docs/module/) - 各功能模块说明
+- [支付文档](docs/payment/) - 支付模块文档
+- [功能文档](docs/features/) - 功能使用指南
+- [监控文档](docs/monitoring/) - 系统监控文档
+- [故障排除](docs/troubleshooting/) - 常见问题解决方案
+- [安全文档](docs/security/) - 安全相关文档
+- [Nacos文档](docs/nacos/) - Nacos安装和配置文档
+- [项目状态](docs/project-status/) - 项目状态和进展文档
+- [归档文档](docs/archive/) - 历史文档归档
 
 ### API文档工具
-
-- [API文档快速访问工具](api-docs-tool.sh) - 交互式API文档访问工具
-- [API自动化测试脚本](api-test.sh) - API接口自动化测试
+- [API文档快速访问工具](scripts/linux/api-docs-tool.sh) - 交互式API文档访问工具
+- [API自动化测试脚本](scripts/linux/api-test.sh) - API接口自动化测试
 
 ---
 
@@ -493,6 +539,7 @@ docker-compose up -d
 - [x] 系统监控功能
 - [x] 营销系统后端服务
 - [x] 营销系统前端页面
+- [x] 项目文档整理
 
 ### 进行中 🚧
 - [ ] 前端页面开发
@@ -523,7 +570,7 @@ docker-compose up -d
 
 ---
 
-## 📞 致谢
+## 🙏 致谢
 
 感谢所有为项目做出贡献的开发者、测试者和使用者！
 

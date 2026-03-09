@@ -15,7 +15,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}'],
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}', 'src-vue3/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}', 'tests/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}'],
     exclude: ['**/node_modules/**', '**/e2e/**', '**/dist/**'],
     pool: 'forks',
     singleFork: true,
@@ -24,10 +24,14 @@ export default defineConfig({
       json: './test-results/test-results.json',
       html: './test-results/test-results.html',
     },
+    environmentMatchGlobs: [
+      ['tests/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}', 'node'],
+      ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}', 'jsdom'],
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
-      include: ['src/**/*.{vue,js,ts}'],
+      include: ['src/**/*.{vue,js,ts}', 'src-vue3/**/*.{vue,js,ts}', 'tests/api/**/*.{js,ts}'],
       exclude: [
         'node_modules/**',
         '**/*.d.ts',
@@ -39,6 +43,8 @@ export default defineConfig({
         'src/layout/**',
         'src/router/**',
         'src/store/**',
+        'src-vue3/views/**',
+        'src-vue3/components/**',
         '**/test/**',
         '**/*.test.ts',
         '**/*.spec.ts',

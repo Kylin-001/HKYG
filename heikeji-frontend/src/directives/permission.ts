@@ -1,8 +1,8 @@
-import { Directive, DirectiveBinding } from 'vue'
+import { Directive, DirectiveBinding, App } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 
 export const permission: Directive = {
-  mounted(el: HTMLElement, binding: DirectiveBinding) {
+  mounted(el: HTMLElement, binding: DirectiveBinding<string[]>) {
     const userStore = useUserStore()
     const { value } = binding
 
@@ -12,12 +12,11 @@ export const permission: Directive = {
 
     const userPermissions = userStore.permissions || []
     const hasPermission = value.some(permission => userPermissions.includes(permission))
-
     if (!hasPermission) {
       el.parentNode?.removeChild(el)
     }
   },
-  updated(el: HTMLElement, binding: DirectiveBinding) {
+  updated(el: HTMLElement, binding: DirectiveBinding<string[]>) {
     const userStore = useUserStore()
     const { value, oldValue } = binding
 
@@ -31,13 +30,12 @@ export const permission: Directive = {
 
     const userPermissions = userStore.permissions || []
     const hasPermission = value.some(permission => userPermissions.includes(permission))
-
     if (!hasPermission) {
       el.parentNode?.removeChild(el)
     }
   },
 }
 
-export function registerPermissionDirective(app: any) {
+export function registerPermissionDirective(app: App) {
   app.directive('permission', permission)
 }

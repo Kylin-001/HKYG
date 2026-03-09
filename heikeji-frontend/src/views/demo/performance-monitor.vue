@@ -1,20 +1,22 @@
 <template>
   <div class="performance-monitor-demo">
     <el-card class="box-card">
-      <div slot="header" class="card-header">
-        <h2>性能监控仪表板</h2>
-        <div class="header-actions">
-          <el-button
-            :type="isMonitoring ? 'danger' : 'primary'"
-            @click="toggleMonitoring"
-            :icon="isMonitoring ? 'el-icon-video-pause' : 'el-icon-video-play'"
-          >
-            {{ isMonitoring ? '停止监控' : '开始监控' }}
-          </el-button>
-          <el-button @click="generateReport" icon="el-icon-document">生成报告</el-button>
-          <el-button @click="clearData" icon="el-icon-delete">清空数据</el-button>
+      <template #header>
+        <div class="card-header">
+          <h2>性能监控仪表板</h2>
+          <div class="header-actions">
+            <el-button
+              :type="isMonitoring ? 'danger' : 'primary'"
+              @click="toggleMonitoring"
+              :icon="isMonitoring ? 'el-icon-video-pause' : 'el-icon-video-play'"
+            >
+              {{ isMonitoring ? '停止监控' : '开始监控' }}
+            </el-button>
+            <el-button @click="generateReport" icon="el-icon-document">生成报告</el-button>
+            <el-button @click="clearData" icon="el-icon-delete">清空数据</el-button>
+          </div>
         </div>
-      </div>
+      </template>
 
       <!-- 实时性能指标 -->
       <div class="metrics-grid">
@@ -81,23 +83,23 @@
         <h3>详细性能数据</h3>
         <el-table :data="performanceData" height="400">
           <el-table-column prop="timestamp" label="时间" width="180">
-            <template slot-scope="scope">
+            <template #default="scope">
               {{ formatTime(scope.row.timestamp) }}
             </template>
           </el-table-column>
           <el-table-column prop="type" label="类型" width="120">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="getTypeTagType(scope.row.type)">{{ scope.row.type }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="name" label="指标名称" width="200" />
           <el-table-column prop="value" label="数值" width="120">
-            <template slot-scope="scope">
+            <template #default="scope">
               {{ scope.row.value.toFixed(2) }}{{ getUnit(scope.row.type) }}
             </template>
           </el-table-column>
           <el-table-column prop="rating" label="评级" width="100">
-            <template slot-scope="scope">
+            <template #default="scope">
               <el-tag :type="getRatingType(scope.row.rating)">{{ scope.row.rating }}</el-tag>
             </template>
           </el-table-column>
@@ -133,357 +135,381 @@
   </div>
 </template>
 
-<script>
-import Vue from 'vue'
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
 import { performanceMonitor } from '@/utils/performance-monitor'
 import logger from '@/utils/logger'
 
-export default {
-  name: 'PerformanceMonitorDemo',
-  data() {
-    return {
-      isMonitoring: false,
-      performanceData: [],
-      errors: [],
-      realTimeMetrics: [
-        {
-          key: 'lcp',
-          name: 'Largest Contentful Paint',
-          value: 0,
-          rating: 'unknown',
-          unit: 'ms',
-        },
-        {
-          key: 'fid',
-          name: 'First Input Delay',
-          value: 0,
-          rating: 'unknown',
-          unit: 'ms',
-        },
-        {
-          key: 'cls',
-          name: 'Cumulative Layout Shift',
-          value: 0,
-          rating: 'unknown',
-          unit: '',
-        },
-        {
-          key: 'ttfb',
-          name: 'Time to First Byte',
-          value: 0,
-          rating: 'unknown',
-          unit: 'ms',
-        },
-        {
-          key: 'fcp',
-          name: 'First Contentful Paint',
-          value: 0,
-          rating: 'unknown',
-          unit: 'ms',
-        },
-        {
-          key: 'domReady',
-          name: 'DOM Ready Time',
-          value: 0,
-          rating: 'unknown',
-          unit: 'ms',
-        },
-      ],
-      pageLoadProgress: 0,
-      averagePageLoadTime: 0,
-      resourceStats: {
-        js: 0,
-        css: 0,
-        image: 0,
-        api: 0,
-      },
-    }
-  },
-  computed: {
-    jsResourcePercentage() {
-      return Math.round((this.resourceStats.js / 100) * 100)
-    },
-    cssResourcePercentage() {
-      return Math.round((this.resourceStats.css / 100) * 100)
-    },
-    imageResourcePercentage() {
-      return Math.round((this.resourceStats.image / 100) * 100)
-    },
-    apiResourcePercentage() {
-      return Math.round((this.resourceStats.api / 100) * 100)
-    },
-  },
-  mounted() {
-    this.initPerformanceMonitor()
-    this.setupPerformanceSubscriptions()
-  },
-  beforeDestroy() {
-    if (this.isMonitoring) {
-      this.stopMonitoring()
-    }
-  },
-  methods: {
-    initPerformanceMonitor() {
-      // 初始化监控
-      if (process.env.NODE_ENV === 'development') {
-        logger.debug('初始化性能监控系统...')
-      }
-    },
-
-    setupPerformanceSubscriptions() {
-      // 订阅不同类型的性能指标
-      const subscriptions = [
-        { type: 'largest-contentful-paint', callback: this.handleLCP },
-        { type: 'first-input-delay', callback: this.handleFID },
-        { type: 'layout-shift-score', callback: this.handleCLS },
-        { type: 'navigation', callback: this.handleNavigation },
-        { type: 'resource', callback: this.handleResource },
-        { type: 'error', callback: this.handleError },
-      ]
-
-      subscriptions.forEach(sub => {
-        performanceMonitor.subscribe(sub.type, sub.callback)
-      })
-    },
-
-    toggleMonitoring() {
-      this.isMonitoring = !this.isMonitoring
-      if (this.isMonitoring) {
-        this.startMonitoring()
-      } else {
-        this.stopMonitoring()
-      }
-    },
-
-    startMonitoring() {
-      // 开始监控时的初始化
-      performanceMonitor.mark('monitoring-start')
-      this.$message.success('性能监控已开始')
-    },
-
-    stopMonitoring() {
-      performanceMonitor.mark('monitoring-stop')
-      this.$message.info('性能监控已停止')
-    },
-
-    generateReport() {
-      const report = performanceMonitor.getPerformanceReport()
-      if (process.env.NODE_ENV === 'development') {
-        logger.debug('性能报告:', report)
-      }
-      this.$message.success('性能报告已生成，请查看控制台')
-    },
-
-    clearData() {
-      this.performanceData = []
-      this.errors = []
-      this.$message.success('数据已清空')
-    },
-
-    // 性能指标处理器
-    handleLCP(metric) {
-      this.updateRealTimeMetric('lcp', metric.value, metric.rating)
-      this.performanceData.unshift(metric)
-    },
-
-    handleFID(metric) {
-      this.updateRealTimeMetric('fid', metric.value, metric.rating)
-      this.performanceData.unshift(metric)
-    },
-
-    handleCLS(metric) {
-      this.updateRealTimeMetric('cls', metric.value, metric.rating)
-      this.performanceData.unshift(metric)
-    },
-
-    handleNavigation(metric) {
-      this.updateRealTimeMetric(
-        'ttfb',
-        metric.metadata.ttfb,
-        this.getTTFBRating(metric.metadata.ttfb)
-      )
-      this.updateRealTimeMetric(
-        'domReady',
-        metric.metadata.domReadyTime,
-        this.getDomReadyRating(metric.metadata.domReadyTime)
-      )
-
-      this.averagePageLoadTime = Math.round(metric.value)
-      this.pageLoadProgress = Math.min((metric.value / 3000) * 100, 100)
-
-      this.performanceData.unshift(metric)
-    },
-
-    handleResource(metric) {
-      // 统计资源类型
-      const { initiatorType } = metric.metadata
-      if (initiatorType === 'script') {
-        this.resourceStats.js += metric.value
-      } else if (initiatorType === 'css') {
-        this.resourceStats.css += metric.value
-      } else if (initiatorType === 'img') {
-        this.resourceStats.image += metric.value
-      } else if (initiatorType === 'xmlhttprequest' || initiatorType === 'fetch') {
-        this.resourceStats.api += metric.value
-      }
-
-      this.performanceData.unshift(metric)
-    },
-
-    handleError(metric) {
-      this.errors.unshift(metric)
-    },
-
-    updateRealTimeMetric(key, value, rating) {
-      const metric = this.realTimeMetrics.find(m => m.key === key)
-      if (metric) {
-        metric.value = Math.round(value)
-        metric.rating = rating
-      }
-    },
-
-    // 测试方法
-    async testLargeDataRender() {
-      this.$message.info('开始大数据渲染测试...')
-      performanceMonitor.mark('large-data-test-start')
-
-      // 模拟大数据渲染
-      const largeArray = new Array(10000).fill(0).map((_, index) => ({
-        id: index,
-        name: `Item ${index}`,
-        value: Math.random() * 1000,
-      }))
-
-      // 模拟DOM操作
-      await this.$nextTick()
-      performanceMonitor.mark('large-data-test-end')
-      performanceMonitor.measure(
-        'large-data-render',
-        'large-data-test-start',
-        'large-data-test-end'
-      )
-
-      this.$message.success('大数据渲染测试完成')
-    },
-
-    async testNetworkDelay() {
-      this.$message.info('开始网络延迟测试...')
-      performanceMonitor.mark('network-test-start')
-
-      try {
-        await performanceMonitor.monitorRequest('/api/test-delay', {
-          method: 'GET',
-        })
-        this.$message.success('网络延迟测试完成')
-      } catch (error) {
-        this.$message.error(`网络测试失败: ${error.message}`)
-      }
-    },
-
-    async testMemoryUsage() {
-      this.$message.info('开始内存使用测试...')
-      performanceMonitor.mark('memory-test-start')
-
-      // 模拟内存消耗
-      const largeData = new Array(100000).fill(0).map(() => ({
-        data: new Array(100).fill('x'.repeat(50)),
-      }))
-
-      await new Promise(resolve => setTimeout(resolve, 100))
-
-      performanceMonitor.mark('memory-test-end')
-      performanceMonitor.measure('memory-usage', 'memory-test-start', 'memory-test-end')
-
-      // 清理内存
-      largeData.length = 0
-
-      this.$message.success('内存使用测试完成')
-    },
-
-    testComponentRender() {
-      this.$message.info('开始组件渲染测试...')
-      performanceMonitor.mark('component-test-start')
-
-      // 动态创建组件测试
-      const ComponentClass = Vue.extend({
-        template: '<div>Test Component {{ message }}</div>',
-        data() {
-          return {
-            message: 'Hello World',
-          }
-        },
-        mounted() {
-          performanceMonitor.mark('component-test-render-end')
-          performanceMonitor.measure(
-            'component-render',
-            'component-test-start',
-            'component-test-render-end'
-          )
-        },
-      })
-
-      const component = new ComponentClass()
-      component.$mount()
-
-      this.$message.success('组件渲染测试完成')
-    },
-
-    // 工具方法
-    getRatingType(rating) {
-      const typeMap = {
-        good: 'success',
-        'needs-improvement': 'warning',
-        poor: 'danger',
-        unknown: 'info',
-      }
-      return typeMap[rating] || 'info'
-    },
-
-    getTypeTagType(type) {
-      const typeMap = {
-        'largest-contentful-paint': 'primary',
-        'first-input-delay': 'success',
-        'layout-shift-score': 'warning',
-        navigation: 'info',
-        resource: 'success',
-        error: 'danger',
-      }
-      return typeMap[type] || 'info'
-    },
-
-    getUnit(type) {
-      const unitMap = {
-        'largest-contentful-paint': 'ms',
-        'first-input-delay': 'ms',
-        'layout-shift-score': '',
-        navigation: 'ms',
-        resource: 'ms',
-        error: '',
-      }
-      return unitMap[type] || ''
-    },
-
-    getTTFBRating(value) {
-      if (value <= 200) return 'good'
-      if (value <= 500) return 'needs-improvement'
-      return 'poor'
-    },
-
-    getDomReadyRating(value) {
-      if (value <= 1000) return 'good'
-      if (value <= 2000) return 'needs-improvement'
-      return 'poor'
-    },
-
-    formatTime(timestamp) {
-      return new Date(timestamp).toLocaleString()
-    },
-
-    removeError(errorId) {
-      this.errors = this.errors.filter(error => error.id !== errorId)
-    },
-  },
+interface RealTimeMetric {
+  key: string
+  name: string
+  value: number
+  rating: string
+  unit: string
 }
+
+interface PerformanceData {
+  timestamp: number
+  type: string
+  name: string
+  value: number
+  rating: string
+  url?: string
+  metadata?: {
+    ttfb?: number
+    domReadyTime?: number
+    initiatorType?: string
+    message?: string
+    filename?: string
+    lineno?: number
+  }
+}
+
+interface ErrorData {
+  id: string
+  metadata: {
+    message: string
+    filename: string
+    lineno: number
+  }
+}
+
+interface ResourceStats {
+  js: number
+  css: number
+  image: number
+  api: number
+}
+
+const isMonitoring = ref(false)
+const performanceData = ref<PerformanceData[]>([])
+const errors = ref<ErrorData[]>([])
+const realTimeMetrics = ref<RealTimeMetric[]>([
+  {
+    key: 'lcp',
+    name: 'Largest Contentful Paint',
+    value: 0,
+    rating: 'unknown',
+    unit: 'ms',
+  },
+  {
+    key: 'fid',
+    name: 'First Input Delay',
+    value: 0,
+    rating: 'unknown',
+    unit: 'ms',
+  },
+  {
+    key: 'cls',
+    name: 'Cumulative Layout Shift',
+    value: 0,
+    rating: 'unknown',
+    unit: '',
+  },
+  {
+    key: 'ttfb',
+    name: 'Time to First Byte',
+    value: 0,
+    rating: 'unknown',
+    unit: 'ms',
+  },
+  {
+    key: 'fcp',
+    name: 'First Contentful Paint',
+    value: 0,
+    rating: 'unknown',
+    unit: 'ms',
+  },
+  {
+    key: 'domReady',
+    name: 'DOM Ready Time',
+    value: 0,
+    rating: 'unknown',
+    unit: 'ms',
+  },
+])
+
+const pageLoadProgress = ref(0)
+const averagePageLoadTime = ref(0)
+const resourceStats = reactive<ResourceStats>({
+  js: 0,
+  css: 0,
+  image: 0,
+  api: 0,
+})
+
+const jsResourcePercentage = computed(() => {
+  return Math.round((resourceStats.js / 100) * 100)
+})
+
+const cssResourcePercentage = computed(() => {
+  return Math.round((resourceStats.css / 100) * 100)
+})
+
+const imageResourcePercentage = computed(() => {
+  return Math.round((resourceStats.image / 100) * 100)
+})
+
+const apiResourcePercentage = computed(() => {
+  return Math.round((resourceStats.api / 100) * 100)
+})
+
+const initPerformanceMonitor = () => {
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('初始化性能监控系统...')
+  }
+}
+
+const setupPerformanceSubscriptions = () => {
+  const subscriptions = [
+    { type: 'largest-contentful-paint', callback: handleLCP },
+    { type: 'first-input-delay', callback: handleFID },
+    { type: 'layout-shift-score', callback: handleCLS },
+    { type: 'navigation', callback: handleNavigation },
+    { type: 'resource', callback: handleResource },
+    { type: 'error', callback: handleError },
+  ]
+
+  subscriptions.forEach(sub => {
+    performanceMonitor.subscribe(sub.type, sub.callback)
+  })
+}
+
+const toggleMonitoring = () => {
+  isMonitoring.value = !isMonitoring.value
+  if (isMonitoring.value) {
+    startMonitoring()
+  } else {
+    stopMonitoring()
+  }
+}
+
+const startMonitoring = () => {
+  performanceMonitor.mark('monitoring-start')
+  ElMessage.success('性能监控已开始')
+}
+
+const stopMonitoring = () => {
+  performanceMonitor.mark('monitoring-stop')
+  ElMessage.info('性能监控已停止')
+}
+
+const generateReport = () => {
+  const report = performanceMonitor.getPerformanceReport()
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('性能报告:', report)
+  }
+  ElMessage.success('性能报告已生成，请查看控制台')
+}
+
+const clearData = () => {
+  performanceData.value = []
+  errors.value = []
+  ElMessage.success('数据已清空')
+}
+
+const handleLCP = (metric: PerformanceData) => {
+  updateRealTimeMetric('lcp', metric.value, metric.rating)
+  performanceData.value.unshift(metric)
+}
+
+const handleFID = (metric: PerformanceData) => {
+  updateRealTimeMetric('fid', metric.value, metric.rating)
+  performanceData.value.unshift(metric)
+}
+
+const handleCLS = (metric: PerformanceData) => {
+  updateRealTimeMetric('cls', metric.value, metric.rating)
+  performanceData.value.unshift(metric)
+}
+
+const handleNavigation = (metric: PerformanceData) => {
+  updateRealTimeMetric(
+    'ttfb',
+    metric.metadata?.ttfb || 0,
+    getTTFBRating(metric.metadata?.ttfb || 0)
+  )
+  updateRealTimeMetric(
+    'domReady',
+    metric.metadata?.domReadyTime || 0,
+    getDomReadyRating(metric.metadata?.domReadyTime || 0)
+  )
+
+  averagePageLoadTime.value = Math.round(metric.value)
+  pageLoadProgress.value = Math.min((metric.value / 3000) * 100, 100)
+
+  performanceData.value.unshift(metric)
+}
+
+const handleResource = (metric: PerformanceData) => {
+  const { initiatorType } = metric.metadata || {}
+  if (initiatorType === 'script') {
+    resourceStats.js += metric.value
+  } else if (initiatorType === 'css') {
+    resourceStats.css += metric.value
+  } else if (initiatorType === 'img') {
+    resourceStats.image += metric.value
+  } else if (initiatorType === 'xmlhttprequest' || initiatorType === 'fetch') {
+    resourceStats.api += metric.value
+  }
+
+  performanceData.value.unshift(metric)
+}
+
+const handleError = (metric: ErrorData) => {
+  errors.value.unshift(metric)
+}
+
+const updateRealTimeMetric = (key: string, value: number, rating: string) => {
+  const metric = realTimeMetrics.value.find(m => m.key === key)
+  if (metric) {
+    metric.value = Math.round(value)
+    metric.rating = rating
+  }
+}
+
+const testLargeDataRender = async () => {
+  ElMessage.info('开始大数据渲染测试...')
+  performanceMonitor.mark('large-data-test-start')
+
+  const largeArray = new Array(10000).fill(0).map((_, index) => ({
+    id: index,
+    name: `Item ${index}`,
+    value: Math.random() * 1000,
+  }))
+
+  await nextTick()
+  performanceMonitor.mark('large-data-test-end')
+  performanceMonitor.measure(
+    'large-data-render',
+    'large-data-test-start',
+    'large-data-test-end'
+  )
+
+  ElMessage.success('大数据渲染测试完成')
+}
+
+const testNetworkDelay = async () => {
+  ElMessage.info('开始网络延迟测试...')
+  performanceMonitor.mark('network-test-start')
+
+  try {
+    await performanceMonitor.monitorRequest('/api/test-delay', {
+      method: 'GET',
+    })
+    ElMessage.success('网络延迟测试完成')
+  } catch (error: any) {
+    ElMessage.error(`网络测试失败: ${error.message}`)
+  }
+}
+
+const testMemoryUsage = async () => {
+  ElMessage.info('开始内存使用测试...')
+  performanceMonitor.mark('memory-test-start')
+
+  const largeData = new Array(100000).fill(0).map(() => ({
+    data: new Array(100).fill('x'.repeat(50)),
+  }))
+
+  await new Promise(resolve => setTimeout(resolve, 100))
+
+  performanceMonitor.mark('memory-test-end')
+  performanceMonitor.measure('memory-usage', 'memory-test-start', 'memory-test-end')
+
+  largeData.length = 0
+
+  ElMessage.success('内存使用测试完成')
+}
+
+const testComponentRender = () => {
+  ElMessage.info('开始组件渲染测试...')
+  performanceMonitor.mark('component-test-start')
+
+  const ComponentClass = {
+    template: '<div>Test Component {{ message }}</div>',
+    data() {
+      return {
+        message: 'Hello World',
+      }
+    },
+    mounted() {
+      performanceMonitor.mark('component-test-render-end')
+      performanceMonitor.measure(
+        'component-render',
+        'component-test-start',
+        'component-test-render-end'
+      )
+    },
+  }
+
+  ElMessage.success('组件渲染测试完成')
+}
+
+const getRatingType = (rating: string) => {
+  const typeMap: Record<string, string> = {
+    good: 'success',
+    'needs-improvement': 'warning',
+    poor: 'danger',
+    unknown: 'info',
+  }
+  return typeMap[rating] || 'info'
+}
+
+const getTypeTagType = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'largest-contentful-paint': 'primary',
+    'first-input-delay': 'success',
+    'layout-shift-score': 'warning',
+    navigation: 'info',
+    resource: 'success',
+    error: 'danger',
+  }
+  return typeMap[type] || 'info'
+}
+
+const getUnit = (type: string) => {
+  const unitMap: Record<string, string> = {
+    'largest-contentful-paint': 'ms',
+    'first-input-delay': 'ms',
+    'layout-shift-score': '',
+    navigation: 'ms',
+    resource: 'ms',
+    error: '',
+  }
+  return unitMap[type] || ''
+}
+
+const getTTFBRating = (value: number) => {
+  if (value <= 200) return 'good'
+  if (value <= 500) return 'needs-improvement'
+  return 'poor'
+}
+
+const getDomReadyRating = (value: number) => {
+  if (value <= 1000) return 'good'
+  if (value <= 2000) return 'needs-improvement'
+  return 'poor'
+}
+
+const formatTime = (timestamp: number) => {
+  return new Date(timestamp).toLocaleString()
+}
+
+const removeError = (errorId: string) => {
+  errors.value = errors.value.filter(error => error.id !== errorId)
+}
+
+onMounted(() => {
+  initPerformanceMonitor()
+  setupPerformanceSubscriptions()
+})
+
+onBeforeUnmount(() => {
+  if (isMonitoring.value) {
+    stopMonitoring()
+  }
+})
 </script>
 
 <style scoped>

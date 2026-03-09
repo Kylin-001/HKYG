@@ -2,31 +2,56 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { constantRoutes, asyncRoutes } from '@/router'
 import { useUserStore } from './user'
+import type { RouteRecordRaw } from 'vue-router'
 
 // 定义路由类型
 type RouteName = string
 
+// 定义路由元数据类型
+interface RouteMeta {
+  title?: string
+  icon?: string
+  roles?: string[]
+  hidden?: boolean
+  affix?: boolean
+  breadcrumb?: boolean
+}
+
+// 定义路由类型
+interface AppRoute extends RouteRecordRaw {
+  name?: string
+  path?: string
+  meta?: RouteMeta
+  children?: AppRoute[]
+}
+
+// 定义面包屑类型
+interface BreadcrumbItem {
+  name: string
+  path: string
+  meta?: RouteMeta
+}
+
 // 定义permission store的状态类型
 interface PermissionState {
-  routes: any[]
-  addRoutes: any[]
-  accessedRoutes: any[]
+  routes: AppRoute[]
+  addRoutes: AppRoute[]
+  accessedRoutes: AppRoute[]
   currentRoute: string
   loading: boolean
 }
 
 // 检查权限匹配函数
-function hasPermission(roles: string[], route: any): boolean {
+function hasPermission(roles: string[], route: AppRoute): boolean {
   if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
+    return roles.some(role => route.meta.roles!.includes(role))
   }
   return true
 }
 
 // 根据角色过滤路由
-function filterAsyncRoutes(routes: any[], roles: string[]): any[] {
-  const res: any[] = []
-
+function filterAsyncRoutes(routes: AppRoute[], roles: string[]): AppRoute[] {
+  const res: AppRoute[] = []
   routes.forEach(route => {
     const tmp = { ...route }
     if (hasPermission(roles, tmp)) {
@@ -36,16 +61,15 @@ function filterAsyncRoutes(routes: any[], roles: string[]): any[] {
       res.push(tmp)
     }
   })
-
   return res
 }
 
 // 创建并导出permission store
 export const usePermissionStore = defineStore('permission', () => {
   // 状态定义
-  const routes = ref<any[]>([])
-  const addRoutes = ref<any[]>([])
-  const accessedRoutes = ref<any[]>([])
+  const routes = ref<AppRoute[]>([])
+  const addRoutes = ref<AppRoute[]>([])
+  const accessedRoutes = ref<AppRoute[]>([])
   const currentRoute = ref('')
   const loading = ref(false)
 
@@ -60,27 +84,24 @@ export const usePermissionStore = defineStore('permission', () => {
       loading.value = true
       const userStore = useUserStore()
       const { roles } = userStore
-
-      let accessedRts: any[] = []
-
+      let accessedRts: AppRoute[] = []
       // 根据角色过滤异步路由
       if (roles.includes('admin')) {
         // 管理员可以访问所有路由
-        accessedRts = asyncRoutes
+        accessedRts = asyncRoutes as AppRoute[]
       } else {
         // 普通用户根据权限过滤路由
-        accessedRts = filterAsyncRoutes(asyncRoutes, roles)
+        accessedRts = filterAsyncRoutes(asyncRoutes as AppRoute[], roles)
       }
 
       // 添加404路由
       accessedRts.push({ path: '/:pathMatch(.*)*', redirect: '/404', meta: { hidden: true } })
-
       addRoutes.value = accessedRts
       routes.value = [...constantRoutes, ...accessedRts]
       accessedRoutes.value = [...accessedRts]
 
       return accessedRts
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('生成路由失败:', error)
       return []
     } finally {
@@ -100,7 +121,7 @@ export const usePermissionStore = defineStore('permission', () => {
     }
 
     // 递归检查路由名称是否在有权限的路由中
-    function checkPermissionRecursive(routesList: any[]): boolean {
+    function checkPermissionRecursive(routesList: AppRoute[]): boolean {
       for (const route of routesList) {
         if (route.name === routeName) {
           return true
@@ -114,7 +135,6 @@ export const usePermissionStore = defineStore('permission', () => {
       }
       return false
     }
-
     return checkPermissionRecursive(addRoutes.value)
   }
 
@@ -127,15 +147,14 @@ export const usePermissionStore = defineStore('permission', () => {
   }
 
   // 方法 - 获取面包屑路径
-  function getBreadcrumbPath(routeName: RouteName): any[] {
-    const breadcrumbs: any[] = []
-
-    function findRouteRecursive(routesList: any[], targetName: RouteName): boolean {
+  function getBreadcrumbPath(routeName: RouteName): BreadcrumbItem[] {
+    const breadcrumbs: BreadcrumbItem[] = []
+    function findRouteRecursive(routesList: AppRoute[], targetName: RouteName): boolean {
       for (const route of routesList) {
         if (route.name === targetName) {
           breadcrumbs.unshift({
-            name: route.name,
-            path: route.path,
+            name: route.name as string,
+            path: route.path as string,
             meta: route.meta,
           })
           return true
@@ -146,8 +165,8 @@ export const usePermissionStore = defineStore('permission', () => {
             // 如果找到了子路由，将当前路由添加到面包屑中
             if (route.meta && !route.meta.hidden) {
               breadcrumbs.unshift({
-                name: route.name,
-                path: route.path,
+                name: route.name as string,
+                path: route.path as string,
                 meta: route.meta,
               })
             }
@@ -157,7 +176,6 @@ export const usePermissionStore = defineStore('permission', () => {
       }
       return false
     }
-
     findRouteRecursive(routes.value, routeName)
     return breadcrumbs
   }

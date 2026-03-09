@@ -1,0 +1,411 @@
+# HKYG项目完整部署配置
+# 使用Docker Compose一键启动所有服务
+
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: heikeji-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USER: heikeji
+      MYSQL_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/schema:/docker-entrypoint-initdb.d:ro
+    networks:
+      - heikeji-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: heikeji-redis
+    command: redis-server --appendonly yes --requirepass heikeji123
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - heikeji-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "heikeji123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Nacos服务注册中心
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    container_name: heikeji-nacos
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root
+      NACOS_AUTH_ENABLE: false
+      TZ: Asia/Shanghai
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos-logs:/home/nacos/logs
+      - nacos-data:/home/nacos/data
+    networks:
+      - heikeji-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  # API网关
+  gateway:
+    image: openjdk:17-slim
+    container_name: heikeji-gateway
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/gateway.jar"
+    ]
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./heikeji-gateway/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 管理后台
+  admin:
+    image: openjdk:17-slim
+    container_name: heikeji-admin
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/admin.jar"
+    ]
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./heikeji-admin/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 用户服务
+  user-service:
+    image: openjdk:17-slim
+    container_name: heikeji-user-service
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/user-service.jar"
+    ]
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./service-user/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 商品服务
+  product-service:
+    image: openjdk:17-slim
+    container_name: heikeji-product-service
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/product-service.jar"
+    ]
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./service-product/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 订单服务
+  order-service:
+    image: openjdk:17-slim
+    container_name: heikeji-order-service
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/order-service.jar"
+    ]
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./service-order/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 支付服务
+  payment-service:
+    image: openjdk:17-slim
+    container_name: heikeji-payment-service
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/payment-service.jar"
+    ]
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./service-payment/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 外卖服务
+  takeout-service:
+    image: openjdk:17-slim
+    container_name: heikeji-takeout-service
+    working_dir: /app
+    command: [
+      "java", 
+      "-Xmx512m", 
+      "-Xms256m", 
+      "-jar", 
+      "/app/takeout-service.jar"
+    ]
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: heikeji123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./service-takeout/target:/app:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 前端应用
+  frontend:
+    image: nginx:alpine
+    container_name: heikeji-frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./heikeji-frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/conf:/etc/nginx/conf.d:ro
+      - ./nginx/logs:/var/log/nginx
+    networks:
+      - heikeji-network
+    depends_on:
+      - gateway
+    restart: unless-stopped
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: heikeji-nginx
+    ports:
+      - "8088:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    networks:
+      - heikeji-network
+    depends_on:
+      - gateway
+      - frontend
+    restart: unless-stopped
+
+  # Prometheus监控
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: heikeji-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - heikeji-network
+    restart: unless-stopped
+
+  # Grafana仪表盘
+  grafana:
+    image: grafana/grafana:latest
+    container_name: heikeji-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - heikeji-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+# 数据卷
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  nacos-logs:
+    driver: local
+  nacos-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# 网络配置
+networks:
+  heikeji-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

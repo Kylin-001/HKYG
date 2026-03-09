@@ -22,9 +22,11 @@
 
     <!-- 订单信息卡片 -->
     <el-card v-if="orderInfo" class="order-info-card">
-      <div slot="header" class="card-header">
-        <span><i class="el-icon-document"></i> 订单信息</span>
-      </div>
+      <template #header>
+        <div class="card-header">
+          <span><i class="el-icon-document"></i> 订单信息</span>
+        </div>
+      </template>
 
       <div class="order-info-content">
         <!-- 商品概览 -->
@@ -161,9 +163,11 @@
 
     <!-- 温馨提示 -->
     <el-card class="tips-card">
-      <div slot="header" class="card-header">
-        <span><i class="el-icon-info-filled"></i> 温馨提示</span>
-      </div>
+      <template #header>
+        <div class="card-header">
+          <span><i class="el-icon-info-filled"></i> 温馨提示</span>
+        </div>
+      </template>
       <div class="tips-content">
         <ul>
           <li v-if="paymentStatus === 'success'">支付成功！我们将尽快为您发货，请耐心等待</li>
@@ -180,176 +184,185 @@
   </div>
 </template>
 
-<script>
-// 导入日志工具
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import logger from '@/utils/logger'
 import notificationService from '@/utils/notification-service'
 
-export default {
-  name: 'PaymentResultPage',
-  data() {
-    return {
-      loading: true,
-      orderInfo: null,
-      orderId: '',
-      paymentStatus: 'pending', // success, failed, pending
-      errorMessage: '',
-    }
-  },
-
-  computed: {
-    // 结果标题
-    resultTitle() {
-      const titles = {
-        success: '支付成功！',
-        failed: '支付失败',
-        pending: '等待支付',
-      }
-      return titles[this.paymentStatus] || '支付处理中'
-    },
-
-    // 结果副标题
-    resultSubtitle() {
-      const subtitles = {
-        success: '感谢您的购买，我们将尽快为您发货',
-        failed: this.errorMessage || '请稍后重试或选择其他支付方式',
-        pending: '请尽快完成支付，以确保订单正常处理',
-      }
-      return subtitles[this.paymentStatus] || '支付正在处理中...'
-    },
-
-    // 结果图标样式类
-    resultStatusClass() {
-      const classes = {
-        success: 'success',
-        failed: 'failed',
-        pending: 'pending',
-      }
-      return classes[this.paymentStatus] || ''
-    },
-
-    // 显示的商品项（最多显示3个）
-    displayedItems() {
-      if (!this.orderInfo || !this.orderInfo.orderItems) return []
-      return this.orderInfo.orderItems.slice(0, 3)
-    },
-
-    // 隐藏的商品数量
-    hiddenItemsCount() {
-      if (!this.orderInfo || !this.orderInfo.orderItems) return 0
-      return Math.max(0, this.orderInfo.orderItems.length - 3)
-    },
-  },
-
-  mounted() {
-    // 获取订单ID和支付状态
-    this.orderId = this.$route.params.id || this.$route.query.id
-    this.paymentStatus = this.$route.query.status || 'pending'
-    this.errorMessage = this.$route.query.message || ''
-
-    // 如果有订单ID，获取订单详情
-    if (this.orderId) {
-      this.fetchOrderDetail()
-    } else {
-      this.loading = false
-    }
-  },
-
-  methods: {
-    // 获取订单详情
-    async fetchOrderDetail() {
-      this.loading = true
-      try {
-        this.orderInfo = await this.$store.dispatch('order/getOrderDetail', this.orderId)
-
-        // 根据订单状态更新支付状态
-        if (this.orderInfo.orderStatus === 1) {
-          this.paymentStatus = 'pending'
-        } else if (this.orderInfo.orderStatus >= 2) {
-          this.paymentStatus = 'success'
-          // 发送支付成功通知
-          notificationService.sendPaymentSuccessNotification({
-            orderId: this.orderId,
-            amount: this.orderInfo.actualAmount,
-            paymentMethod: this.orderInfo.paymentInfo?.paymentMethodText,
-            paymentTime: this.orderInfo.paymentTime,
-          })
-        }
-
-        // 发送订单状态变更通知
-        this.handleOrderStatusChange(this.paymentStatus)
-      } catch (error) {
-        logger.error('获取订单详情失败', error)
-        this.errorMessage = '获取订单信息失败'
-        this.loading = false
-      } finally {
-        this.loading = false
-      }
-    },
-
-    /**
-     * 处理订单状态变更并发送通知
-     * @param {string} newStatus - 新的订单状态
-     */
-    handleOrderStatusChange(newStatus) {
-      const statusTextMap = {
-        success: '支付成功',
-        failed: '支付失败',
-        pending: '等待支付',
-      }
-
-      notificationService.sendOrderStatusChangeNotification({
-        orderId: this.orderId,
-        status: statusTextMap[newStatus] || newStatus,
-        orderInfo: this.orderInfo,
-      })
-    },
-
-    // 格式化日期时间
-    formatDateTime(date) {
-      if (!date) return '--'
-      const d = new Date(date)
-      const year = d.getFullYear()
-      const month = String(d.getMonth() + 1).padStart(2, '0')
-      const day = String(d.getDate()).padStart(2, '0')
-      const hour = String(d.getHours()).padStart(2, '0')
-      const minute = String(d.getMinutes()).padStart(2, '0')
-      return `${year}-${month}-${day} ${hour}:${minute}`
-    },
-
-    // 查看订单详情
-    viewOrderDetail() {
-      this.$router.push(`/order/detail/${this.orderId}`)
-    },
-
-    // 前往支付页面
-    goToPayment() {
-      this.$router.push(`/order/payment/${this.orderId}`)
-    },
-
-    // 联系客服
-    contactService() {
-      this.$message.info('正在为您转接客服，请稍候...')
-      // 这里可以添加联系客服的逻辑，比如打开客服聊天窗口
-      // 发送客服联系通知
-      notificationService.sendServiceContactNotification({
-        orderId: this.orderId,
-        userId: this.$store.state.user?.id,
-        contactTime: new Date(),
-      })
-    },
-
-    // 继续购物
-    continueShopping() {
-      // 判断是否是外卖订单，如果是则返回外卖商家列表，否则返回首页
-      if (this.orderInfo && this.orderInfo.orderType === 'takeout') {
-        this.$router.push('/takeout/merchantList')
-      } else {
-        this.$router.push('/')
-      }
-    },
-  },
+interface OrderItem {
+  productImage?: string
+  productName: string
+  skuAttributes?: string
+  quantity: number
+  price?: number
 }
+
+interface PaymentInfo {
+  paymentMethodText?: string
+  transactionId?: string
+}
+
+interface OrderInfo {
+  orderNo: string
+  actualAmount?: number
+  paymentInfo?: PaymentInfo
+  paymentTime?: string | Date
+  shipTime?: string | Date
+  completeTime?: string | Date
+  orderStatus: number
+  orderItems: OrderItem[]
+  orderType?: string
+}
+
+// 路由和store
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+
+// 状态
+const loading = ref(true)
+const orderInfo = ref<OrderInfo | null>(null)
+const orderId = ref('')
+const paymentStatus = ref<'success' | 'failed' | 'pending'>('pending')
+const errorMessage = ref('')
+
+// 计算属性
+const resultTitle = computed(() => {
+  const titles: Record<string, string> = {
+    success: '支付成功！',
+    failed: '支付失败',
+    pending: '等待支付',
+  }
+  return titles[paymentStatus.value] || '支付处理中'
+})
+
+const resultSubtitle = computed(() => {
+  const subtitles: Record<string, string> = {
+    success: '感谢您的购买，我们将尽快为您发货',
+    failed: errorMessage.value || '请稍后重试或选择其他支付方式',
+    pending: '请尽快完成支付，以确保订单正常处理',
+  }
+  return subtitles[paymentStatus.value] || '支付正在处理中...'
+})
+
+const resultStatusClass = computed(() => {
+  const classes: Record<string, string> = {
+    success: 'success',
+    failed: 'failed',
+    pending: 'pending',
+  }
+  return classes[paymentStatus.value] || ''
+})
+
+const displayedItems = computed(() => {
+  if (!orderInfo.value || !orderInfo.value.orderItems) return []
+  return orderInfo.value.orderItems.slice(0, 3)
+})
+
+const hiddenItemsCount = computed(() => {
+  if (!orderInfo.value || !orderInfo.value.orderItems) return 0
+  return Math.max(0, orderInfo.value.orderItems.length - 3)
+})
+
+// 格式化日期时间
+const formatDateTime = (date: string | Date | undefined): string => {
+  if (!date) return '--'
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hour = String(d.getHours()).padStart(2, '0')
+  const minute = String(d.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
+// 获取订单详情
+const fetchOrderDetail = async () => {
+  loading.value = true
+  try {
+    orderInfo.value = await store.dispatch('order/getOrderDetail', orderId.value)
+
+    if (orderInfo.value.orderStatus === 1) {
+      paymentStatus.value = 'pending'
+    } else if (orderInfo.value.orderStatus >= 2) {
+      paymentStatus.value = 'success'
+      notificationService.sendPaymentSuccessNotification({
+        orderId: orderId.value,
+        amount: orderInfo.value.actualAmount,
+        paymentMethod: orderInfo.value.paymentInfo?.paymentMethodText,
+        paymentTime: orderInfo.value.paymentTime,
+      })
+    }
+
+    handleOrderStatusChange(paymentStatus.value)
+  } catch (error) {
+    logger.error('获取订单详情失败', error)
+    errorMessage.value = '获取订单信息失败'
+    loading.value = false
+  } finally {
+    loading.value = false
+  }
+}
+
+// 处理订单状态变更并发送通知
+const handleOrderStatusChange = (newStatus: string) => {
+  const statusTextMap: Record<string, string> = {
+    success: '支付成功',
+    failed: '支付失败',
+    pending: '等待支付',
+  }
+
+  notificationService.sendOrderStatusChangeNotification({
+    orderId: orderId.value,
+    status: statusTextMap[newStatus] || newStatus,
+    orderInfo: orderInfo.value,
+  })
+}
+
+// 查看订单详情
+const viewOrderDetail = () => {
+  router.push(`/order/detail/${orderId.value}`)
+}
+
+// 前往支付页面
+const goToPayment = () => {
+  router.push(`/order/payment/${orderId.value}`)
+}
+
+// 联系客服
+const contactService = () => {
+  ElMessage.info('正在为您转接客服，请稍候...')
+  notificationService.sendServiceContactNotification({
+    orderId: orderId.value,
+    userId: (store.state as any).user?.id,
+    contactTime: new Date(),
+  })
+}
+
+// 继续购物
+const continueShopping = () => {
+  if (orderInfo.value && orderInfo.value.orderType === 'takeout') {
+    router.push('/takeout/merchantList')
+  } else {
+    router.push('/')
+  }
+}
+
+// 组件挂载
+onMounted(() => {
+  orderId.value = (route.params.id as string) || (route.query.id as string) || ''
+  paymentStatus.value = (route.query.status as any) || 'pending'
+  errorMessage.value = (route.query.message as string) || ''
+
+  if (orderId.value) {
+    fetchOrderDetail()
+  } else {
+    loading.value = false
+  }
+})
 </script>
 
 <style scoped>

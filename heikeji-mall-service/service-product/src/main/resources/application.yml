@@ -69,8 +69,6 @@ spring:
       discovery:
         enabled: false
       config:
-        import-check:
-          enabled: false
         enabled: false
 
 mybatis-plus:

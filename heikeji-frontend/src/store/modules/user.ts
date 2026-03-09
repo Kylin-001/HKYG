@@ -53,8 +53,9 @@ export const useUserStore = defineStore('user', () => {
 
       ElMessage.success('登录成功')
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '登录失败')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '登录失败'
+      ElMessage.error(errorMessage)
       throw error
     } finally {
       isLoading.value = false
@@ -73,8 +74,9 @@ export const useUserStore = defineStore('user', () => {
 
       ElMessage.success('登录成功')
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '登录失败')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '登录失败'
+      ElMessage.error(errorMessage)
       throw error
     } finally {
       isLoading.value = false
@@ -89,8 +91,9 @@ export const useUserStore = defineStore('user', () => {
 
       ElMessage.success('注册成功')
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '注册失败')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '注册失败'
+      ElMessage.error(errorMessage)
       throw error
     } finally {
       isLoading.value = false
@@ -103,8 +106,9 @@ export const useUserStore = defineStore('user', () => {
       const res = await appAuthApi.getVerificationCode({ phone, type })
       ElMessage.success('验证码发送成功')
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '验证码发送失败')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '验证码发送失败'
+      ElMessage.error(errorMessage)
       throw error
     }
   }
@@ -115,15 +119,14 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       const res = await appAuthApi.getUserInfo()
 
-      // 存储用户信息
       userInfo.value = res.data
       roles.value = res.data.roles || []
       permissions.value = res.data.permissions || []
 
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '获取用户信息失败')
-      // 清除token并跳转到登录页
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取用户信息失败'
+      ElMessage.error(errorMessage)
       logoutAction()
       throw error
     } finally {
@@ -135,16 +138,14 @@ export const useUserStore = defineStore('user', () => {
   async function logoutAction() {
     try {
       await appAuthApi.logout()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('登出失败:', error)
     } finally {
-      // 清除状态
       token.value = ''
       userInfo.value = null
       roles.value = []
       permissions.value = []
 
-      // 清除本地存储
       localStorage.removeItem('token')
 
       ElMessage.success('已退出登录')
@@ -157,15 +158,15 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       const res = await appAuthApi.updateUserInfo(userData)
 
-      // 更新本地用户信息
       if (userInfo.value) {
         userInfo.value = { ...userInfo.value, ...res.data }
       }
 
       ElMessage.success('用户信息更新成功')
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '用户信息更新失败')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '用户信息更新失败'
+      ElMessage.error(errorMessage)
       throw error
     } finally {
       isLoading.value = false
@@ -178,15 +179,15 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       const res = await appAuthApi.updateAvatar(formData)
 
-      // 更新本地用户头像
       if (userInfo.value) {
         userInfo.value.avatar = res.data.avatar
       }
 
       ElMessage.success('头像更新成功')
       return res
-    } catch (error: any) {
-      ElMessage.error(error.message || '头像更新失败')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '头像更新失败'
+      ElMessage.error(errorMessage)
       throw error
     } finally {
       isLoading.value = false
