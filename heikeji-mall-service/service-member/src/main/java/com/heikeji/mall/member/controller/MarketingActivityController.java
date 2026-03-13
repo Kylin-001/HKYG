@@ -1,6 +1,6 @@
 package com.heikeji.mall.member.controller;
 
-import com.heikeji.mall.common.core.result.Result;
+import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.member.dto.MarketingActivityDTO;
 import com.heikeji.mall.member.service.MarketingActivityService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,36 +23,36 @@ public class MarketingActivityController {
 
     @GetMapping("/list")
     @Operation(summary = "获取可用营销活动列表")
-    public Result<List<MarketingActivityDTO>> getAvailableActivities(
+    public R<List<MarketingActivityDTO>> getAvailableActivities(
             @Parameter(description = "用户ID") @RequestParam Long userId) {
         List<MarketingActivityDTO> activities = marketingActivityService.getAvailableActivities(userId);
-        return Result.success(activities);
+        return R.ok(activities);
     }
 
     @GetMapping("/detail/{activityId}")
     @Operation(summary = "获取营销活动详情")
-    public Result<MarketingActivityDTO> getActivityDetail(
+    public R<MarketingActivityDTO> getActivityDetail(
             @Parameter(description = "活动ID") @PathVariable Long activityId,
             @Parameter(description = "用户ID") @RequestParam Long userId) {
         MarketingActivityDTO activity = marketingActivityService.getActivityDetail(activityId, userId);
-        return Result.success(activity);
+        return R.ok(activity);
     }
 
     @PostMapping("/participate/{activityId}")
     @Operation(summary = "参与营销活动")
-    public Result<Boolean> participateActivity(
+    public R<Boolean> participateActivity(
             @Parameter(description = "活动ID") @PathVariable Long activityId,
             @Parameter(description = "用户ID") @RequestParam Long userId) {
         boolean success = marketingActivityService.participateActivity(activityId, userId);
-        return Result.success(success);
+        return R.ok(success);
     }
 
     @PostMapping("/complete/{activityId}")
     @Operation(summary = "完成营销活动")
-    public Result<Boolean> completeActivity(
+    public R<Boolean> completeActivity(
             @Parameter(description = "活动ID") @PathVariable Long activityId,
             @Parameter(description = "用户ID") @RequestParam Long userId) {
         boolean success = marketingActivityService.completeActivity(activityId, userId);
-        return Result.success(success);
+        return R.ok(success);
     }
 }

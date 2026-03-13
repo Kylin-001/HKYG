@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -13,27 +15,20 @@ import java.util.Date;
  * 商品实体类
  */
 @Data
+@Getter
+@Setter
 @TableName("product")
 public class Product implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
     
-    @TableField("store_id")
-    private Long merchantId;
+    private String name;
     
     @TableField("category_id")
     private Long categoryId;
     
-    private String name;
-    
-    @TableField("description")
-    private String subtitle;
-    
-    @TableField("images")
-    private String mainImage;
-    
-    @TableField(exist = false)
-    private String images;
+    @TableField("store_id")
+    private Long merchantId;
     
     private BigDecimal price;
     
@@ -42,19 +37,19 @@ public class Product implements Serializable {
     
     private Integer stock;
     
-    @TableField(exist = false)
-    private Integer lockedStock;
-    
     @TableField("sales_count")
     private Integer sales;
     
-    @TableField("description")
-    private String detail;
+    private String images;
+    
+    private String description;
+    
+    private String specifications;
     
     private Integer status;
     
-    @TableField(exist = false)
-    private Integer sortOrder;
+    @TableField("is_featured")
+    private Integer isRecommend;
     
     @TableField("created_at")
     private Date createTime;
@@ -63,26 +58,29 @@ public class Product implements Serializable {
     private Date updateTime;
     
     @TableField(exist = false)
+    private String subtitle;
+    
+    @TableField(exist = false)
+    private Integer lockedStock;
+    
+    @TableField(exist = false)
+    private Integer alertStock;
+    
+    @TableField(exist = false)
+    private String mainImage;
+    
+    @TableField(exist = false)
+    private String detail;
+    
+    @TableField(exist = false)
+    private Integer sortOrder;
+    
+    @TableField(exist = false)
     private Integer delFlag;
     
     @TableField(exist = false)
     private Integer version;
     
-    /**
-     * 是否新品
-     */
     @TableField(exist = false)
     private Integer isNew;
-    
-    /**
-     * 是否推荐
-     */
-    @TableField("is_featured")
-    private Integer isRecommend;
-    
-    /**
-     * 库存预警阈值
-     */
-    @TableField(exist = false)
-    private Integer alertStock;
 }

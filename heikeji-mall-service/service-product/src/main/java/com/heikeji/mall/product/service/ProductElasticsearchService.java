@@ -1,7 +1,5 @@
 package com.heikeji.mall.product.service;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import co.elastic.clients.elasticsearch._types.SortOrder;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.heikeji.mall.product.document.ProductIndex;
 import com.heikeji.mall.product.dto.ProductSearchDTO;
@@ -151,17 +149,13 @@ public class ProductElasticsearchService {
             product.setMerchantId(index.getMerchantId());
             product.setCategoryId(index.getCategoryId());
             product.setName(index.getName());
-            product.setSubtitle(index.getSubtitle());
             product.setPrice(index.getPrice());
             product.setOriginalPrice(index.getOriginalPrice());
             product.setStock(index.getStock());
             product.setSales(index.getSales());
             product.setStatus(index.getStatus());
-            product.setSortOrder(index.getSortOrder());
             product.setCreateTime(index.getCreateTime());
             product.setUpdateTime(index.getUpdateTime());
-            product.setDelFlag(index.getDelFlag());
-            product.setDetail(index.getDetail());
             product.setImages(index.getImages());
             productList.add(product);
         }

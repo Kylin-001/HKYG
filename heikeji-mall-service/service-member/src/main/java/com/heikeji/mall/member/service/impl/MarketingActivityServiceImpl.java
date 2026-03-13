@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heikeji.mall.member.dto.MarketingActivityDTO;
 import com.heikeji.mall.member.entity.MarketingActivity;
 import com.heikeji.mall.member.entity.UserActivityRecord;
+import com.heikeji.mall.member.mapper.MarketingActivityMapper;
 import com.heikeji.mall.member.mapper.UserActivityRecordMapper;
 import com.heikeji.mall.member.service.MarketingActivityService;
 import com.heikeji.mall.member.service.PointService;

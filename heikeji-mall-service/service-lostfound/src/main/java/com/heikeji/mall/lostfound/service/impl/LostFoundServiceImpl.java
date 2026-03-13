@@ -26,7 +26,7 @@ public class LostFoundServiceImpl extends ServiceImpl<LostFoundMapper, LostFound
     @Autowired
     private LostFoundMapper lostFoundMapper;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -47,20 +47,20 @@ public class LostFoundServiceImpl extends ServiceImpl<LostFoundMapper, LostFound
 
     @Override
     public LostFound getLostFoundDetail(Long id) {
-        // 先从Redis获取
-        String redisKey = "lostfound:detail:" + id;
-        LostFound lostFound = (LostFound) redisTemplate.opsForValue().get(redisKey);
+        LostFound lostFound = null;
+        if (redisTemplate != null) {
+            String redisKey = "lostfound:detail:" + id;
+            lostFound = (LostFound) redisTemplate.opsForValue().get(redisKey);
+        }
 
         if (lostFound == null) {
-            // 从数据库获取
             lostFound = lostFoundMapper.selectById(id);
-            if (lostFound != null) {
-                // 存入Redis，过期时间1小时
+            if (lostFound != null && redisTemplate != null) {
+                String redisKey = "lostfound:detail:" + id;
                 redisTemplate.opsForValue().set(redisKey, lostFound, 1, TimeUnit.HOURS);
             }
         }
 
-        // 增加浏览量
         increaseViewCount(id);
 
         return lostFound;
@@ -114,9 +114,10 @@ public class LostFoundServiceImpl extends ServiceImpl<LostFoundMapper, LostFound
 
         int result = lostFoundMapper.updateById(lostFound);
 
-        // 清除Redis缓存
-        String redisKey = "lostfound:detail:" + id;
-        redisTemplate.delete(redisKey);
+        if (redisTemplate != null) {
+            String redisKey = "lostfound:detail:" + id;
+            redisTemplate.delete(redisKey);
+        }
 
         return result > 0;
     }
@@ -131,48 +132,49 @@ public class LostFoundServiceImpl extends ServiceImpl<LostFoundMapper, LostFound
 
         int result = lostFoundMapper.updateById(lostFound);
 
-        // 清除Redis缓存
-        String redisKey = "lostfound:detail:" + id;
-        redisTemplate.delete(redisKey);
+        if (redisTemplate != null) {
+            String redisKey = "lostfound:detail:" + id;
+            redisTemplate.delete(redisKey);
+        }
 
         return result > 0;
     }
 
     @Override
     public void increaseViewCount(Long id) {
-        // 异步增加浏览量，减少主流程耗时
         new Thread(() -> {
-            // 更新数据库
             lostFoundMapper.increaseViewCount(id);
 
-            // 更新Redis缓存
-            String redisKey = "lostfound:detail:" + id;
-            LostFound lostFound = (LostFound) redisTemplate.opsForValue().get(redisKey);
-            if (lostFound != null) {
-                lostFound.setViewCount(lostFound.getViewCount() + 1);
-                redisTemplate.opsForValue().set(redisKey, lostFound, 1, TimeUnit.HOURS);
+            if (redisTemplate != null) {
+                String redisKey = "lostfound:detail:" + id;
+                LostFound lostFound = (LostFound) redisTemplate.opsForValue().get(redisKey);
+                if (lostFound != null) {
+                    lostFound.setViewCount(lostFound.getViewCount() + 1);
+                    redisTemplate.opsForValue().set(redisKey, lostFound, 1, TimeUnit.HOURS);
+                }
             }
         }).start();
     }
 
     @Override
     public List<LostFound> getHotLostFound(Integer limit) {
-        // 先从Redis获取
-        String redisKey = "lostfound:hot:" + limit;
-        List<LostFound> hotLostFound = (List<LostFound>) redisTemplate.opsForValue().get(redisKey);
+        List<LostFound> hotLostFound = null;
+        if (redisTemplate != null) {
+            String redisKey = "lostfound:hot:" + limit;
+            hotLostFound = (List<LostFound>) redisTemplate.opsForValue().get(redisKey);
+        }
 
         if (hotLostFound == null) {
-            // 从数据库获取
             QueryWrapper<LostFound> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("del_flag", 0);
-            queryWrapper.eq("status", 1); // 只查询已发布的信息
+            queryWrapper.eq("status", 1);
             queryWrapper.orderByDesc("view_count");
             queryWrapper.last("LIMIT " + limit);
 
             hotLostFound = lostFoundMapper.selectList(queryWrapper);
 
-            if (hotLostFound != null && !hotLostFound.isEmpty()) {
-                // 存入Redis，过期时间1小时
+            if (hotLostFound != null && !hotLostFound.isEmpty() && redisTemplate != null) {
+                String redisKey = "lostfound:hot:" + limit;
                 redisTemplate.opsForValue().set(redisKey, hotLostFound, 1, TimeUnit.HOURS);
             }
         }

@@ -1,12 +1,10 @@
 package com.heikeji.mall.product.document;
 
 import com.heikeji.mall.product.entity.Product;
-import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -15,9 +13,7 @@ import java.util.Date;
  * Product Index Entity Class
  * Used for Elasticsearch document mapping
  */
-@Data
 @Document(indexName = "product_index")
-
 public class ProductIndex {
 
     @Id
@@ -42,25 +38,25 @@ public class ProductIndex {
     @Field(type = FieldType.Keyword, index = false)
     private String images;
 
-    @Field(type = FieldType.Keyword) // 改为Keyword避免精度丢失
+    @Field(type = FieldType.Keyword)
     private BigDecimal price;
 
-    @Field(type = FieldType.Keyword) // 改为Keyword避免精度丢失
+    @Field(type = FieldType.Keyword)
     private BigDecimal originalPrice;
 
-    @Field(type = FieldType.Integer, index = true) // 添加索引，方便按库存过滤
+    @Field(type = FieldType.Integer, index = true)
     private Integer stock;
 
-    @Field(type = FieldType.Integer, index = false) // 锁定库存不需要搜索，不建索引
+    @Field(type = FieldType.Integer, index = false)
     private Integer lockedStock;
 
-    @Field(type = FieldType.Integer, index = true) // 添加索引，方便按销量排序和搜索
+    @Field(type = FieldType.Integer, index = true)
     private Integer sales;
 
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String detail;
 
-    @Field(type = FieldType.Integer, index = true) // 添加索引，方便按状态过滤
+    @Field(type = FieldType.Integer, index = true)
     private Integer status;
 
     @Field(type = FieldType.Integer)
@@ -78,19 +74,180 @@ public class ProductIndex {
     @Field(type = FieldType.Integer)
     private Integer version;
     
-    /**
-     * 是否新品
-     */
     @Field(type = FieldType.Integer, index = true)
     private Integer isNew;
     
-    /**
-     * 是否推荐
-     */
     @Field(type = FieldType.Integer, index = true)
     private Integer isRecommend;
 
-    // Convert from Product entity to ProductIndex
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(Long merchantId) {
+        this.merchantId = merchantId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
+    }
+
+    public String getMainImage() {
+        return mainImage;
+    }
+
+    public void setMainImage(String mainImage) {
+        this.mainImage = mainImage;
+    }
+
+    public String getImages() {
+        return images;
+    }
+
+    public void setImages(String images) {
+        this.images = images;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public Integer getLockedStock() {
+        return lockedStock;
+    }
+
+    public void setLockedStock(Integer lockedStock) {
+        this.lockedStock = lockedStock;
+    }
+
+    public Integer getSales() {
+        return sales;
+    }
+
+    public void setSales(Integer sales) {
+        this.sales = sales;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Integer getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(Integer delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public Integer getIsNew() {
+        return isNew;
+    }
+
+    public void setIsNew(Integer isNew) {
+        this.isNew = isNew;
+    }
+
+    public Integer getIsRecommend() {
+        return isRecommend;
+    }
+
+    public void setIsRecommend(Integer isRecommend) {
+        this.isRecommend = isRecommend;
+    }
+
     public static ProductIndex fromProduct(Product product) {
         ProductIndex index = new ProductIndex();
         index.setId(product.getId());

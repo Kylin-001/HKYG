@@ -13,22 +13,21 @@ public class LostFoundMatcher {
     private final List<LostFound> foundItems = new ArrayList<>();
 
     private static final Map<String, Double> WEIGHTS = Map.of(
-            "category", 0.3,
+            "category", 0.35,
             "name", 0.25,
-            "color", 0.15,
-            "location", 0.15,
+            "location", 0.2,
             "time", 0.1,
-            "description", 0.05
+            "description", 0.1
     );
 
     public void addLostItem(LostFound item) {
-        if ("lost".equals(item.getType())) {
+        if (item.getType() != null && item.getType() == 0) {
             lostItems.add(item);
         }
     }
 
     public void addFoundItem(LostFound item) {
-        if ("found".equals(item.getType())) {
+        if (item.getType() != null && item.getType() == 1) {
             foundItems.add(item);
         }
     }
@@ -68,22 +67,18 @@ public class LostFoundMatcher {
             score += WEIGHTS.get("category");
         }
 
-        double nameSimilarity = calculateTextSimilarity(item1.getItemName(), item2.getItemName());
+        double nameSimilarity = calculateTextSimilarity(item1.getTitle(), item2.getTitle());
         score += nameSimilarity * WEIGHTS.get("name");
-
-        if (item1.getColor() != null && item1.getColor().equals(item2.getColor())) {
-            score += WEIGHTS.get("color");
-        }
 
         double locationSimilarity = calculateLocationSimilarity(item1.getLocation(), item2.getLocation());
         score += locationSimilarity * WEIGHTS.get("location");
 
-        double timeSimilarity = calculateTimeSimilarity(item1.getLostTime(), item2.getLostTime());
+        double timeSimilarity = calculateTimeSimilarity(item1.getTime(), item2.getTime());
         score += timeSimilarity * WEIGHTS.get("time");
 
         double descSimilarity = calculateTextSimilarity(
-                item1.getDescription() != null ? item1.getDescription() : "",
-                item2.getDescription() != null ? item2.getDescription() : ""
+                item1.getContent() != null ? item1.getContent() : "",
+                item2.getContent() != null ? item2.getContent() : ""
         );
         score += descSimilarity * WEIGHTS.get("description");
 

@@ -3,6 +3,8 @@ package com.heikeji.mall.secondhand.util;
 import com.heikeji.mall.secondhand.entity.SecondhandProduct;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,10 +69,10 @@ public class ProductRecommender {
         }
 
         if (product1.getPrice() != null && product2.getPrice() != null) {
-            double priceDiff = Math.abs(product1.getPrice() - product2.getPrice());
-            double maxPrice = Math.max(product1.getPrice(), product2.getPrice());
-            if (maxPrice > 0) {
-                similarity += (1 - priceDiff / maxPrice) * 0.3;
+            BigDecimal priceDiff = product1.getPrice().subtract(product2.getPrice()).abs();
+            BigDecimal maxPrice = product1.getPrice().max(product2.getPrice());
+            if (maxPrice.compareTo(BigDecimal.ZERO) > 0) {
+                similarity += (1 - priceDiff.divide(maxPrice, 4, RoundingMode.HALF_UP).doubleValue()) * 0.3;
             }
         }
 

@@ -172,8 +172,24 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         userCoupon.setUsedAt(null);
         userCoupon.setOrderNo(null);
         userCouponMapper.updateById(userCoupon);
-
-        log.info("用户{}取消使用优惠券{}成功，订单号：{}", userCoupon.getUserId(), userCouponId, orderNo);
         return true;
+    }
+
+    @Override
+    public List<UserCouponDTO> getUserCoupons(Long userId, Integer status) {
+        LambdaQueryWrapper<UserCoupon> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserCoupon::getUserId, userId);
+        if (status != null) {
+            wrapper.eq(UserCoupon::getStatus, status);
+        }
+        wrapper.orderByDesc(UserCoupon::getCreateTime);
+        
+        List<UserCoupon> userCoupons = userCouponMapper.selectList(wrapper);
+        
+        return userCoupons.stream().map(userCoupon -> {
+            UserCouponDTO dto = new UserCouponDTO();
+            BeanUtils.copyProperties(userCoupon, dto);
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

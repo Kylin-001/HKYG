@@ -71,7 +71,8 @@ start_backend() {
     echo "========================================="
     echo ""
     
-    cd "$PROJECT_DIR"
+    PROJECT_ROOT="$PROJECT_DIR/../.."
+    cd "$PROJECT_ROOT"
     
     echo "正在编译项目..."
     mvn clean package -DskipTests
@@ -84,16 +85,11 @@ start_backend() {
     echo "✓ 项目编译成功"
     echo ""
     
-    echo "启动 Nacos..."
-    cd "$PROJECT_DIR/heikeji-system" || exit 1
-    nohup java -jar target/heikeji-system-1.0.0.jar > nacos.log 2>&1 &
-    NACOS_PID=$!
-    echo "✓ Nacos 已启动 (PID: $NACOS_PID)"
-    echo "   日志文件: nacos.log"
-    sleep 10
+    echo "Nacos已经在运行中，跳过启动"
+    echo ""
     
     echo "启动 Gateway..."
-    cd "$PROJECT_DIR/heikeji-gateway" || exit 1
+    cd "$PROJECT_ROOT/heikeji-gateway" || exit 1
     nohup java -jar target/heikeji-gateway-1.0.0.jar > gateway.log 2>&1 &
     GATEWAY_PID=$!
     echo "✓ Gateway 已启动 (PID: $GATEWAY_PID)"
@@ -101,7 +97,7 @@ start_backend() {
     sleep 5
     
     echo "启动 Admin 服务..."
-    cd "$PROJECT_DIR/heikeji-admin" || exit 1
+    cd "$PROJECT_ROOT/heikeji-admin" || exit 1
     nohup java -jar target/heikeji-admin-1.0.0.jar > admin.log 2>&1 &
     ADMIN_PID=$!
     echo "✓ Admin 服务已启动 (PID: $ADMIN_PID)"
@@ -109,12 +105,12 @@ start_backend() {
     sleep 3
     
     echo "启动服务模块..."
-    SERVICES=("heikeji-mall-service/service-user" "heikeji-mall-service/service-product" "heikeji-mall-service/service-order" "heikeji-mall-service/service-payment" "heikeji-mall-service/service-member")
+    SERVICES=("heikeji-mall-service/service-user" "heikeji-mall-service/service-product" "heikeji-mall-service/service-order" "heikeji-mall-service/service-payment" "heikeji-mall-service/service-member" "heikeji-mall-service/service-takeout" "heikeji-mall-service/service-secondhand" "heikeji-mall-service/service-lostfound" "heikeji-mall-service/service-campus" "heikeji-mall-service/service-delivery")
     
     for SERVICE in "${SERVICES[@]}"; do
-        if [ -d "$PROJECT_DIR/$SERVICE" ]; then
+        if [ -d "$PROJECT_ROOT/$SERVICE" ]; then
             SERVICE_NAME=$(basename "$SERVICE")
-            cd "$PROJECT_DIR/$SERVICE" || exit 1
+            cd "$PROJECT_ROOT/$SERVICE" || exit 1
             
             if [ -f "target/${SERVICE_NAME}-1.0.0.jar" ]; then
                 nohup java -jar "target/${SERVICE_NAME}-1.0.0.jar" > "${SERVICE_NAME}.log" 2>&1 &

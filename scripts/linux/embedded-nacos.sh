@@ -8,8 +8,8 @@ set -e
 # 配置变量
 NACOS_VERSION="2.3.2"
 NACOS_PORT="8848"
-NACOS_HOME="/tmp/nacos"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+NACOS_HOME="${PROJECT_ROOT}/nacos"
 
 # 颜色定义
 RED='\033[0;31m'
@@ -58,9 +58,18 @@ check_java() {
 # 检查端口是否被占用
 check_port() {
     local port=$1
-    if netstat -tuln | grep -q ":$port "; then
-        log_warn "端口 $port 已被占用"
-        return 1
+    if command -v netstat &> /dev/null; then
+        if netstat -tuln 2>/dev/null | grep -q ":$port "; then
+            log_warn "端口 $port 已被占用"
+            return 1
+        fi
+    elif command -v ss &> /dev/null; then
+        if ss -tuln 2>/dev/null | grep -q ":$port "; then
+            log_warn "端口 $port 已被占用"
+            return 1
+        fi
+    else
+        log_warn "无法检查端口状态（netstat和ss都不可用）"
     fi
     return 0
 }
@@ -73,9 +82,16 @@ wait_for_port() {
     log_info "等待端口 $port 可用..."
     
     for i in $(seq 1 $timeout); do
-        if netstat -tuln | grep -q ":$port "; then
-            log_info "端口 $port 已就绪"
-            return 0
+        if command -v netstat &> /dev/null; then
+            if netstat -tuln 2>/dev/null | grep -q ":$port "; then
+                log_info "端口 $port 已就绪"
+                return 0
+            fi
+        elif command -v ss &> /dev/null; then
+            if ss -tuln 2>/dev/null | grep -q ":$port "; then
+                log_info "端口 $port 已就绪"
+                return 0
+            fi
         fi
         sleep 1
     done
@@ -160,7 +176,6 @@ nacos.core.auth.enabled=false
 nacos.core.auth.default.token.secret.key=SecretKey012345678901234567890123456789012345678901234567890123456789
 
 # 日志配置
-server.tomcat.basedir=
 server.tomcat.accesslog.enabled=true
 server.tomcat.accesslog.pattern=%h %l %u %t "%r" %s %b %D "%{Referer}i" "%{User-Agent}i" %a
 server.tomcat.accesslog.prefix=access_log

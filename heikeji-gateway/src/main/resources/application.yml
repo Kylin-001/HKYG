@@ -1,7 +1,5 @@
 server:
-  port: 9999
-  servlet:
-    context-path: /
+  port: 8080
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml,application/xml+rss,image/svg+xml
@@ -22,7 +20,7 @@ spring:
         import-check:
           enabled: false
       discovery:
-        enabled: false
+        enabled: true
         server-addr: localhost:8848
         namespace: public
     gateway:
@@ -135,17 +133,20 @@ spring:
           enabled: false
 
   # Redis配置（用于限流）
-  redis:
-    host: localhost
-    port: 6379
-    database: 1
-    timeout: 3000
-    jedis:
-      pool:
-        max-active: 8
-        max-wait: -1
-        max-idle: 8
-        min-idle: 0
+  # 暂时禁用Redis限流功能，因为Redis 7.0.15 RESP3协议与Lettuce客户端存在兼容性问题
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   password: Redis@hkyg
+  #   database: 1
+  #   timeout: 3000
+  #   jedis:
+  #     pool:
+  #       max-active: 8
+  #       max-wait: -1
+  #       max-idle: 8
+  #       min-idle: 0
+  #   client-type: jedis
 
 # 监控配置
 management:
@@ -156,6 +157,9 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    redis:
+      enabled: false
 
 # 日志配置
 logging:

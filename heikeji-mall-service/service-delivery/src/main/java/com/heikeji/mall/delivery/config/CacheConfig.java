@@ -1,5 +1,7 @@
 package com.heikeji.mall.delivery.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -12,17 +14,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.lang.reflect.Method;
 
-/**
- * 配送服务缓存配置类，统一管理缓存策略
- */
 @Configuration
 @EnableCaching
 public class CacheConfig extends CachingConfigurerSupport {
     
-    /**
-     * 自定义缓存键生成器，生成统一格式的缓存键
-     * 格式：methodName::param1::param2::...::paramN
-     */
     @Bean
     @Override
     public KeyGenerator keyGenerator() {
@@ -43,10 +38,9 @@ public class CacheConfig extends CachingConfigurerSupport {
         };
     }
     
-    /**
-     * RedisTemplate配置
-     */
     @Bean
+    @ConditionalOnClass(RedisConnectionFactory.class)
+    @ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true", matchIfMissing = false)
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
@@ -58,24 +52,15 @@ public class CacheConfig extends CachingConfigurerSupport {
         return template;
     }
     
-    /**
-     * 缓存名称常量定义
-     */
     public static final String CACHE_NAME_DELIVERY = "deliveryCache";
     public static final String CACHE_NAME_DELIVERYMAN = "deliverymanCache";
     public static final String CACHE_NAME_ROUTE = "routeCache";
     
-    /**
-     * 缓存过期时间常量定义
-     */
-    public static final int CACHE_EXPIRE_TIME_DELIVERY = 300; // 配送信息缓存5分钟
-    public static final int CACHE_EXPIRE_TIME_DELIVERYMAN = 3600; // 配送员信息缓存1小时
-    public static final int CACHE_EXPIRE_TIME_ROUTE = 60; // 路线规划缓存1分钟
-    public static final int CACHE_EXPIRE_TIME_STATISTICS = 300; // 统计数据缓存5分钟
+    public static final int CACHE_EXPIRE_TIME_DELIVERY = 300;
+    public static final int CACHE_EXPIRE_TIME_DELIVERYMAN = 3600;
+    public static final int CACHE_EXPIRE_TIME_ROUTE = 60;
+    public static final int CACHE_EXPIRE_TIME_STATISTICS = 300;
     
-    /**
-     * 缓存键前缀常量定义
-     */
     public static final String CACHE_KEY_DELIVERY = "delivery::";
     public static final String CACHE_KEY_DELIVERYMAN = "deliveryman::";
     public static final String CACHE_KEY_ROUTE = "route::";

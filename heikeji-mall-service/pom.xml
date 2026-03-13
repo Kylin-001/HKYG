@@ -24,7 +24,7 @@
         <module>service-campus</module>
         <module>service-secondhand</module>
         <module>service-lostfound</module>
-        <module>../service-api-docs</module>
+        <module>service-member</module>
     </modules>
 </project>
 

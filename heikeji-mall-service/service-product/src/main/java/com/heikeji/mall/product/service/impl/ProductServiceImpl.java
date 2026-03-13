@@ -365,7 +365,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             }
         }
         
-        wrapper.orderByDesc("update_time");
+        wrapper.orderByDesc("updated_at");
         return this.page(page, wrapper);
     }
 
@@ -375,7 +375,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
         wrapper.eq("merchant_id", merchantId)
                .eq("status", 1)
-               .orderByDesc("update_time");
+               .orderByDesc("updated_at");
         return this.list(wrapper);
     }
 

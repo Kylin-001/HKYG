@@ -1,6 +1,6 @@
 package com.heikeji.mall.member.controller;
 
-import com.heikeji.mall.common.core.result.Result;
+import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.member.dto.MemberLevelDTO;
 import com.heikeji.mall.member.service.MemberLevelService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,25 +23,25 @@ public class MemberLevelController {
 
     @GetMapping("/list")
     @Operation(summary = "获取所有会员等级")
-    public Result<List<MemberLevelDTO>> getAllLevels() {
+    public R<List<MemberLevelDTO>> getAllLevels() {
         List<MemberLevelDTO> levels = memberLevelService.getAllLevels();
-        return Result.success(levels);
+        return R.ok(levels);
     }
 
     @GetMapping("/current")
     @Operation(summary = "获取用户当前等级")
-    public Result<MemberLevelDTO> getCurrentLevel(
+    public R<MemberLevelDTO> getCurrentLevel(
             @Parameter(description = "用户ID") @RequestParam Long userId) {
         MemberLevelDTO level = memberLevelService.getCurrentLevel(userId);
-        return Result.success(level);
+        return R.ok(level);
     }
 
     @GetMapping("/check")
     @Operation(summary = "检查并升级会员等级")
-    public Result<Boolean> checkAndUpgrade(
+    public R<Boolean> checkAndUpgrade(
             @Parameter(description = "用户ID") @RequestParam Long userId,
             @Parameter(description = "当前积分") @RequestParam Integer currentPoints) {
         boolean upgraded = memberLevelService.checkAndUpgrade(userId, currentPoints);
-        return Result.success(upgraded);
+        return R.ok(upgraded);
     }
 }

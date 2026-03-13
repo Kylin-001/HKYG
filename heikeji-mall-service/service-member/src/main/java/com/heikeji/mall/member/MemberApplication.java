@@ -2,10 +2,10 @@ package com.heikeji.mall.member;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-/**
- * 浼氬憳鏈嶅姟鍚姩绫? */
 @SpringBootApplication
+@EnableDiscoveryClient
 public class MemberApplication {
 
     public static void main(String[] args) {

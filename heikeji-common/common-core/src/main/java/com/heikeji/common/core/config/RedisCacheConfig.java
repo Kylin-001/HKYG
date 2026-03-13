@@ -21,7 +21,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableCaching
-@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true", matchIfMissing = false)
 public class RedisCacheConfig {
 
     /**

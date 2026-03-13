@@ -5,7 +5,7 @@
 <mapper namespace="com.heikeji.mall.product.mapper.CategoryMapper">
 
     <sql id="Base_Column_List">
-        id, name, parent_id, icon, sort_order, status, level, created_by, created_time, updated_by, updated_time, deleted
+        id, name, parent_id, icon, sort_order, is_enabled, created_at, updated_at
     </sql>
 
     <select id="selectEnabledCategories" resultType="com.heikeji.mall.product.entity.Category">
@@ -14,8 +14,7 @@
         FROM 
             category
         WHERE 
-            status = 1
-            AND deleted = 0
+            is_enabled = 1
         ORDER BY 
             sort_order ASC
     </select>
@@ -26,8 +25,7 @@
         FROM 
             category
         WHERE 
-            status = #{status}
-            AND deleted = 0
+            is_enabled = #{status}
         ORDER BY 
             sort_order ASC
     </select>
@@ -37,8 +35,6 @@
             <include refid="Base_Column_List" />
         FROM 
             category
-        WHERE 
-            deleted = 0
         ORDER BY 
             sort_order ASC
     </select>
@@ -50,7 +46,6 @@
             category
         WHERE 
             parent_id = #{parentId}
-            AND deleted = 0
         ORDER BY 
             sort_order ASC
     </select>
@@ -60,8 +55,6 @@
             <include refid="Base_Column_List" />
         FROM 
             category
-        WHERE 
-            deleted = 0
         ORDER BY 
             sort_order ASC
     </select>
@@ -72,8 +65,7 @@
         FROM 
             category
         WHERE 
-            status = 1
-            AND deleted = 0
+            is_enabled = 1
         ORDER BY 
             sort_order ASC
     </select>
@@ -87,7 +79,6 @@
                 category
             WHERE 
                 id = #{categoryId}
-                AND deleted = 0
             UNION ALL
             SELECT 
                 c.id, c.parent_id, cp.depth + 1
@@ -97,7 +88,6 @@
                 category_path cp ON c.id = cp.parent_id
             WHERE 
                 c.parent_id != 0
-                AND c.deleted = 0
         )
         SELECT 
             MAX(depth) as category_depth
@@ -114,7 +104,6 @@
                 category
             WHERE 
                 parent_id = #{categoryId}
-                AND deleted = 0
             UNION ALL
             SELECT 
                 c.id
@@ -122,8 +111,6 @@
                 category c
             JOIN 
                 sub_categories sc ON c.parent_id = sc.id
-            WHERE 
-                c.deleted = 0
         )
         SELECT 
             COUNT(*)
@@ -131,7 +118,7 @@
             category
         WHERE 
             id IN (SELECT id FROM sub_categories)
-            AND status = 1
+            AND is_enabled = 1
     </select>
 
     <!-- 检查是否存在子分类 -->
@@ -143,7 +130,6 @@
                 category
             WHERE 
                 parent_id = #{categoryId}
-                AND deleted = 0
             UNION ALL
             SELECT 
                 c.id
@@ -151,8 +137,6 @@
                 category c
             JOIN 
                 sub_categories sc ON c.parent_id = sc.id
-            WHERE 
-                c.deleted = 0
         )
         SELECT 
             COUNT(*)
@@ -169,7 +153,6 @@
                 category
             WHERE 
                 id = #{categoryId}
-                AND deleted = 0
             UNION ALL
             SELECT 
                 c.*
@@ -179,14 +162,11 @@
                 category_path cp ON c.id = cp.parent_id
             WHERE 
                 c.parent_id != 0
-                AND c.deleted = 0
         )
         SELECT 
             <include refid="Base_Column_List" />
         FROM 
             category_path
-        ORDER BY 
-            level ASC
     </select>
 
     <!-- 获取父分类列表 -->
@@ -198,7 +178,6 @@
                 category
             WHERE 
                 id = #{categoryId}
-                AND deleted = 0
             UNION ALL
             SELECT 
                 c.*
@@ -208,7 +187,6 @@
                 parent_path pp ON c.id = pp.parent_id
             WHERE 
                 c.parent_id != 0
-                AND c.deleted = 0
         )
         SELECT 
             <include refid="Base_Column_List" />
@@ -216,8 +194,6 @@
             parent_path
         WHERE 
             id != #{categoryId}
-        ORDER BY 
-            level ASC
     </select>
 
     <!-- 查询指定层级的分类 -->
@@ -227,8 +203,7 @@
         FROM 
             category
         WHERE 
-            level = #{level}
-            AND deleted = 0
+            parent_id = 0
         ORDER BY 
             sort_order ASC
     </select>
@@ -244,7 +219,6 @@
             <foreach item="id" collection="ids" open="(" separator="," close=")">
                 #{id}
             </foreach>
-            AND deleted = 0
     </select>
 
     <!-- 检查分类名称是否存在 -->
@@ -255,7 +229,6 @@
             category
         WHERE 
             name = #{name}
-            AND deleted = 0
             <if test="id != null">
                 AND id != #{id}
             </if>

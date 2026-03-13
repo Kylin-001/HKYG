@@ -26,7 +26,7 @@ public class SecondhandProductServiceImpl extends ServiceImpl<SecondhandProductM
     @Autowired
     private SecondhandProductMapper secondhandProductMapper;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -48,20 +48,20 @@ public class SecondhandProductServiceImpl extends ServiceImpl<SecondhandProductM
 
     @Override
     public SecondhandProduct getProductDetail(Long productId) {
-        // 先从Redis获取
-        String redisKey = "secondhand:product:" + productId;
-        SecondhandProduct product = (SecondhandProduct) redisTemplate.opsForValue().get(redisKey);
+        SecondhandProduct product = null;
+        if (redisTemplate != null) {
+            String redisKey = "secondhand:product:" + productId;
+            product = (SecondhandProduct) redisTemplate.opsForValue().get(redisKey);
+        }
 
         if (product == null) {
-            // 从数据库获取
             product = secondhandProductMapper.selectById(productId);
-            if (product != null) {
-                // 存入Redis，过期时间1小时
+            if (product != null && redisTemplate != null) {
+                String redisKey = "secondhand:product:" + productId;
                 redisTemplate.opsForValue().set(redisKey, product, 1, TimeUnit.HOURS);
             }
         }
 
-        // 增加浏览量
         increaseViewCount(productId);
 
         return product;
@@ -134,9 +134,10 @@ public class SecondhandProductServiceImpl extends ServiceImpl<SecondhandProductM
 
         int result = secondhandProductMapper.updateById(product);
 
-        // 清除Redis缓存
-        String redisKey = "secondhand:product:" + productId;
-        redisTemplate.delete(redisKey);
+        if (redisTemplate != null) {
+            String redisKey = "secondhand:product:" + productId;
+            redisTemplate.delete(redisKey);
+        }
 
         return result > 0;
     }
@@ -151,48 +152,49 @@ public class SecondhandProductServiceImpl extends ServiceImpl<SecondhandProductM
 
         int result = secondhandProductMapper.updateById(product);
 
-        // 清除Redis缓存
-        String redisKey = "secondhand:product:" + productId;
-        redisTemplate.delete(redisKey);
+        if (redisTemplate != null) {
+            String redisKey = "secondhand:product:" + productId;
+            redisTemplate.delete(redisKey);
+        }
 
         return result > 0;
     }
 
     @Override
     public void increaseViewCount(Long productId) {
-        // 异步增加浏览量，减少主流程耗时
         new Thread(() -> {
-            // 更新数据库
             secondhandProductMapper.increaseViewCount(productId);
 
-            // 更新Redis缓存
-            String redisKey = "secondhand:product:" + productId;
-            SecondhandProduct product = (SecondhandProduct) redisTemplate.opsForValue().get(redisKey);
-            if (product != null) {
-                product.setViewCount(product.getViewCount() + 1);
-                redisTemplate.opsForValue().set(redisKey, product, 1, TimeUnit.HOURS);
+            if (redisTemplate != null) {
+                String redisKey = "secondhand:product:" + productId;
+                SecondhandProduct product = (SecondhandProduct) redisTemplate.opsForValue().get(redisKey);
+                if (product != null) {
+                    product.setViewCount(product.getViewCount() + 1);
+                    redisTemplate.opsForValue().set(redisKey, product, 1, TimeUnit.HOURS);
+                }
             }
         }).start();
     }
 
     @Override
     public List<SecondhandProduct> getHotProducts(Integer limit) {
-        // 先从Redis获取
-        String redisKey = "secondhand:hot_products:" + limit;
-        List<SecondhandProduct> hotProducts = (List<SecondhandProduct>) redisTemplate.opsForValue().get(redisKey);
+        List<SecondhandProduct> hotProducts = null;
+        if (redisTemplate != null) {
+            String redisKey = "secondhand:hot_products:" + limit;
+            hotProducts = (List<SecondhandProduct>) redisTemplate.opsForValue().get(redisKey);
+        }
 
         if (hotProducts == null) {
-            // 从数据库获取
             QueryWrapper<SecondhandProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("del_flag", 0);
-            queryWrapper.eq("status", 1); // 只查询已上架商品
+            queryWrapper.eq("status", 1);
             queryWrapper.orderByDesc("view_count");
             queryWrapper.last("LIMIT " + limit);
 
             hotProducts = secondhandProductMapper.selectList(queryWrapper);
 
-            if (hotProducts != null && !hotProducts.isEmpty()) {
-                // 存入Redis，过期时间1小时
+            if (hotProducts != null && !hotProducts.isEmpty() && redisTemplate != null) {
+                String redisKey = "secondhand:hot_products:" + limit;
                 redisTemplate.opsForValue().set(redisKey, hotProducts, 1, TimeUnit.HOURS);
             }
         }
