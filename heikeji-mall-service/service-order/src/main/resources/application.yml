@@ -26,9 +26,10 @@ spring:
   cloud:
     nacos:
       discovery:
-        enabled: true
+        enabled: false
         server-addr: localhost:8848
         namespace: public
+        ip: 127.0.0.1
       config:
         import-check:
           enabled: false
@@ -63,23 +64,24 @@ spring:
       # 连接测试超时时间（毫秒）
       login-timeout: 10
   # Redis配置
-  redis:
-    host: localhost
-    port: 6379
-    password: Redis@hkyg
-    database: 0
-    timeout: 5000
-    # Redis连接池配置
-    lettuce:
-      pool:
-        # 最小空闲连接数
-        min-idle: 10
-        # 最大连接数
-        max-active: 50
-        # 最大阻塞等待时间（毫秒）
-        max-wait: 10000
-        # 最大空闲连接数
-        max-idle: 20
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: Redis@hkyg
+      database: 0
+      timeout: 5000
+      # Redis连接池配置
+      lettuce:
+        pool:
+          # 最小空闲连接数
+          min-idle: 10
+          # 最大连接数
+          max-active: 50
+          # 最大阻塞等待时间（毫秒）
+          max-wait: 10000
+          # 最大空闲连接数
+          max-idle: 20
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml

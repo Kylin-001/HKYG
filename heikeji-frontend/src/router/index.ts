@@ -111,18 +111,19 @@ export const constantRoutes: RouteRecordRaw[] = [
 ]
 
 // 动态导入路由模块
+import { userRoutes } from './modules/user.js'
+import { permissionRoutes } from './modules/permission.ts'
+import { statsRoutes } from './modules/stats.ts'
+
 const getUserRoutes = async () => {
-  const { userRoutes } = await import('./modules/user.js')
   return userRoutes
 }
 
 const getPermissionRoutes = async () => {
-  const { permissionRoutes } = await import('./modules/permission.ts')
   return permissionRoutes
 }
 
 const getStatsRoutes = async () => {
-  const { statsRoutes } = await import('./modules/stats.ts')
   return statsRoutes
 }
 

@@ -103,14 +103,13 @@ import ThemeManager from '@/components/ui/ThemeManager.vue'
   justify-content: space-between;
   padding: 0 20px;
   position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   .theme-switcher {
     margin-right: 20px;
   }
-}
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   .header-left {
     display: flex;

@@ -622,7 +622,7 @@ class PerformanceMonitor {
 }
 
 // 创建全局实例
-const performanceMonitor = new PerformanceMonitor()
+const defaultPerformanceMonitor = new PerformanceMonitor()
 
 // Vue插件形式导出
 const PerformanceMonitorPlugin = {
@@ -664,7 +664,7 @@ const PerformanceMonitorPlugin = {
 }
 
 export default PerformanceMonitor
-export { performanceMonitor, PerformanceMonitorPlugin }
+export { defaultPerformanceMonitor, PerformanceMonitorPlugin }
 
 // 工具函数
 export const createCustomMetric = (name, value, metadata = {}) => ({

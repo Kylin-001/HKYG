@@ -10,7 +10,7 @@ import config from '@/config/environment'
  */
 export function getAvailableCoupons(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/coupon/available`,
+    url: `/app/coupon/available`,
     method: 'get',
     params: {
       page: params.page || 1,
@@ -29,7 +29,7 @@ export function getAvailableCoupons(params) {
  */
 export function getMyCoupons(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/coupon/my`,
+    url: `/app/coupon/my`,
     method: 'get',
     params: {
       page: params.page || 1,
@@ -47,7 +47,7 @@ export function getMyCoupons(params) {
  */
 export function receiveCoupon(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/coupon/receive`,
+    url: `/app/coupon/receive`,
     method: 'post',
     data: {
       couponId: params.couponId,
@@ -65,7 +65,7 @@ export function receiveCoupon(params) {
  */
 export function checkCouponAvailable(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/coupon/check`,
+    url: `/app/coupon/check`,
     method: 'post',
     data: {
       couponId: params.couponId,
@@ -82,7 +82,7 @@ export function checkCouponAvailable(params) {
  */
 export function getCouponDetail(couponId) {
   return request({
-    url: `${config.API_BASE_URL}/app/coupon/detail/${couponId}`,
+    url: `/app/coupon/detail/${couponId}`,
     method: 'get',
   })
 }
@@ -96,7 +96,7 @@ export function getCouponDetail(couponId) {
  */
 export function getOrderAvailableCoupons(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/coupon/order-available`,
+    url: `/app/coupon/order-available`,
     method: 'post',
     data: {
       productIds: params.productIds,

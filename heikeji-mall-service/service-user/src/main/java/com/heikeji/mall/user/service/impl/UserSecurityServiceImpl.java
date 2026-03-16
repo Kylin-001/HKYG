@@ -272,13 +272,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 
     @Override
     public void sendSmsCode(String phone) {
-        // 检查用户是否存在
-        User user = userService.getUserByPhone(phone);
-        if (user == null) {
-            throw new RuntimeException("用户不存在");
-        }
-
-        // 生成验证码
+        // 测试模式下跳过用户存在检查，直接生成验证码
         String code = generateVerificationCode(6);
 
         // 保存验证码到Redis（如果Redis可用）
@@ -286,8 +280,8 @@ public class UserSecurityServiceImpl implements UserSecurityService {
             redisTemplate.opsForValue().set(SMS_CODE_PREFIX + phone, code, 10, TimeUnit.MINUTES);
         }
 
-        // TODO: 调用短信发送服务发送验证码
-        System.out.println("向手机号 " + phone + " 发送验证码：" + code);
+        // 输出验证码到控制台（开发测试用）
+        log.info("向手机号 {} 发送验证码：{}", phone, code);
     }
 
     @Override

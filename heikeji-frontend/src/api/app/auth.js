@@ -10,7 +10,7 @@ import config from '@/config/environment'
  */
 export function login(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/auth/login`,
+    url: `/app/auth/login`,
     method: 'post',
     data: {
       phone: params.phone,
@@ -28,7 +28,7 @@ export function login(params) {
  */
 export function loginByCode(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/auth/login-by-code`,
+    url: `/app/auth/login-by-code`,
     method: 'post',
     data: {
       phone: params.phone,
@@ -47,7 +47,7 @@ export function loginByCode(params) {
  */
 export function register(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/auth/register`,
+    url: `/app/auth/register`,
     method: 'post',
     data: {
       phone: params.phone,
@@ -66,7 +66,7 @@ export function register(params) {
  */
 export function getVerificationCode(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/auth/send-code`,
+    url: `/app/auth/send-code`,
     method: 'post',
     data: {
       phone: params.phone,
@@ -85,7 +85,7 @@ export function getVerificationCode(params) {
  */
 export function resetPassword(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/auth/reset-password`,
+    url: `/app/auth/reset-password`,
     method: 'post',
     data: {
       phone: params.phone,
@@ -101,7 +101,7 @@ export function resetPassword(params) {
  */
 export function logout() {
   return request({
-    url: `${config.API_BASE_URL}/app/auth/logout`,
+    url: `/app/auth/logout`,
     method: 'post',
   })
 }
@@ -112,7 +112,7 @@ export function logout() {
  */
 export function getUserInfo() {
   return request({
-    url: `${config.API_BASE_URL}/app/user/info`,
+    url: `/app/user/info`,
     method: 'get',
   })
 }
@@ -124,7 +124,7 @@ export function getUserInfo() {
  */
 export function updateUserInfo(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/user/update`,
+    url: `/app/user/update`,
     method: 'put',
     data: params,
   })
@@ -137,7 +137,7 @@ export function updateUserInfo(params) {
  */
 export function updateAvatar(formData) {
   return request({
-    url: `${config.API_BASE_URL}/app/user/avatar`,
+    url: `/app/user/avatar`,
     method: 'post',
     data: formData,
     headers: {

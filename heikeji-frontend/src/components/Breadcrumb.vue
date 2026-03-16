@@ -137,13 +137,13 @@ watch(
 
     &:not(:last-child) {
       .breadcrumb-text {
-        color: $primary-color;
+        color: $primary;
       }
 
       &:hover {
         .breadcrumb-icon,
         .breadcrumb-text {
-          color: $primary-color;
+          color: $primary;
         }
       }
     }
@@ -174,7 +174,7 @@ watch(
         font-weight: 400;
 
         &:hover {
-          color: $primary-color;
+          color: $primary;
         }
       }
 

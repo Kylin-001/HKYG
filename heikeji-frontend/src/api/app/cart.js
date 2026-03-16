@@ -7,7 +7,7 @@ import config from '@/config/environment'
  */
 export function getCartList() {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/list`,
+    url: `/app/cart/list`,
     method: 'get',
   })
 }
@@ -22,7 +22,7 @@ export function getCartList() {
  */
 export function addToCart(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/add`,
+    url: `/app/cart/add`,
     method: 'post',
     data: {
       productId: params.productId,
@@ -41,7 +41,7 @@ export function addToCart(params) {
  */
 export function updateCartQuantity(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/update-quantity`,
+    url: `/app/cart/update-quantity`,
     method: 'put',
     data: {
       cartItemId: params.cartItemId,
@@ -58,7 +58,7 @@ export function updateCartQuantity(params) {
  */
 export function deleteCartItem(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/delete`,
+    url: `/app/cart/delete`,
     method: 'delete',
     data: {
       cartItemIds: params.cartItemIds,
@@ -72,7 +72,7 @@ export function deleteCartItem(params) {
  */
 export function clearCart() {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/clear`,
+    url: `/app/cart/clear`,
     method: 'delete',
   })
 }
@@ -86,7 +86,7 @@ export function clearCart() {
  */
 export function toggleCartItemCheck(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/check`,
+    url: `/app/cart/check`,
     method: 'put',
     data: {
       cartItemId: params.cartItemId,
@@ -103,7 +103,7 @@ export function toggleCartItemCheck(params) {
  */
 export function toggleCartItemCheckAll(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/check-all`,
+    url: `/app/cart/check-all`,
     method: 'put',
     data: {
       isChecked: params.isChecked,
@@ -117,7 +117,7 @@ export function toggleCartItemCheckAll(params) {
  */
 export function getCartCount() {
   return request({
-    url: `${config.API_BASE_URL}/app/cart/count`,
+    url: `/app/cart/count`,
     method: 'get',
   })
 }

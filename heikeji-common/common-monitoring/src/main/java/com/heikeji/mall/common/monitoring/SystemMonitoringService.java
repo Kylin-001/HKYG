@@ -34,7 +34,7 @@ public class SystemMonitoringService {
     private static final long ALERT_TTL = 600;
 
     private final Map<String, PerformanceMetric> performanceMetrics = new ConcurrentHashMap<>();
-    private final Map<String, ErrorMetric> errorMetrics = new ConcurrentHashMap<>();
+    private final Map<String, List<ErrorMetric>> errorMetrics = new ConcurrentHashMap<>();
     private final Map<String, AlertMetric> alertMetrics = new ConcurrentHashMap<>();
 
     private final AtomicLong totalRequests = new AtomicLong(0);
@@ -148,7 +148,7 @@ public class SystemMonitoringService {
         metric.setTimestamp(System.currentTimeMillis());
         metric.setCount(1);
 
-        errorMetrics.computeIfAbsent(errorType, k -> new ArrayList<>()).add(metric);
+        errorMetrics.computeIfAbsent(errorType, k -> new ArrayList<ErrorMetric>()).add(metric);
 
         if (sentryErrorTrackingService != null) {
             Map<String, Object> context = new HashMap<>();
@@ -191,9 +191,11 @@ public class SystemMonitoringService {
         }
 
         history.sort((a, b) -> {
-            Long timeA = (Long) ((Map) a.get("timestamp"));
-            Long timeB = (Long) ((Map) b.get("timestamp"));
-            return timeA.compareTo(timeB);
+            Object timeA = a.get("timestamp");
+            Object timeB = b.get("timestamp");
+            String strA = String.valueOf(timeA);
+            String strB = String.valueOf(timeB);
+            return strA.compareTo(strB);
         });
 
         return history.stream()

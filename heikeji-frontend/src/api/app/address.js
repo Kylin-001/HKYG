@@ -7,7 +7,7 @@ import config from '@/config/environment'
  */
 export function getAddressList() {
   return request({
-    url: `${config.API_BASE_URL}/app/address/list`,
+    url: `/app/address/list`,
     method: 'get',
   })
 }
@@ -19,7 +19,7 @@ export function getAddressList() {
  */
 export function getAddressDetail(addressId) {
   return request({
-    url: `${config.API_BASE_URL}/app/address/detail/${addressId}`,
+    url: `/app/address/detail/${addressId}`,
     method: 'get',
   })
 }
@@ -38,7 +38,7 @@ export function getAddressDetail(addressId) {
  */
 export function addAddress(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/address/add`,
+    url: `/app/address/add`,
     method: 'post',
     data: {
       receiverName: params.receiverName,
@@ -67,7 +67,7 @@ export function addAddress(params) {
  */
 export function updateAddress(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/address/update`,
+    url: `/app/address/update`,
     method: 'put',
     data: {
       addressId: params.addressId,
@@ -89,7 +89,7 @@ export function updateAddress(params) {
  */
 export function deleteAddress(addressId) {
   return request({
-    url: `${config.API_BASE_URL}/app/address/delete/${addressId}`,
+    url: `/app/address/delete/${addressId}`,
     method: 'delete',
   })
 }
@@ -101,7 +101,7 @@ export function deleteAddress(addressId) {
  */
 export function setDefaultAddress(addressId) {
   return request({
-    url: `${config.API_BASE_URL}/app/address/default/${addressId}`,
+    url: `/app/address/default/${addressId}`,
     method: 'put',
   })
 }
@@ -112,7 +112,7 @@ export function setDefaultAddress(addressId) {
  */
 export function getDefaultAddress() {
   return request({
-    url: `${config.API_BASE_URL}/app/address/default`,
+    url: `/app/address/default`,
     method: 'get',
   })
 }

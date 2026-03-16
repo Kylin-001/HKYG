@@ -6,7 +6,7 @@ import config from '@/config/environment'
 // 获取支持的支付方式列表
 export function getPaymentMethods(orderType) {
   return request({
-    url: `${config.API_BASE_URL}/payment/methods`,
+    url: `/payment/methods`,
     method: 'get',
     params: orderType ? { orderType } : {},
   })
@@ -15,7 +15,7 @@ export function getPaymentMethods(orderType) {
 // 查询指定订单可用的支付方式
 export function getAvailablePaymentMethods(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/order/${orderId}/methods`,
+    url: `/payment/order/${orderId}/methods`,
     method: 'get',
   })
 }
@@ -24,7 +24,7 @@ export function getAvailablePaymentMethods(orderId) {
 // 获取支付配置信息
 export function getPaymentConfig() {
   return request({
-    url: `${config.API_BASE_URL}/payment/config`,
+    url: `/payment/config`,
     method: 'get',
   })
 }
@@ -33,7 +33,7 @@ export function getPaymentConfig() {
 // 生成微信支付参数
 export function createWechatPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/wechat/create/${orderId}`,
+    url: `/payment/wechat/create/${orderId}`,
     method: 'post',
   })
 }
@@ -41,7 +41,7 @@ export function createWechatPayment(orderId) {
 // 微信支付查询
 export function queryWechatPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/wechat/query/${orderId}`,
+    url: `/payment/wechat/query/${orderId}`,
     method: 'get',
   })
 }
@@ -50,7 +50,7 @@ export function queryWechatPayment(orderId) {
 // 生成支付宝支付参数
 export function createAlipayPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/alipay/create/${orderId}`,
+    url: `/payment/alipay/create/${orderId}`,
     method: 'post',
   })
 }
@@ -58,7 +58,7 @@ export function createAlipayPayment(orderId) {
 // 支付宝支付查询
 export function queryAlipayPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/alipay/query/${orderId}`,
+    url: `/payment/alipay/query/${orderId}`,
     method: 'get',
   })
 }
@@ -67,7 +67,7 @@ export function queryAlipayPayment(orderId) {
 // 余额支付
 export function balancePayment(orderId, password) {
   return request({
-    url: `${config.API_BASE_URL}/payment/balance/${orderId}`,
+    url: `/payment/balance/${orderId}`,
     method: 'post',
     data: { password },
   })
@@ -76,7 +76,7 @@ export function balancePayment(orderId, password) {
 // 验证余额支付密码
 export function verifyBalancePassword(password) {
   return request({
-    url: `${config.API_BASE_URL}/payment/balance/verify`,
+    url: `/payment/balance/verify`,
     method: 'post',
     data: { password },
   })
@@ -86,7 +86,7 @@ export function verifyBalancePassword(password) {
 // 获取支付记录列表
 export function getPaymentRecords(params) {
   return request({
-    url: `${config.API_BASE_URL}/payment/records`,
+    url: `/payment/records`,
     method: 'get',
     params,
   })
@@ -95,7 +95,7 @@ export function getPaymentRecords(params) {
 // 获取支付记录详情
 export function getPaymentDetail(paymentId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/detail/${paymentId}`,
+    url: `/payment/detail/${paymentId}`,
     method: 'get',
   })
 }
@@ -104,7 +104,7 @@ export function getPaymentDetail(paymentId) {
 // 申请退款
 export function applyRefund(orderId, params) {
   return request({
-    url: `${config.API_BASE_URL}/payment/refund/apply/${orderId}`,
+    url: `/payment/refund/apply/${orderId}`,
     method: 'post',
     data: params,
   })
@@ -113,7 +113,7 @@ export function applyRefund(orderId, params) {
 // 查询退款状态
 export function queryRefundStatus(refundId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/refund/status/${refundId}`,
+    url: `/payment/refund/status/${refundId}`,
     method: 'get',
   })
 }
@@ -121,7 +121,7 @@ export function queryRefundStatus(refundId) {
 // 批量查询支付状态
 export function batchQueryPaymentStatus(orderIds) {
   return request({
-    url: `${config.API_BASE_URL}/payment/batch/status`,
+    url: `/payment/batch/status`,
     method: 'post',
     data: { orderIds },
   })
@@ -130,7 +130,7 @@ export function batchQueryPaymentStatus(orderIds) {
 // 支付超时检查
 export function checkPaymentTimeout(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/payment/checkTimeout/${orderId}`,
+    url: `/payment/checkTimeout/${orderId}`,
     method: 'get',
   })
 }
@@ -138,7 +138,7 @@ export function checkPaymentTimeout(orderId) {
 // 获取支付二维码（用于扫码支付）
 export function getPaymentQrcode(orderId, paymentMethod) {
   return request({
-    url: `${config.API_BASE_URL}/payment/qrcode/${orderId}`,
+    url: `/payment/qrcode/${orderId}`,
     method: 'get',
     params: { paymentMethod },
   })
@@ -198,7 +198,7 @@ export const createPayment = async data => {
     } else {
       // 通用支付创建接口（如果后端支持）
       response = await request({
-        url: `${config.API_BASE_URL}/payment/create`,
+        url: `/payment/create`,
         method: 'post',
         data,
       })
@@ -221,7 +221,7 @@ export const getPaymentStatus = async orderId => {
     // 尝试通用支付状态查询接口
     try {
       const response = await request({
-        url: `${config.API_BASE_URL}/payment/status/${orderId}`,
+        url: `/payment/status/${orderId}`,
         method: 'get',
       })
       return response.data || response

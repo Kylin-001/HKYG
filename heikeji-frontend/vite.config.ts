@@ -179,7 +179,6 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_BASE_URL || 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
-          rewrite: path => path.replace(/^\/api/, ''),
         },
       },
       // 优化开发服务器性能
@@ -251,7 +250,8 @@ export default defineConfig(({ mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: '@import "@/styles/variables.scss"; @import "@/styles/mixins.scss";',
+          additionalData: `@use "@/styles/variables.scss" as *; @use "@/styles/mixins.scss" as *;`,
+          api: 'modern-compiler',
         },
       },
       // 启用CSS模块

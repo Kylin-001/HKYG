@@ -22,12 +22,15 @@ public class UserSecurityConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 添加JWT授权拦截器
         registry.addInterceptor(authorizationInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/api/auth/login", "/api/auth/register", "/api/auth/refresh");
+                .excludePathPatterns("/api/auth/login", "/api/auth/register", "/api/auth/refresh")
+                .excludePathPatterns("/api/user/login", "/api/user/register", "/api/user/phoneLogin")
+                .excludePathPatterns("/api/security/login", "/api/security/validatePassword")
+                .excludePathPatterns("/api/common/captcha")
+                .excludePathPatterns("/actuator/**")
+                .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**");
 
-        // 添加增强型授权拦截器
         registry.addInterceptor(enhancedAuthorizationInterceptor)
                 .addPathPatterns("/api/admin/**")
                 .addPathPatterns("/api/user/**");

@@ -1,10 +1,9 @@
 package com.heikeji.mall.common.monitoring.controller;
 
 import com.heikeji.mall.common.monitoring.SystemMonitoringService;
-import com.heikeji.mall.common.core.result.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import com.heikeji.common.core.domain.R;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,123 +17,123 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/monitoring")
-@Api(tags = "系统监控")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "系统监控", description = "系统性能、错误和告警监控接口")
 public class SystemMonitoringController {
 
     @Autowired
     private SystemMonitoringService monitoringService;
 
     @GetMapping("/performance/current")
-    @ApiOperation("获取当前性能指标")
-    public Result<Map<String, Object>> getCurrentPerformanceMetrics() {
+    @Operation(summary = "获取当前性能指标", description = "获取系统当前性能指标")
+    public R<Map<String, Object>> getCurrentPerformanceMetrics() {
         try {
             Map<String, Object> metrics = monitoringService.getCurrentMetrics();
             log.info("获取当前性能指标: {}", metrics);
-            return Result.success(metrics);
+            return R.success(metrics);
         } catch (Exception e) {
             log.error("获取性能指标失败", e);
-            return Result.error("获取性能指标失败");
+            return R.error("获取性能指标失败");
         }
     }
 
     @GetMapping("/performance/history")
-    @ApiOperation("获取性能历史")
-    public Result<List<Map<String, Object>>> getPerformanceHistory(
-            @ApiParam(value = "type", defaultValue = "performance") String type,
-            @ApiParam(value = "hours", defaultValue = "24") int hours
+    @Operation(summary = "获取性能历史", description = "获取系统性能历史数据")
+    public R<List<Map<String, Object>>> getPerformanceHistory(
+            @Parameter(description = "指标类型", example = "performance") String type,
+            @Parameter(description = "查询小时数", example = "24") int hours
     ) {
         try {
             List<Map<String, Object>> history = monitoringService.getHistoricalMetrics(type, hours);
             log.info("获取性能历史: type={}, hours={}", type, hours);
-            return Result.success(history);
+            return R.success(history);
         } catch (Exception e) {
             log.error("获取性能历史失败", e);
-            return Result.error("获取性能历史失败");
+            return R.error("获取性能历史失败");
         }
     }
 
     @GetMapping("/errors/current")
-    @ApiOperation("获取当前错误指标")
-    public Result<Map<String, Object>> getCurrentErrorMetrics() {
+    @Operation(summary = "获取当前错误指标", description = "获取系统当前错误指标")
+    public R<Map<String, Object>> getCurrentErrorMetrics() {
         try {
             Map<String, Object> metrics = monitoringService.getCurrentMetrics();
             Map<String, Object> errorMetrics = (Map<String, Object>) metrics.get("errors");
             log.info("获取当前错误指标: {}", errorMetrics);
-            return Result.success(errorMetrics);
+            return R.success(errorMetrics);
         } catch (Exception e) {
             log.error("获取错误指标失败", e);
-            return Result.error("获取错误指标失败");
+            return R.error("获取错误指标失败");
         }
     }
 
     @GetMapping("/errors/history")
-    @ApiOperation("获取错误历史")
-    public Result<List<Map<String, Object>>> getErrorHistory(
-            @ApiParam(value = "type", defaultValue = "error") String type,
-            @ApiParam(value = "hours", defaultValue = "24") int hours
+    @Operation(summary = "获取错误历史", description = "获取系统错误历史数据")
+    public R<List<Map<String, Object>>> getErrorHistory(
+            @Parameter(description = "指标类型", example = "error") String type,
+            @Parameter(description = "查询小时数", example = "24") int hours
     ) {
         try {
             List<Map<String, Object>> history = monitoringService.getHistoricalMetrics(type, hours);
             log.info("获取错误历史: type={}, hours={}", type, hours);
-            return Result.success(history);
+            return R.success(history);
         } catch (Exception e) {
             log.error("获取错误历史失败", e);
-            return Result.error("获取错误历史失败");
+            return R.error("获取错误历史失败");
         }
     }
 
     @GetMapping("/alerts/current")
-    @ApiOperation("获取当前告警")
-    public Result<Map<String, Object>> getCurrentAlerts() {
+    @Operation(summary = "获取当前告警", description = "获取系统当前告警信息")
+    public R<Map<String, Object>> getCurrentAlerts() {
         try {
             Map<String, Object> metrics = monitoringService.getCurrentMetrics();
             Map<String, Object> alerts = (Map<String, Object>) metrics.get("alerts");
             log.info("获取当前告警: {}", alerts);
-            return Result.success(alerts);
+            return R.success(alerts);
         } catch (Exception e) {
             log.error("获取当前告警失败", e);
-            return Result.error("获取当前告警失败");
+            return R.error("获取当前告警失败");
         }
     }
 
     @GetMapping("/alerts/history")
-    @ApiOperation("获取告警历史")
-    public Result<List<Map<String, Object>>> getAlertHistory(
-            @ApiParam(value = "hours", defaultValue = "24") int hours
+    @Operation(summary = "获取告警历史", description = "获取系统告警历史数据")
+    public R<List<Map<String, Object>>> getAlertHistory(
+            @Parameter(description = "查询小时数", example = "24") int hours
     ) {
         try {
             List<Map<String, Object>> history = monitoringService.getHistoricalMetrics("alert", hours);
             log.info("获取告警历史: hours={}", hours);
-            return Result.success(history);
+            return R.success(history);
         } catch (Exception e) {
             log.error("获取告警历史失败", e);
-            return Result.error("获取告警历史失败");
+            return R.error("获取告警历史失败");
         }
     }
 
     @PostMapping("/metrics/reset")
-    @ApiOperation("重置监控指标")
-    public Result<Void> resetMetrics() {
+    @Operation(summary = "重置监控指标", description = "重置所有监控指标数据")
+    public R<Void> resetMetrics() {
         try {
             monitoringService.resetMetrics();
             log.info("重置监控指标");
-            return Result.success();
+            return R.success();
         } catch (Exception e) {
             log.error("重置监控指标失败", e);
-            return Result.error("重置监控指标失败");
+            return R.error("重置监控指标失败");
         }
     }
 
     @PostMapping("/alerts/clear")
-    @ApiOperation("清除告警")
-    public Result<Void> clearAlerts() {
+    @Operation(summary = "清除告警", description = "清除指定天数的告警数据")
+    public R<Void> clearAlerts() {
         try {
             monitoringService.clearOldMetrics(7);
             log.info("清除7天前的告警");
-            return Result.success();
+            return R.success();
         } catch (Exception e) {
             log.error("清除告警失败", e);
-            return Result.error("清除告警失败");
+            return R.error("清除告警失败");
         }
     }
 }

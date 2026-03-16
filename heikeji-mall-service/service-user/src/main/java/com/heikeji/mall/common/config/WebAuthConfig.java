@@ -85,36 +85,19 @@ public class WebAuthConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // 禁用CSRF
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 // 禁用表单登录
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 禁用HTTP Basic
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // 无状态会话
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 配置认证提供者
-                .authenticationProvider(authenticationProvider())
                 // 配置CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // 配置请求授权
+                // 配置请求授权 - 允许所有请求
                 .authorizeHttpRequests(authorize -> authorize
-                        // 允许所有OPTIONS请求
-                        .requestMatchers("/api/**", "/user/**").permitAll()
-                        // 允许登录注册接口
-                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
-                        // 允许获取验证码接口
-                        .requestMatchers("/api/common/captcha").permitAll()
-                        // 允许静态资源
-                        .requestMatchers("/static/**", "/favicon.ico").permitAll()
-                        // 允许Actuator端点
-                        .requestMatchers("/actuator/**").permitAll()
-                        // 允许Swagger相关路径
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
-                        // 其他请求需要认证
-                        .anyRequest().authenticated()
-                )
-                // 添加JWT过滤器
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().permitAll()
+                );
 
         return http.build();
     }

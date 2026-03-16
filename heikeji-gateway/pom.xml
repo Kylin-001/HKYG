@@ -13,13 +13,17 @@
     <name>heikeji-gateway</name>
     <description>API网关模块</description>
 
-    <!-- 使用父项目中定义的版本变量 -->
-
     <dependencies>
         <!-- Spring Cloud Gateway -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+
+        <!-- LoadBalancer支持 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
         <!-- Nacos服务发现 -->
@@ -34,49 +38,25 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
-        <!-- Spring Security -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <!-- Redis依赖（用于限流） -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
-        </dependency>
-
         <!-- 监控指标 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- 日志增强 -->
-        <!-- 暂时注释掉，因为依赖无法解析 -->
-        <!-- <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-sleuth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
-        </dependency> -->
-
         <!-- 自定义通用模块 -->
         <dependency>
             <groupId>com.heikeji</groupId>
             <artifactId>common-core</artifactId>
             <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.heikeji</groupId>
-            <artifactId>common-security</artifactId>
-            <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-security</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
-
-
 
     <build>
         <plugins>

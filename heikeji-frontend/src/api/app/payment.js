@@ -8,7 +8,7 @@ import config from '@/config/environment'
  */
 export function getAvailablePaymentMethods(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/methods/${orderId}`,
+    url: `/app/payment/methods/${orderId}`,
     method: 'get',
   })
 }
@@ -24,7 +24,7 @@ export function getAvailablePaymentMethods(orderId) {
  */
 export function createPayment(data) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/create`,
+    url: `/app/payment/create`,
     method: 'post',
     data: {
       orderId: data.orderId,
@@ -79,7 +79,7 @@ export function pollPaymentResult(orderId, interval = 3000, maxRetries = 20) {
  */
 export function getPaymentStatus(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/status/${orderId}`,
+    url: `/app/payment/status/${orderId}`,
     method: 'get',
   })
 }
@@ -91,7 +91,7 @@ export function getPaymentStatus(orderId) {
  */
 export function createWechatPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/wechat/create/${orderId}`,
+    url: `/app/payment/wechat/create/${orderId}`,
     method: 'post',
   })
 }
@@ -103,7 +103,7 @@ export function createWechatPayment(orderId) {
  */
 export function createAlipayPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/alipay/create/${orderId}`,
+    url: `/app/payment/alipay/create/${orderId}`,
     method: 'post',
   })
 }
@@ -116,7 +116,7 @@ export function createAlipayPayment(orderId) {
  */
 export function balancePayment(orderId, password) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/balance/${orderId}`,
+    url: `/app/payment/balance/${orderId}`,
     method: 'post',
     data: {
       password,
@@ -135,7 +135,7 @@ export function balancePayment(orderId, password) {
  */
 export function getPaymentRecords(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/records`,
+    url: `/app/payment/records`,
     method: 'get',
     params: {
       page: params.page || 1,
@@ -153,7 +153,7 @@ export function getPaymentRecords(params) {
  */
 export function getPaymentRecordDetail(recordId) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/record/${recordId}`,
+    url: `/app/payment/record/${recordId}`,
     method: 'get',
   })
 }
@@ -165,7 +165,7 @@ export function getPaymentRecordDetail(recordId) {
  */
 export function handlePaymentCallback(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/callback`,
+    url: `/app/payment/callback`,
     method: 'post',
     params,
   })
@@ -178,7 +178,7 @@ export function handlePaymentCallback(params) {
  */
 export function cancelPayment(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/cancel/${orderId}`,
+    url: `/app/payment/cancel/${orderId}`,
     method: 'post',
   })
 }
@@ -190,7 +190,7 @@ export function cancelPayment(orderId) {
  */
 export function verifyPaymentPassword(password) {
   return request({
-    url: `${config.API_BASE_URL}/app/payment/verify-password`,
+    url: `/app/payment/verify-password`,
     method: 'post',
     data: {
       password,

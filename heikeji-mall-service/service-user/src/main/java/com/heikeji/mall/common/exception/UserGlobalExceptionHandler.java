@@ -111,6 +111,7 @@ public class UserGlobalExceptionHandler {
         response.put("code", "500");
         response.put("message", "系统内部错误：" + ex.getMessage());
         response.put("data", null);
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

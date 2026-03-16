@@ -29,35 +29,38 @@ export default defineConfig({
     },
     extensions: ['.vue', '.js', '.jsx', '.ts', '.tsx', '.json'],
   },
+  optimizeDeps: {
+    include: ['vue', 'vue-router', 'pinia', 'element-plus'],
+    exclude: ['demo.html', 'index.html', 'local-demo.html'],
+  },
+  esbuild: {
+    legalComments: 'none',
+  },
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "@/styles/variables.scss";`,
+        additionalData: `@use "@/styles/variables.scss" as *;`,
+        silenceDeprecations: ['legacy-js-api'],
       },
     },
   },
   server: {
-    port: 8080,
-    open: true,
+    port: 3000,
+    host: '0.0.0.0',
+    open: false,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:8000',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
       },
     },
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    minify: 'esbuild',
     rollupOptions: {
+      input: './index.html',
       output: {
         manualChunks: {
           vue: ['vue', 'vue-router', 'pinia'],

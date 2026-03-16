@@ -29,36 +29,6 @@ spring:
         max-idle: 8
         min-idle: 0
 
-# 网关配置
-zuul:
-  routes:
-    user-service:
-      path: /user/**
-      serviceId: service-user
-    product-service:
-      path: /product/**
-      serviceId: service-product
-    order-service:
-      path: /order/**
-      serviceId: service-order
-    payment-service:
-      path: /payment/**
-      serviceId: service-payment
-    delivery-service:
-      path: /delivery/**
-      serviceId: service-delivery
-    takeout-service:
-      path: /takeout/**
-      serviceId: service-takeout
-    campus-service:
-      path: /campus/**
-      serviceId: service-campus
-    member-service:
-      path: /member/**
-      serviceId: service-member
-  prefix: /api/v1
-  sensitiveHeaders: # 允许传递所有头信息
-
 # 熔断器配置（基于Resilience4j）
 resilience4j:
   circuitbreaker:
@@ -104,12 +74,18 @@ resilience4j:
         limit-for-period: 15
         timeout-duration: 100ms
 
-# Ribbon配置
-ribbon:
-  ReadTimeout: 5000
-  ConnectTimeout: 5000
-  MaxAutoRetries: 0
-  MaxAutoRetriesNextServer: 1
-  eager-load:
-    enabled: true
-    clients: service-user,service-product,service-order,service-payment,service-delivery,service-takeout,service-campus,service-member
+# Spring Cloud LoadBalancer配置（替代Ribbon）
+spring:
+  cloud:
+    loadbalancer:
+      instances:
+        service-user: true
+        service-product: true
+        service-order: true
+        service-payment: true
+        service-delivery: true
+        service-takeout: true
+        service-campus: true
+        service-member: true
+      ribbon:
+        enabled: false

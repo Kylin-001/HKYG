@@ -11,7 +11,7 @@ import config from '@/config/environment'
  */
 export function getOrderList(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/list`,
+    url: `/app/order/list`,
     method: 'get',
     params: {
       page: params.page || 1,
@@ -28,7 +28,7 @@ export function getOrderList(params) {
  */
 export function getOrderDetail(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/detail/${orderId}`,
+    url: `/app/order/detail/${orderId}`,
     method: 'get',
   })
 }
@@ -41,7 +41,7 @@ export function getOrderDetail(orderId) {
  */
 export function cancelOrder(orderId, reason) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/cancel/${orderId}`,
+    url: `/app/order/cancel/${orderId}`,
     method: 'put',
     data: {
       reason,
@@ -56,7 +56,7 @@ export function cancelOrder(orderId, reason) {
  */
 export function confirmReceipt(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/confirm/${orderId}`,
+    url: `/app/order/confirm/${orderId}`,
     method: 'put',
   })
 }
@@ -68,7 +68,7 @@ export function confirmReceipt(orderId) {
  */
 export function remindShip(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/remind/${orderId}`,
+    url: `/app/order/remind/${orderId}`,
     method: 'post',
   })
 }
@@ -79,7 +79,7 @@ export function remindShip(orderId) {
  */
 export function getOrderStatusStats() {
   return request({
-    url: `${config.API_BASE_URL}/app/order/status/stats`,
+    url: `/app/order/status/stats`,
     method: 'get',
   })
 }
@@ -98,7 +98,7 @@ export function getOrderStatusStats() {
  */
 export function buyNow(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/buy-now`,
+    url: `/app/order/buy-now`,
     method: 'post',
     data: params,
   })
@@ -116,7 +116,7 @@ export function buyNow(params) {
  */
 export function preCreateOrder(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/pre-create`,
+    url: `/app/order/pre-create`,
     method: 'post',
     data: params,
   })
@@ -131,7 +131,7 @@ export function preCreateOrder(params) {
  */
 export function submitOrder(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/submit`,
+    url: `/app/order/submit`,
     method: 'post',
     data: params,
   })
@@ -144,7 +144,7 @@ export function submitOrder(params) {
  */
 export function cancelPreOrder(preOrderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/pre-cancel/${preOrderId}`,
+    url: `/app/order/pre-cancel/${preOrderId}`,
     method: 'put',
   })
 }
@@ -156,7 +156,7 @@ export function cancelPreOrder(preOrderId) {
  */
 export function getPreOrderStatus(preOrderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/pre-status/${preOrderId}`,
+    url: `/app/order/pre-status/${preOrderId}`,
     method: 'get',
   })
 }
@@ -168,7 +168,7 @@ export function getPreOrderStatus(preOrderId) {
  */
 export function getOrderLogistics(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/logistics/${orderId}`,
+    url: `/app/order/logistics/${orderId}`,
     method: 'get',
   })
 }
@@ -180,7 +180,7 @@ export function getOrderLogistics(orderId) {
  */
 export function deleteOrder(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/delete/${orderId}`,
+    url: `/app/order/delete/${orderId}`,
     method: 'delete',
   })
 }
@@ -192,7 +192,7 @@ export function deleteOrder(orderId) {
  */
 export function getInvoiceInfo(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/invoice/${orderId}`,
+    url: `/app/order/invoice/${orderId}`,
     method: 'get',
   })
 }
@@ -209,7 +209,7 @@ export function getInvoiceInfo(orderId) {
  */
 export function applyInvoice(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/invoice/apply`,
+    url: `/app/order/invoice/apply`,
     method: 'post',
     data: params,
   })
@@ -222,7 +222,7 @@ export function applyInvoice(params) {
  */
 export function getOrderLogs(orderId) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/logs/${orderId}`,
+    url: `/app/order/logs/${orderId}`,
     method: 'get',
   })
 }
@@ -237,7 +237,7 @@ export function getOrderLogs(orderId) {
  */
 export function getOrderStats(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/stats`,
+    url: `/app/order/stats`,
     method: 'get',
     params,
   })
@@ -252,7 +252,7 @@ export function getOrderStats(params) {
  */
 export function handleExceptionOrder(orderId, type, reason) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/exception/handle`,
+    url: `/app/order/exception/handle`,
     method: 'post',
     data: {
       orderId,
@@ -271,7 +271,7 @@ export function handleExceptionOrder(orderId, type, reason) {
  */
 export function getExceptionOrders(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/order/exception/list`,
+    url: `/app/order/exception/list`,
     method: 'get',
     params: {
       page: params.page || 1,

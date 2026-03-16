@@ -1,10 +1,4 @@
-// 导入全局样式和变量
-@use './variables.scss' as *;
-@use './global.scss' as *;
-@use './responsive.scss' as *;
-@use './animations.scss' as *;
-
-// 基本重置样式
+// 全局样式入口 - 简化版
 * {
   margin: 0;
   padding: 0;
@@ -14,8 +8,7 @@
 html,
 body {
   height: 100%;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;
   color: #333;
   background-color: #f5f7fa;
@@ -25,18 +18,15 @@ body {
   height: 100%;
 }
 
-// 链接样式
 a {
   color: #1890ff;
   text-decoration: none;
-  transition: color 0.3s;
 }
 
 a:hover {
   color: #40a9ff;
 }
 
-// 滚动条样式
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -44,12 +34,10 @@ a:hover {
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #c1c1c1;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

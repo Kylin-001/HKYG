@@ -16,11 +16,14 @@ spring:
   cloud:
     nacos:
       discovery:
+        enabled: false
         server-addr: localhost:8848
         namespace: public
+        ip: 127.0.0.1
       config:
         import-check:
           enabled: false
+        enabled: false
   main:
     allow-circular-references: true
     allow-bean-definition-overriding: true

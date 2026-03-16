@@ -14,10 +14,13 @@ spring:
         file-extension: yml
         refresh-enabled: true
         group: DEFAULT_GROUP
+        import-check:
+          enabled: false
       discovery:
         server-addr: localhost:8848
         namespace: public
         group: DEFAULT_GROUP
+        enabled: false
 
 # 日志配置
 logging:

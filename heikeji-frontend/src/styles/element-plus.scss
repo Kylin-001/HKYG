@@ -1,9 +1,6 @@
 // Element Plus 主题覆盖样式
 
-// 引入Element Plus的默认变量
-@forward 'element-plus/theme-chalk/src/common/var.scss';
-
-// 自定义Element Plus主题变量
+// 自定义Element Plus主题变量 (使用 CSS 变量)
 :root {
   // 主色
   --el-color-primary: #409eff;

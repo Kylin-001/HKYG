@@ -47,18 +47,18 @@
         <el-table-column type="index" label="序号" width="80"></el-table-column>
         <el-table-column prop="name" label="优惠券名称" width="200"></el-table-column>
         <el-table-column prop="type" label="类型" width="100">
-          <template slot-scope="scope">
+          <template v-slot:default="scope"="scope">
             <el-tag v-if="scope.row.type === 'cash'" type="primary">现金券</el-tag>
             <el-tag v-else type="success">折扣券</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="value" label="优惠金额/折扣" width="120">
-          <template slot-scope="scope">
+          <template v-slot:default="scope"="scope">
             {{ scope.row.type === 'cash' ? `￥${scope.row.value}` : `${scope.row.value}折` }}
           </template>
         </el-table-column>
         <el-table-column prop="minAmount" label="最低消费" width="120">
-          <template slot-scope="scope">
+          <template v-slot:default="scope"="scope">
             {{ scope.row.minAmount === 0 ? '无门槛' : `￥${scope.row.minAmount}` }}
           </template>
         </el-table-column>
@@ -67,14 +67,14 @@
         <el-table-column prop="startTime" label="有效期开始" width="180"></el-table-column>
         <el-table-column prop="endTime" label="有效期结束" width="180"></el-table-column>
         <el-table-column prop="status" label="状态" width="100">
-          <template slot-scope="scope">
+          <template v-slot:default="scope"="scope">
             <el-tag v-if="scope.row.status === 1" type="success">启用</el-tag>
             <el-tag v-else-if="scope.row.status === 0" type="warning">禁用</el-tag>
             <el-tag v-else type="danger">已过期</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180">
-          <template slot-scope="scope">
+          <template v-slot:default="scope"="scope">
             <el-button size="mini" @click="handleEdit(scope.row)" :disabled="scope.row.status === 2"
               >编辑</el-button
             >
@@ -206,10 +206,10 @@
           ></el-input>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <template v-slot:footer class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit">确定</el-button>
-      </div>
+      </template>
     </el-dialog>
 
     <!-- 批量发放对话框 -->
@@ -452,8 +452,7 @@ const handleTypeChange = (value: 'cash' | 'discount') => {
 
 // 删除确认
 const confirmDelete = (row: CouponItem) => {
-  ElMessageBox.confirm('确定要删除该优惠券吗？', '提示', {}
-  }).then(() => {
+  ElMessageBox.confirm('确定要删除该优惠券吗？', '提示', {}).then(() => {
     handleDelete(row)
   })
 }

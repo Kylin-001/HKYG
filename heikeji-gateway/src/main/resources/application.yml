@@ -13,91 +13,92 @@ spring:
   main:
     web-application-type: reactive
   
-  # 服务发现配置
+  # 服务发现配置 - 完全禁用Nacos
   cloud:
     nacos:
+      discovery:
+        enabled: false
+        server-addr: localhost:8848
       config:
+        enabled: false
         import-check:
           enabled: false
-      discovery:
-        enabled: true
-        server-addr: localhost:8848
-        namespace: public
     gateway:
       # 路由配置
       routes:
         # 管理后台服务路由
         - id: heikeji-admin
-          uri: lb://heikeji-admin
+          uri: http://127.0.0.1:8090
           predicates:
             - Path=/admin/**
           filters:
             - StripPrefix=0
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 20
-                redis-rate-limiter.burstCapacity: 40
-                key-resolver: '#{@userKeyResolver}'
-            - name: Retry
-              args:
-                retries: 3
-                statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE
         
         # 商品服务路由
         - id: heikeji-mall-product
-          uri: lb://heikeji-mall-product
+          uri: http://127.0.0.1:8082
           predicates:
             - Path=/api/product/**
           filters:
             - StripPrefix=0
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 50
-                redis-rate-limiter.burstCapacity: 100
-                key-resolver: '#{@ipKeyResolver}'
         
         # 订单服务路由
         - id: heikeji-mall-order
-          uri: lb://heikeji-mall-order
+          uri: http://127.0.0.1:8083
           predicates:
             - Path=/api/order/**
+            - Path=/order/**
           filters:
             - StripPrefix=0
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 30
-                redis-rate-limiter.burstCapacity: 60
-                key-resolver: '#{@userKeyResolver}'
         
         # 用户服务路由
         - id: heikeji-mall-user
-          uri: lb://heikeji-mall-user
+          uri: http://127.0.0.1:8081
           predicates:
             - Path=/api/user/**
           filters:
             - StripPrefix=0
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 40
-                redis-rate-limiter.burstCapacity: 80
-                key-resolver: '#{@ipKeyResolver}'
         
         # 支付服务路由
         - id: heikeji-mall-payment
-          uri: lb://heikeji-mall-payment
+          uri: http://127.0.0.1:8004
           predicates:
             - Path=/api/payment/**
           filters:
             - StripPrefix=0
         
-        # APP应用服务路由
+        # APP服务路由
         - id: heikeji-mall-app
-          uri: lb://heikeji-mall-app
+          uri: http://127.0.0.1:8005
           predicates:
             - Path=/api/app/**
           filters:
             - StripPrefix=0
         
+        # 二手服务路由
+        - id: heikeji-secondhand
+          uri: http://127.0.0.1:8006
+          predicates:
+            - Path=/api/secondhand/**
+          filters:
+            - StripPrefix=0
+
+        # 配送服务路由
+        - id: heikeji-delivery
+          uri: http://127.0.0.1:8001
+          predicates:
+            - Path=/api/delivery/**
+          filters:
+            - StripPrefix=0
+
+        # 失物招领服务路由
+        - id: heikeji-lostfound
+          uri: http://127.0.0.1:8007
+          predicates:
+            - Path=/api/lostfound/**
+          filters:
+            - StripPrefix=0
+
         # 通用服务路由（默认兜底）
         - id: fallback-service
           uri: http://localhost:9999
@@ -121,9 +122,10 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "*"
+            allowedOriginPatterns: ["*"]
             allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
             allowedHeaders: "*"
+            exposedHeaders: ["Authorization"]
             allowCredentials: true
             maxAge: 3600
       

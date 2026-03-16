@@ -138,7 +138,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { performanceMonitor } from '@/utils/performance-monitor'
+import { defaultPerformanceMonitor } from '@/utils/performance-monitor'
 import logger from '@/utils/logger'
 
 interface RealTimeMetric {
@@ -272,7 +272,7 @@ const setupPerformanceSubscriptions = () => {
   ]
 
   subscriptions.forEach(sub => {
-    performanceMonitor.subscribe(sub.type, sub.callback)
+    defaultPerformanceMonitor.subscribe(sub.type, sub.callback)
   })
 }
 
@@ -286,17 +286,17 @@ const toggleMonitoring = () => {
 }
 
 const startMonitoring = () => {
-  performanceMonitor.mark('monitoring-start')
+  defaultPerformanceMonitor.mark('monitoring-start')
   ElMessage.success('性能监控已开始')
 }
 
 const stopMonitoring = () => {
-  performanceMonitor.mark('monitoring-stop')
+  defaultPerformanceMonitor.mark('monitoring-stop')
   ElMessage.info('性能监控已停止')
 }
 
 const generateReport = () => {
-  const report = performanceMonitor.getPerformanceReport()
+  const report = defaultPerformanceMonitor.getPerformanceReport()
   if (process.env.NODE_ENV === 'development') {
     logger.debug('性能报告:', report)
   }
@@ -371,7 +371,7 @@ const updateRealTimeMetric = (key: string, value: number, rating: string) => {
 
 const testLargeDataRender = async () => {
   ElMessage.info('开始大数据渲染测试...')
-  performanceMonitor.mark('large-data-test-start')
+  defaultPerformanceMonitor.mark('large-data-test-start')
 
   const largeArray = new Array(10000).fill(0).map((_, index) => ({
     id: index,
@@ -380,8 +380,8 @@ const testLargeDataRender = async () => {
   }))
 
   await nextTick()
-  performanceMonitor.mark('large-data-test-end')
-  performanceMonitor.measure(
+  defaultPerformanceMonitor.mark('large-data-test-end')
+  defaultPerformanceMonitor.measure(
     'large-data-render',
     'large-data-test-start',
     'large-data-test-end'
@@ -392,10 +392,10 @@ const testLargeDataRender = async () => {
 
 const testNetworkDelay = async () => {
   ElMessage.info('开始网络延迟测试...')
-  performanceMonitor.mark('network-test-start')
+  defaultPerformanceMonitor.mark('network-test-start')
 
   try {
-    await performanceMonitor.monitorRequest('/api/test-delay', {
+    await defaultPerformanceMonitor.monitorRequest('/api/test-delay', {
       method: 'GET',
     })
     ElMessage.success('网络延迟测试完成')
@@ -406,7 +406,7 @@ const testNetworkDelay = async () => {
 
 const testMemoryUsage = async () => {
   ElMessage.info('开始内存使用测试...')
-  performanceMonitor.mark('memory-test-start')
+  defaultPerformanceMonitor.mark('memory-test-start')
 
   const largeData = new Array(100000).fill(0).map(() => ({
     data: new Array(100).fill('x'.repeat(50)),
@@ -414,8 +414,8 @@ const testMemoryUsage = async () => {
 
   await new Promise(resolve => setTimeout(resolve, 100))
 
-  performanceMonitor.mark('memory-test-end')
-  performanceMonitor.measure('memory-usage', 'memory-test-start', 'memory-test-end')
+  defaultPerformanceMonitor.mark('memory-test-end')
+  defaultPerformanceMonitor.measure('memory-usage', 'memory-test-start', 'memory-test-end')
 
   largeData.length = 0
 
@@ -424,7 +424,7 @@ const testMemoryUsage = async () => {
 
 const testComponentRender = () => {
   ElMessage.info('开始组件渲染测试...')
-  performanceMonitor.mark('component-test-start')
+  defaultPerformanceMonitor.mark('component-test-start')
 
   const ComponentClass = {
     template: '<div>Test Component {{ message }}</div>',
@@ -434,8 +434,8 @@ const testComponentRender = () => {
       }
     },
     mounted() {
-      performanceMonitor.mark('component-test-render-end')
-      performanceMonitor.measure(
+      defaultPerformanceMonitor.mark('component-test-render-end')
+      defaultPerformanceMonitor.measure(
         'component-render',
         'component-test-start',
         'component-test-render-end'

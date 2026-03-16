@@ -115,7 +115,9 @@ public class SentryErrorTrackingService {
             breadcrumb.setLevel(SentryLevel.INFO);
 
             if (data != null && !data.isEmpty()) {
-                breadcrumb.setData(data);
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    breadcrumb.setData(entry.getKey(), entry.getValue());
+                }
             }
 
             Sentry.addBreadcrumb(breadcrumb);
@@ -148,14 +150,14 @@ public class SentryErrorTrackingService {
         }
 
         try {
-            Sentry.setExtra(key, value);
+            Sentry.setExtra(key, String.valueOf(value));
             log.debug("Sentry额外信息已设置: {} = {}", key, value);
         } catch (Exception e) {
             log.error("设置Sentry额外信息失败", e);
         }
     }
 
-    private void addRequestContext(io.sentry.Scope scope) {
+    private void addRequestContext(io.sentry.IScope scope) {
         try {
             ServletRequestAttributes attributes = 
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -221,9 +223,9 @@ public class SentryErrorTrackingService {
         }
 
         try {
-            io.sentry.ITransaction transaction = Sentry.getSpan();
-            if (transaction != null) {
-                transaction.finish();
+            io.sentry.ISpan span = Sentry.getSpan();
+            if (span != null) {
+                span.finish();
                 log.debug("Sentry事务已结束: {}", status);
             }
         } catch (Exception e) {

@@ -8,7 +8,7 @@ import config from '@/config/environment'
  */
 export function getProductDetail(productId) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/detail/${productId}`,
+    url: `/app/product/detail/${productId}`,
     method: 'get',
   })
 }
@@ -27,7 +27,7 @@ export function getProductDetail(productId) {
  */
 export function getProductList(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/list`,
+    url: `/app/product/list`,
     method: 'get',
     params: {
       page: params.page || 1,
@@ -49,7 +49,7 @@ export function getProductList(params) {
  */
 export function getHotProducts(params = {}) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/hot`,
+    url: `/app/product/hot`,
     method: 'get',
     params: {
       limit: params.limit || 10,
@@ -65,7 +65,7 @@ export function getHotProducts(params = {}) {
  */
 export function getRecommendedProducts(params = {}) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/recommended`,
+    url: `/app/product/recommended`,
     method: 'get',
     params: {
       limit: params.limit || 10,
@@ -81,7 +81,7 @@ export function getRecommendedProducts(params = {}) {
  */
 export function getBatchProducts(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/batch`,
+    url: `/app/product/batch`,
     method: 'post',
     data: {
       productIds: params.productIds,
@@ -99,7 +99,7 @@ export function getBatchProducts(params) {
  */
 export function searchProducts(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/search`,
+    url: `/app/product/search`,
     method: 'get',
     params: {
       keyword: params.keyword,
@@ -119,7 +119,7 @@ export function searchProducts(params) {
  */
 export function getProductReviews(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/${params.productId}/reviews`,
+    url: `/app/product/${params.productId}/reviews`,
     method: 'get',
     params: {
       page: params.page || 1,
@@ -135,7 +135,7 @@ export function getProductReviews(params) {
  */
 export function getProductReviewStats(productId) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/${productId}/review-stats`,
+    url: `/app/product/${productId}/review-stats`,
     method: 'get',
   })
 }
@@ -148,7 +148,7 @@ export function getProductReviewStats(productId) {
  */
 export function favoriteProduct(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/favorite`,
+    url: `/app/product/favorite`,
     method: 'post',
     data: {
       productId: params.productId,
@@ -164,7 +164,7 @@ export function favoriteProduct(params) {
  */
 export function unfavoriteProduct(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/favorite`,
+    url: `/app/product/favorite`,
     method: 'delete',
     data: {
       productId: params.productId,
@@ -180,7 +180,7 @@ export function unfavoriteProduct(params) {
  */
 export function getProductFavoriteStatus(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/favorite/status`,
+    url: `/app/product/favorite/status`,
     method: 'get',
     params: {
       productId: params.productId,
@@ -198,7 +198,7 @@ export function getProductFavoriteStatus(params) {
  */
 export function checkProductStock(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/stock`,
+    url: `/app/product/stock`,
     method: 'post',
     data: {
       productId: params.productId,
@@ -216,7 +216,7 @@ export function checkProductStock(params) {
  */
 export function recordProductView(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/view`,
+    url: `/app/product/view`,
     method: 'post',
     data: {
       productId: params.productId,
@@ -230,7 +230,7 @@ export function recordProductView(params) {
  */
 export function getHotSearchWords() {
   return request({
-    url: `${config.API_BASE_URL}/app/product/hotWords`,
+    url: `/app/product/hotWords`,
     method: 'get',
   })
 }
@@ -243,7 +243,7 @@ export function getHotSearchWords() {
  */
 export function getSearchSuggestions(params) {
   return request({
-    url: `${config.API_BASE_URL}/app/product/searchSuggestions`,
+    url: `/app/product/searchSuggestions`,
     method: 'get',
     params: {
       keyword: params.keyword,
