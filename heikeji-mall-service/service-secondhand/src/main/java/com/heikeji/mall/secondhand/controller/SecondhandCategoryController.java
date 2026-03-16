@@ -1,8 +1,8 @@
 package com.heikeji.mall.secondhand.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.heikeji.mall.secondhand.entity.SecondhandCategory;
+import com.heikeji.mall.secondhand.service.SecondhandCategoryService;
 import com.heikeji.common.core.domain.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +20,7 @@ import java.util.List;
 public class SecondhandCategoryController {
 
     @Autowired
-    private IService<SecondhandCategory> categoryService;
+    private SecondhandCategoryService categoryService;
 
     @GetMapping("/list")
     @Operation(summary = "获取分类列表")

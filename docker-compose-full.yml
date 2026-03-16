@@ -1,0 +1,440 @@
+# 黑科易购 - 完整Docker Compose配置
+# 一键启动所有基础设施和微服务
+
+version: '3.8'
+
+services:
+  # ==================== 基础设施 ====================
+
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: hkyg-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Mysql@8Root!2025
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hkyg-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pMysql@8Root!2025"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: hkyg-redis
+    command: redis-server --appendonly yes --requirepass Redis@hkyg
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hkyg-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "Redis@hkyg", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Nacos服务注册中心
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    container_name: hkyg-nacos
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: Mysql@8Root!2025
+      NACOS_AUTH_ENABLE: "false"
+      TZ: Asia/Shanghai
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos_logs:/home/nacos/logs
+      - nacos_data:/home/nacos/data
+    networks:
+      - hkyg-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/v1/ns/operator/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    restart: unless-stopped
+
+  # RabbitMQ消息队列
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: hkyg-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      TZ: Asia/Shanghai
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - hkyg-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ==================== 微服务 ====================
+
+  # API网关
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-gateway
+    container_name: hkyg-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 管理后台
+  admin:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-admin
+    container_name: hkyg-admin
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8090:8090"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 用户服务
+  user-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-user
+    container_name: hkyg-user-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8081:8081"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 商品服务
+  product-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-product
+    container_name: hkyg-product-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8082:8082"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 订单服务
+  order-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-order
+    container_name: hkyg-order-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8083:8083"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 配送服务
+  delivery-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-delivery
+    container_name: hkyg-delivery-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8001:8001"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 会员服务
+  member-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-member
+    container_name: hkyg-member-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8088:8088"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 校园服务
+  campus-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-campus
+    container_name: hkyg-campus-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8003:8003"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 二手服务
+  secondhand-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-secondhand
+    container_name: hkyg-secondhand-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8006:8006"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 失物招领服务
+  lostfound-service:
+    build:
+      context: .
+      dockerfile: docker/services/Dockerfile-lostfound
+    container_name: hkyg-lostfound-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: heikeji_mall
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: Mysql@8Root!2025
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: Redis@hkyg
+      TZ: Asia/Shanghai
+    ports:
+      - "8007:8007"
+    networks:
+      - hkyg-network
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ==================== 数据卷 ====================
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  nacos_logs:
+    driver: local
+  nacos_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+# ==================== 网络 ====================
+networks:
+  hkyg-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
