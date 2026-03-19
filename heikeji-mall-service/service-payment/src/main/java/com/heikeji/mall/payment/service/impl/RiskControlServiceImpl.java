@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class RiskControlServiceImpl implements RiskControlService {
     private static final Logger log = LoggerFactory.getLogger(RiskControlServiceImpl.class);
     
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
     
     // 支付金额阈值配置
@@ -49,10 +49,12 @@ public class RiskControlServiceImpl implements RiskControlService {
         
         Map<String, String> riskDetails = new HashMap<>();
         
-        // 1. 检查用户是否被风控
-        if (isUserBlocked(userId)) {
+        // 1. 检查用户是否被风控（如果Redis可用）
+        if (redisTemplate != null && isUserBlocked(userId)) {
             riskDetails.put("block_reason", "用户已被风控系统锁定");
             return new RiskAssessmentResult(RiskLevel.HIGH, "用户账户存在风险，请联系客服", true);
+        } else if (redisTemplate == null) {
+            log.warn("Redis不可用，跳过用户风控检查");
         }
         
         // 2. 金额风险评估
@@ -63,20 +65,30 @@ public class RiskControlServiceImpl implements RiskControlService {
             riskDetails.put("amount_risk", "支付金额较大");
         }
         
-        // 3. 频率风险评估
-        RiskLevel frequencyRiskLevel = assessFrequencyRisk(userId);
-        if (frequencyRiskLevel == RiskLevel.HIGH) {
-            riskDetails.put("frequency_risk", "短时间内支付频率过高");
-            return new RiskAssessmentResult(RiskLevel.HIGH, "支付操作过于频繁，请稍后重试", true);
-        } else if (frequencyRiskLevel == RiskLevel.MEDIUM) {
-            riskDetails.put("frequency_risk", "支付频率较高");
+        // 3. 频率风险评估（如果Redis可用）
+        RiskLevel frequencyRiskLevel = RiskLevel.LOW;
+        if (redisTemplate != null) {
+            frequencyRiskLevel = assessFrequencyRisk(userId);
+            if (frequencyRiskLevel == RiskLevel.HIGH) {
+                riskDetails.put("frequency_risk", "短时间内支付频率过高");
+                return new RiskAssessmentResult(RiskLevel.HIGH, "支付操作过于频繁，请稍后重试", true);
+            } else if (frequencyRiskLevel == RiskLevel.MEDIUM) {
+                riskDetails.put("frequency_risk", "支付频率较高");
+            }
+        } else {
+            log.warn("Redis不可用，跳过频率风险评估");
         }
         
-        // 4. IP风险评估
-        RiskLevel ipRiskLevel = assessIpRisk(ip);
-        if (ipRiskLevel == RiskLevel.HIGH) {
-            riskDetails.put("ip_risk", "IP地址存在风险");
-            return new RiskAssessmentResult(RiskLevel.HIGH, "当前网络环境存在风险，请更换网络重试", true);
+        // 4. IP风险评估（如果Redis可用）
+        RiskLevel ipRiskLevel = RiskLevel.LOW;
+        if (redisTemplate != null) {
+            ipRiskLevel = assessIpRisk(ip);
+            if (ipRiskLevel == RiskLevel.HIGH) {
+                riskDetails.put("ip_risk", "IP地址存在风险");
+                return new RiskAssessmentResult(RiskLevel.HIGH, "当前网络环境存在风险，请更换网络重试", true);
+            }
+        } else {
+            log.warn("Redis不可用，跳过IP风险评估");
         }
         
         // 5. 综合风险等级
@@ -100,28 +112,32 @@ public class RiskControlServiceImpl implements RiskControlService {
     
     @Override
     public boolean checkAbnormalPaymentBehavior(Long userId, BigDecimal amount) {
-        // 检查短时间内多次支付失败
-        String failKey = "payment:fail:" + userId;
-        Integer failCount = (Integer) redisTemplate.opsForValue().get(failKey);
-        if (failCount != null && failCount >= 3) {
-            log.warn("检测到异常支付行为: 用户短时间内多次支付失败 userId={}, failCount={}", userId, failCount);
-            return true;
-        }
-        
-        // 检查大额支付异常模式
-        if (amount.compareTo(HIGH_AMOUNT_THRESHOLD) > 0) {
-            // 检查用户历史支付金额是否通常较低
-            String avgAmountKey = "payment:avg_amount:" + userId;
-            Object avgAmountObj = redisTemplate.opsForValue().get(avgAmountKey);
-            if (avgAmountObj != null) {
-                BigDecimal avgAmount = new BigDecimal(avgAmountObj.toString());
-                // 如果本次支付金额是平均金额的5倍以上，视为异常
-                if (amount.compareTo(avgAmount.multiply(new BigDecimal(5))) > 0) {
-                    log.warn("检测到异常支付行为: 支付金额远超用户平均水平 userId={}, amount={}, avgAmount={}", 
-                             userId, amount, avgAmount);
-                    return true;
+        // 检查短时间内多次支付失败（如果Redis可用）
+        if (redisTemplate != null) {
+            String failKey = "payment:fail:" + userId;
+            Integer failCount = (Integer) redisTemplate.opsForValue().get(failKey);
+            if (failCount != null && failCount >= 3) {
+                log.warn("检测到异常支付行为: 用户短时间内多次支付失败 userId={}, failCount={}", userId, failCount);
+                return true;
+            }
+            
+            // 检查大额支付异常模式
+            if (amount.compareTo(HIGH_AMOUNT_THRESHOLD) > 0) {
+                // 检查用户历史支付金额是否通常较低
+                String avgAmountKey = "payment:avg_amount:" + userId;
+                Object avgAmountObj = redisTemplate.opsForValue().get(avgAmountKey);
+                if (avgAmountObj != null) {
+                    BigDecimal avgAmount = new BigDecimal(avgAmountObj.toString());
+                    // 如果本次支付金额是平均金额的5倍以上，视为异常
+                    if (amount.compareTo(avgAmount.multiply(new BigDecimal(5))) > 0) {
+                        log.warn("检测到异常支付行为: 支付金额远超用户平均水平 userId={}, amount={}, avgAmount={}", 
+                                 userId, amount, avgAmount);
+                        return true;
+                    }
                 }
             }
+        } else {
+            log.warn("Redis不可用，跳过异常支付行为检测");
         }
         
         return false;
@@ -129,45 +145,49 @@ public class RiskControlServiceImpl implements RiskControlService {
     
     @Override
     public void recordPaymentAttempt(Long userId, Long orderId, BigDecimal amount, Integer paymentType, String ip, boolean success) {
-        String key = "payment:attempt:" + userId + ":" + System.currentTimeMillis() / 60000; // 按分钟统计
-        redisTemplate.opsForValue().increment(key, 1);
-        redisTemplate.expire(key, 24, TimeUnit.HOURS);
-        
-        // 记录小时级别的尝试次数
-        String hourKey = "payment:attempt:hour:" + userId + ":" + System.currentTimeMillis() / 3600000;
-        redisTemplate.opsForValue().increment(hourKey, 1);
-        redisTemplate.expire(hourKey, 24, TimeUnit.HOURS);
-        
-        // 如果支付成功，更新用户的平均支付金额
-        if (success) {
-            String avgAmountKey = "payment:avg_amount:" + userId;
-            Object avgAmountObj = redisTemplate.opsForValue().get(avgAmountKey);
-            Object countObj = redisTemplate.opsForValue().get("payment:count:" + userId);
+        if (redisTemplate != null) {
+            String key = "payment:attempt:" + userId + ":" + System.currentTimeMillis() / 60000; // 按分钟统计
+            redisTemplate.opsForValue().increment(key, 1);
+            redisTemplate.expire(key, 24, TimeUnit.HOURS);
             
-            int count = countObj != null ? Integer.parseInt(countObj.toString()) : 0;
-            BigDecimal newAvg;
+            // 记录小时级别的尝试次数
+            String hourKey = "payment:attempt:hour:" + userId + ":" + System.currentTimeMillis() / 3600000;
+            redisTemplate.opsForValue().increment(hourKey, 1);
+            redisTemplate.expire(hourKey, 24, TimeUnit.HOURS);
             
-            if (avgAmountObj != null) {
-                BigDecimal oldAvg = new BigDecimal(avgAmountObj.toString());
-                newAvg = oldAvg.multiply(new BigDecimal(count)).add(amount)
-                              .divide(new BigDecimal(count + 1), 2, BigDecimal.ROUND_HALF_UP);
+            // 如果支付成功，更新用户的平均支付金额
+            if (success) {
+                String avgAmountKey = "payment:avg_amount:" + userId;
+                Object avgAmountObj = redisTemplate.opsForValue().get(avgAmountKey);
+                Object countObj = redisTemplate.opsForValue().get("payment:count:" + userId);
+                
+                int count = countObj != null ? Integer.parseInt(countObj.toString()) : 0;
+                BigDecimal newAvg;
+                
+                if (avgAmountObj != null) {
+                    BigDecimal oldAvg = new BigDecimal(avgAmountObj.toString());
+                    newAvg = oldAvg.multiply(new BigDecimal(count)).add(amount)
+                                  .divide(new BigDecimal(count + 1), 2, BigDecimal.ROUND_HALF_UP);
+                } else {
+                    newAvg = amount;
+                }
+                
+                redisTemplate.opsForValue().set(avgAmountKey, newAvg.toString());
+                redisTemplate.expire(avgAmountKey, 30, TimeUnit.DAYS);
+                
+                redisTemplate.opsForValue().set("payment:count:" + userId, count + 1);
+                redisTemplate.expire("payment:count:" + userId, 30, TimeUnit.DAYS);
+                
+                // 清除失败计数
+                redisTemplate.delete("payment:fail:" + userId);
             } else {
-                newAvg = amount;
+                // 记录失败次数
+                String failKey = "payment:fail:" + userId;
+                redisTemplate.opsForValue().increment(failKey, 1);
+                redisTemplate.expire(failKey, 1, TimeUnit.HOURS);
             }
-            
-            redisTemplate.opsForValue().set(avgAmountKey, newAvg.toString());
-            redisTemplate.expire(avgAmountKey, 30, TimeUnit.DAYS);
-            
-            redisTemplate.opsForValue().set("payment:count:" + userId, count + 1);
-            redisTemplate.expire("payment:count:" + userId, 30, TimeUnit.DAYS);
-            
-            // 清除失败计数
-            redisTemplate.delete("payment:fail:" + userId);
         } else {
-            // 记录失败次数
-            String failKey = "payment:fail:" + userId;
-            redisTemplate.opsForValue().increment(failKey, 1);
-            redisTemplate.expire(failKey, 1, TimeUnit.HOURS);
+            log.warn("Redis不可用，跳过支付尝试记录");
         }
         
         log.info("记录支付尝试: userId={}, orderId={}, success={}", userId, orderId, success);
@@ -216,18 +236,20 @@ public class RiskControlServiceImpl implements RiskControlService {
      * 评估频率风险
      */
     private RiskLevel assessFrequencyRisk(Long userId) {
-        // 检查每分钟的尝试次数
-        String minuteKey = "payment:attempt:" + userId + ":" + System.currentTimeMillis() / 60000;
-        Integer minuteCount = (Integer) redisTemplate.opsForValue().get(minuteKey);
-        if (minuteCount != null && minuteCount >= MAX_ATTEMPTS_PER_MINUTE) {
-            return RiskLevel.HIGH;
-        }
-        
-        // 检查每小时的尝试次数
-        String hourKey = "payment:attempt:hour:" + userId + ":" + System.currentTimeMillis() / 3600000;
-        Integer hourCount = (Integer) redisTemplate.opsForValue().get(hourKey);
-        if (hourCount != null && hourCount >= MAX_ATTEMPTS_PER_HOUR) {
-            return RiskLevel.MEDIUM;
+        if (redisTemplate != null) {
+            // 检查每分钟的尝试次数
+            String minuteKey = "payment:attempt:" + userId + ":" + System.currentTimeMillis() / 60000;
+            Integer minuteCount = (Integer) redisTemplate.opsForValue().get(minuteKey);
+            if (minuteCount != null && minuteCount >= MAX_ATTEMPTS_PER_MINUTE) {
+                return RiskLevel.HIGH;
+            }
+            
+            // 检查每小时的尝试次数
+            String hourKey = "payment:attempt:hour:" + userId + ":" + System.currentTimeMillis() / 3600000;
+            Integer hourCount = (Integer) redisTemplate.opsForValue().get(hourKey);
+            if (hourCount != null && hourCount >= MAX_ATTEMPTS_PER_HOUR) {
+                return RiskLevel.MEDIUM;
+            }
         }
         
         return RiskLevel.LOW;
@@ -243,11 +265,13 @@ public class RiskControlServiceImpl implements RiskControlService {
             }
         }
         
-        // 检查IP的尝试次数
-        String ipKey = "payment:ip:" + ip + ":" + System.currentTimeMillis() / 3600000;
-        Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
-        if (ipCount != null && ipCount >= 20) { // 同一IP每小时超过20次支付尝试
-            return RiskLevel.MEDIUM;
+        // 检查IP的尝试次数（如果Redis可用）
+        if (redisTemplate != null) {
+            String ipKey = "payment:ip:" + ip + ":" + System.currentTimeMillis() / 3600000;
+            Integer ipCount = (Integer) redisTemplate.opsForValue().get(ipKey);
+            if (ipCount != null && ipCount >= 20) { // 同一IP每小时超过20次支付尝试
+                return RiskLevel.MEDIUM;
+            }
         }
         
         return RiskLevel.LOW;
@@ -270,26 +294,37 @@ public class RiskControlServiceImpl implements RiskControlService {
      * 检查用户是否被风控系统锁定
      */
     private boolean isUserBlocked(Long userId) {
-        String blockKey = "payment:block:" + userId;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(blockKey));
+        if (redisTemplate != null) {
+            String blockKey = "payment:block:" + userId;
+            return Boolean.TRUE.equals(redisTemplate.hasKey(blockKey));
+        }
+        return false;
     }
     
     /**
      * 锁定风险用户
      */
     public void blockUser(Long userId, String reason, int hours) {
-        String blockKey = "payment:block:" + userId;
-        redisTemplate.opsForValue().set(blockKey, reason);
-        redisTemplate.expire(blockKey, hours, TimeUnit.HOURS);
-        log.warn("锁定风险用户: userId={}, reason={}, hours={}", userId, reason, hours);
+        if (redisTemplate != null) {
+            String blockKey = "payment:block:" + userId;
+            redisTemplate.opsForValue().set(blockKey, reason);
+            redisTemplate.expire(blockKey, hours, TimeUnit.HOURS);
+            log.warn("锁定风险用户: userId={}, reason={}, hours={}", userId, reason, hours);
+        } else {
+            log.warn("Redis不可用，跳过用户锁定操作: userId={}, reason={}, hours={}", userId, reason, hours);
+        }
     }
     
     /**
      * 解除用户锁定
      */
     public void unblockUser(Long userId) {
-        String blockKey = "payment:block:" + userId;
-        redisTemplate.delete(blockKey);
-        log.info("解除用户锁定: userId={}", userId);
+        if (redisTemplate != null) {
+            String blockKey = "payment:block:" + userId;
+            redisTemplate.delete(blockKey);
+            log.info("解除用户锁定: userId={}", userId);
+        } else {
+            log.warn("Redis不可用，跳过用户解锁操作: userId={}", userId);
+        }
     }
 }

@@ -64,11 +64,12 @@ export const userApi = {
    * 用户登录
    * @param data 登录参数
    */
-  login: (data: LoginParams) => request.post<LoginResult>('/api/login', data, {
-    rateLimit: true,
-    encrypt: true,
-    encryptFields: ['password'], // 只加密密码字段
-  }),
+  login: (data: LoginParams) =>
+    request.post<LoginResult>('/api/login', data, {
+      rateLimit: true,
+      encrypt: true,
+      encryptFields: ['password'], // 只加密密码字段
+    }),
 
   /**
    * 退出登录
@@ -78,17 +79,27 @@ export const userApi = {
   /**
    * 获取用户信息
    */
-  getUserInfo: () => request.get<UserInfo>('/api/user/info', {}, {
-    decryptResponse: true, // 解密响应数据
-  }),
+  getUserInfo: () =>
+    request.get<UserInfo>(
+      '/api/user/info',
+      {},
+      {
+        decryptResponse: true, // 解密响应数据
+      }
+    ),
 
   /**
    * 刷新Token
    */
-  refreshToken: () => request.post<{ token: string }>('/api/auth/refresh', {}, {
-    rateLimit: true,
-    rateLimitKey: 'refresh-token', // 自定义速率限制键
-  }),
+  refreshToken: () =>
+    request.post<{ token: string }>(
+      '/api/auth/refresh',
+      {},
+      {
+        rateLimit: true,
+        rateLimitKey: 'refresh-token', // 自定义速率限制键
+      }
+    ),
 
   /**
    * 获取用户列表
@@ -126,8 +137,7 @@ export const userApi = {
    * 修改密码
    * @param data 密码数据
    */
-  updatePassword: (data: UpdatePasswordParams) =>
-    request.put('/api/user/profile/updatePwd', data),
+  updatePassword: (data: UpdatePasswordParams) => request.put('/api/user/profile/updatePwd', data),
 
   /**
    * 更新用户信息
@@ -139,7 +149,8 @@ export const userApi = {
    * 上传头像
    * @param formData 头像文件
    */
-  uploadAvatar: (formData: FormData) => request.upload<{ avatar: string }>('/api/user/profile/avatar', formData),
+  uploadAvatar: (formData: FormData) =>
+    request.upload<{ avatar: string }>('/api/user/profile/avatar', formData),
 
   /**
    * 获取用户角色列表
@@ -151,6 +162,5 @@ export const userApi = {
    * 分配用户角色
    * @param data 角色分配数据
    */
-  assignRoles: (data: AssignRolesParams) =>
-    request.put('/api/system/user/authRole', data),
+  assignRoles: (data: AssignRolesParams) => request.put('/api/system/user/authRole', data),
 }

@@ -13,12 +13,12 @@ spring:
   main:
     web-application-type: reactive
   
-  # 服务发现配置 - 完全禁用Nacos
+  # 服务发现配置
   cloud:
     nacos:
       discovery:
-        enabled: false
-        server-addr: localhost:8848
+        enabled: true
+        server-addr: 192.168.186.128:8848
       config:
         enabled: false
         import-check:

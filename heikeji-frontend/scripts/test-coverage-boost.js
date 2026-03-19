@@ -22,10 +22,7 @@ const config = {
     '**/index.ts', // 通常只是导出文件
     '**/types/**', // 类型定义文件
   ],
-  includePatterns: [
-    '**/*.vue',
-    '**/*.ts',
-  ],
+  includePatterns: ['**/*.vue', '**/*.ts'],
 }
 
 // 分析结果
@@ -42,38 +39,38 @@ let analysisResult = {
  */
 function getAllFiles(dir, patterns, excludePatterns) {
   const files = []
-  
+
   function traverse(currentDir) {
     const items = fs.readdirSync(currentDir)
-    
+
     for (const item of items) {
       const fullPath = path.join(currentDir, item)
       const stat = fs.statSync(fullPath)
-      
+
       if (stat.isDirectory()) {
         traverse(fullPath)
       } else if (stat.isFile()) {
         const relativePath = path.relative(config.srcDir, fullPath)
-        
+
         // 检查是否匹配包含模式
         const isIncluded = patterns.some(pattern => {
           const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'))
           return regex.test(relativePath)
         })
-        
+
         // 检查是否匹配排除模式
         const isExcluded = excludePatterns.some(pattern => {
           const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'))
           return regex.test(relativePath)
         })
-        
+
         if (isIncluded && !isExcluded) {
           files.push(fullPath)
         }
       }
     }
   }
-  
+
   traverse(dir)
   return files
 }
@@ -84,14 +81,14 @@ function getAllFiles(dir, patterns, excludePatterns) {
 function runCoverageTest() {
   try {
     console.log('🔍 运行测试覆盖率分析...')
-    
+
     const testCommand = 'npm run test:coverage'
-    const output = execSync(testCommand, { 
+    const output = execSync(testCommand, {
       encoding: 'utf8',
       stdio: 'pipe',
-      cwd: path.join(__dirname, '..')
+      cwd: path.join(__dirname, '..'),
     })
-    
+
     console.log('✅ 测试覆盖率分析完成')
     return true
   } catch (error) {
@@ -105,12 +102,12 @@ function runCoverageTest() {
  */
 function parseCoverageReport() {
   const coverageFile = path.join(__dirname, '../coverage/coverage-summary.json')
-  
+
   if (!fs.existsSync(coverageFile)) {
     console.error('❌ 覆盖率报告文件不存在:', coverageFile)
     return null
   }
-  
+
   try {
     const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'))
     return coverageData
@@ -130,19 +127,19 @@ function analyzeFileCoverage(coverageData, files) {
     untestedFiles: [],
     lowCoverageFiles: [],
   }
-  
+
   for (const file of files) {
     const relativePath = path.relative(config.srcDir, file)
     const coverageKey = path.join(config.srcDir, relativePath)
-    
+
     let coverage = null
     if (coverageData && coverageData[coverageKey]) {
       coverage = coverageData[coverageKey]
     }
-    
+
     if (coverage && coverage.lines && coverage.lines.pct > 0) {
       result.testedFiles++
-      
+
       if (coverage.lines.pct < config.coverageThreshold) {
         result.lowCoverageFiles.push({
           file: relativePath,
@@ -156,7 +153,7 @@ function analyzeFileCoverage(coverageData, files) {
       })
     }
   }
-  
+
   return result
 }
 
@@ -167,19 +164,19 @@ function generateTestTemplate(filePath) {
   const relativePath = path.relative(config.srcDir, filePath)
   const testFilePath = filePath.replace(/\.(vue|ts)$/, '.test.ts')
   const componentName = path.basename(filePath, path.extname(filePath))
-  
+
   // 确定文件类型
   const isVueFile = filePath.endsWith('.vue')
   const isTsFile = filePath.endsWith('.ts')
-  
+
   let template = ''
-  
+
   if (isVueFile) {
     template = generateVueTestTemplate(relativePath, componentName)
   } else if (isTsFile) {
     template = generateTsTestTemplate(relativePath, componentName)
   }
-  
+
   return {
     testFilePath,
     template,
@@ -264,13 +261,13 @@ function createTestFile(testFilePath, template) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
     }
-    
+
     // 检查文件是否已存在
     if (fs.existsSync(testFilePath)) {
       console.log(`⚠️  测试文件已存在: ${testFilePath}`)
       return false
     }
-    
+
     // 创建测试文件
     fs.writeFileSync(testFilePath, template, 'utf8')
     console.log(`✅ 创建测试文件: ${testFilePath}`)
@@ -286,7 +283,7 @@ function createTestFile(testFilePath, template) {
  */
 function generateReport(analysisResult) {
   const reportPath = path.join(__dirname, '../test-coverage-report.md')
-  
+
   let report = `# 测试覆盖率报告
 
 ## 总览
@@ -300,7 +297,7 @@ function generateReport(analysisResult) {
 ## 未测试文件
 
 `
-  
+
   if (analysisResult.untestedFiles.length > 0) {
     for (const file of analysisResult.untestedFiles) {
       report += `- ${file.file}\n`
@@ -308,9 +305,9 @@ function generateReport(analysisResult) {
   } else {
     report += '🎉 所有文件都有测试覆盖！\n'
   }
-  
+
   report += `\n## 低覆盖率文件 (< ${config.coverageThreshold}%)\n\n`
-  
+
   if (analysisResult.lowCoverageFiles.length > 0) {
     for (const file of analysisResult.lowCoverageFiles) {
       report += `- ${file.file} (${file.coverage.toFixed(2)}%)\n`
@@ -318,20 +315,20 @@ function generateReport(analysisResult) {
   } else {
     report += '🎉 所有文件都达到覆盖率要求！\n'
   }
-  
+
   report += `\n## 建议\n\n`
-  
+
   if (analysisResult.untestedFiles.length > 0) {
     report += `1. 为未测试的文件创建测试用例\n`
   }
-  
+
   if (analysisResult.lowCoverageFiles.length > 0) {
     report += `2. 提高低覆盖率文件的测试覆盖率\n`
   }
-  
+
   report += `3. 定期运行此脚本检查覆盖率\n`
   report += `4. 设置CI/CD流水线确保覆盖率不低于${config.coverageThreshold}%\n`
-  
+
   try {
     fs.writeFileSync(reportPath, report, 'utf8')
     console.log(`✅ 生成测试报告: ${reportPath}`)
@@ -345,48 +342,48 @@ function generateReport(analysisResult) {
  */
 function main() {
   console.log('🚀 开始测试覆盖率分析...')
-  
+
   // 获取所有需要测试的文件
   const files = getAllFiles(config.srcDir, config.includePatterns, config.excludePatterns)
   console.log(`📁 找到 ${files.length} 个需要测试的文件`)
-  
+
   // 运行测试覆盖率
   const testSuccess = runCoverageTest()
   if (!testSuccess) {
     console.log('⚠️  测试运行失败，将基于现有文件生成测试模板')
   }
-  
+
   // 解析覆盖率报告
   const coverageData = parseCoverageReport()
-  
+
   // 分析文件覆盖率
   analysisResult = analyzeFileCoverage(coverageData, files)
-  
+
   console.log(`📊 测试覆盖率分析结果:`)
   console.log(`   总文件数: ${analysisResult.totalFiles}`)
   console.log(`   已测试文件数: ${analysisResult.testedFiles}`)
   console.log(`   未测试文件数: ${analysisResult.untestedFiles.length}`)
   console.log(`   低覆盖率文件数: ${analysisResult.lowCoverageFiles.length}`)
-  
+
   // 为未测试的文件生成测试模板
   let createdTests = 0
   for (const file of analysisResult.untestedFiles) {
     const filePath = path.join(config.srcDir, file.file)
     const { testFilePath, template } = generateTestTemplate(filePath)
-    
+
     if (createTestFile(testFilePath, template)) {
       createdTests++
     }
   }
-  
+
   console.log(`📝 为 ${createdTests} 个文件创建了测试模板`)
-  
+
   // 生成报告
   generateReport(analysisResult)
-  
+
   console.log('✅ 测试覆盖率分析完成！')
   console.log(`📄 查看详细报告: ${path.join(__dirname, '../test-coverage-report.md')}`)
-  
+
   // 如果有未测试的文件，返回非零退出码
   if (analysisResult.untestedFiles.length > 0) {
     process.exit(1)

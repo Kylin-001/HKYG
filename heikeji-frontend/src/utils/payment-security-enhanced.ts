@@ -23,10 +23,7 @@ export class EnhancedSignature {
     return result
   }
 
-  static generateEnhancedSign(
-    params: SignParams,
-    appSecret: string
-  ): SignResult {
+  static generateEnhancedSign(params: SignParams, appSecret: string): SignResult {
     const timestamp = Date.now()
     const nonce = this.generateNonce()
 
@@ -59,10 +56,7 @@ export class EnhancedSignature {
       return false
     }
 
-    const generatedSign = this.generateEnhancedSign(
-      params,
-      appSecret
-    )
+    const generatedSign = this.generateEnhancedSign(params, appSecret)
 
     return generatedSign.sign === receivedSign
   }
@@ -74,15 +68,13 @@ export class EnhancedSignature {
       .map(key => `${key}=${params[key]}`)
       .join('&')
 
-    const sign = CryptoJS.MD5(signStr + appKey).toString().toUpperCase()
+    const sign = CryptoJS.MD5(signStr + appKey)
+      .toString()
+      .toUpperCase()
     return sign
   }
 
-  static verifySign(
-    params: SignParams,
-    appKey: string,
-    sign: string
-  ): boolean {
+  static verifySign(params: SignParams, appKey: string, sign: string): boolean {
     const generatedSign = this.generateSign(params, appKey)
     return generatedSign === sign
   }

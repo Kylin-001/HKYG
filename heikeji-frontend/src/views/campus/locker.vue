@@ -1519,7 +1519,7 @@ const getStatusText = (status: string) => {
 }
 
 // 扩展表格样式
-::v-deep {
+:deep(*) {
   .el-table {
     .urgent-row {
       background-color: #fef0f0 !important;
@@ -1563,7 +1563,7 @@ const getStatusText = (status: string) => {
 }
 
 // 监控页面布局样式
-::v-deep .el-row {
+:deep(.el-row) {
   .el-col {
     margin-bottom: 10px;
   }

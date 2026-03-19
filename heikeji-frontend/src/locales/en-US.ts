@@ -22,7 +22,6 @@ export default {
     yes: 'Yes',
     no: 'No',
     ok: 'OK',
-    cancel: 'Cancel',
     refresh: 'Refresh',
     export: 'Export',
     import: 'Import',

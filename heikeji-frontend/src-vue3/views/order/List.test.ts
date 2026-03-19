@@ -59,13 +59,13 @@ describe('Order List Component', () => {
       userPhone: '13800138000',
       userAddress: '北京市朝阳区某某街道',
       totalAmount: 199.99,
-      discountAmount: 10.00,
+      discountAmount: 10.0,
       actualAmount: 189.99,
       paymentMethod: 'alipay',
       paymentStatus: 2,
       orderStatus: 2,
       deliveryType: 1,
-      deliveryFee: 10.00,
+      deliveryFee: 10.0,
       items: [
         {
           id: '1',
@@ -135,33 +135,33 @@ describe('Order List Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Default API responses
     vi.mocked(orderApi.getOrderList).mockResolvedValue({
       data: mockOrderListResponse,
     })
-    
+
     vi.mocked(orderApi.getOrderStats).mockResolvedValue({
       data: mockOrderStats,
     })
-    
+
     vi.mocked(orderApi.updateOrderStatus).mockResolvedValue({
       data: true,
     })
-    
+
     vi.mocked(orderApi.cancelOrder).mockResolvedValue({
       data: true,
     })
-    
+
     vi.mocked(orderApi.exportOrders).mockResolvedValue({
       data: new Blob(),
     })
-    
+
     vi.mocked(ElMessageBox.confirm).mockResolvedValue('confirm')
     vi.mocked(ElMessageBox.prompt).mockResolvedValue({
       value: '测试取消原因',
     })
-    
+
     wrapper = mount(List, {
       global: {
         stubs: {
@@ -192,14 +192,14 @@ describe('Order List Component', () => {
 
   it('loads orders on mount', async () => {
     await wrapper.vm.$nextTick()
-    
+
     expect(orderApi.getOrderList).toHaveBeenCalledTimes(1)
     expect(orderApi.getOrderStats).toHaveBeenCalledTimes(1)
   })
 
   it('displays order stats correctly', async () => {
     await wrapper.vm.$nextTick()
-    
+
     expect(wrapper.text()).toContain('100')
     expect(wrapper.text()).toContain('10')
     expect(wrapper.text()).toContain('1999.99')
@@ -208,11 +208,11 @@ describe('Order List Component', () => {
 
   it('displays orders in table', async () => {
     await wrapper.vm.$nextTick()
-    
+
     // Wait for API call to complete
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     expect(wrapper.text()).toContain('ORD20230101001')
     expect(wrapper.text()).toContain('ORD20230101002')
     expect(wrapper.text()).toContain('张三')
@@ -223,7 +223,7 @@ describe('Order List Component', () => {
     const searchInput = wrapper.find('.search-container input')
     await searchInput.setValue('ORD20230101001')
     await searchInput.trigger('keyup.enter')
-    
+
     expect(orderApi.getOrderList).toHaveBeenCalledWith(
       expect.objectContaining({
         orderNo: 'ORD20230101001',
@@ -235,7 +235,7 @@ describe('Order List Component', () => {
   it('handles refresh correctly', async () => {
     const refreshButton = wrapper.find('.header-right button:nth-child(1)')
     await refreshButton.trigger('click')
-    
+
     expect(orderApi.getOrderList).toHaveBeenCalledTimes(2)
     expect(orderApi.getOrderStats).toHaveBeenCalledTimes(2)
   })
@@ -245,18 +245,18 @@ describe('Order List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the handleConfirm method
     wrapper.vm.handleConfirm(mockOrders[0])
-    
+
     expect(ElMessageBox.confirm).toHaveBeenCalledWith(
       expect.stringContaining('确定要确认订单"ORD20230101001"吗？'),
       '提示',
       expect.any(Object)
     )
-    
+
     await wrapper.vm.$nextTick()
-    
+
     expect(orderApi.updateOrderStatus).toHaveBeenCalledWith('1', 2)
   })
 
@@ -265,18 +265,18 @@ describe('Order List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the handleCancel method
     wrapper.vm.handleCancel(mockOrders[0])
-    
+
     expect(ElMessageBox.prompt).toHaveBeenCalledWith(
       expect.stringContaining('确定要取消订单"ORD20230101001"吗？'),
       '取消订单',
       expect.any(Object)
     )
-    
+
     await wrapper.vm.$nextTick()
-    
+
     expect(orderApi.cancelOrder).toHaveBeenCalledWith('1', '测试取消原因')
   })
 
@@ -285,10 +285,10 @@ describe('Order List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the handleDeliver method
     wrapper.vm.handleDeliver(mockOrders[0])
-    
+
     expect(wrapper.vm.deliveryDialogVisible).toBe(true)
     expect(wrapper.vm.selectedOrderId).toBe('1')
   })
@@ -298,10 +298,10 @@ describe('Order List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the handleView method
     wrapper.vm.handleView(mockOrders[0])
-    
+
     expect(wrapper.vm.detailDialogVisible).toBe(true)
     expect(wrapper.vm.selectedOrderId).toBe('1')
   })
@@ -309,22 +309,22 @@ describe('Order List Component', () => {
   it('handles export correctly', async () => {
     const exportButton = wrapper.find('.header-right button:nth-child(2)')
     await exportButton.trigger('click')
-    
+
     expect(ElMessageBox.confirm).toHaveBeenCalledWith(
       '确定要导出订单数据吗？',
       '提示',
       expect.any(Object)
     )
-    
+
     expect(orderApi.exportOrders).toHaveBeenCalled()
   })
 
   it('handles date range change correctly', async () => {
     const startDate = new Date('2023-01-01')
     const endDate = new Date('2023-01-31')
-    
+
     wrapper.vm.handleDateChange([startDate, endDate])
-    
+
     expect(wrapper.vm.searchParams.startDate).toBe('2023-01-01')
     expect(wrapper.vm.searchParams.endDate).toBe('2023-01-31')
   })
@@ -335,10 +335,10 @@ describe('Order List Component', () => {
     wrapper.vm.searchParams.userName = '张三'
     wrapper.vm.searchParams.orderStatus = '1'
     wrapper.vm.searchParams.paymentStatus = '2'
-    
+
     const resetButton = wrapper.find('.search-container button:last-child')
     await resetButton.trigger('click')
-    
+
     expect(wrapper.vm.searchParams.orderNo).toBe('')
     expect(wrapper.vm.searchParams.userName).toBe('')
     expect(wrapper.vm.searchParams.orderStatus).toBe('')
@@ -353,7 +353,7 @@ describe('Order List Component', () => {
     expect(wrapper.vm.getPaymentStatusType(2)).toBe('success')
     expect(wrapper.vm.getPaymentStatusType(3)).toBe('danger')
     expect(wrapper.vm.getPaymentStatusType(4)).toBe('info')
-    
+
     expect(wrapper.vm.getPaymentStatusText(1)).toBe('待支付')
     expect(wrapper.vm.getPaymentStatusText(2)).toBe('已支付')
     expect(wrapper.vm.getPaymentStatusText(3)).toBe('支付失败')
@@ -366,7 +366,7 @@ describe('Order List Component', () => {
     expect(wrapper.vm.getOrderStatusType(3)).toBe('success')
     expect(wrapper.vm.getOrderStatusType(4)).toBe('success')
     expect(wrapper.vm.getOrderStatusType(5)).toBe('info')
-    
+
     expect(wrapper.vm.getOrderStatusText(1)).toBe('待确认')
     expect(wrapper.vm.getOrderStatusText(2)).toBe('已确认')
     expect(wrapper.vm.getOrderStatusText(3)).toBe('配送中')

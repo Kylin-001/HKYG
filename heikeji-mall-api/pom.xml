@@ -16,7 +16,7 @@
     <description>API接口模块</description>
 
     <dependencies>
-        <!-- Spring Boot 核心依赖 -->
+        <!-- Spring Boot 核心依赖+ -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

@@ -115,26 +115,26 @@ describe('Product List Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Default API responses
     vi.mocked(productApi.getProductList).mockResolvedValue({
       data: mockProductListResponse,
     })
-    
+
     vi.mocked(productApi.getProductStats).mockResolvedValue({
       data: mockProductStats,
     })
-    
+
     vi.mocked(productApi.deleteProduct).mockResolvedValue({
       data: true,
     })
-    
+
     vi.mocked(productApi.exportProducts).mockResolvedValue({
       data: new Blob(),
     })
-    
+
     vi.mocked(ElMessageBox.confirm).mockResolvedValue('confirm')
-    
+
     wrapper = mount(List, {
       global: {
         stubs: {
@@ -161,14 +161,14 @@ describe('Product List Component', () => {
 
   it('loads products on mount', async () => {
     await wrapper.vm.$nextTick()
-    
+
     expect(productApi.getProductList).toHaveBeenCalledTimes(1)
     expect(productApi.getProductStats).toHaveBeenCalledTimes(1)
   })
 
   it('displays product stats correctly', async () => {
     await wrapper.vm.$nextTick()
-    
+
     expect(wrapper.text()).toContain('100')
     expect(wrapper.text()).toContain('80')
     expect(wrapper.text()).toContain('10')
@@ -177,11 +177,11 @@ describe('Product List Component', () => {
 
   it('displays products in table', async () => {
     await wrapper.vm.$nextTick()
-    
+
     // Wait for API call to complete
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     expect(wrapper.text()).toContain('测试商品1')
     expect(wrapper.text()).toContain('测试商品2')
     expect(wrapper.text()).toContain('P001')
@@ -192,7 +192,7 @@ describe('Product List Component', () => {
     const searchInput = wrapper.find('.search-container input')
     await searchInput.setValue('测试商品')
     await searchInput.trigger('keyup.enter')
-    
+
     expect(productApi.getProductList).toHaveBeenCalledWith(
       expect.objectContaining({
         keyword: '测试商品',
@@ -204,7 +204,7 @@ describe('Product List Component', () => {
   it('handles refresh correctly', async () => {
     const refreshButton = wrapper.find('.header-right button:nth-child(2)')
     await refreshButton.trigger('click')
-    
+
     expect(productApi.getProductList).toHaveBeenCalledTimes(2)
     expect(productApi.getProductStats).toHaveBeenCalledTimes(2)
   })
@@ -214,27 +214,27 @@ describe('Product List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the table action
     wrapper.vm.handleTableAction('delete', mockProducts[0])
-    
+
     expect(ElMessageBox.confirm).toHaveBeenCalledWith(
       expect.stringContaining('确定要删除商品"测试商品1"吗？'),
       '警告',
       expect.any(Object)
     )
-    
+
     await wrapper.vm.$nextTick()
-    
+
     expect(productApi.deleteProduct).toHaveBeenCalledWith('1')
   })
 
   it('handles pagination correctly', async () => {
-    const pagination = wrapper.vm.pagination
+    const { pagination } = wrapper.vm
     pagination.currentPage = 2
-    
+
     await wrapper.vm.$nextTick()
-    
+
     expect(productApi.getProductList).toHaveBeenCalledWith(
       expect.objectContaining({
         pageNum: 2,
@@ -245,20 +245,20 @@ describe('Product List Component', () => {
   it('handles export correctly', async () => {
     const exportButton = wrapper.find('.header-right button:nth-child(3)')
     await exportButton.trigger('click')
-    
+
     expect(ElMessageBox.confirm).toHaveBeenCalledWith(
       '确定要导出商品数据吗？',
       '提示',
       expect.any(Object)
     )
-    
+
     expect(productApi.exportProducts).toHaveBeenCalled()
   })
 
   it('handles add product correctly', async () => {
     const addButton = wrapper.find('.header-right button:nth-child(1)')
     await addButton.trigger('click')
-    
+
     expect(wrapper.vm.editDialogVisible).toBe(true)
     expect(wrapper.vm.editMode).toBe('add')
     expect(wrapper.vm.selectedProductId).toBe(null)
@@ -269,10 +269,10 @@ describe('Product List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the table action
     wrapper.vm.handleTableAction('view', mockProducts[0])
-    
+
     expect(wrapper.vm.detailDialogVisible).toBe(true)
     expect(wrapper.vm.selectedProductId).toBe('1')
   })
@@ -282,10 +282,10 @@ describe('Product List Component', () => {
     await wrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
-    
+
     // Mock the table action
     wrapper.vm.handleTableAction('edit', mockProducts[0])
-    
+
     expect(wrapper.vm.editDialogVisible).toBe(true)
     expect(wrapper.vm.editMode).toBe('edit')
     expect(wrapper.vm.selectedProductId).toBe('1')
@@ -296,10 +296,10 @@ describe('Product List Component', () => {
     wrapper.vm.searchParams.keyword = 'test'
     wrapper.vm.searchParams.categoryId = '1'
     wrapper.vm.searchParams.status = '1'
-    
+
     const resetButton = wrapper.find('.search-container button:last-child')
     await resetButton.trigger('click')
-    
+
     expect(wrapper.vm.searchParams.keyword).toBe('')
     expect(wrapper.vm.searchParams.categoryId).toBe('')
     expect(wrapper.vm.searchParams.status).toBe('0')
@@ -309,7 +309,7 @@ describe('Product List Component', () => {
   it('displays loading state correctly', async () => {
     wrapper.vm.loading = true
     await wrapper.vm.$nextTick()
-    
+
     // Check if loading state is displayed
     expect(wrapper.find('.el-loading-mask').exists()).toBe(true)
   })

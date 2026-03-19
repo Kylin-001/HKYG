@@ -70,14 +70,14 @@ describe('性能和兼容性E2E测试', () => {
   test('多浏览器兼容性测试', async () => {
     // 测试Chrome、Firefox、Safari兼容性
     const browsers = ['chromium', 'firefox', 'webkit']
-    
+
     for (const browserType of browsers) {
       console.log(`测试${browserType}浏览器兼容性...`)
-      
+
       // 这里可以添加针对不同浏览器的特定测试
       await pageObject.goto('/app/compatibility-test')
       await pageObject.waitForSelector('.compatibility-content')
-      
+
       // 验证基本功能
       await expect(pageObject.locator('.test-button')).toBeVisible()
       await pageObject.click('.test-button')
@@ -102,11 +102,11 @@ describe('性能和兼容性E2E测试', () => {
       await pageObject.page.setViewportSize(viewport)
       await pageObject.reload()
       await pageObject.waitForSelector('.responsive-content')
-      
+
       // 验证布局适配
       const content = pageObject.locator('.responsive-content')
       await expect(content).toBeVisible()
-      
+
       // 验证关键元素可见性
       const testButton = pageObject.locator('.test-button')
       await expect(testButton).toBeVisible()

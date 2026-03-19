@@ -27,7 +27,7 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   # Redis配置
   redis:
-    host: localhost
+    host: 192.168.186.128
     port: 6379
     password: Redis@hkyg
     database: 0
@@ -49,10 +49,10 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
+        server-addr: 192.168.186.128:8848
         namespace: public
       config:
-        server-addr: localhost:8848
+        server-addr: 192.168.186.128:8848
         namespace: public
         file-extension: yml
         refresh-enabled: true

@@ -108,11 +108,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog
-      v-model="recordsDialogVisible"
-      title="积分记录"
-      width="800px"
-    >
+    <el-dialog v-model="recordsDialogVisible" title="积分记录" width="800px">
       <div v-loading="loadingRecords" class="point-records">
         <el-table :data="pointRecords" stripe max-height="400">
           <el-table-column prop="points" label="积分变动" width="120" align="center">
@@ -203,7 +199,7 @@ const fetchPointRecords = async () => {
   }
 }
 
-const showProductDetail = (product) => {
+const showProductDetail = product => {
   selectedProduct.value = product
   detailDialogVisible.value = true
 }
@@ -249,10 +245,9 @@ const showPointRecords = () => {
   fetchPointRecords()
 }
 
-const handleSearch = () => {
-}
+const handleSearch = () => {}
 
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   const date = new Date(time)
   return date.toLocaleString('zh-CN')

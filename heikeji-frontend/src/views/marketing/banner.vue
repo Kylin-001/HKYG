@@ -165,6 +165,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import * as marketingApi from '@/api/marketing'
 
 // 类型定义
 interface BannerItem {
@@ -272,30 +273,15 @@ const rules = {
 const fetchBanners = async () => {
   loading.value = true
   try {
-    // 这里应该调用API获取数据
-    // const response = await getBannerList(searchForm, pagination)
-    // 模拟数据
-    banners.value = [
-      {
-        id: 1,
-        name: '首页轮播图1',
-        imageUrl: 'https://via.placeholder.com/1920x500',
-        linkUrl: 'https://www.example.com',
-        sort: 1,
-        status: 1,
-        createTime: '2024-01-01 10:00:00',
-      },
-      {
-        id: 2,
-        name: '首页轮播图2',
-        imageUrl: 'https://via.placeholder.com/1920x500',
-        linkUrl: 'https://www.example.com',
-        sort: 2,
-        status: 1,
-        createTime: '2024-01-02 10:00:00',
-      },
-    ]
-    pagination.total = banners.value.length
+    const res = await marketingApi.getBannerList({
+      keyword: searchForm.name,
+      position: searchForm.position,
+      status: searchForm.status,
+      page: pagination.currentPage,
+      size: pagination.pageSize,
+    })
+    banners.value = res.data.records || []
+    pagination.total = res.data.total || 0
   } catch (error) {
     ElMessage.error('获取轮播图列表失败')
   } finally {
@@ -361,8 +347,7 @@ const handleDelete = async (row: BannerItem) => {
 // 排序改变
 const handleSortChange = async (row: BannerItem) => {
   try {
-    // 这里应该调用API更新排序
-    // await updateBannerSort(row.id, row.sort)
+    await marketingApi.updateBannerSort({ id: row.id, sort: row.sort })
     ElMessage.success('排序更新成功')
   } catch (error) {
     ElMessage.error('排序更新失败')
@@ -372,8 +357,7 @@ const handleSortChange = async (row: BannerItem) => {
 // 状态改变
 const handleStatusChange = async (row: BannerItem) => {
   try {
-    // 这里应该调用API更新状态
-    // await updateBannerStatus(row.id, row.status)
+    await marketingApi.updateBannerStatus(row.id, row.status)
     ElMessage.success('状态更新成功')
   } catch (error) {
     ElMessage.error('状态更新失败')
@@ -381,19 +365,27 @@ const handleStatusChange = async (row: BannerItem) => {
 }
 
 // 表单提交
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!formRef.value) return
-  formRef.value.validate((valid: boolean) => {
-    if (valid) {
-      submitLoading.value = true
-      setTimeout(() => {
-        submitLoading.value = false
-        dialogVisible.value = false
-        ElMessage.success(isEdit.value ? '更新成功' : '添加成功')
-        fetchBanners()
-      }, 1000)
+  try {
+    await formRef.value.validate()
+    submitLoading.value = true
+
+    if (isEdit.value) {
+      await marketingApi.updateBanner(formData)
+      ElMessage.success('更新成功')
+    } else {
+      await marketingApi.addBanner(formData)
+      ElMessage.success('添加成功')
     }
-  })
+
+    dialogVisible.value = false
+    fetchBanners()
+  } catch (error) {
+    ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 // 重置表单

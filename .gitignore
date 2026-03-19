@@ -81,3 +81,28 @@ pnpm-lock.yaml
 
 # Nacos data
 nacos/data/
+
+# Deployment scripts with sensitive information
+**/deploy-*.ps1
+
+# Binary files
+*.msi
+*.exe
+
+# Temporary directories
+nacos-temp/
+
+# Local scripts
+start_services*.ps1
+
+# Log files
+**/logs/
+**/*.log
+
+# IDE specific files
+.idea/
+.vscode/
+
+# OS specific files
+Thumbs.db
+.DS_Store

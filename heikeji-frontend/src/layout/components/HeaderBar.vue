@@ -92,7 +92,7 @@ import ThemeManager from '@/components/ui/ThemeManager.vue'
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/variables.scss';
+@use '@/styles/variables.scss' as *;
 
 .main-header {
   height: $header-height;

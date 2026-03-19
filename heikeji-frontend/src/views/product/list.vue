@@ -473,7 +473,7 @@ onMounted(() => {
   padding: 20px;
 }
 
-// 商品图片样式
+/* 商品图片样式 */
 .product-image {
   width: 40px;
   height: 40px;
@@ -482,7 +482,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-// 商品名称容器
+/* 商品名称容器 */
 .product-name {
   display: flex;
   align-items: center;

@@ -2,15 +2,13 @@
   <div class="app-home">
     <div class="home-header">
       <div class="search-bar">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="搜索商品"
-          @keyup.enter.native="handleSearch"
-        >
-          <i slot="prefix" class="el-input__icon el-icon-search"></i>
+        <el-input v-model="searchKeyword" placeholder="搜索商品" @keyup.enter="handleSearch">
+          <template #prefix>
+            <i class="el-input__icon el-icon-search"></i>
+          </template>
         </el-input>
-      </template>
-    </template>
+      </div>
+    </div>
 
     <div class="home-content">
       <el-row :gutter="10" class="category-grid">
@@ -18,7 +16,7 @@
           <div class="category-item" @click="goCategory(cat)">
             <i :class="cat.icon"></i>
             <span>{{ cat.name }}</span>
-          </template>
+          </div>
         </el-col>
       </el-row>
 
@@ -26,30 +24,34 @@
         <div class="section-header">
           <h3>二手好物</h3>
           <el-button type="text" @click="goSecondhandList">更多</el-button>
-        </template>
+        </div>
         <el-row :gutter="10" v-if="secondhandProducts.length">
           <el-col :span="12" v-for="product in secondhandProducts" :key="product.id">
             <div class="product-card" @click="goSecondhandDetail(product.id)">
-              <el-image :src="product.images ? product.images.split(',')[0] : ''" fit="cover" class="product-image" />
+              <el-image
+                :src="product.images ? product.images.split(',')[0] : ''"
+                fit="cover"
+                class="product-image"
+              />
               <div class="product-info">
-                <div class="product-name">{{ product.productName }}</template>
-                <div class="product-price">¥{{ product.price }}</template>
+                <div class="product-name">{{ product.productName }}</div>
+                <div class="product-price">¥{{ product.price }}</div>
                 <div class="product-meta">
                   <span class="condition">{{ getConditionText(product.condition) }}</span>
                   <span class="views">{{ product.viewCount }}人浏览</span>
-                </template>
-              </template>
-            </template>
+                </div>
+              </div>
+            </div>
           </el-col>
         </el-row>
-        <div v-else class="empty-tip">暂无二手商品</template>
-      </template>
+        <div v-else class="empty-tip">暂无二手商品</div>
+      </div>
 
       <div class="section">
         <div class="section-header">
           <h3>失物招领</h3>
           <el-button type="text" @click="goLostFoundList">更多</el-button>
-        </template>
+        </div>
         <el-row :gutter="10" v-if="lostFoundList.length">
           <el-col :span="24" v-for="item in lostFoundList" :key="item.id">
             <div class="lostfound-card" @click="goLostFoundDetail(item.id)">
@@ -57,131 +59,141 @@
                 {{ item.type === 0 ? '寻物' : '招领' }}
               </el-tag>
               <div class="lostfound-content">
-                <div class="lostfound-title">{{ item.title }}</template>
+                <div class="lostfound-title">{{ item.title }}</div>
                 <div class="lostfound-meta">
                   <span>{{ item.location }}</span>
                   <span>{{ item.createTime }}</span>
-                </template>
-              </template>
-            </template>
+                </div>
+              </div>
+            </div>
           </el-col>
         </el-row>
-        <div v-else class="empty-tip">暂无失物招领信息</template>
-      </template>
+        <div v-else class="empty-tip">暂无失物招领信息</div>
+      </div>
 
       <div class="section">
         <div class="section-header">
           <h3>热门商品</h3>
-        </template>
+        </div>
         <el-row :gutter="10" v-if="hotProducts.length">
           <el-col :span="8" v-for="product in hotProducts" :key="product.id">
             <div class="product-card-small" @click="goProductDetail(product.id)">
               <el-image :src="product.image" fit="cover" class="product-image" />
               <div class="product-info">
-                <div class="product-name">{{ product.name }}</template>
-                <div class="product-price">¥{{ product.price }}</template>
-              </template>
-            </template>
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">¥{{ product.price }}</div>
+              </div>
+            </div>
           </el-col>
         </el-row>
-      </template>
-    </template>
+      </div>
+    </div>
 
     <div class="tab-bar">
       <div class="tab-item active">
         <i class="el-icon-home"></i>
         <span>首页</span>
-      </template>
+      </div>
       <div class="tab-item" @click="goSecondhandList">
         <i class="el-icon-sell"></i>
         <span>二手</span>
-      </template>
+      </div>
       <div class="tab-item" @click="goLostFoundList">
         <i class="el-icon-search"></i>
         <span>失物</span>
-      </template>
+      </div>
       <div class="tab-item" @click="goUser">
         <i class="el-icon-user"></i>
         <span>我的</span>
-      </template>
-    </template>
-  </template>
+      </div>
+    </div>
+  </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getSecondhandHot } from '@/api/secondhand'
 import { getLostFoundHot } from '@/api/lostfound'
 
-export default {
-  name: 'AppHome',
-  data() {
-    return {
-      searchKeyword: '',
-      categories: [
-        { id: 1, name: '二手商品', icon: 'el-icon-sell', path: '/app/secondhand' },
-        { id: 2, name: '失物招领', icon: 'el-icon-search', path: '/app/lostfound' },
-        { id: 3, name: '外卖点餐', icon: 'el-icon-soup', path: '/app/takeout' },
-        { id: 4, name: '校园服务', icon: 'el-icon-location', path: '/app/campus' }
-      ],
-      secondhandProducts: [],
-      lostFoundList: [],
-      hotProducts: []
-    }
-  },
-  created() {
-    this.loadData()
-  },
-  methods: {
-    loadData() {
-      getSecondhandHot(4).then(response => {
-        this.secondhandProducts = response.data || []
-      }).catch(() => {
-        this.secondhandProducts = []
-      })
+const router = useRouter()
 
-      getLostFoundHot(3).then(response => {
-        this.lostFoundList = response.data || []
-      }).catch(() => {
-        this.lostFoundList = []
-      })
+const searchKeyword = ref('')
+const categories = ref([
+  { id: 1, name: '二手商品', icon: 'el-icon-sell', path: '/app/secondhand' },
+  { id: 2, name: '失物招领', icon: 'el-icon-search', path: '/app/lostfound' },
+  { id: 3, name: '外卖点餐', icon: 'el-icon-soup', path: '/app/takeout' },
+  { id: 4, name: '校园服务', icon: 'el-icon-location', path: '/app/campus' },
+])
+const secondhandProducts = ref([])
+const lostFoundList = ref([])
+const hotProducts = ref([])
 
-      this.hotProducts = [
-        { id: 1, name: 'iPhone 14 Pro', price: 5999, image: '' },
-        { id: 2, name: 'MacBook Air', price: 7999, image: '' },
-        { id: 3, name: 'AirPods Pro', price: 1999, image: '' }
-      ]
-    },
-    handleSearch() {
-      if (this.searchKeyword) {
-        this.$router.push(`/app/product/search?keyword=${this.searchKeyword}`)
-      }
-    },
-    goCategory(cat) {
-      this.$router.push(cat.path)
-    },
-    goSecondhandList() {
-      this.$router.push('/app/secondhand/list')
-    },
-    goSecondhandDetail(id) {
-      this.$router.push(`/app/secondhand/detail/${id}`)
-    },
-    goLostFoundList() {
-      this.$router.push('/app/lostfound/list')
-    },
-    goLostFoundDetail(id) {
-      this.$router.push(`/app/lostfound/detail/${id}`)
-    },
-    goProductDetail(id) {
-      this.$router.push(`/app/product/detail/${id}`)
-    },
-    goUser() {
-      this.$router.push('/app/user/profile')
-    },
-    getConditionText(condition) {
-      const texts = ['全新', '九成新', '八成新', '七成新', '六成新及以下']
-      return texts[condition] || ''
-    }
+onMounted(() => {
+  loadData()
+})
+
+const loadData = async () => {
+  try {
+    const secondhandResponse = await getSecondhandHot(4)
+    secondhandProducts.value = secondhandResponse.data || []
+  } catch (error) {
+    console.error('获取二手商品失败:', error)
+    secondhandProducts.value = []
   }
+
+  try {
+    const lostFoundResponse = await getLostFoundHot(3)
+    lostFoundList.value = lostFoundResponse.data || []
+  } catch (error) {
+    console.error('获取失物招领失败:', error)
+    lostFoundList.value = []
+  }
+
+  hotProducts.value = [
+    { id: 1, name: 'iPhone 14 Pro', price: 5999, image: '' },
+    { id: 2, name: 'MacBook Air', price: 7999, image: '' },
+    { id: 3, name: 'AirPods Pro', price: 1999, image: '' },
+  ]
+}
+
+const handleSearch = () => {
+  if (searchKeyword.value) {
+    router.push(`/app/product/search?keyword=${searchKeyword.value}`)
+  }
+}
+
+const goCategory = cat => {
+  router.push(cat.path)
+}
+
+const goSecondhandList = () => {
+  router.push('/app/secondhand/list')
+}
+
+const goSecondhandDetail = id => {
+  router.push(`/app/secondhand/detail/${id}`)
+}
+
+const goLostFoundList = () => {
+  router.push('/app/lostfound/list')
+}
+
+const goLostFoundDetail = id => {
+  router.push(`/app/lostfound/detail/${id}`)
+}
+
+const goProductDetail = id => {
+  router.push(`/app/product/detail/${id}`)
+}
+
+const goUser = () => {
+  router.push('/app/user/profile')
+}
+
+const getConditionText = condition => {
+  const texts = ['全新', '九成新', '八成新', '七成新', '六成新及以下']
+  return texts[condition] || ''
 }
 </script>
 
@@ -193,7 +205,7 @@ export default {
 }
 
 .home-header {
-  background: #409EFF;
+  background: #409eff;
   padding: 15px;
 }
 
@@ -221,7 +233,7 @@ export default {
 
 .category-item i {
   font-size: 28px;
-  color: #409EFF;
+  color: #409eff;
   display: block;
   margin-bottom: 5px;
 }
@@ -271,7 +283,7 @@ export default {
 }
 
 .product-price {
-  color: #F56C6C;
+  color: #f56c6c;
   font-size: 16px;
   font-weight: bold;
   margin: 5px 0;
@@ -355,6 +367,6 @@ export default {
 }
 
 .tab-item.active {
-  color: #409EFF;
+  color: #409eff;
 }
 </style>

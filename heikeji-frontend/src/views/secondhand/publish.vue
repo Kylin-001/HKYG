@@ -109,7 +109,7 @@ export default {
     }
   },
   created() {
-    const id = this.$route.params.id
+    const {id} = this.$route.params
     if (id) {
       this.isEdit = true
       this.getDetail(id)
@@ -121,7 +121,7 @@ export default {
         this.form = response.data
         this.imageList = this.form.images ? this.form.images.split(',').map((url, index) => ({
           uid: index,
-          url: url
+          url
         })) : []
         this.tradeTypes = this.form.tradeType !== null ? String(this.form.tradeType).split('') : []
       })
@@ -140,7 +140,7 @@ export default {
         if (valid) {
           const tradeType = this.tradeTypes.length === 2 ? 2 : (this.tradeTypes[0] === '0' ? 0 : 1)
           this.form.tradeType = tradeType
-          
+
           const action = this.isEdit ? updateSecondhand(this.form) : publishSecondhand(this.form)
           action.then(() => {
             this.$message.success(this.isEdit ? '修改成功' : '发布成功')

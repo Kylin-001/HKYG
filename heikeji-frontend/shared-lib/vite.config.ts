@@ -14,7 +14,7 @@ export default defineConfig({
       exposes: {
         './components': './src/components/index.ts',
         './utils': './src/utils/index.ts',
-        './store': './src/store/index.ts'
+        './store': './src/store/index.ts',
       },
       // 配置共享依赖
       shared: {

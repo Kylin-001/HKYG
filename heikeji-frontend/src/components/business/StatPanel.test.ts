@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import StatPanel from '@/components/business/StatPanel.vue'
@@ -17,7 +17,7 @@ describe('StatPanel Component', () => {
       icon: 'User',
       trend: 'up',
       trendIcon: 'ArrowUp',
-      trendText: '12.5%'
+      trendText: '12.5%',
     },
     {
       id: 2,
@@ -26,17 +26,17 @@ describe('StatPanel Component', () => {
       icon: 'ShoppingCart',
       trend: 'down',
       trendIcon: 'ArrowDown',
-      trendText: '3.2%'
-    }
+      trendText: '3.2%',
+    },
   ]
 
   it('should render stats correctly', () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: mockStats
-      }
+        stats: mockStats,
+      },
     })
-    
+
     expect(wrapper.text()).toContain('总用户数')
     expect(wrapper.text()).toContain('12345')
     expect(wrapper.text()).toContain('今日订单')
@@ -46,10 +46,10 @@ describe('StatPanel Component', () => {
   it('should render icons correctly', () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: mockStats
-      }
+        stats: mockStats,
+      },
     })
-    
+
     const icons = wrapper.findAll('.stat-icon')
     expect(icons.length).toBe(2)
   })
@@ -57,10 +57,10 @@ describe('StatPanel Component', () => {
   it('should show trend indicators', () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: mockStats
-      }
+        stats: mockStats,
+      },
     })
-    
+
     expect(wrapper.text()).toContain('12.5%')
     expect(wrapper.text()).toContain('3.2%')
   })
@@ -68,30 +68,30 @@ describe('StatPanel Component', () => {
   it('should apply correct color for upward trend', () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: [mockStats[0]]
-      }
+        stats: [mockStats[0]],
+      },
     })
-    
+
     expect(wrapper.find('.trend-up').exists()).toBe(true)
   })
 
   it('should apply correct color for downward trend', () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: [mockStats[1]]
-      }
+        stats: [mockStats[1]],
+      },
     })
-    
+
     expect(wrapper.find('.trend-down').exists()).toBe(true)
   })
 
   it('should emit click event when stat is clicked', async () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: mockStats
-      }
+        stats: mockStats,
+      },
     })
-    
+
     const statCard = wrapper.findAll('.stat-card')[0]
     await statCard.trigger('click')
     expect(wrapper.emitted('stat-click')).toBeTruthy()
@@ -102,20 +102,20 @@ describe('StatPanel Component', () => {
     const wrapper = mount(StatPanel, {
       props: {
         stats: mockStats,
-        loading: true
-      }
+        loading: true,
+      },
     })
-    
+
     expect(wrapper.find('.loading-skeleton').exists()).toBe(true)
   })
 
   it('should handle empty stats', () => {
     const wrapper = mount(StatPanel, {
       props: {
-        stats: []
-      }
+        stats: [],
+      },
     })
-    
+
     expect(wrapper.text()).toContain('暂无数据')
   })
 })

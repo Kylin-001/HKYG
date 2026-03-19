@@ -29,7 +29,7 @@ export class EnhancedPaymentPolling {
       callback,
       maxAttempts = this.DEFAULT_MAX_ATTEMPTS,
       baseInterval = this.DEFAULT_BASE_INTERVAL,
-      maxInterval = this.DEFAULT_MAX_INTERVAL
+      maxInterval = this.DEFAULT_MAX_INTERVAL,
     } = params
 
     const config: PollingConfig = {
@@ -37,7 +37,7 @@ export class EnhancedPaymentPolling {
       attempts: 0,
       currentInterval: baseInterval,
       intervalId: null,
-      isActive: true
+      isActive: true,
     }
 
     this.pollingConfigs.set(orderId, config)
@@ -67,12 +67,13 @@ export class EnhancedPaymentPolling {
           maxInterval
         )
 
-        logger.info(`轮询支付状态 [${config.attempts}/${maxAttempts}]，间隔: ${config.currentInterval}ms`)
+        logger.info(
+          `轮询支付状态 [${config.attempts}/${maxAttempts}]，间隔: ${config.currentInterval}ms`
+        )
 
         const intervalId = setTimeout(poll, config.currentInterval)
         config.intervalId = intervalId as unknown as number
         this.pollingConfigs.set(orderId, config)
-
       } catch (error) {
         logger.error('轮询支付状态失败:', error)
 
@@ -82,7 +83,7 @@ export class EnhancedPaymentPolling {
           this.pollingConfigs.set(orderId, config)
         } else {
           this.stopPolling(orderId)
-          callback({ success: false, error: error.message || '轮询失败' })
+          callback({ success: false, error: (error as Error).message || '轮询失败' })
         }
       }
     }
@@ -130,7 +131,7 @@ export class EnhancedPaymentPolling {
     return {
       isPolling: config.isActive,
       attempts: config.attempts,
-      currentInterval: config.currentInterval
+      currentInterval: config.currentInterval,
     }
   }
 

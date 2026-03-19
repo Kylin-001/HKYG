@@ -18,10 +18,11 @@ spring:
   cloud:
     nacos:
       discovery:
-        enabled: false
+        enabled: true
         server-addr: localhost:8848
         namespace: public
         ip: 127.0.0.1
+        cluster-name: DEFAULT
       config:
         import-check:
           enabled: false

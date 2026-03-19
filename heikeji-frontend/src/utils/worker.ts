@@ -20,33 +20,33 @@ interface WorkerResponse {
 export const processLargeDataset = (data: any[], processor: (item: any) => any): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker('/workers/performance-worker.js', { type: 'module' })
-    
+
     const messageId = Date.now().toString()
-    
+
     worker.postMessage({
       id: messageId,
       type: 'process',
       data: {
         dataset: data,
         processor: processor.toString(),
-      }
+      },
     } as WorkerMessage)
-    
-    worker.onmessage = (event) => {
+
+    worker.onmessage = event => {
       const response = event.data as WorkerResponse
-      
+
       if (response.id === messageId) {
         if (response.type === 'result') {
           resolve(response.data)
         } else if (response.type === 'error') {
           reject(new Error(response.data))
         }
-        
+
         worker.terminate()
       }
     }
-    
-    worker.onerror = (error) => {
+
+    worker.onerror = error => {
       reject(error)
       worker.terminate()
     }
@@ -57,33 +57,33 @@ export const processLargeDataset = (data: any[], processor: (item: any) => any):
 export const performComplexCalculation = (data: any[], calculation: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker('/workers/performance-worker.js', { type: 'module' })
-    
+
     const messageId = Date.now().toString()
-    
+
     worker.postMessage({
       id: messageId,
       type: 'calculate',
       data: {
         dataset: data,
         calculation,
-      }
+      },
     } as WorkerMessage)
-    
-    worker.onmessage = (event) => {
+
+    worker.onmessage = event => {
       const response = event.data as WorkerResponse
-      
+
       if (response.id === messageId) {
         if (response.type === 'result') {
           resolve(response.data)
         } else if (response.type === 'error') {
           reject(new Error(response.data))
         }
-        
+
         worker.terminate()
       }
     }
-    
-    worker.onerror = (error) => {
+
+    worker.onerror = error => {
       reject(error)
       worker.terminate()
     }
@@ -94,30 +94,30 @@ export const performComplexCalculation = (data: any[], calculation: string): Pro
 export const analyzePerformanceData = (metrics: any): Promise<any> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker('/workers/performance-worker.js', { type: 'module' })
-    
+
     const messageId = Date.now().toString()
-    
+
     worker.postMessage({
       id: messageId,
       type: 'analyze',
       data: metrics,
     } as WorkerMessage)
-    
-    worker.onmessage = (event) => {
+
+    worker.onmessage = event => {
       const response = event.data as WorkerResponse
-      
+
       if (response.id === messageId) {
         if (response.type === 'result') {
           resolve(response.data)
         } else if (response.type === 'error') {
           reject(new Error(response.data))
         }
-        
+
         worker.terminate()
       }
     }
-    
-    worker.onerror = (error) => {
+
+    worker.onerror = error => {
       reject(error)
       worker.terminate()
     }
@@ -128,33 +128,33 @@ export const analyzePerformanceData = (metrics: any): Promise<any> => {
 export const processImage = (imageData: ImageData, operation: string): Promise<ImageData> => {
   return new Promise((resolve, reject) => {
     const worker = new Worker('/workers/image-worker.js', { type: 'module' })
-    
+
     const messageId = Date.now().toString()
-    
+
     worker.postMessage({
       id: messageId,
       type: 'process',
       data: {
         imageData,
         operation,
-      }
+      },
     } as WorkerMessage)
-    
-    worker.onmessage = (event) => {
+
+    worker.onmessage = event => {
       const response = event.data as WorkerResponse
-      
+
       if (response.id === messageId) {
         if (response.type === 'result') {
           resolve(response.data)
         } else if (response.type === 'error') {
           reject(new Error(response.data))
         }
-        
+
         worker.terminate()
       }
     }
-    
-    worker.onerror = (error) => {
+
+    worker.onerror = error => {
       reject(error)
       worker.terminate()
     }
@@ -173,63 +173,63 @@ class WorkerPool {
     reject: (error: any) => void
   }> = []
   private maxWorkers: number
-  
+
   constructor(workerUrl: string, maxWorkers = 4) {
     this.maxWorkers = maxWorkers
-    
+
     // 创建Worker池
     for (let i = 0; i < maxWorkers; i++) {
       const worker = new Worker(workerUrl, { type: 'module' })
       this.workers.push(worker)
       this.availableWorkers.push(worker)
-      
+
       // 设置消息处理
-      worker.onmessage = (event) => {
+      worker.onmessage = event => {
         const response = event.data as WorkerResponse
         this.handleWorkerResponse(worker, response)
       }
-      
-      worker.onerror = (error) => {
+
+      worker.onerror = error => {
         console.error('Worker错误:', error)
         this.handleWorkerError(worker, error)
       }
     }
   }
-  
+
   // 处理Worker响应
   private handleWorkerResponse(worker: Worker, response: WorkerResponse) {
     // 查找对应的任务
     const taskIndex = this.taskQueue.findIndex(task => task.id === response.id)
-    
+
     if (taskIndex !== -1) {
       const task = this.taskQueue[taskIndex]
       this.taskQueue.splice(taskIndex, 1)
-      
+
       if (response.type === 'result') {
         task.resolve(response.data)
       } else if (response.type === 'error') {
         task.reject(new Error(response.data))
       }
-      
+
       // 将Worker标记为可用
       this.availableWorkers.push(worker)
-      
+
       // 处理下一个任务
       this.processNextTask()
     }
   }
-  
+
   // 处理Worker错误
   private handleWorkerError(worker: Worker, error: any) {
     // 查找对应的任务
     const taskIndex = this.taskQueue.findIndex(task => this.workers.includes(worker))
-    
+
     if (taskIndex !== -1) {
       const task = this.taskQueue[taskIndex]
       this.taskQueue.splice(taskIndex, 1)
       task.reject(error)
     }
-    
+
     // 移除有问题的Worker
     const workerIndex = this.workers.indexOf(worker)
     if (workerIndex !== -1) {
@@ -239,41 +239,43 @@ class WorkerPool {
         this.availableWorkers.splice(availableIndex, 1)
       }
     }
-    
+
     // 创建新的Worker替换
     try {
-      const newWorker = new Worker(worker.scriptURL!, { type: 'module' })
+      const newWorker = new Worker((worker as any).scriptURL || worker.toString(), {
+        type: 'module',
+      })
       this.workers.push(newWorker)
       this.availableWorkers.push(newWorker)
-      
-      newWorker.onmessage = (event) => {
+
+      newWorker.onmessage = event => {
         this.handleWorkerResponse(newWorker, event.data as WorkerResponse)
       }
-      
-      newWorker.onerror = (error) => {
+
+      newWorker.onerror = error => {
         this.handleWorkerError(newWorker, error)
       }
     } catch (error) {
       console.error('创建新Worker失败:', error)
     }
   }
-  
+
   // 处理下一个任务
   private processNextTask() {
     if (this.taskQueue.length === 0 || this.availableWorkers.length === 0) {
       return
     }
-    
+
     const task = this.taskQueue[0]
     const worker = this.availableWorkers.shift()!
-    
+
     worker.postMessage({
       id: task.id,
       type: task.type,
       data: task.data,
     } as WorkerMessage)
   }
-  
+
   // 执行任务
   execute(type: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -284,12 +286,12 @@ class WorkerPool {
         resolve,
         reject,
       }
-      
+
       this.taskQueue.push(task)
       this.processNextTask()
     })
   }
-  
+
   // 销毁Worker池
   destroy() {
     this.workers.forEach(worker => worker.terminate())
@@ -315,24 +317,24 @@ export const batchProcess = async <T, R>(
   maxConcurrency = 4
 ): Promise<R[]> => {
   const results: R[] = []
-  
+
   // 分批处理
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize)
-    
+
     // 并发处理批次中的项目
-    const batchPromises = batch.map(item => 
+    const batchPromises = batch.map(item =>
       executeInBackground('process', {
         item,
         processor: processor.toString(),
       })
     )
-    
+
     // 等待当前批次完成
     const batchResults = await Promise.all(batchPromises)
     results.push(...batchResults)
   }
-  
+
   return results
 }
 

@@ -15,7 +15,7 @@ interface SecurityCheckResult {
 export class EnhancedSecurityCheck {
   private static canvas: HTMLCanvasElement | null = null
 
-  static generateDeviceFingerprint(): string {
+  static async generateDeviceFingerprint(): Promise<string> {
     try {
       this.canvas = document.createElement('canvas')
       const ctx = this.canvas.getContext('2d')
@@ -35,25 +35,25 @@ export class EnhancedSecurityCheck {
         navigator.language,
         screen.colorDepth,
         new Date().getTimezoneOffset(),
-        this.canvas.toDataURL()
+        this.canvas.toDataURL(),
       ].join('|')
 
-      return this.sha256(fingerprint)
+      return await EnhancedSecurityCheck.sha256(fingerprint)
     } catch (error) {
       logger.error('生成设备指纹失败:', error)
       return ''
     }
   }
 
-  static performComprehensiveSecurityCheck(): SecurityCheckResult {
+  static async performComprehensiveSecurityCheck(): Promise<SecurityCheckResult> {
     const risks: SecurityRisk[] = []
-    const recommendations: string[]
+    const recommendations: string[] = []
 
     if (typeof window === 'undefined') {
       risks.push({
         type: 'invalid_environment',
         severity: 'critical',
-        message: '无效的运行环境'
+        message: '无效的运行环境',
       })
     }
 
@@ -61,19 +61,19 @@ export class EnhancedSecurityCheck {
       risks.push({
         type: 'insecure_protocol',
         severity: 'critical',
-        message: '当前环境使用非安全连接'
+        message: '当前环境使用非安全连接',
       })
       recommendations.push('请使用HTTPS协议访问')
     }
 
-    const currentFingerprint = this.generateDeviceFingerprint()
+    const currentFingerprint = await this.generateDeviceFingerprint()
     if (currentFingerprint) {
       const storedFingerprint = localStorage.getItem('device_fingerprint')
       if (storedFingerprint && storedFingerprint !== currentFingerprint) {
         risks.push({
           type: 'device_changed',
           severity: 'high',
-          message: '检测到设备环境变化'
+          message: '检测到设备环境变化',
         })
         recommendations.push('请验证您的身份')
       }
@@ -84,7 +84,7 @@ export class EnhancedSecurityCheck {
       risks.push({
         type: 'crypto_unavailable',
         severity: 'warning',
-        message: '浏览器不支持现代加密功能'
+        message: '浏览器不支持现代加密功能',
       })
       recommendations.push('请使用现代浏览器')
     }
@@ -93,7 +93,7 @@ export class EnhancedSecurityCheck {
       risks.push({
         type: 'automation_detected',
         severity: 'high',
-        message: '检测到自动化工具'
+        message: '检测到自动化工具',
       })
       recommendations.push('请使用真实浏览器访问')
     }
@@ -102,7 +102,7 @@ export class EnhancedSecurityCheck {
       risks.push({
         type: 'websocket_unavailable',
         severity: 'warning',
-        message: '浏览器不支持WebSocket'
+        message: '浏览器不支持WebSocket',
       })
       recommendations.push('建议使用支持WebSocket的浏览器')
     }
@@ -110,7 +110,7 @@ export class EnhancedSecurityCheck {
     return {
       isSecure: risks.length === 0,
       risks,
-      recommendations
+      recommendations,
     }
   }
 
@@ -200,19 +200,18 @@ export class EnhancedSecurityCheck {
       name: browserName,
       version: browserVersion,
       os,
-      isMobile
+      isMobile,
     }
   }
 
-  private static sha256(str: string): string {
+  private static async sha256(str: string): Promise<string> {
     try {
       const encoder = new TextEncoder()
       const data = encoder.encode(str)
-      return window.crypto.subtle.digest('SHA-256', data).then(hashBuffer => {
-        const hashArray = Array.from(new Uint8Array(hashBuffer))
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-        return hashHex
-      })
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      return hashHex
     } catch (error) {
       logger.error('SHA256哈希失败:', error)
       return ''

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import Dashboard from '@/views/dashboard/index.vue'
 
 vi.mock('@/components/business/StatPanel.vue', () => ({
   name: 'StatPanel',
-  template: '<div class="stat-panel-mock">StatPanel</div>'
+  template: '<div class="stat-panel-mock">StatPanel</div>',
 }))
 
 describe('Dashboard Page', () => {
@@ -21,10 +21,10 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
-    expect(wrapper.find('.dashboard-container')).exists().toBe(true)
-    expect(wrapper.find('.school-banner')).exists().toBe(true)
-    expect(wrapper.find('.dashboard-header')).exists().toBe(true)
+
+    expect(wrapper.find('.dashboard-container').exists()).toBe(true)
+    expect(wrapper.find('.school-banner').exists()).toBe(true)
+    expect(wrapper.find('.dashboard-header').exists()).toBe(true)
   })
 
   it('should display school slogan', () => {
@@ -33,7 +33,7 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.school-slogan').text()).toContain('自强不息，创业创新')
     expect(wrapper.find('.school-motto').text()).toContain('黑龙江科技大学校训')
   })
@@ -44,9 +44,11 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.dashboard-title').text()).toContain('黑科易购校园电商平台管理系统')
-    expect(wrapper.find('.dashboard-subtitle').text()).toContain('为黑龙江科技大学师生提供便捷的校园电商服务')
+    expect(wrapper.find('.dashboard-subtitle').text()).toContain(
+      '为黑龙江科技大学师生提供便捷的校园电商服务'
+    )
   })
 
   it('should show loading state', () => {
@@ -55,10 +57,10 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     wrapper.vm.loading = true
-    expect(wrapper.find('.loading-container')).exists().toBe(true)
-    expect(wrapper.find('.el-skeleton')).exists().toBe(true)
+    expect(wrapper.find('.loading-container').exists()).toBe(true)
+    expect(wrapper.find('.el-skeleton').exists()).toBe(true)
   })
 
   it('should render stat cards', () => {
@@ -67,8 +69,8 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
-    expect(wrapper.find('.stats-card-group')).exists().toBe(true)
+
+    expect(wrapper.find('.stats-card-group').exists()).toBe(true)
     expect(wrapper.findComponent({ name: 'StatPanel' })).toBeTruthy()
   })
 
@@ -78,9 +80,9 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
-    expect(wrapper.find('.charts-container')).exists().toBe(true)
-    expect(wrapper.find('.chart-card')).exists().toBe(true)
+
+    expect(wrapper.find('.charts-container').exists()).toBe(true)
+    expect(wrapper.find('.chart-card').exists()).toBe(true)
   })
 
   it('should render service trend chart', () => {
@@ -89,9 +91,9 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.chart-title').text()).toContain('服务趋势分析')
-    expect(wrapper.find('.ve-chart')).exists().toBe(true)
+    expect(wrapper.find('.ve-chart').exists()).toBe(true)
   })
 
   it('should render service type chart', () => {
@@ -100,7 +102,7 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const chartCards = wrapper.findAll('.chart-card')
     expect(chartCards.length).toBeGreaterThan(1)
   })
@@ -111,9 +113,9 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
-    expect(wrapper.find('.recent-requests-container')).exists().toBe(true)
-    expect(wrapper.find('.chart-card')).exists().toBe(true)
+
+    expect(wrapper.find('.recent-requests-container').exists()).toBe(true)
+    expect(wrapper.find('.chart-card').exists()).toBe(true)
   })
 
   it('should render order table', () => {
@@ -122,9 +124,9 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
-    expect(wrapper.find('.order-table-container')).exists().toBe(true)
-    expect(wrapper.find('.el-table')).exists().toBe(true)
+
+    expect(wrapper.find('.order-table-container').exists()).toBe(true)
+    expect(wrapper.find('.el-table').exists()).toBe(true)
   })
 
   it('should render tabs for order types', () => {
@@ -133,9 +135,9 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
-    expect(wrapper.find('.el-tabs')).exists().toBe(true)
-    expect(wrapper.find('.el-tab-pane')).exists().toBe(true)
+
+    expect(wrapper.find('.el-tabs').exists()).toBe(true)
+    expect(wrapper.find('.el-tab-pane').exists()).toBe(true)
   })
 
   it('should have navigation buttons', () => {
@@ -144,7 +146,7 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const buttons = wrapper.findAll('.el-button')
     expect(buttons.length).toBeGreaterThan(0)
   })
@@ -155,7 +157,7 @@ describe('Dashboard Page', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const buttons = wrapper.findAll('.el-button')
     if (buttons.length > 0) {
       await buttons[0].trigger('click')

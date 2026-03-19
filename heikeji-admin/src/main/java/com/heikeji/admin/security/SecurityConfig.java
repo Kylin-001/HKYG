@@ -73,8 +73,8 @@ public class SecurityConfig {
      * JWT工具类
      */
     @Bean
-    public com.heikeji.common.core.security.JwtUtils jwtUtils() {
-        return new com.heikeji.common.core.security.JwtUtils();
+    public com.heikeji.common.security.utils.JwtUtils jwtUtils() {
+        return new com.heikeji.common.security.utils.JwtUtils();
     }
 
     /**

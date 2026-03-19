@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,9 +26,27 @@ public class CacheWarmupConfig implements ApplicationRunner {
     
     @Autowired
     private ProductRecommendService productRecommendService;
+    
+    @Autowired
+    private Environment environment;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        // 检查是否为测试环境
+        String[] activeProfiles = environment.getActiveProfiles();
+        boolean isTest = false;
+        for (String profile : activeProfiles) {
+            if ("test".equals(profile)) {
+                isTest = true;
+                break;
+            }
+        }
+        
+        if (isTest) {
+            System.out.println("测试环境，跳过缓存预热...");
+            return;
+        }
+        
         System.out.println("开始缓存预热...");
         
         // 预热热点商品数据

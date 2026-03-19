@@ -163,6 +163,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Search, Edit, Lock, Delete } from '@element-plus/icons-vue'
+import * as systemApi from '@/api/system'
 
 // 导入类型定义
 interface Role {
@@ -340,40 +341,13 @@ onMounted(() => {
 const fetchRoleList = async () => {
   loading.value = true
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 模拟数据
-    const mockData: Role[] = [
-      {
-        id: '1',
-        name: '超级管理员',
-        code: 'admin',
-        description: '拥有系统所有权限',
-        status: '1',
-        createTime: '2026-01-01 10:00:00',
-        updateTime: '2026-01-01 10:00:00',
-      },
-      {
-        id: '2',
-        name: '商品管理员',
-        code: 'product_admin',
-        description: '管理商品相关权限',
-        status: '1',
-        createTime: '2026-01-02 14:30:00',
-        updateTime: '2026-01-02 14:30:00',
-      },
-      {
-        id: '3',
-        name: '订单管理员',
-        code: 'order_admin',
-        description: '管理订单相关权限',
-        status: '1',
-        createTime: '2026-01-03 09:15:00',
-        updateTime: '2026-01-03 09:15:00',
-      },
-    ]
-    roleList.value = mockData
-    total.value = mockData.length
+    const res = await systemApi.getRoleList({
+      keyword: searchParams.keyword,
+      current: pagination.currentPage,
+      size: pagination.pageSize,
+    })
+    roleList.value = res.data.records || []
+    total.value = res.data.total || 0
   } catch (error) {
     ElMessage.error('获取角色列表失败')
   } finally {
@@ -413,7 +387,6 @@ const handleSelectionChange = (selection: any[]) => {
 // 新增角色
 const handleAddRole = () => {
   isEdit.value = false
-  // 重置表单
   Object.assign(roleForm, {
     id: '',
     name: '',
@@ -427,16 +400,19 @@ const handleAddRole = () => {
 // 编辑角色
 const handleEditRole = (role: Role) => {
   isEdit.value = true
-  // 填充表单数据
   Object.assign(roleForm, role)
   dialogVisible.value = true
 }
 
 // 配置权限
-const handlePermissionConfig = (role: Role) => {
-  // 模拟获取角色权限
-  selectedPermissions.value = ['1', '1-1', '1-1-1', '1-1-2', '1-1-3', '1-1-4']
-  permissionDialogVisible.value = true
+const handlePermissionConfig = async (role: Role) => {
+  try {
+    const res = await systemApi.getRolePerms(role.id)
+    selectedPermissions.value = res.data || []
+    permissionDialogVisible.value = true
+  } catch (error) {
+    ElMessage.error('获取角色权限失败')
+  }
 }
 
 // 删除角色
@@ -447,12 +423,9 @@ const handleDeleteRole = async (id: string) => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 更新本地数据
-    roleList.value = roleList.value.filter(item => item.id !== id)
-    total.value = roleList.value.length
+    await systemApi.deleteRole(id)
     ElMessage.success('角色删除成功')
+    fetchRoleList()
   } catch (error) {
     // 取消删除
   }
@@ -463,32 +436,15 @@ const handleSubmit = async () => {
   if (!roleFormRef.value) return
   try {
     await roleFormRef.value.validate()
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
     if (isEdit.value) {
-      // 更新角色
-      const index = roleList.value.findIndex(item => item.id === roleForm.id)
-      if (index !== -1) {
-        roleList.value[index] = {
-          ...roleList.value[index],
-          ...roleForm,
-          updateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        }
-      }
+      await systemApi.updateRole(roleForm)
       ElMessage.success('角色更新成功')
     } else {
-      // 新增角色
-      const newRole: Role = {
-        ...roleForm,
-        id: Date.now().toString(),
-        createTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        updateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      }
-      roleList.value.unshift(newRole)
-      total.value = roleList.value.length
+      await systemApi.addRole(roleForm)
       ElMessage.success('角色新增成功')
     }
     dialogVisible.value = false
+    fetchRoleList()
   } catch (error) {
     // 表单验证失败或保存失败
   }
@@ -496,17 +452,28 @@ const handleSubmit = async () => {
 
 // 保存权限配置
 const handleSavePermission = async () => {
-  // 模拟API请求
-  await new Promise(resolve => setTimeout(resolve, 500))
-  ElMessage.success('权限配置保存成功')
-  permissionDialogVisible.value = false
+  try {
+    const currentRoleId = roleList.value.find(r =>
+      selectedPermissions.value.some(p => permissionTree.value.some(pt => pt.id === p))
+    )?.id
+    if (currentRoleId) {
+      await systemApi.updateRolePerms(currentRoleId, selectedPermissions.value)
+      ElMessage.success('权限配置保存成功')
+    }
+    permissionDialogVisible.value = false
+  } catch (error) {
+    ElMessage.error('权限配置保存失败')
+  }
 }
 
 // 切换角色状态
 const handleStatusChange = async (role: Role) => {
-  // 模拟API请求
-  await new Promise(resolve => setTimeout(resolve, 500))
-  ElMessage.success('角色状态更新成功')
+  try {
+    await systemApi.updateRoleStatus(role.id, role.status)
+    ElMessage.success('角色状态更新成功')
+  } catch (error) {
+    ElMessage.error('角色状态更新失败')
+  }
 }
 </script>
 

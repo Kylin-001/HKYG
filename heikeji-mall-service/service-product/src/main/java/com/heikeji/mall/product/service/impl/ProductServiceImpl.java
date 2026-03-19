@@ -455,6 +455,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Override
     @Cacheable(value = "productCache", key = "'recommend_list_'+#limit")
     public List<Product> getRecommendProductList(Integer limit) {
+        // 确保limit为正数
+        if (limit == null || limit <= 0) {
+            limit = 10; // 默认值
+        }
         return this.getBaseMapper().selectRecommendProducts(limit);
     }
     

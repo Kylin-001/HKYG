@@ -24,7 +24,7 @@ const transitionTypes = {
   slide: 'slide',
   scale: 'scale',
   slideFade: 'slide-fade',
-  zoom: 'zoom'
+  zoom: 'zoom',
 } as const
 
 // 定义属性类型
@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   mode: 'out-in',
   duration: 300,
   direction: 'left',
-  route: undefined
+  route: undefined,
 })
 
 // 从provide/inject获取当前路由（如果没有通过props传递）
@@ -58,7 +58,7 @@ const pageTransitionConfig = {
   '/order/list': { type: 'slide' as const, duration: 300, direction: 'left' },
   '/user/list': { type: 'scale' as const, duration: 350 },
   '/login': { type: 'fade' as const, duration: 500 },
-  '/404': { type: 'fade' as const, duration: 500 }
+  '/404': { type: 'fade' as const, duration: 500 },
 }
 
 // 计算当前页面的过渡配置

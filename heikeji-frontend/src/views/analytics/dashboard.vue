@@ -145,9 +145,7 @@
             <el-table-column prop="name" label="商品名称" min-width="150" />
             <el-table-column prop="sales" label="销量" width="100" align="center" />
             <el-table-column prop="revenue" label="营收" width="120" align="center">
-              <template #default="{ row }">
-                ¥{{ row.revenue }}
-              </template>
+              <template #default="{ row }"> ¥{{ row.revenue }} </template>
             </el-table-column>
             <el-table-column prop="growth" label="增长率" width="100" align="center">
               <template #default="{ row }">
@@ -185,7 +183,26 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { User, UserFilled, ShoppingCart, Money } from '@element-plus/icons-vue'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([
+  BarChart,
+  LineChart,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer,
+])
 
 const stats = ref({
   totalUsers: 0,
@@ -212,10 +229,10 @@ let charts = []
 
 const initUserGrowthChart = () => {
   if (!userGrowthChart.value) return
-  
+
   const chart = echarts.init(userGrowthChart.value)
   charts.push(chart)
-  
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -252,16 +269,16 @@ const initUserGrowthChart = () => {
       },
     ],
   }
-  
+
   chart.setOption(option)
 }
 
 const initOrderTrendChart = () => {
   if (!orderTrendChart.value) return
-  
+
   const chart = echarts.init(orderTrendChart.value)
   charts.push(chart)
-  
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -292,16 +309,16 @@ const initOrderTrendChart = () => {
       },
     ],
   }
-  
+
   chart.setOption(option)
 }
 
 const initCategoryChart = () => {
   if (!categoryChart.value) return
-  
+
   const chart = echarts.init(categoryChart.value)
   charts.push(chart)
-  
+
   const option = {
     tooltip: {
       trigger: 'item',
@@ -345,16 +362,16 @@ const initCategoryChart = () => {
       },
     ],
   }
-  
+
   chart.setOption(option)
 }
 
 const initLevelChart = () => {
   if (!levelChart.value) return
-  
+
   const chart = echarts.init(levelChart.value)
   charts.push(chart)
-  
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -398,16 +415,16 @@ const initLevelChart = () => {
       },
     ],
   }
-  
+
   chart.setOption(option)
 }
 
 const initRecommendationChart = () => {
   if (!recommendationChart.value) return
-  
+
   const chart = echarts.init(recommendationChart.value)
   charts.push(chart)
-  
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -449,16 +466,16 @@ const initRecommendationChart = () => {
       },
     ],
   }
-  
+
   chart.setOption(option)
 }
 
 const initBehaviorChart = () => {
   if (!behaviorChart.value) return
-  
+
   const chart = echarts.init(behaviorChart.value)
   charts.push(chart)
-  
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -495,7 +512,7 @@ const initBehaviorChart = () => {
       },
     ],
   }
-  
+
   chart.setOption(option)
 }
 
@@ -521,14 +538,38 @@ const fetchTopProducts = async () => {
 const fetchActiveUsers = async () => {
   activeUsersList.value = [
     { username: 'user001', points: 12580, orders: 156, level: '钻石会员', lastActive: new Date() },
-    { username: 'user002', points: 9840, orders: 123, level: '金卡会员', lastActive: new Date(Date.now() - 3600000) },
-    { username: 'user003', points: 8760, orders: 98, level: '金卡会员', lastActive: new Date(Date.now() - 7200000) },
-    { username: 'user004', points: 6540, orders: 87, level: '银卡会员', lastActive: new Date(Date.now() - 10800000) },
-    { username: 'user005', points: 5430, orders: 76, level: '银卡会员', lastActive: new Date(Date.now() - 14400000) },
+    {
+      username: 'user002',
+      points: 9840,
+      orders: 123,
+      level: '金卡会员',
+      lastActive: new Date(Date.now() - 3600000),
+    },
+    {
+      username: 'user003',
+      points: 8760,
+      orders: 98,
+      level: '金卡会员',
+      lastActive: new Date(Date.now() - 7200000),
+    },
+    {
+      username: 'user004',
+      points: 6540,
+      orders: 87,
+      level: '银卡会员',
+      lastActive: new Date(Date.now() - 10800000),
+    },
+    {
+      username: 'user005',
+      points: 5430,
+      orders: 76,
+      level: '银卡会员',
+      lastActive: new Date(Date.now() - 14400000),
+    },
   ]
 }
 
-const formatTime = (time) => {
+const formatTime = time => {
   if (!time) return ''
   const date = new Date(time)
   const now = new Date()
@@ -536,7 +577,7 @@ const formatTime = (time) => {
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
-  
+
   if (days > 0) return `${days}天前`
   if (hours > 0) return `${hours}小时前`
   if (minutes > 0) return `${minutes}分钟前`
@@ -553,7 +594,7 @@ onMounted(() => {
   fetchStats()
   fetchTopProducts()
   fetchActiveUsers()
-  
+
   setTimeout(() => {
     initUserGrowthChart()
     initOrderTrendChart()
@@ -562,7 +603,7 @@ onMounted(() => {
     initRecommendationChart()
     initBehaviorChart()
   }, 100)
-  
+
   window.addEventListener('resize', handleResize)
 })
 
@@ -578,7 +619,7 @@ watch([userGrowthPeriod, orderTrendPeriod, behaviorType], () => {
     chart && chart.dispose()
   })
   charts = []
-  
+
   setTimeout(() => {
     initUserGrowthChart()
     initOrderTrendChart()

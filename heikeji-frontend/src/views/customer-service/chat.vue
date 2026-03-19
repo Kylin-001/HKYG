@@ -140,19 +140,19 @@ export default {
     },
     sendMessage() {
       if (!this.inputMessage.trim() || this.loading) return
-      
+
       const message = this.inputMessage.trim()
       this.inputMessage = ''
-      
+
       this.messages.push({
         type: 'user',
         content: message,
         timestamp: Date.now()
       })
-      
+
       this.scrollToBottom()
       this.loading = true
-      
+
       chat({
         sessionId: this.sessionId,
         message: message
@@ -164,7 +164,7 @@ export default {
             content: data.reply,
             timestamp: Date.now()
           })
-          
+
           this.messageCount++
           if (this.messageCount >= 5) {
             this.showEvaluation = true

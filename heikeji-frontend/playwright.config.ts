@@ -7,13 +7,7 @@ export default defineConfig({
   retries: 2,
   timeout: 30000,
   expect: 'playwright/test',
-  reporter: [
-    ['html'],
-    ['json'],
-    ['junit'],
-    ['line'],
-    ['allure-playwright'],
-  ],
+  reporter: [['html'], ['json'], ['junit'], ['line'], ['allure-playwright']],
   use: {
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -24,7 +18,8 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         ignoreHTTPSErrors: true,
         acceptDownloads: true,
       },
@@ -44,7 +39,8 @@ export default defineConfig({
       use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1280, height: 720 },
-        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.1 Safari/604.1.4',
+        userAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.1 Safari/604.1.4',
         ignoreHTTPSErrors: true,
         acceptDownloads: true,
       },

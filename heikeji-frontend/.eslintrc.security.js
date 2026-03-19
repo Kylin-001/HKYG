@@ -100,7 +100,7 @@ module.exports = {
     'no-extend-native': 'error',
     'no-proto': 'error',
     'no-throw-literal': 'error',
-    
+
     // 安全插件规则
     'security/detect-object-injection': 'warn', // 检测对象注入
     'security/detect-non-literal-fs-filename': 'error', // 检测非字面量文件名
@@ -166,7 +166,7 @@ module.exports = {
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
-    
+
     // TypeScript安全规则
     '@typescript-eslint/no-unsafe-assignment': 'warn',
     '@typescript-eslint/no-unsafe-call': 'warn',

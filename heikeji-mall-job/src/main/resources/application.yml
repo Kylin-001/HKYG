@@ -4,22 +4,35 @@ server:
 spring:
   application:
     name: heikeji-mall-job
-  
+
+  # 禁用Nacos配置检查和服务发现
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
+      discovery:
+        enabled: false
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.186.128:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: hkyg
+    password: Mysql@8Root!2025
+
   # Redis配置
   redis:
-    host: localhost
+    host: 192.168.186.128
     port: 6379
-    password: 
+    password:
     database: 0
     timeout: 3000ms
-  
+
   # Quartz配置
   quartz:
-    # 任务存储方式：数据库存储
     job-store-type: memory
-    # 定时任务启动时更新已存在的任务
     overwrite-existing-jobs: true
-    # 线程池配置
     properties:
       org:
         quartz:
@@ -27,15 +40,6 @@ spring:
             threadCount: 10
             threadPriority: 5
             threadsInheritContextClassLoaderOfInitializingThread: true
-
-# Eureka配置
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    preferIpAddress: true
-    instanceId: ${spring.cloud.client.ip-address}:${server.port}
 
 # 日志配置
 logging:
@@ -49,9 +53,6 @@ logging:
 
 # 自定义任务配置
 job:
-  # 订单自动取消配置（分钟）
   orderAutoCancel: 30
-  # 订单自动确认收货配置（天）
   orderAutoConfirm: 7
-  # 定时清理日志配置（天）
   logCleanup: 30

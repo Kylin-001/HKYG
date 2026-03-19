@@ -563,7 +563,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/variables.scss';
+@use '@/styles/variables.scss' as *;
 
 // 样式将从原组件迁移并适配Vue 3
 .dashboard-container {
@@ -660,12 +660,12 @@ onBeforeUnmount(() => {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   @media (min-width: $screen-sm) and (max-width: $screen-md) {
     grid-template-columns: repeat(2, 1fr);
     display: grid;
   }
-  
+
   @media (min-width: $screen-md) {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -726,26 +726,26 @@ onBeforeUnmount(() => {
   .order-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    
+
     .el-table {
       min-width: 768px;
-      
+
       @media (max-width: $screen-sm) {
         font-size: 12px;
-        
+
         .el-table__column {
           padding: 8px 4px;
         }
       }
     }
   }
-  
+
   .el-tabs {
     @media (max-width: $screen-sm) {
       .el-tabs__header {
         margin-bottom: 10px;
       }
-      
+
       .el-tabs__nav-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;

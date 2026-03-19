@@ -1,4 +1,4 @@
-package com.heikeji.mall.customer.controller;
+package com.heikeji.mall.user.controller;
 
 import com.heikeji.common.core.domain.R;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,7 +70,7 @@ public class CustomerServiceController {
         return R.success(replies);
     }
 
-    @GetMapping("/evaluaion/{sessionId}")
+    @GetMapping("/evaluation")
     @Operation(summary = "获取满意度评价选项")
     public R<List<Map<String, String>>> getEvaluationOptions() {
         List<Map<String, String>> options = new ArrayList<>();

@@ -7,6 +7,16 @@ spring:
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
+  autoconfigure:
+    # 排除Redis和RabbitMQ自动配置，避免连接失败导致服务启动问题
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.health.RedisHealthContributorAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisCacheAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.health.RabbitHealthContributorAutoConfiguration
   datasource:
     url: jdbc:mysql://192.168.186.128:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: hkyg
@@ -14,23 +24,24 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   # Redis配置
   redis:
-    host: localhost
-    port: 6379
-    database: 0
+    enabled: false
   # 禁用Nacos服务发现和配置检查，避免启动错误
   cloud:
     nacos:
       discovery:
-        enabled: false
+        enabled: true
         server-addr: localhost:8848
         namespace: public
+        ip: 127.0.0.1
+        cluster-name: DEFAULT
       config:
         import-check:
           enabled: false
         enabled: false
   # RabbitMQ配置
   rabbitmq:
-    host: localhost
+    enabled: true
+    host: 192.168.186.128
     port: 5672
     username: guest
     password: guest
@@ -123,3 +134,17 @@ logging:
     com.heikeji.mall.payment: DEBUG
     org.springframework.web: INFO
     com.github.binarywang.wxpay: DEBUG
+
+# 配置Spring Boot Actuator健康检查
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  health:
+    redis:
+      enabled: false

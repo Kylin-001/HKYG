@@ -1062,8 +1062,8 @@ onBeforeUnmount(() => {
 
 <style>
 .app-product-detail {
-  // 购物车动画
-    .cart-animation {
+  /* 购物车动画 */
+  .cart-animation {
     position: fixed;
     font-size: 16px;
     font-weight: bold;

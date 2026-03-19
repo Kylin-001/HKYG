@@ -138,6 +138,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, Search, Check, Close } from '@element-plus/icons-vue'
+import * as systemApi from '@/api/system'
 
 // 导入类型定义
 interface User {
@@ -198,53 +199,13 @@ watch(selectedUsers, newVal => {
 const fetchUserList = async () => {
   loading.value = true
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 模拟数据
-    const mockData: User[] = [
-      {
-        id: '1',
-        username: 'admin',
-        nickname: '超级管理员',
-        avatar: '',
-        phone: '13800138000',
-        email: 'admin@example.com',
-        status: '1',
-        createTime: '2026-01-01 10:00:00',
-      },
-      {
-        id: '2',
-        username: 'user1',
-        nickname: '用户1',
-        avatar: '',
-        phone: '13800138001',
-        email: 'user1@example.com',
-        status: '1',
-        createTime: '2026-01-02 14:30:00',
-      },
-      {
-        id: '3',
-        username: 'user2',
-        nickname: '用户2',
-        avatar: '',
-        phone: '13800138002',
-        email: 'user2@example.com',
-        status: '1',
-        createTime: '2026-01-03 09:15:00',
-      },
-      {
-        id: '4',
-        username: 'user3',
-        nickname: '用户3',
-        avatar: '',
-        phone: '13800138003',
-        email: 'user3@example.com',
-        status: '0',
-        createTime: '2026-01-04 16:45:00',
-      },
-    ]
-    userList.value = mockData
-    total.value = mockData.length
+    const res = await systemApi.getAdminList({
+      keyword: searchParams.keyword,
+      current: pagination.currentPage,
+      size: pagination.pageSize,
+    })
+    userList.value = res.data.records || []
+    total.value = res.data.total || 0
   } catch (error) {
     ElMessage.error('获取用户列表失败')
   } finally {
@@ -255,36 +216,8 @@ const fetchUserList = async () => {
 // 获取角色列表
 const fetchRoleList = async () => {
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 模拟数据
-    const mockData: Role[] = [
-      {
-        id: '1',
-        name: '超级管理员',
-        code: 'admin',
-        description: '拥有系统所有权限',
-      },
-      {
-        id: '2',
-        name: '商品管理员',
-        code: 'product_admin',
-        description: '管理商品相关权限',
-      },
-      {
-        id: '3',
-        name: '订单管理员',
-        code: 'order_admin',
-        description: '管理订单相关权限',
-      },
-      {
-        id: '4',
-        name: '普通用户',
-        code: 'normal',
-        description: '普通用户权限',
-      },
-    ]
-    roleList.value = mockData
+    const res = await systemApi.getEnabledRoles()
+    roleList.value = res.data || []
   } catch (error) {
     ElMessage.error('获取角色列表失败')
   }
@@ -293,20 +226,10 @@ const fetchRoleList = async () => {
 // 获取用户角色
 const fetchUserRoles = async (userId: string) => {
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 模拟数据
-    const mockRoles: Role[] = [
-      {
-        id: '1',
-        name: '超级管理员',
-        code: 'admin',
-        description: '拥有系统所有权限',
-      },
-    ]
-    selectedUserRoles.value = mockRoles
-    // 更新选中的角色ID
-    checkedRoles.value = mockRoles.map(role => role.id)
+    const res = await systemApi.getUserRoleIds(userId)
+    const roleIds = res.data || []
+    selectedUserRoles.value = roleList.value.filter(role => roleIds.includes(role.id))
+    checkedRoles.value = roleIds
   } catch (error) {
     ElMessage.error('获取用户角色失败')
   }
@@ -354,10 +277,13 @@ const handleRemoveRole = (roleId: string) => {
 
 // 保存角色分配
 const handleSaveRoles = async () => {
+  if (selectedUsers.value.length !== 1) {
+    ElMessage.warning('请选择单个用户')
+    return
+  }
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 更新当前用户角色
+    const userId = selectedUsers.value[0].id
+    await systemApi.assignUserRoles(userId, checkedRoles.value)
     selectedUserRoles.value = roleList.value.filter(role => checkedRoles.value.includes(role.id))
     ElMessage.success('角色分配保存成功')
   } catch (error) {
@@ -367,7 +293,6 @@ const handleSaveRoles = async () => {
 
 // 取消操作
 const handleCancel = () => {
-  // 恢复原始角色选择
   checkedRoles.value = selectedUserRoles.value.map(role => role.id)
 }
 </script>

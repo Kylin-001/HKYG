@@ -3,14 +3,14 @@
  * 用于敏感数据的加密和解密
  */
 
-import { CryptoJS } from 'crypto-js'
+import CryptoJS from 'crypto-js'
 
 // 加密配置
 interface EncryptionConfig {
   key: string // 加密密钥
   iv?: string // 初始化向量（可选）
-  mode?: CryptoJS.mode.CBC | CryptoJS.mode.ECB | CryptoJS.mode.GCM // 加密模式
-  padding?: CryptoJS.pad.Pkcs7 | CryptoJS.pad.Iso10126 | CryptoJS.pad.NoPadding // 填充方式
+  mode?: any // 加密模式
+  padding?: any // 填充方式
 }
 
 // 默认加密配置
@@ -28,12 +28,12 @@ class DataEncryption {
 
   constructor(config?: Partial<EncryptionConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config }
-    
+
     // 从环境变量获取密钥
     if (!this.config.key) {
       this.config.key = import.meta.env.VITE_APP_ENCRYPTION_KEY || 'default-encryption-key-32'
     }
-    
+
     // 确保密钥长度足够
     if (this.config.key.length < 32) {
       console.warn('加密密钥长度不足32位，建议使用更长的密钥')
@@ -52,7 +52,7 @@ class DataEncryption {
         padding: this.config.padding,
         iv: this.config.iv ? CryptoJS.enc.Utf8.parse(this.config.iv) : undefined,
       })
-      
+
       return encrypted.toString()
     } catch (error) {
       console.error('加密失败:', error)
@@ -72,7 +72,7 @@ class DataEncryption {
         padding: this.config.padding,
         iv: this.config.iv ? CryptoJS.enc.Utf8.parse(this.config.iv) : undefined,
       })
-      
+
       return decrypted.toString(CryptoJS.enc.Utf8)
     } catch (error) {
       console.error('解密失败:', error)
@@ -127,11 +127,11 @@ class DataEncryption {
   decryptNumber(encryptedData: string): number {
     const decryptedString = this.decrypt(encryptedData)
     const number = parseFloat(decryptedString)
-    
+
     if (isNaN(number)) {
       throw new Error('解密后的数据不是有效的数字')
     }
-    
+
     return number
   }
 
@@ -205,7 +205,7 @@ export const defaultEncryption = new DataEncryption()
 // 创建敏感数据加密实例（使用更严格的配置）
 export const sensitiveDataEncryption = new DataEncryption({
   key: import.meta.env.VITE_APP_SENSITIVE_DATA_KEY || 'sensitive-data-encryption-key-64',
-  mode: CryptoJS.mode.GCM,
+  mode: CryptoJS.mode.CBC,
 })
 
 // 创建本地存储加密实例
@@ -217,23 +217,23 @@ export const localStorageEncryption = new DataEncryption({
 export function encryptField(encryption: DataEncryption = defaultEncryption) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalSetter = descriptor.set
-    
+
     descriptor.set = function (value: any) {
       // 如果是字符串，进行加密
       if (typeof value === 'string') {
         value = encryption.encrypt(value)
       }
-      
+
       if (originalSetter) {
         originalSetter.call(this, value)
       }
     }
-    
+
     const originalGetter = descriptor.get
-    
+
     descriptor.get = function () {
       let value = originalGetter?.call(this)
-      
+
       // 如果是字符串且看起来像加密数据，进行解密
       if (typeof value === 'string' && value.length > 20) {
         try {
@@ -243,10 +243,10 @@ export function encryptField(encryption: DataEncryption = defaultEncryption) {
           console.warn('字段解密失败:', error)
         }
       }
-      
+
       return value
     }
-    
+
     return descriptor
   }
 }
@@ -279,7 +279,7 @@ export const secureStorage = {
     try {
       const encryptedValue = localStorage.getItem(key)
       if (!encryptedValue) return null
-      
+
       return encryption.decrypt(encryptedValue)
     } catch (error) {
       console.error('安全存储获取失败:', error)
@@ -313,7 +313,7 @@ export const secureStorage = {
     try {
       const encryptedValue = sessionStorage.getItem(key)
       if (!encryptedValue) return null
-      
+
       return encryption.decrypt(encryptedValue)
     } catch (error) {
       console.error('安全会话存储获取失败:', error)

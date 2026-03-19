@@ -143,3 +143,40 @@ export function getProductOperationLogs(productId) {
     method: 'get',
   })
 }
+
+// 获取商品销售统计
+export function getProductSales(startDate, endDate, categoryId) {
+  return request({
+    url: '/api/product/sales',
+    method: 'get',
+    params: { startDate, endDate, categoryId },
+  })
+}
+
+// 导出商品数据
+export function exportProducts(params) {
+  return request({
+    url: '/api/product/export',
+    method: 'get',
+    params,
+    responseType: 'blob',
+  })
+}
+
+// 获取销售趋势数据
+export function getSalesTrend(startDate, endDate, timeGranularity) {
+  return request({
+    url: '/api/product/sales/trend',
+    method: 'get',
+    params: { startDate, endDate, timeGranularity },
+  })
+}
+
+// 获取销售排行数据
+export function getSalesRanking(limit, startDate, endDate) {
+  return request({
+    url: '/api/product/sales/ranking',
+    method: 'get',
+    params: { limit, startDate, endDate },
+  })
+}

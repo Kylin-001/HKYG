@@ -268,7 +268,7 @@ describe('NotificationService', () => {
         '客服服务',
         '正在为您连接客服，请稍候...',
         { duration: 3000 }
-      );
+      )
 
       // 恢复原始方法
       showInAppNotificationSpy.mockRestore()

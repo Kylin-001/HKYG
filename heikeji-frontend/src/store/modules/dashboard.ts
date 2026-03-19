@@ -59,13 +59,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     totalMerchants: 0,
     totalRevenue: 0,
     dailyActiveUsers: 0,
-    dailyOrders: 0
+    dailyOrders: 0,
   })
   const systemHealth = ref<SystemHealth>({
     cpuUsage: 0,
     memoryUsage: 0,
     diskUsage: 0,
-    uptime: 0
+    uptime: 0,
   })
   const salesTrend = ref<SalesTrendItem[]>([])
   const orderCategory = ref<OrderCategoryItem[]>([])
@@ -200,13 +200,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
       totalMerchants: 0,
       totalRevenue: 0,
       dailyActiveUsers: 0,
-      dailyOrders: 0
+      dailyOrders: 0,
     }
     systemHealth.value = {
       cpuUsage: 0,
       memoryUsage: 0,
       diskUsage: 0,
-      uptime: 0
+      uptime: 0,
     }
     salesTrend.value = []
     orderCategory.value = []

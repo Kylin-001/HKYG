@@ -6,6 +6,7 @@ import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
  * Redisson配置类
@@ -27,6 +28,7 @@ public class RedissonConfig {
     private int database;
 
     @Bean
+    @ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true", matchIfMissing = true)
     public RedissonClient redissonClient() {
         Config config = new Config();
         

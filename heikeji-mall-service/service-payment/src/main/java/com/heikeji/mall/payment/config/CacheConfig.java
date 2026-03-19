@@ -2,8 +2,10 @@ package com.heikeji.mall.payment.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -16,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Redis缓存配置类
+ * 缓存配置类
  * 为支付服务提供高性能缓存支持
  */
 @Configuration
@@ -24,7 +26,8 @@ import java.util.Map;
 public class CacheConfig {
 
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    @ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true", matchIfMissing = true)
+    public CacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
         // 配置Redis缓存
         RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(10)) // 默认缓存10分钟
@@ -52,6 +55,17 @@ public class CacheConfig {
                 .withInitialCacheConfigurations(cacheConfigurations)
                 .transactionAware() // 支持事务
                 .build();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "false")
+    public CacheManager inMemoryCacheManager() {
+        // 使用内存缓存作为Redis的替代
+        return new ConcurrentMapCacheManager(
+                "payParamsCache",
+                "paymentStatusCache",
+                "orderUserCache"
+        );
     }
 
 }

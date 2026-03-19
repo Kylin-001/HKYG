@@ -42,7 +42,7 @@
 
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
-      <el-loading-spinner></el-loading-spinner>
+      <div class="loading-spinner"></div>
       <span>正在加载...</span>
     </div>
 
@@ -55,10 +55,7 @@
         @click="goToDetail(product.id)"
       >
         <div class="product-image">
-          <img
-            v-lazy="product.mainImage || '/static/images/default-product.png'"
-            :alt="product.name"
-          />
+          <img v-lazy="product.mainImage || '@/assets/images/error.svg'" :alt="product.name" />
         </div>
         <div class="product-info">
           <div class="product-name">{{ product.name }}</div>
@@ -70,7 +67,7 @@
 
     <!-- 无商品状态 -->
     <div v-else class="no-products">
-      <img src="/static/images/no-products.png" alt="暂无商品" />
+      <img src="@/assets/images/error.svg" alt="暂无商品" />
       <p>暂无商品</p>
     </div>
 
@@ -96,6 +93,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getProductList } from '@/api/app/product'
+import { ElLoading } from 'element-plus'
+import 'element-plus/dist/index.css'
 
 // 定义类型
 interface Product {
@@ -354,6 +353,24 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 40px 0;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #ebeef5;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-container span {

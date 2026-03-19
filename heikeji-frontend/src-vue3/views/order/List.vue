@@ -172,14 +172,7 @@
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button
-              type="primary"
-              size="small"
-              link
-              @click="handleView(row)"
-            >
-              查看
-            </el-button>
+            <el-button type="primary" size="small" link @click="handleView(row)"> 查看 </el-button>
             <el-button
               v-if="row.orderStatus === 1"
               type="success"
@@ -244,23 +237,23 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Refresh, 
-  Download, 
-  Document, 
-  Calendar, 
-  Money, 
-  Warning, 
-  Search 
+import {
+  Refresh,
+  Download,
+  Document,
+  Calendar,
+  Money,
+  Warning,
+  Search,
 } from '@element-plus/icons-vue'
 import OrderDetailDialog from './components/OrderDetailDialog.vue'
 import DeliveryDialog from './components/DeliveryDialog.vue'
-import { 
-  getOrderList, 
-  getOrderStats, 
-  updateOrderStatus, 
+import {
+  getOrderList,
+  getOrderStats,
+  updateOrderStatus,
   cancelOrder,
-  exportOrders
+  exportOrders,
 } from '@/api/order'
 import type { Order, OrderSearchParams, OrderStats } from '@/types/order'
 
@@ -317,7 +310,7 @@ const loadOrders = async () => {
   try {
     searchParams.pageNum = pagination.currentPage
     searchParams.pageSize = pagination.pageSize
-    
+
     const res = await getOrderList(searchParams)
     orders.value = res.data.list
     total.value = res.data.total
@@ -368,9 +361,9 @@ const handleExport = async () => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    
+
     const res = await exportOrders(searchParams)
-    
+
     // 创建下载链接
     const blob = new Blob([res.data])
     const url = window.URL.createObjectURL(blob)
@@ -379,7 +372,7 @@ const handleExport = async () => {
     link.download = `订单列表_${new Date().toLocaleDateString()}.xlsx`
     link.click()
     window.URL.revokeObjectURL(url)
-    
+
     ElMessage.success('导出成功')
   } catch (error) {
     if (error !== 'cancel') {
@@ -400,16 +393,12 @@ const handleView = (row: Order) => {
 
 const handleConfirm = async (row: Order) => {
   try {
-    await ElMessageBox.confirm(
-      `确定要确认订单"${row.orderNo}"吗？`,
-      '提示',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
-    
+    await ElMessageBox.confirm(`确定要确认订单"${row.orderNo}"吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
     await updateOrderStatus(row.id, 2)
     ElMessage.success('订单确认成功')
     loadOrders()
@@ -439,7 +428,7 @@ const handleCancel = async (row: Order) => {
         inputErrorMessage: '请输入取消原因',
       }
     )
-    
+
     await cancelOrder(row.id, reason)
     ElMessage.success('订单取消成功')
     loadOrders()

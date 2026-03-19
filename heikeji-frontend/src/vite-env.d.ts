@@ -1,0 +1,56 @@
+// / <reference types="vite/client" />
+
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue'
+  const component: DefineComponent<{}, {}, any>
+  export default component
+}
+
+declare interface ImportMetaEnv {
+  // 基础配置
+  VITE_APP_BASE_API: string
+  VITE_APP_ENABLE_RATE_LIMITING: string
+  VITE_APP_ENABLE_REQUEST_ENCRYPTION: string
+  VITE_APP_ENABLE_RESPONSE_DECRYPTION: string
+
+  // 缓存相关
+  VITE_CACHE_ALERT_HIT_RATE_BELOW: string
+  VITE_CACHE_ALERT_MEMORY_USAGE_ABOVE: string
+  VITE_CACHE_MAX_MEMORY: string
+  VITE_CACHE_HIT_RATE_TARGET: string
+  VITE_CACHE_MEMORY_USAGE_THRESHOLD: string
+  VITE_CACHE_MAX_SIZE: string
+
+  // 加密相关
+  VITE_APP_ENCRYPTION_KEY: string
+  VITE_APP_SENSITIVE_DATA_KEY: string
+  VITE_APP_LOCAL_STORAGE_KEY: string
+
+  // 性能分析
+  VITE_ENABLE_ANALYTICS: string
+
+  // Redis配置
+  VITE_REDIS_HOST: string
+  VITE_REDIS_PORT: string
+  VITE_REDIS_PASSWORD: string
+  VITE_REDIS_DB: string
+  VITE_REDIS_KEY_PREFIX: string
+  VITE_REDIS_DEFAULT_TTL: string
+
+  // 速率限制
+  VITE_APP_RATE_LIMIT_WINDOW: string
+  VITE_APP_RATE_LIMIT_MAX_REQUESTS: string
+  VITE_APP_LOGIN_RATE_LIMIT_WINDOW: string
+  VITE_APP_LOGIN_RATE_LIMIT_MAX_REQUESTS: string
+  VITE_APP_REGISTER_RATE_LIMIT_WINDOW: string
+  VITE_APP_REGISTER_RATE_LIMIT_MAX_REQUESTS: string
+  VITE_APP_SENSITIVE_RATE_LIMIT_WINDOW: string
+  VITE_APP_SENSITIVE_RATE_LIMIT_MAX_REQUESTS: string
+  VITE_APP_UPLOAD_RATE_LIMIT_WINDOW: string
+  VITE_APP_UPLOAD_RATE_LIMIT_MAX_REQUESTS: string
+  VITE_APP_SEARCH_RATE_LIMIT_WINDOW: string
+  VITE_APP_SEARCH_RATE_LIMIT_MAX_REQUESTS: string
+
+  // 构建环境
+  PROD: boolean
+}

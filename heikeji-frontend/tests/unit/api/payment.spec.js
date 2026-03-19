@@ -19,7 +19,6 @@ vi.mock('@/config/environment', () => ({
 
 // 导入要测试的函数
 import request from '@/utils/request'
-import logger from '@/utils/logger'
 import config from '@/config/environment'
 import {
   getPaymentMethods,
@@ -38,9 +37,6 @@ import {
   batchQueryPaymentStatus,
   checkPaymentTimeout,
   getPaymentQrcode,
-  pollPaymentResult,
-  createPayment,
-  getPaymentStatus,
   balancePay,
 } from '@/api/payment'
 

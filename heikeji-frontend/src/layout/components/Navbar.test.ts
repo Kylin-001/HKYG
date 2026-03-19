@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import Navbar from '@/layout/components/Navbar.vue'
@@ -21,7 +21,7 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.navbar').exists()).toBe(true)
   })
 
@@ -31,7 +31,7 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.logo').exists()).toBe(true)
   })
 
@@ -41,7 +41,7 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.user-menu').exists()).toBe(true)
   })
 
@@ -51,10 +51,10 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const menuButton = wrapper.find('.menu-button')
     await menuButton.trigger('click')
-    
+
     expect(wrapper.emitted('toggle-sidebar')).toBeTruthy()
   })
 
@@ -64,7 +64,7 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const logoutButton = wrapper.find('.logout-button')
     if (logoutButton.exists()) {
       await logoutButton.trigger('click')
@@ -78,7 +78,7 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.notification-badge').exists()).toBe(true)
   })
 
@@ -88,10 +88,10 @@ describe('Navbar Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const userAvatar = wrapper.find('.user-avatar')
     await userAvatar.trigger('click')
-    
+
     expect(wrapper.find('.user-dropdown').exists()).toBe(true)
   })
 })

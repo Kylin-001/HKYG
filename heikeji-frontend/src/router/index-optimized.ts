@@ -38,18 +38,10 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   // 用户端商品相关路由（不需要权限的）
-  createPreloadRoute(
-    '/app/product',
-    'AppProductPublic',
-    'app/product/list.vue',
-    { hidden: true }
-  ),
-  createPreloadRoute(
-    '/app/product/list',
-    'AppProductListPublic',
-    'app/product/list.vue',
-    { hidden: true }
-  ),
+  createPreloadRoute('/app/product', 'AppProductPublic', 'app/product/list.vue', { hidden: true }),
+  createPreloadRoute('/app/product/list', 'AppProductListPublic', 'app/product/list.vue', {
+    hidden: true,
+  }),
   createPreloadRoute(
     '/app/product/detail/:id',
     'AppProductDetailPublic',
@@ -62,51 +54,25 @@ export const constantRoutes: RouteRecordRaw[] = [
     'app/product/category.vue',
     { hidden: true }
   ),
-  createPreloadRoute(
-    '/app/product/search',
-    'AppProductSearchPublic',
-    'app/product/search.vue',
-    { hidden: true }
-  ),
+  createPreloadRoute('/app/product/search', 'AppProductSearchPublic', 'app/product/search.vue', {
+    hidden: true,
+  }),
   // 购物车路由
-  createPreloadRoute(
-    '/app/cart',
-    'AppCart',
-    'app/cart/index.vue',
-    { hidden: true }
-  ),
+  createPreloadRoute('/app/cart', 'AppCart', 'app/cart/index.vue', { hidden: true }),
   // 用户登录注册路由
-  createPreloadRoute(
-    '/app/user/login',
-    'AppUserLogin',
-    'app/user/login.vue',
-    { hidden: true }
-  ),
-  createPreloadRoute(
-    '/app/user/register',
-    'AppUserRegister',
-    'app/user/register.vue',
-    { hidden: true }
-  ),
+  createPreloadRoute('/app/user/login', 'AppUserLogin', 'app/user/login.vue', { hidden: true }),
+  createPreloadRoute('/app/user/register', 'AppUserRegister', 'app/user/register.vue', {
+    hidden: true,
+  }),
   // 订单相关路由
-  createPreloadRoute(
-    '/app/order/confirm',
-    'AppOrderConfirm',
-    'app/order/confirm.vue',
-    { hidden: true }
-  ),
-  createPreloadRoute(
-    '/app/order/list',
-    'AppOrderList',
-    'app/order/list.vue',
-    { hidden: true }
-  ),
-  createPreloadRoute(
-    '/app/order/detail/:id',
-    'AppOrderDetail',
-    'app/order/detail.vue',
-    { hidden: true, props: true }
-  ),
+  createPreloadRoute('/app/order/confirm', 'AppOrderConfirm', 'app/order/confirm.vue', {
+    hidden: true,
+  }),
+  createPreloadRoute('/app/order/list', 'AppOrderList', 'app/order/list.vue', { hidden: true }),
+  createPreloadRoute('/app/order/detail/:id', 'AppOrderDetail', 'app/order/detail.vue', {
+    hidden: true,
+    props: true,
+  }),
 ]
 
 // 动态导入路由模块
@@ -201,11 +167,11 @@ export const asyncRoutes: RouteRecordRaw[] = [
     ]),
   },
   // 用户管理
-  ...await getUserRoutes(),
+  ...(await getUserRoutes()),
   // 权限管理
-  ...await getPermissionRoutes(),
+  ...(await getPermissionRoutes()),
   // 数据统计
-  ...await getStatsRoutes(),
+  ...(await getStatsRoutes()),
   // 404路由必须放在最后
   { path: '/:pathMatch(.*)*', redirect: '/404', meta: { hidden: true } },
 ]

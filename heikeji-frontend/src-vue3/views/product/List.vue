@@ -269,7 +269,7 @@ const loadProducts = async () => {
   try {
     searchParams.pageNum = pagination.currentPage
     searchParams.pageSize = pagination.pageSize
-    
+
     const res = await getProductList(searchParams)
     products.value = res.data.list
     total.value = res.data.total
@@ -299,7 +299,7 @@ const loadCategories = async () => {
     // 这里应该调用获取分类的API
     // const res = await getCategories()
     // categories.value = res.data
-    
+
     // 模拟数据
     categories.value = [
       { id: '1', name: '数码电器' },
@@ -343,9 +343,9 @@ const handleExport = async () => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    
+
     const res = await exportProducts(searchParams)
-    
+
     // 创建下载链接
     const blob = new Blob([res.data])
     const url = window.URL.createObjectURL(blob)
@@ -354,7 +354,7 @@ const handleExport = async () => {
     link.download = `商品列表_${new Date().toLocaleDateString()}.xlsx`
     link.click()
     window.URL.revokeObjectURL(url)
-    
+
     ElMessage.success('导出成功')
   } catch (error) {
     if (error !== 'cancel') {
@@ -387,16 +387,12 @@ const handleTableAction = async (action: string, row: Product) => {
 
 const handleDelete = async (row: Product) => {
   try {
-    await ElMessageBox.confirm(
-      `确定要删除商品"${row.name}"吗？此操作不可恢复！`,
-      '警告',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
-    
+    await ElMessageBox.confirm(`确定要删除商品"${row.name}"吗？此操作不可恢复！`, '警告', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
     await deleteProduct(row.id)
     ElMessage.success('删除成功')
     loadProducts()

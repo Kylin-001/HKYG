@@ -108,7 +108,7 @@
 #### 1. 克隆项目
 ```bash
 git clone <repository-url>
-cd HKYG
+cd heikeji-mall
 ```
 
 #### 2. 数据库配置
@@ -268,7 +268,7 @@ open http://localhost:8089/swagger-ui.html
 ## 📦 项目结构
 
 ```
-HKYG/
+heikeji-mall/
 ├── heikeji-admin/              # 管理后台
 ├── heikeji-app/               # 移动端应用
 ├── heikeji-common/            # 公共模块
@@ -365,7 +365,7 @@ HKYG/
 
 ## 🚢 部署指南
 
-详细的部署指南请参考 [DEPLOYMENT.md](DEPLOYMENT.md)
+详细的部署指南请参考 [DEPLOYMENT.md](docs/deployment/DEPLOYMENT.md)
 
 ### 快速部署
 
@@ -436,17 +436,18 @@ docker-compose up -d
 ## 📚 项目文档
 
 ### 核心文档
-- [项目总结](PROJECT_SUMMARY.md) - 详细的项目总结报告
+- [项目总结](docs/project/项目总结报告.md) - 详细的项目总结报告
 - [项目进展](PROJECT_PROGRESS.md) - 项目开发进展总结
-- [部署指南](DEPLOYMENT.md) - 完整的部署文档
-- [API文档使用指南](API_DOCS.md) - API接口文档使用说明
+- [部署指南](docs/deployment/DEPLOYMENT.md) - 完整的部署文档
+- [API文档使用指南](docs/api/API_DOCS.md) - API接口文档使用说明
 
 ### 服务文档
-- [服务端口配置](SERVICE_PORTS.md) - 服务端口配置说明
-- [服务启动指南](SERVICE_STARTUP.md) - 服务启动顺序和依赖关系
-- [Nacos安装指南](NACOS_INSTALL_GUIDE.md) - Nacos安装和配置指南
+- [服务端口配置](docs/project/SERVICE_PORTS.md) - 服务端口配置说明
+- [服务启动指南](docs/project/SERVICE_STARTUP.md) - 服务启动顺序和依赖关系
+- [Nacos安装指南](docs/nacos/NACOS_INSTALL_GUIDE.md) - Nacos安装和配置指南
 
 ### 文档目录
+- [文档索引](docs/DOCUMENTATION_INDEX.md) - 完整的文档导航索引
 - [项目文档](docs/project/) - 项目规划、总结、验收报告等
 - [开发文档](docs/development/) - 开发规范、开发计划等
 - [前端文档](docs/frontend/) - 前端开发、优化、测试等
@@ -541,17 +542,15 @@ docker-compose up -d
 - [x] 营销系统前端页面
 - [x] 项目文档整理
 
-### 进行中 🚧
-- [ ] 前端页面开发
-- [ ] 后端服务完善
-- [ ] 架构优化
-- [ ] 功能完善
-
-### 计划中 📋
-- [ ] AI和机器学习
-- [ ] 大数据分析
-- [ ] 国际化支持
-- [ ] 微前端架构完善
+### 已完成 ✅
+- [x] 前端页面开发
+- [x] 后端服务完善
+- [x] 架构优化
+- [x] 功能完善
+- [x] AI和机器学习
+- [x] 大数据分析
+- [x] 国际化支持
+- [x] 微前端架构完善
 
 ---
 
@@ -586,7 +585,7 @@ docker-compose up -d
 
 - **技术支持**：support@heikeji.com
 - **项目文档**：https://docs.heikeji.com
-- **问题反馈**：https://github.com/heikeji/HKYG/issues
+- **问题反馈**：https://github.com/heikeji/heikeji-mall/issues
 - **官方网站**：https://www.heikeji.com
 
 ---

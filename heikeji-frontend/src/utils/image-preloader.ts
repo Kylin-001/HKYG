@@ -24,7 +24,7 @@ export class ImagePreloader {
   private images: string[] = []
   private loadedCount = 0
   private options: ImagePreloadOptions = {
-    priority: 'idle'
+    priority: 'idle',
   }
 
   /**
@@ -56,14 +56,14 @@ export class ImagePreloader {
     const loadImage = (src: string): Promise<HTMLImageElement> => {
       return new Promise((resolve, reject) => {
         const img = new Image()
-        
+
         img.onload = () => {
           this.loadedCount++
           this.options.onComplete?.(src, img)
           resolve(img)
         }
 
-        img.onerror = (error) => {
+        img.onerror = error => {
           this.loadedCount++
           this.options.onError?.(src, error)
           resolve(img) // 即使失败也继续加载其他图片
@@ -76,11 +76,13 @@ export class ImagePreloader {
     // 根据优先级选择加载策略
     if (this.options.priority === 'high') {
       // 高优先级：立即加载所有图片
-      this.images.forEach(src => loadImage(src).then(() => {
-        if (this.loadedCount === this.images.length) {
-          this.options.onAllComplete?.()
-        }
-      }))
+      this.images.forEach(src =>
+        loadImage(src).then(() => {
+          if (this.loadedCount === this.images.length) {
+            this.options.onAllComplete?.()
+          }
+        })
+      )
     } else {
       // 低优先级：使用requestIdleCallback在浏览器空闲时加载
       if ('requestIdleCallback' in window) {
@@ -102,7 +104,7 @@ export class ImagePreloader {
         // 不支持requestIdleCallback时，使用setTimeout分批加载
         let index = 0
         const batchSize = 3 // 每次加载3张图片
-        
+
         const loadBatch = () => {
           const batch = this.images.slice(index, index + batchSize)
           if (batch.length === 0) {
@@ -115,7 +117,7 @@ export class ImagePreloader {
             setTimeout(loadBatch, 100)
           })
         }
-        
+
         setTimeout(loadBatch, 500)
       }
     }
@@ -165,7 +167,7 @@ export const preloadImages = (images: string[], options?: ImagePreloadOptions): 
  */
 export const extractImagesFromDOM = (element: HTMLElement): string[] => {
   const images: string[] = []
-  
+
   // 提取img标签的src
   const imgElements = element.querySelectorAll('img')
   imgElements.forEach(img => {
@@ -176,7 +178,7 @@ export const extractImagesFromDOM = (element: HTMLElement): string[] => {
 
   // 提取CSS背景图片
   const computedStyle = getComputedStyle(element)
-  const backgroundImage = computedStyle.backgroundImage
+  const { backgroundImage } = computedStyle
   if (backgroundImage && backgroundImage !== 'none') {
     const matches = backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/g)
     if (matches) {

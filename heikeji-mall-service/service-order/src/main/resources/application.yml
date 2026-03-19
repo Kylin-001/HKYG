@@ -22,14 +22,15 @@ spring:
     allow-bean-definition-overriding: true
   application:
     name: service-order
-  # 禁用Nacos服务发现和配置检查，避免启动错误
+  # Nacos服务发现配置
   cloud:
     nacos:
       discovery:
-        enabled: false
+        enabled: true
         server-addr: localhost:8848
         namespace: public
         ip: 127.0.0.1
+        cluster-name: DEFAULT
       config:
         import-check:
           enabled: false
@@ -66,7 +67,7 @@ spring:
   # Redis配置
   data:
     redis:
-      host: localhost
+      host: 192.168.186.128
       port: 6379
       password: Redis@hkyg
       database: 0

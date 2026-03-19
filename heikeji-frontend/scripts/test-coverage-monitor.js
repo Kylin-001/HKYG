@@ -33,14 +33,14 @@ function ensureDirectoryExists(dir) {
 function runTestCoverage() {
   try {
     console.log('🔍 运行测试覆盖率分析...')
-    
+
     const testCommand = 'npm run test:coverage'
-    const output = execSync(testCommand, { 
+    const output = execSync(testCommand, {
       encoding: 'utf8',
       stdio: 'pipe',
-      cwd: config.projectDir
+      cwd: config.projectDir,
     })
-    
+
     console.log('✅ 测试覆盖率分析完成')
     return true
   } catch (error) {
@@ -54,12 +54,12 @@ function runTestCoverage() {
  */
 function parseCoverageData() {
   const coverageFile = path.join(config.coverageDir, 'coverage-summary.json')
-  
+
   if (!fs.existsSync(coverageFile)) {
     console.error('❌ 覆盖率报告文件不存在:', coverageFile)
     return null
   }
-  
+
   try {
     const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'))
     return coverageData
@@ -74,7 +74,7 @@ function parseCoverageData() {
  */
 function calculateOverallCoverage(coverageData) {
   if (!coverageData) return null
-  
+
   let totalLines = 0
   let coveredLines = 0
   let totalFunctions = 0
@@ -83,31 +83,31 @@ function calculateOverallCoverage(coverageData) {
   let coveredBranches = 0
   let totalStatements = 0
   let coveredStatements = 0
-  
+
   for (const filePath in coverageData) {
     const fileData = coverageData[filePath]
-    
+
     if (fileData.lines) {
       totalLines += fileData.lines.total
       coveredLines += fileData.lines.covered
     }
-    
+
     if (fileData.functions) {
       totalFunctions += fileData.functions.total
       coveredFunctions += fileData.functions.covered
     }
-    
+
     if (fileData.branches) {
       totalBranches += fileData.branches.total
       coveredBranches += fileData.branches.covered
     }
-    
+
     if (fileData.statements) {
       totalStatements += fileData.statements.total
       coveredStatements += fileData.statements.covered
     }
   }
-  
+
   return {
     lines: {
       total: totalLines,
@@ -139,7 +139,7 @@ function loadHistory() {
   if (!fs.existsSync(config.historyFile)) {
     return []
   }
-  
+
   try {
     const historyData = fs.readFileSync(config.historyFile, 'utf8')
     return JSON.parse(historyData)
@@ -158,7 +158,7 @@ function saveHistory(history) {
     if (history.length > config.maxHistoryEntries) {
       history = history.slice(-config.maxHistoryEntries)
     }
-    
+
     fs.writeFileSync(config.historyFile, JSON.stringify(history, null, 2), 'utf8')
     console.log('✅ 保存历史记录成功')
   } catch (error) {
@@ -174,23 +174,23 @@ function generateTrendReport(history) {
     console.log('⚠️  历史记录不足，无法生成趋势报告')
     return
   }
-  
+
   const latest = history[history.length - 1]
   const previous = history[history.length - 2]
-  
+
   const trend = {
     lines: latest.coverage.lines.percentage - previous.coverage.lines.percentage,
     functions: latest.coverage.functions.percentage - previous.coverage.functions.percentage,
     branches: latest.coverage.branches.percentage - previous.coverage.branches.percentage,
     statements: latest.coverage.statements.percentage - previous.coverage.statements.percentage,
   }
-  
+
   console.log('\n📈 覆盖率趋势报告:')
   console.log(`   行覆盖率: ${trend.lines >= 0 ? '+' : ''}${trend.lines.toFixed(2)}%`)
   console.log(`   函数覆盖率: ${trend.functions >= 0 ? '+' : ''}${trend.functions.toFixed(2)}%`)
   console.log(`   分支覆盖率: ${trend.branches >= 0 ? '+' : ''}${trend.branches.toFixed(2)}%`)
   console.log(`   语句覆盖率: ${trend.statements >= 0 ? '+' : ''}${trend.statements.toFixed(2)}%`)
-  
+
   // 生成HTML趋势报告
   generateHtmlTrendReport(history)
 }
@@ -200,7 +200,7 @@ function generateTrendReport(history) {
  */
 function generateHtmlTrendReport(history) {
   ensureDirectoryExists(config.reportDir)
-  
+
   const htmlReport = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -313,7 +313,9 @@ function generateHtmlTrendReport(history) {
                 </tr>
             </thead>
             <tbody>
-                ${history.map(entry => `
+                ${history
+                  .map(
+                    entry => `
                 <tr>
                     <td>${new Date(entry.timestamp).toLocaleString()}</td>
                     <td>${entry.coverage.lines.percentage.toFixed(2)}%</td>
@@ -321,7 +323,9 @@ function generateHtmlTrendReport(history) {
                     <td>${entry.coverage.branches.percentage.toFixed(2)}%</td>
                     <td>${entry.coverage.statements.percentage.toFixed(2)}%</td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </tbody>
         </table>
     </div>
@@ -391,7 +395,7 @@ function generateHtmlTrendReport(history) {
 </body>
 </html>
 `
-  
+
   const reportPath = path.join(config.reportDir, 'coverage-trend.html')
   try {
     fs.writeFileSync(reportPath, htmlReport, 'utf8')
@@ -406,62 +410,69 @@ function generateHtmlTrendReport(history) {
  */
 function main() {
   console.log('🚀 开始测试覆盖率监控...')
-  
+
   // 确保目录存在
   ensureDirectoryExists(config.coverageDir)
   ensureDirectoryExists(config.reportDir)
-  
+
   // 运行测试覆盖率
   const testSuccess = runTestCoverage()
   if (!testSuccess) {
     console.log('⚠️  测试运行失败，将尝试解析现有覆盖率数据')
   }
-  
+
   // 解析覆盖率数据
   const coverageData = parseCoverageData()
   if (!coverageData) {
     console.error('❌ 无法获取覆盖率数据，退出')
     process.exit(1)
   }
-  
+
   // 计算总体覆盖率
   const overallCoverage = calculateOverallCoverage(coverageData)
-  
+
   // 加载历史记录
   const history = loadHistory()
-  
+
   // 添加新记录
   const newEntry = {
     timestamp: new Date().toISOString(),
     coverage: overallCoverage,
   }
-  
+
   history.push(newEntry)
-  
+
   // 保存历史记录
   saveHistory(history)
-  
+
   // 显示当前覆盖率
   console.log('\n📊 当前测试覆盖率:')
-  console.log(`   行覆盖率: ${overallCoverage.lines.percentage.toFixed(2)}% (${overallCoverage.lines.covered}/${overallCoverage.lines.total})`)
-  console.log(`   函数覆盖率: ${overallCoverage.functions.percentage.toFixed(2)}% (${overallCoverage.functions.covered}/${overallCoverage.functions.total})`)
-  console.log(`   分支覆盖率: ${overallCoverage.branches.percentage.toFixed(2)}% (${overallCoverage.branches.covered}/${overallCoverage.branches.total})`)
-  console.log(`   语句覆盖率: ${overallCoverage.statements.percentage.toFixed(2)}% (${overallCoverage.statements.covered}/${overallCoverage.statements.total})`)
-  
+  console.log(
+    `   行覆盖率: ${overallCoverage.lines.percentage.toFixed(2)}% (${overallCoverage.lines.covered}/${overallCoverage.lines.total})`
+  )
+  console.log(
+    `   函数覆盖率: ${overallCoverage.functions.percentage.toFixed(2)}% (${overallCoverage.functions.covered}/${overallCoverage.functions.total})`
+  )
+  console.log(
+    `   分支覆盖率: ${overallCoverage.branches.percentage.toFixed(2)}% (${overallCoverage.branches.covered}/${overallCoverage.branches.total})`
+  )
+  console.log(
+    `   语句覆盖率: ${overallCoverage.statements.percentage.toFixed(2)}% (${overallCoverage.statements.covered}/${overallCoverage.statements.total})`
+
   // 生成趋势报告
   generateTrendReport(history)
-  
+
   console.log('\n✅ 测试覆盖率监控完成！')
   console.log(`📄 查看HTML趋势报告: ${path.join(config.reportDir, 'coverage-trend.html')}`)
-  
+
   // 检查覆盖率是否达标
   const threshold = 70
-  const isBelowThreshold = 
+  const isBelowThreshold =
     overallCoverage.lines.percentage < threshold ||
     overallCoverage.functions.percentage < threshold ||
     overallCoverage.branches.percentage < threshold ||
     overallCoverage.statements.percentage < threshold
-  
+
   if (isBelowThreshold) {
     console.log(`⚠️  警告: 测试覆盖率低于${threshold}%，请增加测试用例`)
     process.exit(1)

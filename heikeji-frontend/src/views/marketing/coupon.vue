@@ -244,6 +244,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import * as marketingApi from '@/api/marketing'
 
 // 类型定义
 interface CouponItem {
@@ -376,31 +377,21 @@ const rules = {
 const fetchCoupons = async () => {
   loading.value = true
   try {
-    // 模拟数据
-    coupons.value = [
-      {
-        id: 1,
-        name: '满100减20',
-        type: 'cash',
-        value: 20,
-        minAmount: 100,
-        totalCount: 1000,
-        usedCount: 500,
-        startTime: '2024-01-01 00:00:00',
-        endTime: '2024-12-31 23:59:59',
-        status: 1,
-        description: '满100元即可使用'
-      },
-      {
-        id: 2,
-        name: '9折优惠券',
-        type: 'discount',
-        value: 9.0,
-        minAmount: 0,
-        totalCount: 500,
-        usedCount: 200,
-        startTime: '2024-01-01 00:00:00',
-        endTime: '2024-06-30 23:59:59',
+    const res = await marketingApi.getCouponList({
+      keyword: searchKeyword.value,
+      status: statusFilter.value,
+      type: typeFilter.value,
+      page: pagination.currentPage,
+      size: pagination.pageSize,
+    })
+    coupons.value = res.data.records || []
+    pagination.total = res.data.total || 0
+  } catch (error) {
+    ElMessage.error('获取优惠券列表失败')
+  } finally {
+    loading.value = false
+  }
+}
         status: 1,
         description: '全场商品9折优惠'
       }
@@ -460,6 +451,7 @@ const confirmDelete = (row: CouponItem) => {
 // 删除优惠券
 const handleDelete = async (row: CouponItem) => {
   try {
+    await marketingApi.deleteCoupon(row.id)
     ElMessage.success('删除成功')
     fetchCoupons()
   } catch (error) {
@@ -483,19 +475,27 @@ const confirmBatchSend = () => {
 }
 
 // 表单提交
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!formRef.value) return
-  formRef.value.validate((valid: boolean) => {
-    if (valid) {
-      submitLoading.value = true
-      setTimeout(() => {
-        submitLoading.value = false
-        dialogVisible.value = false
-        ElMessage.success(isEdit.value ? '更新成功' : '添加成功')
-        fetchCoupons()
-      }, 1000)
+  try {
+    await formRef.value.validate()
+    submitLoading.value = true
+    
+    if (isEdit.value) {
+      await marketingApi.updateCoupon(formData)
+      ElMessage.success('更新成功')
+    } else {
+      await marketingApi.addCoupon(formData)
+      ElMessage.success('添加成功')
     }
-  })
+    
+    dialogVisible.value = false
+    fetchCoupons()
+  } catch (error) {
+    ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 // 重置表单

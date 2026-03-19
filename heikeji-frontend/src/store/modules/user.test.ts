@@ -21,7 +21,7 @@ describe('User Store', () => {
   it('should set token correctly', () => {
     const store = useUserStore()
     const testToken = testUserData.token
-    
+
     store.setToken(testToken)
     expect(store.token).toBe(testToken)
   })
@@ -34,9 +34,9 @@ describe('User Store', () => {
       nickname: '测试用户',
       avatar: 'http://example.com/avatar.jpg',
       email: 'test@example.com',
-      phone: '13800138000'
+      phone: '13800138000',
     }
-    
+
     store.setUserInfo(testUserInfo)
     expect(store.userInfo).toEqual(testUserInfo)
   })
@@ -44,20 +44,20 @@ describe('User Store', () => {
   it('should set permissions correctly', () => {
     const store = useUserStore()
     const testPermissions = ['user:view', 'user:add', 'user:edit']
-    
+
     store.setPermissions(testPermissions)
     expect(store.permissions).toEqual(testPermissions)
   })
 
   it('should clear user state correctly', () => {
     const store = useUserStore()
-    
+
     store.setToken('test-token')
     store.setUserInfo({ userId: 1, username: 'test' })
     store.setPermissions(['user:view'])
-    
+
     store.clearUser()
-    
+
     expect(store.token).toBe('')
     expect(store.userInfo).toBeNull()
     expect(store.permissions).toEqual([])
@@ -66,7 +66,7 @@ describe('User Store', () => {
   it('should check if user has permission', () => {
     const store = useUserStore()
     store.setPermissions(['user:view', 'user:add', 'user:edit'])
-    
+
     expect(store.hasPermission('user:view')).toBe(true)
     expect(store.hasPermission('user:delete')).toBe(false)
   })
@@ -74,7 +74,7 @@ describe('User Store', () => {
   it('should check if user has any of the permissions', () => {
     const store = useUserStore()
     store.setPermissions(['user:view', 'user:add'])
-    
+
     expect(store.hasAnyPermission(['user:delete', 'user:view'])).toBe(true)
     expect(store.hasAnyPermission(['user:delete', 'user:edit'])).toBe(false)
   })

@@ -45,7 +45,7 @@
             :type="getTimelineType(level)"
             :size="getTimelineSize(level)"
           >
-            <div class="level-card-item" :class="{ 'current': currentLevel?.id === level.id }">
+            <div class="level-card-item" :class="{ current: currentLevel?.id === level.id }">
               <div class="level-header">
                 <div class="level-title">
                   <span class="level-name">{{ level.name }}</span>
@@ -147,20 +147,20 @@ const checkUpgrade = async () => {
   }
 }
 
-const getTimelineType = (level) => {
+const getTimelineType = level => {
   if (!currentLevel.value) return 'info'
   if (level.id === currentLevel.value.id) return 'primary'
   if (level.minPoints > currentLevel.value.minPoints) return 'success'
   return 'info'
 }
 
-const getTimelineSize = (level) => {
+const getTimelineSize = level => {
   if (!currentLevel.value) return 'normal'
   if (level.id === currentLevel.value.id) return 'large'
   return 'normal'
 }
 
-const parsePrivileges = (privileges) => {
+const parsePrivileges = privileges => {
   try {
     return JSON.parse(privileges)
   } catch {

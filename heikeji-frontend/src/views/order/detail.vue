@@ -15,7 +15,7 @@
       <!-- 加载中状态 -->
       <el-row v-if="loading" type="flex" justify="center" align="middle" style="height: 300px">
         <el-col>
-          <el-loading-spinner type="snake" :size="40" />
+          <div class="custom-loading-spinner"></div>
           <p style="margin-top: 20px; text-align: center">加载中...</p>
         </el-col>
       </el-row>
@@ -1381,6 +1381,26 @@ async function handleExport() {
 
   .timeline-line {
     left: 20px;
+  }
+}
+
+/* 自定义加载动画 */
+.custom-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 

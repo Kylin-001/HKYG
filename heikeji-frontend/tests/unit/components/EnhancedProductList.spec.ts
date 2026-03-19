@@ -3,10 +3,8 @@ import { shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import ElementPlus from 'element-plus'
 import EnhancedProductList from '@/components/EnhancedProductList.vue'
-import VirtualTable from '@/components/VirtualTable.vue'
 
 // Mock dependencies
-vi.mock('@/components/VirtualTable.vue')
 vi.mock('element-plus', async importOriginal => {
   const actual = await importOriginal<typeof import('element-plus')>()
   return {

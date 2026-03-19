@@ -314,11 +314,7 @@
     </el-card>
 
     <!-- 图片预览对话框 -->
-    <el-dialog
-      v-model="previewDialogVisible"
-      :show-close="false"
-      class="image-preview-dialog"
-    >
+    <el-dialog v-model="previewDialogVisible" :show-close="false" class="image-preview-dialog">
       <img :src="previewImageSrc" class="preview-image" alt="预览图片" />
       <span class="el-dialog__close" @click="previewDialogVisible = false">×</span>
     </el-dialog>
@@ -453,7 +449,7 @@ const rules: FormRules = {
 const hasSpecCombinations = computed(() => {
   return (
     formData.specs.length > 0 &&
-    formData.specs.every((spec) => spec.values.length > 0) &&
+    formData.specs.every(spec => spec.values.length > 0) &&
     formData.skus.length > 0
   )
 })
@@ -552,13 +548,13 @@ const fetchProductDetail = () => {
 
 const getCombinations = (arrays: string[][]): string[][] => {
   if (arrays.length === 0) return [[]]
-  if (arrays.length === 1) return arrays[0].map((item) => [item])
+  if (arrays.length === 1) return arrays[0].map(item => [item])
 
   const result: string[][] = []
   const rest = getCombinations(arrays.slice(1))
 
-  arrays[0].forEach((item) => {
-    rest.forEach((combination) => {
+  arrays[0].forEach(item => {
+    rest.forEach(combination => {
       result.push([item].concat(combination))
     })
   })
@@ -567,15 +563,15 @@ const getCombinations = (arrays: string[][]): string[][] => {
 }
 
 const generateSkuCombinations = () => {
-  const specs = formData.specs.filter((spec) => spec.values.length > 0)
+  const specs = formData.specs.filter(spec => spec.values.length > 0)
   if (specs.length === 0) {
     formData.skus = []
     return
   }
 
-  const combinations = getCombinations(specs.map((spec) => spec.values))
+  const combinations = getCombinations(specs.map(spec => spec.values))
 
-  formData.skus = combinations.map((combo) => ({
+  formData.skus = combinations.map(combo => ({
     id: Date.now() + Math.random(),
     specs: combo,
     price: formData.price,
@@ -654,7 +650,7 @@ const handleSubmit = () => {
 const confirmSave = async () => {
   if (!formDataRef.value) return
 
-  await formDataRef.value.validate((valid) => {
+  await formDataRef.value.validate(valid => {
     if (valid) {
       setTimeout(() => {
         ElMessage.success('商品保存成功！')

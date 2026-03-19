@@ -58,8 +58,7 @@ export const analyticsApi = {
   getPaymentMethodDistribution: (timeRange: 'day' | 'week' | 'month' = 'day') =>
     request.get('/api/analytics/payment-methods', { timeRange }),
 
-  getConversionFunnel: () =>
-    request.get('/api/analytics/conversion-funnel'),
+  getConversionFunnel: () => request.get('/api/analytics/conversion-funnel'),
 
   getRecommendationStats: (timeRange: 'day' | 'week' | 'month' = 'day') =>
     request.get('/api/analytics/recommendation-stats', { timeRange }),
@@ -76,8 +75,7 @@ export const analyticsApi = {
   getRecommendationReason: (userId: number, productId: number) =>
     request.get('/api/analytics/recommendation/reason', { userId, productId }),
 
-  getUserSegmentation: () =>
-    request.get('/api/analytics/user-segmentation'),
+  getUserSegmentation: () => request.get('/api/analytics/user-segmentation'),
 
   getChurnPrediction: (userId: number) =>
     request.get('/api/analytics/churn-prediction', { userId }),

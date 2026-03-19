@@ -14,7 +14,7 @@
       <el-icon :size="18"><DataAnalysis /></el-icon>
       <span class="header-title">性能监控</span>
       <span class="performance-score" :class="scoreClass">{{ performanceScore }}</span>
-      <el-icon :size="16"><ChevronDown v-if="isExpanded" /><ChevronUp v-else /></el-icon>
+      <el-icon :size="16"><ArrowDown v-if="isExpanded" /><ArrowUp v-else /></el-icon>
     </div>
 
     <div v-if="isExpanded" class="monitor-content">
@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from 'vue'
-import { DataAnalysis, ChevronDown, ChevronUp, CircleCheck } from '@element-plus/icons-vue'
+import { DataAnalysis, ArrowDown, ArrowUp, CircleCheck } from '@element-plus/icons-vue'
 
 // 定义接口
 interface PerformanceMetrics {

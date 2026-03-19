@@ -705,7 +705,7 @@ const viewOrderDetail = (order: Order) => {
 
 // 生成订单状态流
 const generateStatusFlow = (order: Order): StatusFlowStep[] => {
-  const statusMap: Record<string, { title: string, icon: string, desc: string }> = {
+  const statusMap: Record<string, { title: string; icon: string; desc: string }> = {
     待接单: { title: '待接单', icon: 'el-icon-time', desc: '等待商家接单' },
     已接单: { title: '已接单', icon: 'el-icon-check', desc: '商家已接单' },
     制作中: { title: '制作中', icon: 'el-icon-food', desc: '正在制作食物' },

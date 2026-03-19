@@ -16,8 +16,8 @@ spring:
   cloud:
     nacos:
       discovery:
-        enabled: false
-        server-addr: localhost:8848
+        enabled: true
+        server-addr: 192.168.186.128:8848
         namespace: public
         ip: 127.0.0.1
       config:

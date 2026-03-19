@@ -1,9 +1,9 @@
 import request from '@/utils/request'
-import type { 
-  Order, 
-  OrderListResponse, 
-  OrderSearchParams, 
-  OrderStats, 
+import type {
+  Order,
+  OrderListResponse,
+  OrderSearchParams,
+  OrderStats,
   OrderForm,
   Payment,
   PaymentParams,
@@ -13,7 +13,7 @@ import type {
   Delivery,
   DeliveryForm,
   OrderReview,
-  OrderReviewForm
+  OrderReviewForm,
 } from '@/types/order'
 
 // 获取订单列表

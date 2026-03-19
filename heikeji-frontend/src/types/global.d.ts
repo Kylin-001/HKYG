@@ -141,9 +141,13 @@ declare interface Window {
     warning: (options: { title: string; message: string }) => void
     info: (options: { title: string; message: string }) => void
   }
-  $confirm?: (message: string, title?: string, options?: {
-    confirmButtonText?: string
-    cancelButtonText?: string
-    type?: 'success' | 'warning' | 'info' | 'error'
-  }) => Promise<void>
+  $confirm?: (
+    message: string,
+    title?: string,
+    options?: {
+      confirmButtonText?: string
+      cancelButtonText?: string
+      type?: 'success' | 'warning' | 'info' | 'error'
+    }
+  ) => Promise<void>
 }

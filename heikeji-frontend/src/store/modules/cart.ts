@@ -125,7 +125,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
     error.value = null
     try {
-      await cartApi.deleteCartItems([cartId])
+      await cartApi.deleteCartItem({ cartItemIds: [cartId] })
       // 重新获取购物车列表
       await fetchCartList()
     } catch (err: any) {
@@ -144,7 +144,7 @@ export const useCartStore = defineStore('cart', () => {
     try {
       const selectedIds = products.value.filter(item => item.checked).map(item => item.id)
       if (selectedIds.length > 0) {
-        await cartApi.deleteCartItems(selectedIds)
+        await cartApi.deleteCartItem({ cartItemIds: selectedIds })
         // 重新获取购物车列表
         await fetchCartList()
       }
@@ -178,7 +178,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
     error.value = null
     try {
-      await cartApi.checkCartItems({ cartIds: [cartId], checked })
+      await cartApi.toggleCartItemCheck({ cartItemId: cartId, isChecked: checked })
       // 重新获取购物车列表
       await fetchCartList()
     } catch (err: any) {
@@ -195,7 +195,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
     error.value = null
     try {
-      await cartApi.checkAllCartItems(checked)
+      await cartApi.toggleCartItemCheckAll({ isChecked: checked })
       // 重新获取购物车列表
       await fetchCartList()
     } catch (err: any) {

@@ -353,8 +353,7 @@ onMounted(() => {
 
 // 方法
 const getDashboardData = () => store.getDashboardData()
-const updateStatus = (status: 'online' | 'offline') =>
-  store.updateStatus(status)
+const updateStatus = (status: 'online' | 'offline') => store.updateStatus(status)
 const getOrders = () => store.getOrders()
 const acceptOrderAction = (orderId: string) => store.acceptOrder(orderId)
 

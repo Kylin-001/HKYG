@@ -53,22 +53,10 @@
             >
               立即参与
             </el-button>
-            <el-button
-              v-else-if="!activity.isCompleted"
-              type="info"
-              size="small"
-              disabled
-            >
+            <el-button v-else-if="!activity.isCompleted" type="info" size="small" disabled>
               已参与
             </el-button>
-            <el-button
-              v-else
-              type="success"
-              size="small"
-              disabled
-            >
-              已完成
-            </el-button>
+            <el-button v-else type="success" size="small" disabled> 已完成 </el-button>
           </div>
         </div>
 
@@ -117,22 +105,10 @@
           >
             立即参与
           </el-button>
-          <el-button
-            v-else-if="!selectedActivity.isCompleted"
-            type="info"
-            size="large"
-            disabled
-          >
+          <el-button v-else-if="!selectedActivity.isCompleted" type="info" size="large" disabled>
             已参与
           </el-button>
-          <el-button
-            v-else
-            type="success"
-            size="large"
-            disabled
-          >
-            已完成
-          </el-button>
+          <el-button v-else type="success" size="large" disabled> 已完成 </el-button>
         </div>
       </div>
     </el-dialog>
@@ -182,7 +158,7 @@ const fetchActivities = async () => {
   }
 }
 
-const showActivityDetail = (activity) => {
+const showActivityDetail = activity => {
   selectedActivity.value = activity
   detailDialogVisible.value = true
 }
@@ -192,17 +168,13 @@ const handleCloseDetail = () => {
   detailDialogVisible.value = false
 }
 
-const handleParticipate = async (activity) => {
+const handleParticipate = async activity => {
   try {
-    await ElMessageBox.confirm(
-      `确定要参与活动"${activity.name}"吗？`,
-      '确认参与',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'info',
-      }
-    )
+    await ElMessageBox.confirm(`确定要参与活动"${activity.name}"吗？`, '确认参与', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'info',
+    })
 
     participating.value = true
     const userId = userStore.userId || 1
@@ -220,7 +192,7 @@ const handleParticipate = async (activity) => {
   }
 }
 
-const getActivityTypeTag = (type) => {
+const getActivityTypeTag = type => {
   const typeMap = {
     1: 'primary',
     2: 'success',
@@ -229,7 +201,7 @@ const getActivityTypeTag = (type) => {
   return typeMap[type] || 'info'
 }
 
-const getActivityTypeName = (type) => {
+const getActivityTypeName = type => {
   const typeMap = {
     1: '优惠券活动',
     2: '积分活动',
@@ -245,7 +217,7 @@ const formatTimeRange = (startTime, endTime) => {
   return `${start.toLocaleDateString('zh-CN')} - ${end.toLocaleDateString('zh-CN')}`
 }
 
-const formatConfig = (config) => {
+const formatConfig = config => {
   try {
     return JSON.stringify(JSON.parse(config), null, 2)
   } catch {

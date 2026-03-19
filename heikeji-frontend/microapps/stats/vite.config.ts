@@ -14,7 +14,7 @@ export default defineConfig({
       exposes: {
         './App': './src/App.vue',
         './router': './src/router/index.ts',
-        './store': './src/store/index.ts'
+        './store': './src/store/index.ts',
       },
       // 配置共享依赖
       shared: {

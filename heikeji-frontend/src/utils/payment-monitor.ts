@@ -41,9 +41,9 @@ export class PaymentMonitor {
   private alertThresholds: AlertThresholds = {
     failureRate: 0.05,
     averageDuration: 30000,
-    timeoutRate: 0.02
+    timeoutRate: 0.02,
   }
-  private reportingInterval: number | null = null
+  private reportingInterval: ReturnType<typeof setInterval> | null = null
   private static REPORTING_INTERVAL = 5 * 60 * 1000
 
   private constructor() {
@@ -65,7 +65,7 @@ export class PaymentMonitor {
       endTime: 0,
       duration: 0,
       status: 'processing',
-      attempts: 1
+      attempts: 1,
     })
 
     logger.info(`记录支付开始: ${orderId}, 方式: ${paymentMethod}`)
@@ -100,12 +100,11 @@ export class PaymentMonitor {
     const timeRanges = {
       hour: 60 * 60 * 1000,
       day: 24 * 60 * 60 * 1000,
-      week: 7 * 24 * 60 * 60 * 1000
+      week: 7 * 24 * 60 * 60 * 1000,
     }
 
     const startTime = now - timeRanges[timeRange]
-    const metrics = Array.from(this.paymentMetrics.values())
-      .filter(m => m.startTime >= startTime)
+    const metrics = Array.from(this.paymentMetrics.values()).filter(m => m.startTime >= startTime)
 
     const total = metrics.length
     const success = metrics.filter(m => m.status === 'success').length
@@ -123,7 +122,7 @@ export class PaymentMonitor {
       failureRate: total > 0 ? failed / total : 0,
       timeoutRate: total > 0 ? timeout / total : 0,
       averageDuration: total > 0 ? totalDuration / total : 0,
-      paymentMethodStats: this.getPaymentMethodStats(metrics)
+      paymentMethodStats: this.getPaymentStats(timeRange),
     }
 
     logger.info(`获取支付统计 [${timeRange}]:`, stats)
@@ -138,7 +137,7 @@ export class PaymentMonitor {
         type: 'high_failure_rate',
         severity: 'critical',
         message: `支付失败率过高: ${(stats.failureRate * 100).toFixed(2)}%`,
-        data: stats
+        data: stats,
       })
     }
 
@@ -147,7 +146,7 @@ export class PaymentMonitor {
         type: 'high_timeout_rate',
         severity: 'warning',
         message: `支付超时率过高: ${(stats.timeoutRate * 100).toFixed(2)}%`,
-        data: stats
+        data: stats,
       })
     }
 
@@ -156,7 +155,7 @@ export class PaymentMonitor {
         type: 'slow_payment',
         severity: 'warning',
         message: `平均支付时长过长: ${(stats.averageDuration / 1000).toFixed(2)}秒`,
-        data: stats
+        data: stats,
       })
     }
   }
@@ -167,9 +166,9 @@ export class PaymentMonitor {
     fetch('/api/monitoring/alert', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(alert)
+      body: JSON.stringify(alert),
     }).catch(error => {
       logger.error('发送告警失败:', error)
     })
@@ -183,7 +182,7 @@ export class PaymentMonitor {
     this.reportingInterval = setInterval(() => {
       const stats = this.getPaymentStats('hour')
       this.reportStats(stats)
-    }, this.REPORTING_INTERVAL)
+    }, PaymentMonitor.REPORTING_INTERVAL)
 
     logger.info('启动定期上报，间隔: 5分钟')
   }
@@ -192,14 +191,16 @@ export class PaymentMonitor {
     fetch('/api/monitoring/payment-stats', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(stats)
-    }).then(() => {
-      logger.info('上报统计数据成功')
-    }).catch(error => {
-      logger.error('上报统计数据失败:', error)
+      body: JSON.stringify(stats),
     })
+      .then(() => {
+        logger.info('上报统计数据成功')
+      })
+      .catch(error => {
+        logger.error('上报统计数据失败:', error)
+      })
   }
 
   clearOldMetrics(maxAge: number = 24 * 60 * 60 * 1000): void {

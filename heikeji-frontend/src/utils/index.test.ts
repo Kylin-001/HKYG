@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { formatDate, debounce, throttle } from '@/utils'
 
 describe('Utils', () => {
@@ -35,13 +35,13 @@ describe('Utils', () => {
     it('should debounce function calls', () => {
       const fn = vi.fn()
       const debouncedFn = debounce(fn, 300)
-      
+
       debouncedFn()
       debouncedFn()
       debouncedFn()
-      
+
       expect(fn).not.toHaveBeenCalled()
-      
+
       vi.advanceTimersByTime(300)
       expect(fn).toHaveBeenCalledTimes(1)
     })
@@ -59,14 +59,14 @@ describe('Utils', () => {
     it('should throttle function calls', () => {
       const fn = vi.fn()
       const throttledFn = throttle(fn, 300)
-      
+
       throttledFn()
       expect(fn).toHaveBeenCalledTimes(1)
-      
+
       vi.advanceTimersByTime(100)
       throttledFn()
       expect(fn).toHaveBeenCalledTimes(1)
-      
+
       vi.advanceTimersByTime(200)
       throttledFn()
       expect(fn).toHaveBeenCalledTimes(2)

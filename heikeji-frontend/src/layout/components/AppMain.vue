@@ -30,8 +30,8 @@ const transitionName = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/variables.scss';
-@import '@/styles/animations.scss';
+@use '@/styles/variables.scss' as *;
+@use '@/styles/animations.scss' as *;
 
 .app-main {
   min-height: calc(100vh - #{$header-height});

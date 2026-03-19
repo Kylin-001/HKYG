@@ -105,7 +105,7 @@
 
       <!-- 加载状态 -->
       <div v-if="loading" class="loading-container">
-        <el-loading-spinner></el-loading-spinner>
+        <div class="custom-loading-spinner"></div>
         <span>正在加载...</span>
       </div>
 
@@ -118,10 +118,7 @@
           @click="goToDetail(product.id)"
         >
           <div class="product-image">
-            <img
-              :src="product.mainImage || '/static/images/default-product.png'"
-              :alt="product.name"
-            />
+            <img :src="product.mainImage || '@/assets/images/error.svg'" :alt="product.name" />
           </div>
           <div class="product-info">
             <div class="product-name">{{ product.name }}</div>
@@ -133,7 +130,7 @@
 
       <!-- 无结果状态 -->
       <div v-else class="no-results">
-        <img src="/static/images/no-results.png" alt="无结果" />
+        <img src="@/assets/images/error.svg" alt="无结果" />
         <p>抱歉，没有找到相关商品</p>
         <el-button type="primary" @click="resetSearch">换个关键词试试</el-button>
       </div>
@@ -823,6 +820,25 @@ onMounted(() => {
 .cart-button:hover {
   transform: scale(1.1);
   background-color: #ff526b;
+}
+
+/* 自定义加载动画 */
+.custom-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 响应式调整 */

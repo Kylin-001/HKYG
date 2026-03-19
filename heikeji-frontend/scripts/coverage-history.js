@@ -5,8 +5,8 @@
  * 用于跟踪测试覆盖率的变化趋势
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 
 // 配置
 const config = {
@@ -14,120 +14,120 @@ const config = {
   coverageDir: path.join(__dirname, '../coverage'),
   reportsDir: path.join(__dirname, '../test-reports'),
   maxHistoryEntries: 100, // 最大历史记录条数
-};
+}
 
 // 确保目录存在
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true })
   }
 }
 
 // 读取当前测试覆盖率
 function readCurrentCoverage() {
   try {
-    const coverageFile = path.join(config.coverageDir, 'coverage-summary.json');
+    const coverageFile = path.join(config.coverageDir, 'coverage-summary.json')
     if (fs.existsSync(coverageFile)) {
-      const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+      const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'))
       return {
         timestamp: new Date().toISOString(),
         lines: coverageData.total.lines.pct,
         functions: coverageData.total.functions.pct,
         branches: coverageData.total.branches.pct,
         statements: coverageData.total.statements.pct,
-      };
+      }
     }
   } catch (error) {
-    console.error('读取当前测试覆盖率失败:', error);
+    console.error('读取当前测试覆盖率失败:', error)
   }
-  return null;
+  return null
 }
 
 // 读取历史覆盖率数据
 function readCoverageHistory() {
   try {
     if (fs.existsSync(config.coverageHistoryFile)) {
-      return JSON.parse(fs.readFileSync(config.coverageHistoryFile, 'utf8'));
+      return JSON.parse(fs.readFileSync(config.coverageHistoryFile, 'utf8'))
     }
   } catch (error) {
-    console.error('读取历史覆盖率数据失败:', error);
+    console.error('读取历史覆盖率数据失败:', error)
   }
-  return [];
+  return []
 }
 
 // 保存覆盖率历史
 function saveCoverageHistory(history) {
   try {
-    ensureDir(config.reportsDir);
-    fs.writeFileSync(config.coverageHistoryFile, JSON.stringify(history, null, 2));
-    return true;
+    ensureDir(config.reportsDir)
+    fs.writeFileSync(config.coverageHistoryFile, JSON.stringify(history, null, 2))
+    return true
   } catch (error) {
-    console.error('保存覆盖率历史失败:', error);
-    return false;
+    console.error('保存覆盖率历史失败:', error)
+    return false
   }
 }
 
 // 添加当前覆盖率到历史记录
 function addCoverageToHistory() {
-  const currentCoverage = readCurrentCoverage();
+  const currentCoverage = readCurrentCoverage()
   if (!currentCoverage) {
-    console.error('无法获取当前覆盖率数据');
-    return false;
+    console.error('无法获取当前覆盖率数据')
+    return false
   }
-  
-  const history = readCoverageHistory();
-  
+
+  const history = readCoverageHistory()
+
   // 添加当前覆盖率到历史记录
-  history.push(currentCoverage);
-  
+  history.push(currentCoverage)
+
   // 限制历史记录数量
   if (history.length > config.maxHistoryEntries) {
-    history.splice(0, history.length - config.maxHistoryEntries);
+    history.splice(0, history.length - config.maxHistoryEntries)
   }
-  
+
   // 保存历史记录
-  return saveCoverageHistory(history);
+  return saveCoverageHistory(history)
 }
 
 // 生成覆盖率趋势报告
 function generateCoverageTrendReport() {
-  const history = readCoverageHistory();
-  
+  const history = readCoverageHistory()
+
   if (history.length < 2) {
-    console.log('历史数据不足，无法生成趋势报告');
-    return null;
+    console.log('历史数据不足，无法生成趋势报告')
+    return null
   }
-  
-  const latest = history[history.length - 1];
-  const previous = history[history.length - 2];
-  
+
+  const latest = history[history.length - 1]
+  const previous = history[history.length - 2]
+
   // 计算变化
-  const linesChange = latest.lines - previous.lines;
-  const functionsChange = latest.functions - previous.functions;
-  const branchesChange = latest.branches - previous.branches;
-  const statementsChange = latest.statements - previous.statements;
-  
+  const linesChange = latest.lines - previous.lines
+  const functionsChange = latest.functions - previous.functions
+  const branchesChange = latest.branches - previous.branches
+  const statementsChange = latest.statements - previous.statements
+
   // 计算平均变化率
-  let avgLinesChange = 0;
-  let avgFunctionsChange = 0;
-  let avgBranchesChange = 0;
-  let avgStatementsChange = 0;
-  
+  let avgLinesChange = 0
+  let avgFunctionsChange = 0
+  let avgBranchesChange = 0
+  let avgStatementsChange = 0
+
   if (history.length > 1) {
     for (let i = 1; i < history.length; i++) {
-      avgLinesChange += history[i].lines - history[i-1].lines;
-      avgFunctionsChange += history[i].functions - history[i-1].functions;
-      avgBranchesChange += history[i].branches - history[i-1].branches;
-      avgStatementsChange += history[i].statements - history[i-1].statements;
+      avgLinesChange += history[i].lines - history[i - 1].lines
+      avgFunctionsChange += history[i].functions - history[i - 1].functions
+      avgBranchesChange += history[i].branches - history[i - 1].branches
+      avgStatementsChange += history[i].statements - history[i - 1].statements
     }
-    
-    const divisor = history.length - 1;
-    avgLinesChange /= divisor;
-    avgFunctionsChange /= divisor;
-    avgBranchesChange /= divisor;
-    avgStatementsChange /= divisor;
+
+    const divisor = history.length - 1
+    avgLinesChange /= divisor
+    avgFunctionsChange /= divisor
+    avgBranchesChange /= divisor
+    avgStatementsChange /= divisor
   }
-  
+
   return {
     latest,
     previous,
@@ -149,18 +149,18 @@ function generateCoverageTrendReport() {
       branches: avgBranchesChange >= 0 ? 'up' : 'down',
       statements: avgStatementsChange >= 0 ? 'up' : 'down',
     },
-  };
+  }
 }
 
 // 生成HTML趋势报告
 function generateHtmlTrendReport() {
-  const history = readCoverageHistory();
-  const trend = generateCoverageTrendReport();
-  
+  const history = readCoverageHistory()
+  const trend = generateCoverageTrendReport()
+
   if (!trend) {
-    return null;
+    return null
   }
-  
+
   const html = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -398,35 +398,35 @@ function generateHtmlTrendReport() {
   </script>
 </body>
 </html>
-  `;
-  
-  ensureDir(config.reportsDir);
-  const reportFile = path.join(config.reportsDir, `coverage-trend-${new Date().getTime()}.html`);
-  fs.writeFileSync(reportFile, html);
-  
-  return reportFile;
+  `
+
+  ensureDir(config.reportsDir)
+  const reportFile = path.join(config.reportsDir, `coverage-trend-${new Date().getTime()}.html`)
+  fs.writeFileSync(reportFile, html)
+
+  return reportFile
 }
 
 // 主函数
 function main() {
-  console.log('开始更新测试覆盖率历史记录...');
-  
+  console.log('开始更新测试覆盖率历史记录...')
+
   if (!addCoverageToHistory()) {
-    console.error('更新测试覆盖率历史记录失败');
-    process.exit(1);
+    console.error('更新测试覆盖率历史记录失败')
+    process.exit(1)
   }
-  
-  console.log('测试覆盖率历史记录已更新');
-  
-  const trendReport = generateHtmlTrendReport();
+
+  console.log('测试覆盖率历史记录已更新')
+
+  const trendReport = generateHtmlTrendReport()
   if (trendReport) {
-    console.log(`覆盖率趋势报告已生成: ${trendReport}`);
+    console.log(`覆盖率趋势报告已生成: ${trendReport}`)
   }
 }
 
 // 如果直接运行此脚本
 if (require.main === module) {
-  main();
+  main()
 }
 
 module.exports = {
@@ -434,4 +434,4 @@ module.exports = {
   generateCoverageTrendReport,
   generateHtmlTrendReport,
   readCoverageHistory,
-};
+}

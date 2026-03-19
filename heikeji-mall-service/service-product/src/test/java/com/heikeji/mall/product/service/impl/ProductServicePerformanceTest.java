@@ -10,7 +10,7 @@ import jakarta.annotation.Resource;
 /**
  * 商品服务性能测试
  */
-@SpringBootTest
+@SpringBootTest(classes = com.heikeji.mall.product.ProductApplication.class, properties = {"spring.profiles.active=test", "spring.datasource.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "spring.datasource.driverClassName=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password="})
 class ProductServicePerformanceTest {
 
     @Resource

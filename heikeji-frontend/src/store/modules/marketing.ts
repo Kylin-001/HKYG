@@ -2,7 +2,14 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import * as marketingApi from '@/api/marketing'
 import { ElMessage } from 'element-plus'
-import type { Coupon, UserCoupon, PointRecord, PointProduct, MemberLevel, MarketingActivity } from '@/api/marketing'
+import type {
+  Coupon,
+  UserCoupon,
+  PointRecord,
+  PointProduct,
+  MemberLevel,
+  MarketingActivity,
+} from '@/api/marketing'
 
 interface CouponListParams {
   page?: number

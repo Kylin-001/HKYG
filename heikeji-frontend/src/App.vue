@@ -4,7 +4,7 @@
   <div id="app">
     <!-- 无障碍支持：跳过导航链接 -->
     <a href="#main-content" class="skip-link">跳过导航，直接进入内容</a>
-    
+
     <!-- 登录页面路由视图 -->
     <router-view v-if="!isLoggedIn" key="login"></router-view>
 
@@ -114,8 +114,17 @@ const showMobile = ref(false)
 const submenuOpenStatus = reactive<Record<string, boolean>>({})
 
 // 组件缓存 - 基于路由元信息的动态缓存配置
-const cachedComponentSet = ref(new Set(['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList']))
-const cachedComponentList = ref(['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList'])
+const cachedComponentSet = ref(
+  new Set(['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList'])
+)
+const cachedComponentList = ref([
+  'UserProfile',
+  'ProductList',
+  'Dashboard',
+  'ProductList',
+  'OrderList',
+  'UserList',
+])
 
 // 响应式断点
 const breakpoints = {
@@ -244,7 +253,14 @@ const initializeCache = () => {
     }
   } else {
     // 默认缓存常用组件
-    const defaultCache = ['UserProfile', 'ProductList', 'Dashboard', 'ProductList', 'OrderList', 'UserList']
+    const defaultCache = [
+      'UserProfile',
+      'ProductList',
+      'Dashboard',
+      'ProductList',
+      'OrderList',
+      'UserList',
+    ]
     cachedComponentSet.value = new Set(defaultCache)
     cachedComponentList.value = defaultCache
     localStorage.setItem('cachedComponents', JSON.stringify(defaultCache))
@@ -261,7 +277,7 @@ const preloadNextRoute = (route: any) => {
     const nextRoute = visibleRoutes.value[currentIndex + 1]
     // 预加载组件 (仅在开发环境)
     if (process.env.NODE_ENV === 'development' && nextRoute.component) {
-      import(`@/views/${nextRoute.component}`)
+      import(`@/views/${nextRoute.component}.vue`)
     }
   }
 }
@@ -359,7 +375,7 @@ onMounted(async () => {
       if (import.meta.env.MODE === 'development') {
         logger.log('可见区域图片预加载完成')
       }
-    }
+    },
   })
 })
 

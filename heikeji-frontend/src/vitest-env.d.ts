@@ -1,4 +1,4 @@
-/// <reference types="vitest/globals" />
+// / <reference types="vitest/globals" />
 import { vi } from 'vitest'
 
 vi.mock('axios', () => ({
@@ -22,7 +22,7 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 }
 
-global.matchMedia = vi.fn((query) => ({
+global.matchMedia = vi.fn(query => ({
   matches: false,
   media: query,
   onchange: null,

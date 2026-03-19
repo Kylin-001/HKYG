@@ -192,7 +192,7 @@
 
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-overlay">
-      <el-loading-spinner />
+      <div class="custom-loading-spinner"></div>
       <div class="loading-text">{{ loadingText || '加载中...' }}</div>
     </div>
   </div>
@@ -671,5 +671,24 @@ defineExpose({
 .loading-text {
   margin-top: 16px;
   color: #606266;
+}
+
+/* 自定义加载动画 */
+.custom-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

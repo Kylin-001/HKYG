@@ -66,7 +66,7 @@ spring:
       # 如需认证，取消注释并配置用户名密码
       # username: elastic
       # password: changeme
-  # 禁用Nacos服务发现和配置检查，避免启动错误
+  # Nacos服务发现配置
   cloud:
     nacos:
       config:
@@ -74,10 +74,11 @@ spring:
           enabled: false
         enabled: false
       discovery:
-        enabled: false
+        enabled: true
         server-addr: localhost:8848
         namespace: public
         ip: 127.0.0.1
+        cluster-name: DEFAULT
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

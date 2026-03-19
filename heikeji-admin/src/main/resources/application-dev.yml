@@ -9,10 +9,14 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
+        server-addr: 192.168.186.128:8848
       config:
-        server-addr: localhost:8848
+        server-addr: 192.168.186.128:8848
         file-extension: yml
+    # 禁用Nacos配置检查
+    config:
+      import-check:
+        enabled: false
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
@@ -31,25 +35,22 @@ spring:
       connection-test-query: SELECT 1
 
   redis:
-    host: localhost
+    host: 192.168.186.128
     port: 6379
     password: 
     database: 0
     timeout: 3000
   
-  # Spring MVC配置 - 修复SpringFox Swagger兼容性问题
+  # Spring MVC配置
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
   
-  # 额外的SpringFox兼容性配置
   main:
     allow-bean-definition-overriding: true
 
 # MyBatis-Plus配置
 mybatis-plus:
-  # 暂时禁用XML映射文件加载
-  # mapper-locations: classpath*:/mapper/*.xml
   type-aliases-package: com.heikeji.admin.entity
   global-config:
     db-config:
@@ -66,7 +67,7 @@ mybatis-plus:
 admin:
   security:
     token:
-      expireTime: 1440  # token过期时间（分钟）
-      tokenHead: "Bearer "  # token前缀
-      header: "Authorization"  # 请求头名称
-      tokenStartWith: "Bearer "  # token开始字符串
+      expireTime: 1440
+      tokenHead: "Bearer "
+      header: "Authorization"
+      tokenStartWith: "Bearer "

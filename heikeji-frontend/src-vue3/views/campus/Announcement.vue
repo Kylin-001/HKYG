@@ -134,7 +134,11 @@
               <span class="top-index" :class="`top-${index + 1}`">{{ index + 1 }}</span>
               <span class="top-title">{{ announcement.title }}</span>
             </div>
-            <el-empty v-if="topAnnouncements.length === 0" description="暂无热门公告" :image-size="80" />
+            <el-empty
+              v-if="topAnnouncements.length === 0"
+              description="暂无热门公告"
+              :image-size="80"
+            />
           </div>
         </el-card>
       </el-col>
@@ -177,7 +181,7 @@ import {
   getAnnouncementById,
   getAnnouncementCategories,
   getTopAnnouncements,
-  getPublishedAnnouncements
+  getPublishedAnnouncements,
 } from '@/api/campus'
 import type { CampusAnnouncement, CampusAnnouncementCategory } from '@/types/campus'
 
@@ -194,12 +198,12 @@ const searchForm = reactive({
   keyword: '',
   categoryId: undefined as number | undefined,
   pageNum: 1,
-  pageSize: 10
+  pageSize: 10,
 })
 
 const pagination = reactive({
   currentPage: 1,
-  pageSize: 10
+  pageSize: 10,
 })
 
 const formatDate = (dateStr: string) => {
@@ -207,7 +211,7 @@ const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   })
 }
 
@@ -217,7 +221,7 @@ const loadAnnouncements = async () => {
     const params = {
       ...searchForm,
       pageNum: pagination.currentPage,
-      pageSize: pagination.pageSize
+      pageSize: pagination.pageSize,
     }
     const res = await getAnnouncements(params)
     announcements.value = res.data?.list || []

@@ -115,6 +115,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Edit, CirclePlus, Delete } from '@element-plus/icons-vue'
+import * as systemApi from '@/api/system'
 
 // 导入类型定义
 interface Menu {
@@ -175,112 +176,8 @@ onMounted(() => {
 const fetchMenuTree = async () => {
   loading.value = true
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 模拟数据
-    const mockData: Menu[] = [
-      {
-        id: '1',
-        name: '首页',
-        path: '/dashboard',
-        component: '@/views/dashboard/index.vue',
-        icon: 'House',
-        sort: 1,
-        status: '1',
-        hidden: '0',
-        permission: 'dashboard:view',
-        parentId: '0',
-      },
-      {
-        id: '2',
-        name: '商品管理',
-        path: '/product',
-        component: '',
-        icon: 'Goods',
-        sort: 2,
-        status: '1',
-        hidden: '0',
-        permission: 'product:manage',
-        parentId: '0',
-        children: [
-          {
-            id: '2-1',
-            name: '商品列表',
-            path: 'list',
-            component: '@/views/product/list.vue',
-            icon: 'Grid',
-            sort: 1,
-            status: '1',
-            hidden: '0',
-            permission: 'product:list',
-            parentId: '2',
-          },
-          {
-            id: '2-2',
-            name: '商品分类',
-            path: 'category',
-            component: '@/views/product/category.vue',
-            icon: 'Folder',
-            sort: 2,
-            status: '1',
-            hidden: '0',
-            permission: 'product:category',
-            parentId: '2',
-          },
-          {
-            id: '2-3',
-            name: '品牌管理',
-            path: 'brand',
-            component: '@/views/product/brand.vue',
-            icon: 'ShoppingBag',
-            sort: 3,
-            status: '1',
-            hidden: '0',
-            permission: 'product:brand',
-            parentId: '2',
-          },
-        ],
-      },
-      {
-        id: '3',
-        name: '用户管理',
-        path: '/user',
-        component: '',
-        icon: 'User',
-        sort: 3,
-        status: '1',
-        hidden: '0',
-        permission: 'user:manage',
-        parentId: '0',
-        children: [
-          {
-            id: '3-1',
-            name: '用户列表',
-            path: 'list',
-            component: '@/views/user/list.vue',
-            icon: 'User',
-            sort: 1,
-            status: '1',
-            hidden: '0',
-            permission: 'user:list',
-            parentId: '3',
-          },
-          {
-            id: '3-2',
-            name: '角色管理',
-            path: 'role',
-            component: '@/views/user/role.vue',
-            icon: 'User',
-            sort: 2,
-            status: '1',
-            hidden: '0',
-            permission: 'user:role',
-            parentId: '3',
-          },
-        ],
-      },
-    ]
-    menuTree.value = mockData
+    const res = await systemApi.getMenuTree()
+    menuTree.value = res.data || []
   } catch (error) {
     ElMessage.error('获取菜单树失败')
   } finally {
@@ -308,7 +205,6 @@ const handleNodeContextMenu = (event: MouseEvent, data: Menu) => {
 const handleAddMenu = () => {
   isEdit.value = false
   isSubMenu.value = false
-  // 重置表单
   Object.assign(menuForm, {
     id: '',
     name: '',
@@ -328,7 +224,6 @@ const handleAddMenu = () => {
 const handleAddSubMenu = (parentMenu: Menu) => {
   isEdit.value = false
   isSubMenu.value = true
-  // 重置表单
   Object.assign(menuForm, {
     id: '',
     name: '',
@@ -348,7 +243,6 @@ const handleAddSubMenu = (parentMenu: Menu) => {
 const handleEditMenu = (menu: Menu) => {
   isEdit.value = true
   isSubMenu.value = false
-  // 填充表单数据
   Object.assign(menuForm, menu)
   dialogVisible.value = true
 }
@@ -361,22 +255,9 @@ const handleDeleteMenu = async (menu: Menu) => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 更新本地数据
-    const deleteMenuFromTree = (tree: Menu[], id: string): Menu[] => {
-      return tree.filter(item => {
-        if (item.id === id) {
-          return false
-        }
-        if (item.children && item.children.length > 0) {
-          item.children = deleteMenuFromTree(item.children, id)
-        }
-        return true
-      })
-    }
-    menuTree.value = deleteMenuFromTree(menuTree.value, menu.id)
+    await systemApi.deleteMenu(menu.id)
     ElMessage.success('菜单删除成功')
+    fetchMenuTree()
   } catch (error) {
     // 取消删除
   }
@@ -387,67 +268,15 @@ const handleSubmit = async () => {
   if (!menuFormRef.value) return
   try {
     await menuFormRef.value.validate()
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
-    // 更新本地数据
-    const updateMenuInTree = (tree: Menu[]): Menu[] => {
-      return tree.map(item => {
-        if (item.id === menuForm.id) {
-          return {
-            ...item,
-            ...menuForm,
-          }
-        }
-        if (item.children && item.children.length > 0) {
-          item.children = updateMenuInTree(item.children)
-        }
-        return item
-      })
-    }
-
-    const addMenuToTree = (tree: Menu[]): Menu[] => {
-      if (menuForm.parentId === '0') {
-        // 新增一级菜单
-        return [
-          ...tree,
-          {
-            ...menuForm,
-            id: Date.now().toString(),
-            children: [],
-          },
-        ]
-      } else {
-        // 新增子菜单
-        return tree.map(item => {
-          if (item.id === menuForm.parentId) {
-            return {
-              ...item,
-              children: [
-                ...(item.children || []),
-                {
-                  ...menuForm,
-                  id: Date.now().toString(),
-                  children: [],
-                },
-              ],
-            }
-          }
-          if (item.children && item.children.length > 0) {
-            item.children = addMenuToTree(item.children)
-          }
-          return item
-        })
-      }
-    }
-
     if (isEdit.value) {
-      menuTree.value = updateMenuInTree(menuTree.value)
+      await systemApi.updateMenu(menuForm)
       ElMessage.success('菜单更新成功')
     } else {
-      menuTree.value = addMenuToTree(menuTree.value)
+      await systemApi.addMenu(menuForm)
       ElMessage.success('菜单新增成功')
     }
     dialogVisible.value = false
+    fetchMenuTree()
   } catch (error) {
     // 表单验证失败或保存失败
   }

@@ -1,17 +1,17 @@
 import request from '@/utils/request'
-import type { 
-  Product, 
-  ProductListResponse, 
-  ProductSearchParams, 
-  ProductStats, 
-  ProductForm, 
+import type {
+  Product,
+  ProductListResponse,
+  ProductSearchParams,
+  ProductStats,
+  ProductForm,
   ProductImportResult,
   ProductExportParams,
   ProductCategory,
   ProductBrand,
   ProductReview,
   ProductReviewStats,
-  ProductStockRecord
+  ProductStockRecord,
 } from '@/types/product'
 
 // 获取商品列表
@@ -106,7 +106,7 @@ export function exportProducts(params: ProductExportParams) {
 export function importProducts(file: File) {
   const formData = new FormData()
   formData.append('file', file)
-  
+
   return request<ProductImportResult>({
     url: '/product/import',
     method: 'post',
@@ -136,7 +136,9 @@ export function getProductCategories(params?: { parentId?: string; level?: numbe
 }
 
 // 创建商品分类
-export function createProductCategory(data: Omit<ProductCategory, 'id' | 'createTime' | 'updateTime'>) {
+export function createProductCategory(
+  data: Omit<ProductCategory, 'id' | 'createTime' | 'updateTime'>
+) {
   return request<string>({
     url: '/product/category',
     method: 'post',
@@ -197,7 +199,7 @@ export function deleteProductBrand(id: string) {
 }
 
 // 获取商品评价列表
-export function getProductReviews(params: { 
+export function getProductReviews(params: {
   productId?: string
   rating?: number
   status?: number

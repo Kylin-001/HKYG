@@ -6,7 +6,7 @@
     :before-close="handleClose"
     destroy-on-close
   >
-    <el-form
+    <ElForm
       ref="formRef"
       :model="formData"
       :rules="formRules"
@@ -89,20 +89,12 @@
           <el-row :gutter="20">
             <el-col :span="8">
               <el-form-item label="库存数量" prop="stock">
-                <el-input-number
-                  v-model="formData.stock"
-                  :min="0"
-                  style="width: 100%"
-                />
+                <el-input-number v-model="formData.stock" :min="0" style="width: 100%" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
               <el-form-item label="排序">
-                <el-input-number
-                  v-model="formData.sort"
-                  :min="0"
-                  style="width: 100%"
-                />
+                <el-input-number v-model="formData.sort" :min="0" style="width: 100%" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -171,11 +163,7 @@
                   <el-input v-model="spec.value" placeholder="规格值" />
                 </el-col>
                 <el-col :span="2">
-                  <el-input-number
-                    v-model="spec.sort"
-                    :min="0"
-                    style="width: 100%"
-                  />
+                  <el-input-number v-model="spec.sort" :min="0" style="width: 100%" />
                 </el-col>
                 <el-col :span="2">
                   <el-button
@@ -217,7 +205,7 @@
           </el-form-item>
         </el-tab-pane>
       </el-tabs>
-    </el-form>
+    </ElForm>
 
     <template #footer>
       <div class="dialog-footer">
@@ -296,7 +284,7 @@ const formRules = {
 
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (value) => emit('update:visible', value),
+  set: value => emit('update:visible', value),
 })
 
 const dialogTitle = computed(() => {
@@ -314,18 +302,18 @@ const loadCategories = async () => {
 
 const loadProductDetail = async () => {
   if (!props.productId) return
-  
+
   try {
     const res = await getProductDetail(props.productId)
     const product = res.data
-    
+
     // 填充表单数据
     Object.keys(formData).forEach(key => {
       if (key in product) {
         formData[key] = product[key]
       }
     })
-    
+
     // 确保数组字段有默认值
     if (!formData.tags) formData.tags = []
     if (!formData.specifications) formData.specifications = []
@@ -348,7 +336,7 @@ const resetForm = () => {
       formData[key] = ''
     }
   })
-  
+
   formData.status = 1
   formData.specifications = []
   formData.tags = []
@@ -363,12 +351,12 @@ const handleClose = () => {
 
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
+
   try {
     await formRef.value.validate()
-    
+
     submitLoading.value = true
-    
+
     if (props.mode === 'add') {
       await createProduct(formData)
       ElMessage.success('商品创建成功')
@@ -376,7 +364,7 @@ const handleSubmit = async () => {
       await updateProduct(props.productId!, formData)
       ElMessage.success('商品更新成功')
     }
-    
+
     emit('refresh')
     handleClose()
   } catch (error) {
@@ -428,7 +416,7 @@ const removeSpecification = (index: number) => {
 // 监听对话框显示状态
 watch(
   () => props.visible,
-  (visible) => {
+  visible => {
     if (visible) {
       loadCategories()
       if (props.mode === 'edit' && props.productId) {

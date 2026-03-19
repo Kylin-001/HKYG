@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import Layout from '@/layout/index.vue'
@@ -7,17 +7,17 @@ import { useAppStore } from '@/store/modules/app'
 
 vi.mock('@/layout/components/Navbar.vue', () => ({
   name: 'Navbar',
-  template: '<div class="navbar-mock">Navbar</div>'
+  template: '<div class="navbar-mock">Navbar</div>',
 }))
 
 vi.mock('@/layout/components/Sidebar.vue', () => ({
   name: 'Sidebar',
-  template: '<div class="sidebar-mock">Sidebar</div>'
+  template: '<div class="sidebar-mock">Sidebar</div>',
 }))
 
 vi.mock('@/layout/components/AppMain.vue', () => ({
   name: 'AppMain',
-  template: '<div class="main-mock">Main</div>'
+  template: '<div class="main-mock">Main</div>',
 }))
 
 describe('Layout Component', () => {
@@ -31,7 +31,7 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.app-wrapper').exists()).toBe(true)
     expect(wrapper.find('.navbar-mock').exists()).toBe(true)
     expect(wrapper.find('.sidebar-mock').exists()).toBe(true)
@@ -44,11 +44,11 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const appStore = useAppStore()
     appStore.setDevice('mobile')
     appStore.openSidebar()
-    
+
     expect(wrapper.find('.drawer-bg').exists()).toBe(true)
   })
 
@@ -58,11 +58,11 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const appStore = useAppStore()
     appStore.setDevice('mobile')
     appStore.closeSidebar()
-    
+
     expect(wrapper.find('.drawer-bg').exists()).toBe(false)
   })
 
@@ -72,11 +72,11 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const appStore = useAppStore()
     appStore.setDevice('desktop')
     appStore.openSidebar()
-    
+
     expect(wrapper.find('.drawer-bg').exists()).toBe(false)
   })
 
@@ -86,7 +86,7 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.fixed-header').exists()).toBe(true)
   })
 
@@ -96,7 +96,7 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.has-logo').exists()).toBe(true)
   })
 
@@ -106,14 +106,14 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const appStore = useAppStore()
     appStore.setDevice('mobile')
     appStore.openSidebar()
-    
+
     const drawerBg = wrapper.find('.drawer-bg')
     await drawerBg.trigger('click')
-    
+
     expect(appStore.sidebar.opened).toBe(false)
   })
 
@@ -123,7 +123,7 @@ describe('Layout Component', () => {
         plugins: [createPinia()],
       },
     })
-    
+
     const appWrapper = wrapper.find('.app-wrapper')
     expect(appWrapper.classes()).toContain('has-logo')
   })

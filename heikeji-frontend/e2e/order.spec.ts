@@ -20,7 +20,7 @@ test.describe('订单功能测试', () => {
     const orderItems = await page.locator('.order-item')
     await expect(orderItems).toHaveCount(expect.atLeast(0))
 
-    if (await orderItems.count() > 0) {
+    if ((await orderItems.count()) > 0) {
       // 验证订单项包含基本信息
       const firstOrder = orderItems.first()
       await expect(firstOrder.locator('.order-number')).toBeVisible()
@@ -35,15 +35,15 @@ test.describe('订单功能测试', () => {
     const statusFilter = await page.locator('.status-filter')
     if (await statusFilter.isVisible()) {
       await statusFilter.click()
-      
+
       // 选择已完成状态
       const completedOption = await page.locator('.filter-option', { hasText: /已完成|completed/i })
       if (await completedOption.isVisible()) {
         await completedOption.click()
-        
+
         // 等待筛选结果
         await page.waitForTimeout(500)
-        
+
         // 验证筛选结果
         const orderItems = await page.locator('.order-item')
         await expect(orderItems).toHaveCount(expect.atLeast(0))
@@ -56,15 +56,15 @@ test.describe('订单功能测试', () => {
     const searchInput = await page.locator('.order-search-input')
     if (await searchInput.isVisible()) {
       await searchInput.fill('测试订单')
-      
+
       // 点击搜索按钮
       const searchButton = await page.locator('.search-button')
       if (await searchButton.isVisible()) {
         await searchButton.click()
-        
+
         // 等待搜索结果
         await page.waitForTimeout(500)
-        
+
         // 验证搜索结果
         const orderItems = await page.locator('.order-item')
         await expect(orderItems).toHaveCount(expect.atLeast(0))
@@ -75,17 +75,17 @@ test.describe('订单功能测试', () => {
   test('应该能够查看订单详情', async ({ page }) => {
     // 获取第一个订单项
     const orderItems = await page.locator('.order-item')
-    if (await orderItems.count() > 0) {
+    if ((await orderItems.count()) > 0) {
       const firstOrder = orderItems.first()
-      
+
       // 点击查看详情按钮
       const detailButton = await firstOrder.locator('.detail-button')
       if (await detailButton.isVisible()) {
         await detailButton.click()
-        
+
         // 验证页面跳转到订单详情页
         await expect(page.url()).toMatch(/\/order\/detail\//)
-        
+
         // 验证订单详情包含基本信息
         await expect(page.locator('.order-detail')).toBeVisible()
         await expect(page.locator('.order-detail-info')).toBeVisible()
@@ -129,13 +129,13 @@ test.describe('订单功能测试', () => {
   test('应该在移动端正确显示', async ({ page }) => {
     // 切换到移动端视图
     await page.setViewportSize({ width: 768, height: 1024 })
-    
+
     // 验证订单列表在移动端正常显示
     await expect(page.locator('.order-list')).toBeVisible()
-    
+
     // 验证移动端订单项显示正确
     const orderItems = await page.locator('.order-item')
-    if (await orderItems.count() > 0) {
+    if ((await orderItems.count()) > 0) {
       const firstOrder = orderItems.first()
       await expect(firstOrder.locator('.order-mobile-header')).toBeVisible()
       await expect(firstOrder.locator('.order-mobile-content')).toBeVisible()
@@ -147,17 +147,17 @@ test.describe('订单详情测试', () => {
   test('应该显示订单基本信息', async ({ page }) => {
     // 先访问订单列表
     await page.goto('/order/list')
-    
+
     // 查找第一个订单并点击查看详情
     const firstOrder = await page.locator('.order-item').first()
     if (await firstOrder.isVisible()) {
       const detailButton = await firstOrder.locator('.detail-button')
       if (await detailButton.isVisible()) {
         await detailButton.click()
-        
+
         // 验证订单详情页面显示
         await expect(page.url()).toMatch(/\/order\/detail\//)
-        
+
         // 验证订单基本信息
         await expect(page.locator('.order-detail-header')).toBeVisible()
         await expect(page.locator('.order-number')).toBeVisible()
@@ -171,17 +171,17 @@ test.describe('订单详情测试', () => {
   test('应该显示订单商品列表', async ({ page }) => {
     // 先访问订单详情页（如果存在）
     await page.goto('/order/list')
-    
+
     const firstOrder = await page.locator('.order-item').first()
     if (await firstOrder.isVisible()) {
       const detailButton = await firstOrder.locator('.detail-button')
       if (await detailButton.isVisible()) {
         await detailButton.click()
-        
+
         // 验证订单商品列表
         const orderItems = await page.locator('.order-product-item')
         await expect(orderItems).toHaveCount(expect.atLeast(1))
-        
+
         // 验证商品项包含基本信息
         const firstProduct = orderItems.first()
         await expect(firstProduct.locator('.product-name')).toBeVisible()
@@ -194,13 +194,13 @@ test.describe('订单详情测试', () => {
   test('应该显示订单配送信息', async ({ page }) => {
     // 先访问订单详情页（如果存在）
     await page.goto('/order/list')
-    
+
     const firstOrder = await page.locator('.order-item').first()
     if (await firstOrder.isVisible()) {
       const detailButton = await firstOrder.locator('.detail-button')
       if (await detailButton.isVisible()) {
         await detailButton.click()
-        
+
         // 验证配送信息
         await expect(page.locator('.delivery-info')).toBeVisible()
         await expect(page.locator('.delivery-address')).toBeVisible()
@@ -212,13 +212,13 @@ test.describe('订单详情测试', () => {
   test('应该显示订单支付信息', async ({ page }) => {
     // 先访问订单详情页（如果存在）
     await page.goto('/order/list')
-    
+
     const firstOrder = await page.locator('.order-item').first()
     if (await firstOrder.isVisible()) {
       const detailButton = await firstOrder.locator('.detail-button')
       if (await detailButton.isVisible()) {
         await detailButton.click()
-        
+
         // 验证支付信息
         await expect(page.locator('.payment-info')).toBeVisible()
         await expect(page.locator('.payment-total')).toBeVisible()
@@ -233,20 +233,20 @@ test.describe('订单创建流程测试', () => {
   test('应该能够从商品详情页创建订单', async ({ page }) => {
     // 访问商品列表页面
     await page.goto('/product/list')
-    
+
     // 查找第一个商品并点击查看详情
     const firstProduct = await page.locator('.product-card').first()
     if (await firstProduct.isVisible()) {
       await firstProduct.click()
-      
+
       // 验证页面跳转到商品详情页
       await expect(page.url()).toMatch(/\/product\/detail\//)
-      
+
       // 点击立即购买按钮
       const buyNowButton = await page.locator('.buy-now-button')
       if (await buyNowButton.isVisible()) {
         await buyNowButton.click()
-        
+
         // 验证页面跳转到结算页面
         await expect(page.url()).toMatch(/\/checkout|\/order\/confirm/i)
       }
@@ -256,12 +256,12 @@ test.describe('订单创建流程测试', () => {
   test('应该能够从购物车创建订单', async ({ page }) => {
     // 访问购物车页面
     await page.goto('/cart')
-    
+
     // 查找去结算按钮
     const checkoutButton = await page.locator('.checkout-button')
     if (await checkoutButton.isVisible()) {
       await checkoutButton.click()
-      
+
       // 验证页面跳转到结算页面
       await expect(page.url()).toMatch(/\/checkout|\/order\/confirm/i)
     }

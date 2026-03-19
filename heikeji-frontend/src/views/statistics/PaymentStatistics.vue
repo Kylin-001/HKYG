@@ -268,7 +268,26 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([
+  BarChart,
+  LineChart,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer,
+])
 import request from '@/utils/request'
 import { formatDateTime } from '@/utils/date-utils'
 
@@ -340,10 +359,7 @@ const initDefaultDateRange = () => {
   const start = new Date()
   start.setDate(start.getDate() - 6)
 
-  filterForm.dateRange = [
-    start.toISOString().split('T')[0],
-    end.toISOString().split('T')[0],
-  ]
+  filterForm.dateRange = [start.toISOString().split('T')[0], end.toISOString().split('T')[0]]
 }
 
 // 处理日期范围变化
@@ -709,7 +725,7 @@ watch(chartType, () => {
 onMounted(async () => {
   initDefaultDateRange()
   await loadStatisticsData()
-  
+
   await nextTick()
   initTrendChart()
   initPaymentMethodChart()
@@ -719,14 +735,14 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   const chartDom1 = trendChart.value
   const chartDom2 = paymentMethodChart.value
-  
+
   if (chartDom1) {
     const chart = echarts.getInstanceByDom(chartDom1)
     if (chart) {
       chart.dispose()
     }
   }
-  
+
   if (chartDom2) {
     const chart = echarts.getInstanceByDom(chartDom2)
     if (chart) {

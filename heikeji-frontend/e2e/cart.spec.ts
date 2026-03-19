@@ -35,9 +35,9 @@ test.describe('购物车功能测试', () => {
   test('应该支持增加商品数量', async ({ page }) => {
     const firstItem = page.locator('.cart-item').first()
     const increaseBtn = firstItem.locator('.increase-btn')
-    
+
     await increaseBtn.click()
-    
+
     const quantity = await firstItem.locator('.quantity').inputValue()
     expect(parseInt(quantity)).toBeGreaterThan(1)
   })
@@ -45,9 +45,9 @@ test.describe('购物车功能测试', () => {
   test('应该支持减少商品数量', async ({ page }) => {
     const firstItem = page.locator('.cart-item').first()
     const decreaseBtn = firstItem.locator('.decrease-btn')
-    
+
     await decreaseBtn.click()
-    
+
     const quantity = await firstItem.locator('.quantity').inputValue()
     expect(parseInt(quantity)).toBeGreaterThanOrEqual(0)
   })
@@ -55,9 +55,9 @@ test.describe('购物车功能测试', () => {
   test('应该支持删除商品', async ({ page }) => {
     const firstItem = page.locator('.cart-item').first()
     const deleteBtn = firstItem.locator('.delete-btn')
-    
+
     await deleteBtn.click()
-    
+
     await page.waitForTimeout(500)
     const cartItems = await page.locator('.cart-item').all()
     await expect(cartItems).toHaveLength(0)
@@ -65,10 +65,10 @@ test.describe('购物车功能测试', () => {
 
   test('应该支持清空购物车', async ({ page }) => {
     const clearBtn = page.locator('.clear-cart-btn')
-    
+
     if (await clearBtn.isVisible()) {
       await clearBtn.click()
-      
+
       await page.waitForTimeout(500)
       const cartItems = await page.locator('.cart-item').all()
       await expect(cartItems).toHaveLength(0)
@@ -94,7 +94,7 @@ test.describe('购物车功能测试', () => {
 
   test('应该显示库存不足提示', async ({ page }) => {
     const outOfStockItems = await page.locator('.out-of-stock').all()
-    
+
     if (outOfStockItems.length > 0) {
       await expect(outOfStockItems.first()).toBeVisible()
     }

@@ -20,7 +20,7 @@ import java.util.UUID;
 public class PaymentMessageProducer {
     private static final Logger log = LoggerFactory.getLogger(PaymentMessageProducer.class);
 
-    @Autowired
+    @Autowired(required = false)
     private RabbitTemplate rabbitTemplate;
     
     /**
@@ -30,6 +30,12 @@ public class PaymentMessageProducer {
     public void sendPaymentSuccessMessage(Payment payment) {
         if (payment == null) {
             log.error("支付信息为空，无法发送支付成功消息");
+            return;
+        }
+        
+        if (rabbitTemplate == null) {
+            log.info("RabbitMQ未启用，跳过支付成功消息发送，订单号: {}, 支付流水号: {}", 
+                    payment.getOrderNo(), payment.getPaymentNo());
             return;
         }
         
@@ -78,6 +84,12 @@ public class PaymentMessageProducer {
             return;
         }
         
+        if (rabbitTemplate == null) {
+            log.info("RabbitMQ未启用，跳过支付失败消息发送，订单号: {}, 支付流水号: {}", 
+                    payment.getOrderNo(), payment.getPaymentNo());
+            return;
+        }
+        
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
         
         try {
@@ -118,6 +130,12 @@ public class PaymentMessageProducer {
     public void sendRefundSuccessMessage(Payment payment, BigDecimal refundAmount, String refundNo) {
         if (payment == null) {
             log.error("支付信息为空，无法发送退款成功消息");
+            return;
+        }
+        
+        if (rabbitTemplate == null) {
+            log.info("RabbitMQ未启用，跳过退款成功消息发送，订单号: {}, 支付流水号: {}", 
+                    payment.getOrderNo(), payment.getPaymentNo());
             return;
         }
         

@@ -407,7 +407,7 @@ const handleCategoryChange = (value: number[]) => {
   }
 }
 
-const handlePictureCardPreview: UploadProps['onPreview'] = (file) => {
+const handlePictureCardPreview: UploadProps['onPreview'] = file => {
   dialogImageUrl.value = file.url!
   dialogVisible.value = true
 }
@@ -417,9 +417,8 @@ const handleRemove: UploadProps['onRemove'] = (file, uploadFileList) => {
   fileList.value = uploadFileList
 }
 
-const beforeUpload: UploadProps['beforeUpload'] = (file) => {
-  const isJPG =
-    file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png'
+const beforeUpload: UploadProps['beforeUpload'] = file => {
+  const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png'
   const isLt2M = file.size / 1024 / 1024 < 2
 
   if (!isJPG) {
@@ -440,7 +439,7 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (response, file) => {
   }
 }
 
-const handleUploadError: UploadProps['onError'] = (error) => {
+const handleUploadError: UploadProps['onError'] = error => {
   ElMessage.error('图片上传失败')
   logger.error('图片上传失败', error)
 }
@@ -473,11 +472,11 @@ const handleDeleteParam = (index: number) => {
 const handleSubmit = async () => {
   if (!productFormRef.value) return
 
-  await productFormRef.value.validate((valid) => {
+  await productFormRef.value.validate(valid => {
     if (valid) {
       const submitData = {
         ...productForm,
-        images: fileList.value.map((file) => file.url),
+        images: fileList.value.map(file => file.url),
       }
 
       const submitPromise = isEdit.value ? updateProduct(submitData) : addProduct(submitData)

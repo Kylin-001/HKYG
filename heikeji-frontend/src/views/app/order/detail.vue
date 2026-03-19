@@ -175,7 +175,7 @@
       <div class="logs-section">
         <div class="section-title">订单日志</div>
         <div v-if="logsLoading" class="logs-loading">
-          <el-loading-spinner></el-loading-spinner>
+          <div class="custom-loading-spinner"></div>
           <span>正在加载...</span>
         </div>
         <div v-else-if="orderLogs.length > 0" class="logs-list">
@@ -1273,5 +1273,25 @@ const showStatusChangeNotification = (oldStatus, newStatus) => {
 .contact-btn {
   color: #909399;
   border-color: #dcdfe6;
+}
+
+/* 自定义加载动画 */
+.custom-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

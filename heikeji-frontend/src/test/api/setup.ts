@@ -1,12 +1,11 @@
 import { beforeAll, afterAll, beforeEach, afterEach, describe, it, expect } from 'vitest'
 import { setupServer } from 'msw/node'
-import { rest } from 'msw'
 import { http, HttpResponse } from 'msw'
 
 // Mock server setup
 export const setupMockServer = () => {
   const server = setupServer(
-    rest.get('http://localhost:3000/api/user/info', () => {
+    http.get('http://localhost:3000/api/user/info', () => {
       return HttpResponse.json({
         code: 20000,
         data: {
@@ -26,7 +25,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.get('http://localhost:3000/api/product/list', () => {
+    http.get('http://localhost:3000/api/product/list', () => {
       return HttpResponse.json({
         code: 20000,
         data: {
@@ -44,7 +43,7 @@ export const setupMockServer = () => {
               images: ['http://example.com/image1.jpg'],
               status: 1,
               attributes: { color: '红色', size: 'L' },
-            }
+            },
           ],
           total: 1,
           current: 1,
@@ -56,7 +55,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.post('http://localhost:3000/api/product', () => {
+    http.post('http://localhost:3000/api/product', () => {
       return HttpResponse.json({
         code: 20000,
         data: { success: true },
@@ -65,7 +64,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.put('http://localhost:3000/api/product', () => {
+    http.put('http://localhost:3000/api/product', () => {
       return HttpResponse.json({
         code: 20000,
         data: { success: true },
@@ -74,7 +73,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.delete('http://localhost:3000/api/product/:id', () => {
+    http.delete('http://localhost:3000/api/product/:id', () => {
       return HttpResponse.json({
         code: 20000,
         data: { success: true },
@@ -83,7 +82,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.get('http://localhost:3000/api/order/list', () => {
+    http.get('http://localhost:3000/api/order/list', () => {
       return HttpResponse.json({
         code: 20000,
         data: {
@@ -101,7 +100,7 @@ export const setupMockServer = () => {
                   price: 100,
                   quantity: 2,
                   total: 200,
-                }
+                },
               ],
               amount: 200,
               status: '待支付',
@@ -109,7 +108,7 @@ export const setupMockServer = () => {
               deliveryAddress: '北京市朝阳区',
               estimatedDelivery: '2024-03-05',
               remark: '测试订单',
-            }
+            },
           ],
           total: 1,
           current: 1,
@@ -121,7 +120,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.get('http://localhost:3000/api/analytics/user-behavior', () => {
+    http.get('http://localhost:3000/api/analytics/user-behavior', () => {
       return HttpResponse.json({
         code: 20000,
         data: {
@@ -136,7 +135,7 @@ export const setupMockServer = () => {
       })
     }),
 
-    rest.get('http://localhost:3000/api/marketing/coupons', () => {
+    http.get('http://localhost:3000/api/marketing/coupons', () => {
       return HttpResponse.json({
         code: 20000,
         data: {
@@ -157,7 +156,7 @@ export const setupMockServer = () => {
               perUserLimit: 1,
               status: 1,
               description: '测试优惠券描述',
-            }
+            },
           ],
           total: 1,
           current: 1,
@@ -167,7 +166,7 @@ export const setupMockServer = () => {
         message: '获取优惠券列表成功',
         timestamp: Date.now(),
       })
-    }),
+    })
   )
 
   return server
@@ -234,7 +233,7 @@ export const createMockOrder = (overrides = {}) => ({
       price: 100,
       quantity: 2,
       total: 200,
-    }
+    },
   ],
   amount: 200,
   status: '待支付',
@@ -281,18 +280,18 @@ export const createMockCoupon = (overrides = {}) => ({
 // Performance testing utilities
 export const measureApiPerformance = async (apiCall: () => Promise<any>, iterations = 10) => {
   const times: number[] = []
-  
+
   for (let i = 0; i < iterations; i++) {
     const start = performance.now()
     await apiCall()
     const end = performance.now()
     times.push(end - start)
   }
-  
+
   const avgTime = times.reduce((sum, time) => sum + time, 0) / times.length
   const minTime = Math.min(...times)
   const maxTime = Math.max(...times)
-  
+
   return {
     times,
     avgTime,
@@ -310,7 +309,7 @@ export const testSqlInjection = async (apiCall: (input: string) => Promise<any>)
     "admin'--",
     "<script>alert('XSS')</script>",
   ]
-  
+
   for (const input of maliciousInputs) {
     try {
       const result = await apiCall(input)
@@ -330,7 +329,7 @@ export const testXssProtection = async (apiCall: (input: string) => Promise<any>
     "javascript:alert('XSS')",
     "<svg onload=alert('XSS')>",
   ]
-  
+
   for (const payload of xssPayloads) {
     try {
       const result = await apiCall(payload)
@@ -346,15 +345,15 @@ export const testXssProtection = async (apiCall: (input: string) => Promise<any>
 
 export const testRateLimiting = async (apiCall: () => Promise<any>, limit = 5) => {
   const promises = []
-  
+
   for (let i = 0; i < limit + 2; i++) {
     promises.push(apiCall())
   }
-  
+
   const results = await Promise.allSettled(promises)
   const successCount = results.filter(r => r.status === 'fulfilled').length
   const failureCount = results.filter(r => r.status === 'rejected').length
-  
+
   // Should allow up to the limit
   expect(successCount).toBeLessThanOrEqual(limit)
   expect(failureCount).toBeGreaterThanOrEqual(2)

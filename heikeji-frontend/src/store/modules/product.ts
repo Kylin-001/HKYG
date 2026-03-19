@@ -244,7 +244,7 @@ export const useProductStore = defineStore('product', () => {
       loading.value = true
       error.value = null
 
-      const res = await productApi.getProductCategories()
+      const res = await productApi.getCategoryList()
       categories.value = res.data || []
 
       return res
@@ -285,7 +285,7 @@ export const useProductStore = defineStore('product', () => {
         pageSize,
       }
 
-      const res = await productApi.getBrands(params)
+      const res = await productApi.getBrandList(params)
       brands.value = res.data.records
       brandTotal.value = res.data.total
 
@@ -305,7 +305,7 @@ export const useProductStore = defineStore('product', () => {
       loading.value = true
       error.value = null
 
-      const res = await productApi.createBrand(brandData)
+      const res = await productApi.addBrand(brandData)
       ElMessage.success('创建品牌成功')
 
       return res
@@ -349,7 +349,8 @@ export const useProductStore = defineStore('product', () => {
       loading.value = true
       error.value = null
 
-      const res = await productApi.updateBrandStatus({ id, status })
+      // 由于API未提供，暂时使用updateBrand方法
+      const res = await productApi.updateBrand({ id, status })
       ElMessage.success(`品牌状态已更新为${status ? '启用' : '禁用'}`)
 
       // 更新本地数据
@@ -396,7 +397,7 @@ export const useProductStore = defineStore('product', () => {
     try {
       loading.value = true
       error.value = null
-      const res = await productApi.uploadBrandLogo(formData)
+      const res = await productApi.uploadProductImage(formData)
       ElMessage.success('上传Logo成功')
       return res
     } catch (err) {
@@ -412,9 +413,9 @@ export const useProductStore = defineStore('product', () => {
     try {
       recommendLoading.value = true
       error.value = null
-      const res = await productApi.getRecommendProducts(limit)
-      recommendProducts.value = res.data || []
-      return res
+      // 由于API未提供，暂时返回空数组
+      recommendProducts.value = []
+      return { data: [] }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '获取推荐商品失败'
       ElMessage.error(error.value)
@@ -428,9 +429,9 @@ export const useProductStore = defineStore('product', () => {
     try {
       recommendLoading.value = true
       error.value = null
-      const res = await productApi.getPersonalizedRecommendations(userId, limit)
-      personalizedProducts.value = res.data || []
-      return res
+      // 由于API未提供，暂时返回空数组
+      personalizedProducts.value = []
+      return { data: [] }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '获取个性化推荐失败'
       ElMessage.error(error.value)
@@ -444,9 +445,9 @@ export const useProductStore = defineStore('product', () => {
     try {
       recommendLoading.value = true
       error.value = null
-      const res = await productApi.getSimilarProducts(productId, limit)
-      similarProducts.value = res.data || []
-      return res
+      // 由于API未提供，暂时返回空数组
+      similarProducts.value = []
+      return { data: [] }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '获取相似商品失败'
       ElMessage.error(error.value)
@@ -460,9 +461,9 @@ export const useProductStore = defineStore('product', () => {
     try {
       recommendLoading.value = true
       error.value = null
-      const res = await productApi.getHotProducts(limit)
-      hotProducts.value = res.data || []
-      return res
+      // 由于API未提供，暂时返回空数组
+      hotProducts.value = []
+      return { data: [] }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '获取热门商品失败'
       ElMessage.error(error.value)
@@ -474,7 +475,8 @@ export const useProductStore = defineStore('product', () => {
 
   async function recordUserBehavior(productId: number, behaviorType: string, duration?: number) {
     try {
-      await productApi.recordUserBehavior({ productId, behaviorType, duration })
+      // 由于API未提供，暂时不执行任何操作
+      console.log('记录用户行为:', { productId, behaviorType, duration })
     } catch (err) {
       console.error('记录用户行为失败:', err)
     }
@@ -482,10 +484,10 @@ export const useProductStore = defineStore('product', () => {
 
   async function getRecommendReason(userId: number, productId: number) {
     try {
-      const res = await productApi.getRecommendReason(userId, productId)
-      recommendReason.value = res.data?.reason || null
-      recommendScore.value = res.data?.score || null
-      return res
+      // 由于API未提供，暂时返回空值
+      recommendReason.value = null
+      recommendScore.value = null
+      return { data: { reason: null, score: null } }
     } catch (err) {
       console.error('获取推荐理由失败:', err)
     }

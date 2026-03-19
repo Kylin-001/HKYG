@@ -79,7 +79,7 @@ stop-all.bat
 - 后端API：http://localhost:8080
 - Nacos控制台：http://localhost:8848/nacos
 - Gateway：http://localhost:8080
-- Admin：http://localhost:8081
+- Admin：http://localhost:8090
 
 ## 服务说明
 
@@ -89,12 +89,15 @@ stop-all.bat
 |---------|------|------|
 | Nacos | 8848 | 服务注册与配置中心 |
 | Gateway | 8080 | API网关 |
-| Admin | 8081 | 管理后台 |
-| User Service | 8082 | 用户服务 |
-| Product Service | 8083 | 商品服务 |
-| Order Service | 8084 | 订单服务 |
-| Payment Service | 8085 | 支付服务 |
-| Member Service | 8086 | 会员服务 |
+| Admin | 8090 | 管理后台 |
+| User Service | 8081 | 用户服务 |
+| Product Service | 8082 | 商品服务 |
+| Order Service | 8083 | 订单服务 |
+| Delivery Service | 8001 | 配送服务 |
+| Member Service | 8088 | 会员服务 |
+| Campus Service | 8003 | 校园服务 |
+| Secondhand Service | 8006 | 二手交易 |
+| Lostfound Service | 8007 | 失物招领 |
 
 ### 前端服务
 
@@ -288,6 +291,104 @@ java -Xms512m -Xmx1024m -jar app.jar
 - 定期清理旧日志
 - 配置日志轮转
 - 监控日志大小
+
+## 分离部署架构
+
+### 架构说明
+本项目采用分离部署架构，将核心服务部署在虚拟机中，其余服务在本地运行：
+
+#### 虚拟机中运行的服务
+- **MySQL**：数据库服务
+- **Redis**：缓存服务
+- **Nacos**：服务注册与配置中心
+- **RabbitMQ**：消息队列服务
+
+#### 本地运行的服务
+- **API Gateway**：API网关
+- **User Service**：用户服务
+- **Product Service**：商品服务
+- **Order Service**：订单服务
+- **Admin**：管理后台
+- **其他业务服务**
+
+### 虚拟机配置
+
+#### 虚拟机信息
+- **IP地址**：192.168.186.128
+- **操作系统**：Linux
+- **内存**：建议4GB以上
+- **磁盘**：建议50GB以上
+
+#### 服务配置
+
+| 服务 | 端口 | 配置文件 |
+|------|------|----------|
+| MySQL | 3306 | 数据库：heikeji_mall |
+| Redis | 6379 | 无密码 |
+| Nacos | 8848 | 默认配置 |
+| RabbitMQ | 5672 | 默认用户：guest/guest |
+
+### 本地服务配置
+
+所有本地服务需要更新以下配置，指向虚拟机IP：
+
+#### 数据库配置
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://192.168.186.128:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: hkyg
+    password: Mysql@8Root!2025
+```
+
+#### Redis配置
+```yaml
+spring:
+  redis:
+    host: 192.168.186.128
+    port: 6379
+    password: 
+    database: 0
+    timeout: 3000
+```
+
+#### Nacos配置
+```yaml
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.186.128:8848
+```
+
+#### RabbitMQ配置
+```yaml
+spring:
+  rabbitmq:
+    host: 192.168.186.128
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    connection-timeout: 30000
+```
+
+### 部署步骤
+
+#### 1. 虚拟机环境准备
+1. 安装并配置MySQL、Redis、Nacos、RabbitMQ
+2. 创建数据库：`CREATE DATABASE heikeji_mall CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+3. 导入数据库脚本
+
+#### 2. 本地服务配置
+1. 更新所有服务的配置文件，指向虚拟机IP
+2. 编译打包服务
+3. 启动本地服务
+
+#### 3. 验证服务
+1. 检查服务注册状态：访问Nacos控制台
+2. 测试API接口：使用Postman或Swagger UI
+3. 验证消息队列：发送测试消息
 
 ## 安全建议
 

@@ -165,7 +165,7 @@ watch(
   }
 
   // Element UI 面包屑默认样式覆盖
-  ::v-deep .el-breadcrumb {
+  :deep(.el-breadcrumb) {
     font-size: 14px;
     line-height: 1.4;
 
@@ -206,7 +206,7 @@ watch(
       }
     }
 
-    ::v-deep .el-breadcrumb {
+    :deep(.el-breadcrumb) {
       font-size: 13px;
 
       .el-breadcrumb__item {
@@ -222,7 +222,7 @@ watch(
   .breadcrumb-wrapper {
     padding: 8px 12px;
 
-    ::v-deep .el-breadcrumb {
+    :deep(.el-breadcrumb) {
       .el-breadcrumb__item {
         .el-breadcrumb__inner {
           font-size: 12px;

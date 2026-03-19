@@ -90,10 +90,10 @@ export const productApi = {
 
   deleteCategory: (categoryId: number) => request.delete(`/api/category/${categoryId}`),
 
-  uploadImage: (formData: FormData) => request.upload<{ url: string }>('/api/product/upload/image', formData),
+  uploadImage: (formData: FormData) =>
+    request.upload<{ url: string }>('/api/product/upload/image', formData),
 
-  getRecommendProducts: (limit: number = 10) =>
-    request.get('/api/product/recommend', { limit }),
+  getRecommendProducts: (limit: number = 10) => request.get('/api/product/recommend', { limit }),
 
   getPersonalizedRecommendations: (userId: number, limit: number = 10) =>
     request.get('/api/product/recommend/personalized', { userId, limit }),
@@ -101,8 +101,7 @@ export const productApi = {
   getSimilarProducts: (productId: number, limit: number = 10) =>
     request.get(`/api/product/recommend/similar/${productId}`, { limit }),
 
-  getHotProducts: (limit: number = 10) =>
-    request.get('/api/product/recommend/hot', { limit }),
+  getHotProducts: (limit: number = 10) => request.get('/api/product/recommend/hot', { limit }),
 
   recordUserBehavior: (data: BehaviorRecordParams) =>
     request.post('/api/user/behavior/record', data),
@@ -110,8 +109,7 @@ export const productApi = {
   getRecommendReason: (userId: number, productId: number) =>
     request.get('/api/product/recommend/reason', { userId, productId }),
 
-  searchProducts: (params: SearchParams) =>
-    request.get('/api/product/search', params),
+  searchProducts: (params: SearchParams) => request.get('/api/product/search', params),
 
   getBrands: (params?: BrandQueryParams) => request.get('/api/brand/list', params),
 
@@ -121,8 +119,8 @@ export const productApi = {
 
   deleteBrand: (brandId: string) => request.delete(`/api/brand/${brandId}`),
 
-  updateBrandStatus: (data: UpdateBrandStatusParams) =>
-    request.put('/api/brand/status', data),
+  updateBrandStatus: (data: UpdateBrandStatusParams) => request.put('/api/brand/status', data),
 
-  uploadBrandLogo: (formData: FormData) => request.upload<{ url: string }>('/api/brand/upload/logo', formData),
+  uploadBrandLogo: (formData: FormData) =>
+    request.upload<{ url: string }>('/api/brand/upload/logo', formData),
 }

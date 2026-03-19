@@ -66,13 +66,13 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
     @Autowired
     private PaymentStrategyFactory paymentStrategyFactory;
     
-    @Autowired
+    @Autowired(required = false)
     private RedissonClient redissonClient;
     
     @Autowired
     private RiskControlService riskControlService;
     
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     /**
@@ -93,51 +93,79 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
             return existingPayment;
         }
         
-        // 3. 使用分布式锁防止重复创建支付订单
-        RLock lock = redissonClient.getLock("payment:create:" + orderNo);
-        try {
-            // 尝试获取锁，3秒超时，10秒自动过期
-            if (lock.tryLock(3, 10, TimeUnit.SECONDS)) {
-                try {
-                    // 双重检查，防止并发情况下的重复创建
-                    existingPayment = paymentMapper.selectByOrderNo(orderNo);
-                    if (existingPayment != null) {
-                        log.info("订单已存在支付记录: orderNo={}", orderNo);
-                        return existingPayment;
+        // 3. 使用分布式锁防止重复创建支付订单（如果Redis可用）
+        if (redissonClient != null) {
+            RLock lock = redissonClient.getLock("payment:create:" + orderNo);
+            try {
+                // 尝试获取锁，3秒超时，10秒自动过期
+                if (lock.tryLock(3, 10, TimeUnit.SECONDS)) {
+                    try {
+                        // 双重检查，防止并发情况下的重复创建
+                        existingPayment = paymentMapper.selectByOrderNo(orderNo);
+                        if (existingPayment != null) {
+                            log.info("订单已存在支付记录: orderNo={}", orderNo);
+                            return existingPayment;
+                        }
+                        
+                        // 4. 生成支付订单号
+                        String paymentNo = generatePaymentNo();
+                        
+                        Payment payment = new Payment();
+                        payment.setOrderId(orderId);
+                        payment.setOrderNo(orderNo);
+                        payment.setPaymentNo(paymentNo);
+                        payment.setPaymentType(paymentType);
+                        payment.setAmount(amount);
+                        payment.setStatus(0); // 待支付
+                        payment.setCreateTime(new Date());
+                        payment.setUpdateTime(new Date());
+                        
+                        // 5. 保存支付记录（事务内操作）
+                        this.savePayment(payment);
+                        return payment;
+                    } finally {
+                        if (lock.isHeldByCurrentThread()) {
+                            lock.unlock();
+                        }
                     }
-                    
-                    // 4. 生成支付订单号
-                    String paymentNo = generatePaymentNo();
-                    
-                    Payment payment = new Payment();
-                    payment.setOrderId(orderId);
-                    payment.setOrderNo(orderNo);
-                    payment.setPaymentNo(paymentNo);
-                    payment.setPaymentType(paymentType);
-                    payment.setAmount(amount);
-                    payment.setStatus(0); // 待支付
-                    payment.setCreateTime(new Date());
-                    payment.setUpdateTime(new Date());
-                    
-                    // 5. 保存支付记录（事务内操作）
-                    this.savePayment(payment);
-                    return payment;
-                } finally {
-                    if (lock.isHeldByCurrentThread()) {
-                        lock.unlock();
-                    }
+                } else {
+                    log.error("创建支付订单获取锁失败: orderNo={}", orderNo);
+                    throw new RuntimeException("系统繁忙，请稍后重试");
                 }
-            } else {
-                log.error("创建支付订单获取锁失败: orderNo={}", orderNo);
-                throw new RuntimeException("系统繁忙，请稍后重试");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("创建支付订单中断: orderNo={}", orderNo, e);
+                throw new RuntimeException("创建支付订单失败");
+            } catch (Exception e) {
+                log.error("创建支付订单异常: orderNo={}", orderNo, e);
+                throw new RuntimeException("创建支付订单失败");
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("创建支付订单中断: orderNo={}", orderNo, e);
-            throw new RuntimeException("创建支付订单失败");
-        } catch (Exception e) {
-            log.error("创建支付订单异常: orderNo={}", orderNo, e);
-            throw new RuntimeException("创建支付订单失败");
+        } else {
+            // Redis不可用，直接创建支付订单
+            log.warn("Redis不可用，跳过分布式锁，直接创建支付订单: orderNo={}", orderNo);
+            // 再次检查是否已存在支付记录
+            existingPayment = paymentMapper.selectByOrderNo(orderNo);
+            if (existingPayment != null) {
+                log.info("订单已存在支付记录: orderNo={}", orderNo);
+                return existingPayment;
+            }
+            
+            // 生成支付订单号
+            String paymentNo = generatePaymentNo();
+            
+            Payment payment = new Payment();
+            payment.setOrderId(orderId);
+            payment.setOrderNo(orderNo);
+            payment.setPaymentNo(paymentNo);
+            payment.setPaymentType(paymentType);
+            payment.setAmount(amount);
+            payment.setStatus(0); // 待支付
+            payment.setCreateTime(new Date());
+            payment.setUpdateTime(new Date());
+            
+            // 保存支付记录（事务内操作）
+            this.savePayment(payment);
+            return payment;
         }
     }
     
@@ -195,15 +223,19 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
                 return false;
             }
             
-            // 2. 获取分布式锁，防止重复处理回调
+            // 2. 获取分布式锁，防止重复处理回调（如果Redis可用）
             String lockKey = "payment:callback:" + orderNo;
             boolean isLocked = false;
             try {
-                // 获取锁，设置5秒过期时间
-                isLocked = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", 5, TimeUnit.SECONDS);
-                if (!isLocked) {
-                    log.info("支付回调已被其他线程处理，订单号：{}", orderNo);
-                    return true; // 已被其他线程处理，返回成功
+                if (redisTemplate != null) {
+                    // 获取锁，设置5秒过期时间
+                    isLocked = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", 5, TimeUnit.SECONDS);
+                    if (!isLocked) {
+                        log.info("支付回调已被其他线程处理，订单号：{}", orderNo);
+                        return true; // 已被其他线程处理，返回成功
+                    }
+                } else {
+                    log.warn("Redis不可用，跳过分布式锁，直接处理支付回调: orderNo={}", orderNo);
                 }
                 
                 // 3. 使用策略模式处理回调，包含签名验证
@@ -245,7 +277,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
                 return true;
             } finally {
                 // 释放分布式锁
-                if (isLocked) {
+                if (isLocked && redisTemplate != null) {
                     redisTemplate.delete(lockKey);
                 }
             }

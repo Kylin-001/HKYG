@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { ref, computed } from 'vue'
-import { Sun, Moon, Monitor } from '@element-plus/icons-vue'
+import { Sunny, Moon, Monitor } from '@element-plus/icons-vue'
 
 // 定义接口
 interface ThemeOption {
@@ -78,7 +78,7 @@ const isThemeInitialized = ref<boolean>(false)
 
 // 主题图标映射
 const themeIcons = {
-  light: Sun,
+  light: Sunny,
   dark: Moon,
   auto: Monitor,
 }
@@ -89,7 +89,7 @@ const defaultThemes: ThemeOption[] = [
     value: 'light',
     label: '浅色主题',
     color: '#ffffff',
-    icon: Sun,
+    icon: Sunny,
   },
   {
     value: 'dark',
@@ -272,7 +272,7 @@ const currentThemeName = computed(() => {
 // 当前主题图标
 const currentThemeIcon = computed(() => {
   const themeConfig = availableThemes.value.find(t => t.value === currentTheme.value)
-  return themeConfig?.icon || themeIcons[currentTheme.value as keyof typeof themeIcons] || Sun
+  return themeConfig?.icon || themeIcons[currentTheme.value as keyof typeof themeIcons] || Sunny
 })
 
 // 处理主题变化

@@ -16,7 +16,12 @@
     <el-card class="search-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="教学楼">
-          <el-select v-model="searchForm.buildingId" placeholder="请选择教学楼" clearable @change="handleBuildingChange">
+          <el-select
+            v-model="searchForm.buildingId"
+            placeholder="请选择教学楼"
+            clearable
+            @change="handleBuildingChange"
+          >
             <el-option
               v-for="building in buildings"
               :key="building.id"
@@ -53,14 +58,7 @@
     </el-card>
 
     <el-row :gutter="20" class="classroom-grid">
-      <el-col
-        v-for="classroom in classrooms"
-        :key="classroom.id"
-        :xs="24"
-        :sm="12"
-        :md="8"
-        :lg="6"
-      >
+      <el-col v-for="classroom in classrooms" :key="classroom.id" :xs="24" :sm="12" :md="8" :lg="6">
         <el-card class="classroom-card" :class="{ 'is-available': classroom.isAvailable }">
           <div class="classroom-header">
             <h3>{{ classroom.name }}</h3>
@@ -86,7 +84,11 @@
             <el-button type="primary" size="small" @click="handleViewSchedule(classroom)">
               查看课程
             </el-button>
-            <el-button size="small" @click="handleBookClassroom(classroom)" v-if="classroom.isAvailable">
+            <el-button
+              size="small"
+              @click="handleBookClassroom(classroom)"
+              v-if="classroom.isAvailable"
+            >
               预订
             </el-button>
           </div>
@@ -96,11 +98,7 @@
 
     <el-empty v-if="classrooms.length === 0 && !loading" description="暂无可用教室" />
 
-    <el-dialog
-      v-model="scheduleDialogVisible"
-      title="教室课程安排"
-      width="700px"
-    >
+    <el-dialog v-model="scheduleDialogVisible" title="教室课程安排" width="700px">
       <div class="schedule-container">
         <h4>{{ selectedClassroom?.name }} - {{ searchForm.date }}</h4>
         <el-timeline>
@@ -114,7 +112,9 @@
             <el-card>
               <div class="schedule-item">
                 <div class="schedule-title">{{ schedule.courseName || '自习' }}</div>
-                <div class="schedule-teacher" v-if="schedule.teacherName">教师: {{ schedule.teacherName }}</div>
+                <div class="schedule-teacher" v-if="schedule.teacherName">
+                  教师: {{ schedule.teacherName }}
+                </div>
                 <el-tag size="small" :type="schedule.status === 1 ? 'danger' : 'success'">
                   {{ schedule.status === 1 ? '已占用' : '空闲' }}
                 </el-tag>
@@ -135,7 +135,12 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, Search } from '@element-plus/icons-vue'
-import { getBuildings, getClassrooms, searchAvailableClassrooms, getClassroomSchedule } from '@/api/campus'
+import {
+  getBuildings,
+  getClassrooms,
+  searchAvailableClassrooms,
+  getClassroomSchedule,
+} from '@/api/campus'
 import type { CampusBuilding, CampusClassroom, CampusClassroomSchedule } from '@/types/campus'
 
 const loading = ref(false)
@@ -148,7 +153,7 @@ const selectedClassroom = ref<CampusClassroom | null>(null)
 const searchForm = reactive({
   buildingId: undefined as number | undefined,
   date: new Date().toISOString().split('T')[0],
-  classSection: undefined as number | undefined
+  classSection: undefined as number | undefined,
 })
 
 const buildingMap = computed(() => {
@@ -177,12 +182,12 @@ const searchClassrooms = async () => {
     const params = {
       buildingId: searchForm.buildingId,
       date: searchForm.date,
-      classSection: searchForm.classSection
+      classSection: searchForm.classSection,
     }
     const res = await searchAvailableClassrooms(params)
     classrooms.value = (res.data || []).map((classroom: any) => ({
       ...classroom,
-      isAvailable: true
+      isAvailable: true,
     }))
   } catch (error) {
     ElMessage.error('查询教室失败')
@@ -204,7 +209,7 @@ const loadClassroomsByBuilding = async () => {
     const res = await getClassrooms(searchForm.buildingId)
     classrooms.value = (res.data || []).map((classroom: any) => ({
       ...classroom,
-      isAvailable: true
+      isAvailable: true,
     }))
   } catch (error) {
     console.error(error)

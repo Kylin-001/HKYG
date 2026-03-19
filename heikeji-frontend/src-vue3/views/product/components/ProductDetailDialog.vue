@@ -15,7 +15,7 @@
               <span>基本信息</span>
             </div>
           </template>
-          
+
           <el-row :gutter="20">
             <el-col :span="8">
               <div class="product-image-container">
@@ -31,22 +31,30 @@
               <el-descriptions :column="2" border>
                 <el-descriptions-item label="商品名称">{{ product.name }}</el-descriptions-item>
                 <el-descriptions-item label="商品编号">{{ product.code }}</el-descriptions-item>
-                <el-descriptions-item label="商品分类">{{ product.categoryName }}</el-descriptions-item>
+                <el-descriptions-item label="商品分类">{{
+                  product.categoryName
+                }}</el-descriptions-item>
                 <el-descriptions-item label="商品状态">
                   <el-tag :type="product.status === 1 ? 'success' : 'danger'">
                     {{ product.status === 1 ? '上架' : '下架' }}
                   </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="销售价格">¥{{ product.price.toFixed(2) }}</el-descriptions-item>
+                <el-descriptions-item label="销售价格"
+                  >¥{{ product.price.toFixed(2) }}</el-descriptions-item
+                >
                 <el-descriptions-item label="原价" v-if="product.originalPrice">
                   ¥{{ product.originalPrice.toFixed(2) }}
                 </el-descriptions-item>
                 <el-descriptions-item label="库存数量">{{ product.stock }}</el-descriptions-item>
                 <el-descriptions-item label="销量">{{ product.sales }}</el-descriptions-item>
-                <el-descriptions-item label="创建时间">{{ formatDate(product.createTime) }}</el-descriptions-item>
-                <el-descriptions-item label="更新时间">{{ formatDate(product.updateTime) }}</el-descriptions-item>
+                <el-descriptions-item label="创建时间">{{
+                  formatDate(product.createTime)
+                }}</el-descriptions-item>
+                <el-descriptions-item label="更新时间">{{
+                  formatDate(product.updateTime)
+                }}</el-descriptions-item>
               </el-descriptions>
-              
+
               <div class="product-tags" v-if="product.tags && product.tags.length">
                 <el-tag
                   v-for="tag in product.tags"
@@ -73,7 +81,10 @@
         </el-card>
 
         <!-- 商品规格 -->
-        <el-card class="detail-section" v-if="product.specifications && product.specifications.length">
+        <el-card
+          class="detail-section"
+          v-if="product.specifications && product.specifications.length"
+        >
           <template #header>
             <div class="section-header">
               <span>商品规格</span>
@@ -168,12 +179,12 @@ const product = ref<Product | null>(null)
 
 const dialogVisible = computed({
   get: () => props.visible,
-  set: (value) => emit('update:visible', value),
+  set: value => emit('update:visible', value),
 })
 
 const loadProductDetail = async () => {
   if (!props.productId) return
-  
+
   loading.value = true
   try {
     const res = await getProductDetail(props.productId)
@@ -205,7 +216,7 @@ const formatDate = (dateString: string) => {
 // 监听productId变化
 watch(
   () => props.productId,
-  (newId) => {
+  newId => {
     if (newId && props.visible) {
       loadProductDetail()
     }
@@ -216,7 +227,7 @@ watch(
 // 监听对话框显示状态
 watch(
   () => props.visible,
-  (visible) => {
+  visible => {
     if (visible && props.productId) {
       loadProductDetail()
     }

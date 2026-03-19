@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import StatusTag from '@/components/ui/StatusTag.vue'
@@ -12,10 +12,10 @@ describe('StatusTag Component', () => {
   it('should render correctly with default props', () => {
     const wrapper = mount(StatusTag, {
       props: {
-        status: 'success'
-      }
+        status: 'success',
+      },
     })
-    
+
     expect(wrapper.find('.status-tag').exists()).toBe(true)
     expect(wrapper.text()).toContain('success')
   })
@@ -23,10 +23,10 @@ describe('StatusTag Component', () => {
   it('should apply correct color class based on status', () => {
     const wrapper = mount(StatusTag, {
       props: {
-        status: 'error'
-      }
+        status: 'error',
+      },
     })
-    
+
     expect(wrapper.find('.status-tag--error').exists()).toBe(true)
   })
 
@@ -34,10 +34,10 @@ describe('StatusTag Component', () => {
     const wrapper = mount(StatusTag, {
       props: {
         status: 'success',
-        text: '已完成'
-      }
+        text: '已完成',
+      },
     })
-    
+
     expect(wrapper.text()).toBe('已完成')
   })
 
@@ -45,10 +45,10 @@ describe('StatusTag Component', () => {
     const wrapper = mount(StatusTag, {
       props: {
         status: 'success',
-        clickable: true
-      }
+        clickable: true,
+      },
     })
-    
+
     await wrapper.find('.status-tag').trigger('click')
     expect(wrapper.emitted('click')).toBeTruthy()
   })
@@ -57,10 +57,10 @@ describe('StatusTag Component', () => {
     const wrapper = mount(StatusTag, {
       props: {
         status: 'success',
-        clickable: false
-      }
+        clickable: false,
+      },
     })
-    
+
     await wrapper.find('.status-tag').trigger('click')
     expect(wrapper.emitted('click')).toBeFalsy()
   })

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import UserAvatar from '@/components/business/UserAvatar.vue'
@@ -16,32 +16,32 @@ describe('UserAvatar Component Tests', () => {
     avatar: 'http://example.com/avatar.jpg',
     status: 'online',
     email: 'test@example.com',
-    phone: '13800138000'
+    phone: '13800138000',
   }
 
   it('should render correctly', () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: mockUser
+        user: mockUser,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.user-avatar').exists()).toBe(true)
   })
 
   it('should display avatar image', () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: mockUser
+        user: mockUser,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     const img = wrapper.find('img')
     expect(img.attributes('src')).toBe('http://example.com/avatar.jpg')
     expect(img.attributes('alt')).toBe('测试用户')
@@ -51,13 +51,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: mockUser,
-        showName: true
+        showName: true,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.text()).toContain('测试用户')
   })
 
@@ -65,39 +65,39 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: { ...mockUser, nickname: null },
-        showName: true
+        showName: true,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.text()).toContain('testuser')
   })
 
   it('should show online status indicator', () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: mockUser
+        user: mockUser,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.status-online')).exists().toBe(true)
   })
 
   it('should show offline status indicator', () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: { ...mockUser, status: 'offline' }
+        user: { ...mockUser, status: 'offline' },
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.status-offline')).exists().toBe(true)
   })
 
@@ -105,26 +105,26 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: mockUser,
-        size: 'large'
+        size: 'large',
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.avatar-large')).exists().toBe(true)
   })
 
   it('should apply default size', () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: mockUser
+        user: mockUser,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.avatar-medium')).exists().toBe(true)
   })
 
@@ -132,13 +132,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: mockUser,
-        role: 'admin'
+        role: 'admin',
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.role-badge')).exists().toBe(true)
     expect(wrapper.text()).toContain('admin')
   })
@@ -146,13 +146,13 @@ describe('UserAvatar Component Tests', () => {
   it('should emit click event when clicked', async () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: mockUser
+        user: mockUser,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     await wrapper.find('.user-avatar').trigger('click')
     expect(wrapper.emitted('click')).toBeTruthy()
     expect(wrapper.emitted('click')[0]).toEqual([mockUser])
@@ -161,13 +161,13 @@ describe('UserAvatar Component Tests', () => {
   it('should show default avatar when user avatar not provided', () => {
     const wrapper = mount(UserAvatar, {
       props: {
-        user: { ...mockUser, avatar: null }
+        user: { ...mockUser, avatar: null },
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     const img = wrapper.find('img')
     expect(img.attributes('src')).toContain('default-avatar')
   })
@@ -176,13 +176,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: mockUser,
-        size: 'small'
+        size: 'small',
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.avatar-small')).exists().toBe(true)
   })
 
@@ -190,13 +190,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: mockUser,
-        size: 'xlarge'
+        size: 'xlarge',
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.find('.avatar-xlarge')).exists().toBe(true)
   })
 
@@ -204,13 +204,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: mockUser,
-        roles: ['admin', 'moderator', 'vip']
+        roles: ['admin', 'moderator', 'vip'],
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     const badges = wrapper.findAll('.role-badge')
     expect(badges.length).toBe(3)
   })
@@ -220,13 +220,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: { ...mockUser, nickname: longNickname },
-        showName: true
+        showName: true,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.text()).toContain(longNickname)
   })
 
@@ -235,13 +235,13 @@ describe('UserAvatar Component Tests', () => {
     const wrapper = mount(UserAvatar, {
       props: {
         user: { ...mockUser, nickname: specialNickname },
-        showName: true
+        showName: true,
       },
       global: {
         plugins: [createPinia()],
       },
     })
-    
+
     expect(wrapper.text()).toContain(specialNickname)
   })
 })

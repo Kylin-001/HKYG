@@ -58,18 +58,18 @@ export const useCourierStore = defineStore('courier', {
       avatar: '',
       onlineStatus: 'offline',
       joinDate: '',
-      rating: 0
+      rating: 0,
     },
     dashboardData: null,
-    loading: false
+    loading: false,
   }),
 
   getters: {
     // 获取配送员信息
-    getCourierInfo: (state) => state.courierInfo,
-    
+    getCourierInfo: state => state.courierInfo,
+
     // 获取仪表板数据
-    getDashboardData: (state) => state.dashboardData
+    getDashboardData: state => state.dashboardData,
   },
 
   actions: {
@@ -117,6 +117,6 @@ export const useCourierStore = defineStore('courier', {
       } finally {
         this.loading = false
       }
-    }
+    },
   },
 })

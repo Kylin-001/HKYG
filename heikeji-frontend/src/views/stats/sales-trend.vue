@@ -248,8 +248,29 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([
+  BarChart,
+  LineChart,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer,
+])
 import { Download, Refresh, Search, RefreshRight } from '@element-plus/icons-vue'
+import * as productApi from '@/api/product'
+import * as orderApi from '@/api/order'
 
 // 日期快捷选项
 const dateShortcuts = [
@@ -619,13 +640,27 @@ const handleResize = () => {
 }
 
 // 查询数据
-const handleSearch = () => {
+const handleSearch = async () => {
   loading.value = true
-  // 模拟API请求
-  setTimeout(() => {
-    loading.value = false
+  try {
+    const res = await productApi.getProductSales(
+      filterParams.dateRange?.[0],
+      filterParams.dateRange?.[1],
+      filterParams.category
+    )
+
+    if (res.data) {
+      salesTrendChartData.value = res.data.trend || []
+      salesData.value = res.data.list || []
+      total.value = salesData.value.length
+    }
+
     ElMessage.success('查询成功')
-  }, 500)
+  } catch (error) {
+    ElMessage.error('查询失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 重置筛选条件
@@ -639,19 +674,31 @@ const handleReset = () => {
 }
 
 // 导出数据
-const handleExport = () => {
-  ElMessage.info('导出功能开发中')
+const handleExport = async () => {
+  try {
+    await productApi.exportProducts({
+      ...filterParams,
+      startDate: filterParams.dateRange?.[0],
+      endDate: filterParams.dateRange?.[1],
+    })
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
 }
 
 // 刷新数据
-const handleRefresh = () => {
+const handleRefresh = async () => {
   loading.value = true
-  // 模拟API请求
-  setTimeout(() => {
-    loading.value = false
-    ElMessage.success('刷新成功')
+  try {
+    await handleSearch()
     refreshCharts()
-  }, 500)
+    ElMessage.success('刷新成功')
+  } catch (error) {
+    ElMessage.error('刷新失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 分页大小变化

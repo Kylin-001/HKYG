@@ -1,1 +1,15 @@
-export { formatDate, deepClone, isEmpty, debounce, throttle, formatNumber, formatFileSize, generateUniqueId, copyToClipboard, scrollToElement, getUrlParam, downloadFile, onResize } from './index'
+export {
+  formatDate,
+  deepClone,
+  isEmpty,
+  debounce,
+  throttle,
+  formatNumber,
+  formatFileSize,
+  generateUniqueId,
+  copyToClipboard,
+  scrollToElement,
+  getUrlParam,
+  downloadFile,
+  onResize,
+} from './index'

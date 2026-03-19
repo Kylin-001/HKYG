@@ -42,7 +42,7 @@ export const setupE2ETest = () => {
         price: 100,
         quantity: 2,
         total: 200,
-      }
+      },
     ],
     amount: 200,
     status: '待支付',
@@ -135,7 +135,7 @@ export const generateTestReport = async (testResults: any) => {
       error: result.error,
       browser: result.browser,
       viewport: result.viewport,
-    }),
+    })),
   }
 
   try {

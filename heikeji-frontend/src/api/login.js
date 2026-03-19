@@ -4,17 +4,18 @@ import config from '@/config/environment'
 // 用户登录 - 使用LoginController和AuthController
 export function login(data) {
   return request({
-    url: `/api/auth/login`,
+    url: `/api/user/login`,
     method: 'post',
     data,
   })
 }
 
 // 获取验证码 - 使用LoginController
-export function getCodeImg() {
+export function getCodeImg(phone) {
   return request({
-    url: '/api/login/codeImg',
-    method: 'get',
+    url: '/api/user/sendCode',
+    method: 'post',
+    params: { phone }
   })
 }
 
@@ -23,7 +24,7 @@ export const getCaptcha = getCodeImg
 // 退出登录 - 使用LoginController
 export function logout() {
   return request({
-    url: `/api/auth/logout`,
+    url: `/api/user/logout`,
     method: 'post',
   })
 }
@@ -31,7 +32,7 @@ export function logout() {
 // 获取当前用户信息 - 使用AuthController
 export function getCurrentUser() {
   return request({
-    url: `/api/auth/currentUser`,
+    url: `/api/user/me`,
     method: 'get',
   })
 }
@@ -39,7 +40,7 @@ export function getCurrentUser() {
 // 刷新令牌 - 使用AuthController
 export function refreshToken() {
   return request({
-    url: `/api/auth/refresh`,
+    url: `/api/user/refresh`,
     method: 'post',
   })
 }

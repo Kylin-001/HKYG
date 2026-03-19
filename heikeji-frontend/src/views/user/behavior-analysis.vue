@@ -349,15 +349,11 @@ const loadBehaviorData = async () => {
     const now = new Date()
 
     for (let i = 0; i < 100; i++) {
-      const date = new Date(
-        now.getTime() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000
-      )
+      const date = new Date(now.getTime() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000)
       mockData.push({
         id: i + 1,
         userId: Math.floor(Math.random() * 10) + 1,
-        behaviorType: ['browse', 'purchase', 'favorite', 'comment'][
-          Math.floor(Math.random() * 4)
-        ],
+        behaviorType: ['browse', 'purchase', 'favorite', 'comment'][Math.floor(Math.random() * 4)],
         behaviorContent: `商品${Math.floor(Math.random() * 100)}`,
         behaviorTime: date.toISOString().substring(0, 19).replace('T', ' '),
       })
@@ -373,12 +369,8 @@ const loadBehaviorData = async () => {
 
 const updateMetrics = () => {
   const browsingCount = behaviorData.value.filter(item => item.behaviorType === 'browse').length
-  const purchaseCount = behaviorData.value.filter(
-    item => item.behaviorType === 'purchase'
-  ).length
-  const favoriteCount = behaviorData.value.filter(
-    item => item.behaviorType === 'favorite'
-  ).length
+  const purchaseCount = behaviorData.value.filter(item => item.behaviorType === 'purchase').length
+  const favoriteCount = behaviorData.value.filter(item => item.behaviorType === 'favorite').length
   const commentCount = behaviorData.value.filter(item => item.behaviorType === 'comment').length
 
   metrics.totalBrowsing = browsingCount.toLocaleString()

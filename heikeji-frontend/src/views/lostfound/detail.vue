@@ -12,9 +12,9 @@
           </el-tag>
           <h2>{{ item.title }}</h2>
         </template>
-        
+
         <el-divider />
-        
+
         <el-row :gutter="20">
           <el-col :span="16">
             <div class="info-grid">
@@ -58,15 +58,15 @@
                 <span class="value">{{ item.createTime }}</span>
               </template>
             </template>
-            
+
             <el-divider />
-            
+
             <div class="desc-section">
               <h4>详细描述</h4>
               <p>{{ item.description }}</p>
             </template>
           </el-col>
-          
+
           <el-col :span="8">
             <div v-if="item.images" class="image-section">
               <el-image
@@ -79,7 +79,7 @@
             </template>
           </el-col>
         </el-row>
-        
+
         <div class="action-buttons">
           <el-button v-if="item.status === 1" type="primary" size="large" @click="handleContact">联系{{ item.type === 0 ? '失主' : '拾取者' }}</el-button>
           <el-button v-if="item.type === 0 && item.status === 1" size="large" @click="handleFound">我找到了</el-button>

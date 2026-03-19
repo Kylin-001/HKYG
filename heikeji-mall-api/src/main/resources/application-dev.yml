@@ -17,7 +17,7 @@ spring:
         group: DEFAULT_GROUP
   # Redis配置
   redis:
-    host: localhost
+    host: 192.168.186.128
     port: 6379
     database: 0
     password: # 开发环境可以留空

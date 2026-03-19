@@ -1,7 +1,7 @@
 package com.heikeji.admin.security.impl;
 
 import com.heikeji.admin.security.TokenService;
-import com.heikeji.common.core.security.JwtUtils;
+import com.heikeji.common.security.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -26,9 +26,9 @@ public class JwtTokenServiceImpl implements TokenService {
     @Override
     public String createToken(UserDetails userDetails) {
         // 使用common-core的JwtUtils生成标准JWT token
-        // 注意：这里需要userId和username，暂时使用username作为userId
+        // 注意：这里需要userId和username，暂时使用1L作为userId，username作为openId
         String username = userDetails.getUsername();
-        return jwtUtils.generateToken(username, username);
+        return jwtUtils.generateToken(1L, username);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class JwtTokenServiceImpl implements TokenService {
     @Override
     public String getUsernameFromToken(String token) {
         // 使用common-core的JwtUtils从token中获取用户名
-        return jwtUtils.getUsernameFromToken(token);
+        return jwtUtils.getOpenIdFromToken(token);
     }
 
     @Override

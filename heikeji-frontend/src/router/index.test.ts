@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { testUserData } from '@/config/test';
+import { testUserData } from '@/config/test'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import router from '@/router'
 import { setActivePinia, createPinia } from 'pinia'
@@ -23,7 +23,7 @@ describe('Router', () => {
   it('should have constant routes defined', () => {
     const routes = router.getRoutes()
     expect(routes.length).toBeGreaterThan(0)
-    
+
     const loginRoute = routes.find(r => r.path === '/login')
     expect(loginRoute).toBeDefined()
   })

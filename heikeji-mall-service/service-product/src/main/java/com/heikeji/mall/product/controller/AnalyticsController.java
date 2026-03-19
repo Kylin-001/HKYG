@@ -1,4 +1,4 @@
-package com.heikeji.mall.analytics.controller;
+package com.heikeji.mall.product.controller;
 
 import com.heikeji.common.core.domain.R;
 import io.swagger.v3.oas.annotations.Operation;

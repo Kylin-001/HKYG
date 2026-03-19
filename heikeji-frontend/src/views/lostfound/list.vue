@@ -125,7 +125,7 @@ export default {
       } else if (this.activeTab === 'found') {
         params.type = 1
       }
-      
+
       getLostFoundList(params).then(response => {
         this.list = response.data.records || []
         this.total = response.data.total || 0

@@ -3,6 +3,7 @@ package com.heikeji.mall.payment.config;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,7 @@ import java.util.Map;
  * 配置支付服务相关的交换机、队列和绑定关系
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.rabbitmq.enabled", havingValue = "true", matchIfMissing = true)
 public class RabbitMQConfig {
 
     // 从配置文件读取交换机和队列名称

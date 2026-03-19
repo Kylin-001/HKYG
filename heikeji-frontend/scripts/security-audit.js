@@ -5,9 +5,9 @@
  * 用于检查项目中的安全漏洞和问题
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require('fs')
+const path = require('path')
+const { execSync } = require('child_process')
 
 // 配置
 const config = {
@@ -29,7 +29,7 @@ const config = {
       /auth[_-]?token\s*[:=]\s*['"`][^'"`]{10,}['"`]/gi,
       /bearer\s+['"`][^'"`]{10,}['"`]/gi,
     ],
-    
+
     // 不安全的代码模式
     unsafePatterns: [
       /eval\s*\(/gi,
@@ -42,59 +42,59 @@ const config = {
       /document\.writeln\s*\(/gi,
       /crypto\.getRandomValues\s*\(\s*new\s+Uint8Array\s*\(\s*1\s*\)\s*\)/gi, // 弱随机数
     ],
-    
+
     // 不安全的HTTP请求
     insecureHttpPatterns: [
       /http:\/\/[^'"\s]+/gi,
       /xmlhttprequest/gi,
       /fetch\s*\(\s*['"`]http:\/\//gi,
     ],
-    
+
     // 硬编码的URL
     hardcodedUrls: [
       /https?:\/\/[^\s'"`]+\.(jpg|jpeg|png|gif|svg|webp)/gi,
       /https?:\/\/[^\s'"`]+\.(js|css|woff|woff2|ttf|eot)/gi,
     ],
   },
-};
+}
 
 // 确保目录存在
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true })
   }
 }
 
 // 递归获取所有文件
 function getAllFiles(dir, fileList = []) {
-  const files = fs.readdirSync(dir);
-  
+  const files = fs.readdirSync(dir)
+
   files.forEach(file => {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
-    
+    const filePath = path.join(dir, file)
+    const stat = fs.statSync(filePath)
+
     if (stat.isDirectory()) {
       // 跳过排除的目录
       if (!config.excludeDirs.includes(file)) {
-        getAllFiles(filePath, fileList);
+        getAllFiles(filePath, fileList)
       }
     } else {
       // 跳过排除的文件
       const shouldExclude = config.excludeFiles.some(pattern => {
-        const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-        return regex.test(file);
-      });
-      
+        const regex = new RegExp(pattern.replace(/\*/g, '.*'))
+        return regex.test(file)
+      })
+
       // 跳过本地化文件
-      const isLocalizationFile = filePath.includes('/locales/') || filePath.includes('\\locales\\');
-      
+      const isLocalizationFile = filePath.includes('/locales/') || filePath.includes('\\locales\\')
+
       if (!shouldExclude && !isLocalizationFile) {
-        fileList.push(filePath);
+        fileList.push(filePath)
       }
     }
-  });
-  
-  return fileList;
+  })
+
+  return fileList
 }
 
 // 检查文件中的安全漏洞
@@ -102,14 +102,14 @@ function checkFileSecurity(filePath) {
   const results = {
     filePath: path.relative(__dirname, '../', filePath),
     issues: [],
-  };
-  
+  }
+
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    
+    const content = fs.readFileSync(filePath, 'utf8')
+
     // 检查敏感信息
     config.securityRules.sensitivePatterns.forEach((pattern, index) => {
-      const matches = content.match(pattern);
+      const matches = content.match(pattern)
       if (matches) {
         results.issues.push({
           type: 'sensitive-data',
@@ -117,13 +117,13 @@ function checkFileSecurity(filePath) {
           rule: `sensitive-pattern-${index}`,
           message: `发现可能的敏感信息: ${pattern}`,
           matches: matches.map(match => match.substring(0, 50) + (match.length > 50 ? '...' : '')),
-        });
+        })
       }
-    });
-    
+    })
+
     // 检查不安全的代码模式
     config.securityRules.unsafePatterns.forEach((pattern, index) => {
-      const matches = content.match(pattern);
+      const matches = content.match(pattern)
       if (matches) {
         results.issues.push({
           type: 'unsafe-code',
@@ -131,13 +131,13 @@ function checkFileSecurity(filePath) {
           rule: `unsafe-pattern-${index}`,
           message: `发现不安全的代码模式: ${pattern}`,
           matches: matches.map(match => match.substring(0, 50) + (match.length > 50 ? '...' : '')),
-        });
+        })
       }
-    });
-    
+    })
+
     // 检查不安全的HTTP请求
     config.securityRules.insecureHttpPatterns.forEach((pattern, index) => {
-      const matches = content.match(pattern);
+      const matches = content.match(pattern)
       if (matches) {
         results.issues.push({
           type: 'insecure-http',
@@ -145,13 +145,13 @@ function checkFileSecurity(filePath) {
           rule: `insecure-http-${index}`,
           message: `发现不安全的HTTP请求: ${pattern}`,
           matches: matches.map(match => match.substring(0, 50) + (match.length > 50 ? '...' : '')),
-        });
+        })
       }
-    });
-    
+    })
+
     // 检查硬编码的URL
     config.securityRules.hardcodedUrls.forEach((pattern, index) => {
-      const matches = content.match(pattern);
+      const matches = content.match(pattern)
       if (matches) {
         results.issues.push({
           type: 'hardcoded-url',
@@ -159,76 +159,78 @@ function checkFileSecurity(filePath) {
           rule: `hardcoded-url-${index}`,
           message: `发现硬编码的URL: ${pattern}`,
           matches: matches.slice(0, 5), // 只显示前5个匹配
-        });
+        })
       }
-    });
-    
+    })
   } catch (error) {
     // 忽略读取错误
   }
-  
-  return results;
+
+  return results
 }
 
 // 运行npm audit
 function runNpmAudit() {
   try {
-    const output = execSync('npm audit --json', { encoding: 'utf8', cwd: path.join(__dirname, '../') });
-    return JSON.parse(output);
+    const output = execSync('npm audit --json', {
+      encoding: 'utf8',
+      cwd: path.join(__dirname, '../'),
+    })
+    return JSON.parse(output)
   } catch (error) {
     // npm audit在发现漏洞时会返回非零退出码
     try {
-      return JSON.parse(error.stdout);
+      return JSON.parse(error.stdout)
     } catch (parseError) {
-      return { error: '无法解析npm audit输出' };
+      return { error: '无法解析npm audit输出' }
     }
   }
 }
 
 // 生成安全报告
 function generateSecurityReport() {
-  console.log('开始安全审计...');
-  
+  console.log('开始安全审计...')
+
   // 确保报告目录存在
-  ensureDir(config.reportsDir);
-  
+  ensureDir(config.reportsDir)
+
   // 获取所有文件
-  const files = getAllFiles(config.srcDir);
-  console.log(`检查 ${files.length} 个文件...`);
-  
+  const files = getAllFiles(config.srcDir)
+  console.log(`检查 ${files.length} 个文件...`)
+
   // 检查每个文件
-  const fileResults = [];
-  let totalIssues = 0;
-  let highSeverityIssues = 0;
-  let mediumSeverityIssues = 0;
-  let lowSeverityIssues = 0;
-  
+  const fileResults = []
+  let totalIssues = 0
+  let highSeverityIssues = 0
+  let mediumSeverityIssues = 0
+  let lowSeverityIssues = 0
+
   files.forEach(filePath => {
-    const result = checkFileSecurity(filePath);
+    const result = checkFileSecurity(filePath)
     if (result.issues.length > 0) {
-      fileResults.push(result);
-      totalIssues += result.issues.length;
-      
+      fileResults.push(result)
+      totalIssues += result.issues.length
+
       result.issues.forEach(issue => {
         switch (issue.severity) {
           case 'high':
-            highSeverityIssues++;
-            break;
+            highSeverityIssues++
+            break
           case 'medium':
-            mediumSeverityIssues++;
-            break;
+            mediumSeverityIssues++
+            break
           case 'low':
-            lowSeverityIssues++;
-            break;
+            lowSeverityIssues++
+            break
         }
-      });
+      })
     }
-  });
-  
+  })
+
   // 运行npm audit
-  console.log('运行npm audit...');
-  const npmAuditResult = runNpmAudit();
-  
+  console.log('运行npm audit...')
+  const npmAuditResult = runNpmAudit()
+
   // 生成报告
   const report = {
     timestamp: new Date().toISOString(),
@@ -239,25 +241,32 @@ function generateSecurityReport() {
       highSeverityIssues,
       mediumSeverityIssues,
       lowSeverityIssues,
-      npmAuditVulnerabilities: npmAuditResult.metadata ? npmAuditResult.metadata.vulnerabilities : {},
+      npmAuditVulnerabilities: npmAuditResult.metadata
+        ? npmAuditResult.metadata.vulnerabilities
+        : {},
     },
     fileResults,
     npmAuditResult,
-  };
-  
+  }
+
   // 保存JSON报告
-  const jsonReportPath = path.join(config.reportsDir, `security-report-${new Date().getTime()}.json`);
-  fs.writeFileSync(jsonReportPath, JSON.stringify(report, null, 2));
-  
+  const jsonReportPath = path.join(
+    config.reportsDir,
+    `security-report-${new Date().getTime()}.json`
+  )
+  fs.writeFileSync(jsonReportPath, JSON.stringify(report, null, 2))
+
   // 生成HTML报告
-  const htmlReportPath = generateHtmlReport(report);
-  
-  console.log(`安全审计完成！`);
-  console.log(`发现 ${totalIssues} 个问题 (${highSeverityIssues} 高危, ${mediumSeverityIssues} 中危, ${lowSeverityIssues} 低危)`);
-  console.log(`JSON报告: ${jsonReportPath}`);
-  console.log(`HTML报告: ${htmlReportPath}`);
-  
-  return report;
+  const htmlReportPath = generateHtmlReport(report)
+
+  console.log(`安全审计完成！`)
+  console.log(
+    `发现 ${totalIssues} 个问题 (${highSeverityIssues} 高危, ${mediumSeverityIssues} 中危, ${lowSeverityIssues} 低危)`
+  )
+  console.log(`JSON报告: ${jsonReportPath}`)
+  console.log(`HTML报告: ${htmlReportPath}`)
+
+  return report
 }
 
 // 生成HTML报告
@@ -443,15 +452,21 @@ function generateHtmlReport(report) {
     </div>
   </div>
   
-  ${report.fileResults.length > 0 ? `
+  ${
+    report.fileResults.length > 0
+      ? `
   <div class="section">
     <div class="section-header">代码安全问题</div>
     <div class="section-content">
-      ${report.fileResults.map(file => `
+      ${report.fileResults
+        .map(
+          file => `
         <div class="file-item">
           <div class="file-header">${file.filePath}</div>
           <div class="file-content">
-            ${file.issues.map(issue => `
+            ${file.issues
+              .map(
+                issue => `
               <div class="issue-item ${issue.severity}">
                 <div class="issue-type">${issue.type}</div>
                 <div class="issue-message">${issue.message}</div>
@@ -459,19 +474,29 @@ function generateHtmlReport(report) {
                   匹配: ${issue.matches.join(', ')}
                 </div>
               </div>
-            `).join('')}
+            `
+              )
+              .join('')}
           </div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
   
-  ${report.npmAuditResult.vulnerabilities ? `
+  ${
+    report.npmAuditResult.vulnerabilities
+      ? `
   <div class="section">
     <div class="section-header">依赖漏洞</div>
     <div class="section-content">
-      ${Object.entries(report.npmAuditResult.vulnerabilities).map(([name, vulnerability]) => `
+      ${Object.entries(report.npmAuditResult.vulnerabilities)
+        .map(
+          ([name, vulnerability]) => `
         <div class="vulnerability-item">
           <div class="vulnerability-title">${name}</div>
           <div class="vulnerability-severity ${vulnerability.severity}">${vulnerability.severity}</div>
@@ -479,38 +504,45 @@ function generateHtmlReport(report) {
           <div>影响范围: ${vulnerability.range}</div>
           <div>修复版本: ${vulnerability.fixAvailable ? vulnerability.fixAvailable.version : '无'}</div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 </body>
 </html>
-  `;
-  
-  const htmlReportPath = path.join(config.reportsDir, `security-report-${new Date().getTime()}.html`);
-  fs.writeFileSync(htmlReportPath, html);
-  
-  return htmlReportPath;
+  `
+
+  const htmlReportPath = path.join(
+    config.reportsDir,
+    `security-report-${new Date().getTime()}.html`
+  )
+  fs.writeFileSync(htmlReportPath, html)
+
+  return htmlReportPath
 }
 
 // 主函数
 function main() {
-  const report = generateSecurityReport();
-  
+  const report = generateSecurityReport()
+
   // 如果有高危问题，退出码为1
   if (report.summary.highSeverityIssues > 0) {
-    console.error(`发现 ${report.summary.highSeverityIssues} 个高危安全问题，请及时修复！`);
-    process.exit(1);
+    console.error(`发现 ${report.summary.highSeverityIssues} 个高危安全问题，请及时修复！`)
+    process.exit(1)
   }
 }
 
 // 如果直接运行此脚本
 if (require.main === module) {
-  main();
+  main()
 }
 
 module.exports = {
   generateSecurityReport,
   checkFileSecurity,
   runNpmAudit,
-};
+}

@@ -224,7 +224,27 @@
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download, Refresh, Search } from '@element-plus/icons-vue'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([
+  BarChart,
+  LineChart,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer,
+])
+import * as orderApi from '@/api/order'
 
 // 类型定义
 interface OrderStatsByDate {
@@ -438,44 +458,24 @@ const handleResize = () => {
 const loadOrderStatsData = async () => {
   loading.value = true
   try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 调用API获取订单统计数据
+    const res = await orderApi.getOrderStatistics(
+      filterParams.dateRange?.length ? filterParams.dateRange[0] : undefined,
+      filterParams.dateRange?.length ? filterParams.dateRange[1] : undefined
+    )
 
-    // 根据统计维度生成不同的模拟数据
-    if (detailType.value === 'date') {
-      // 按日期统计
-      const mockData: OrderStatsByDate[] = []
-      for (let i = 1; i <= 30; i++) {
-        mockData.push({
-          date: `2026-01-${i.toString().padStart(2, '0')}`,
-          orderCount: Math.floor(Math.random() * 200) + 100,
-          completedCount: Math.floor(Math.random() * 180) + 90,
-          cancelledCount: Math.floor(Math.random() * 20) + 10,
-          totalAmount: Math.random() * 50000 + 20000,
-          avgAmount: Math.random() * 300 + 200,
-          growthRate: (Math.random() - 0.5) * 20,
-        })
+    if (res.data) {
+      if (detailType.value === 'date') {
+        // 按日期统计
+        orderStatsData.value = res.data.dailyStats || []
+      } else if (detailType.value === 'type') {
+        // 按订单类型统计
+        orderStatsData.value = res.data.typeStats || []
+      } else if (detailType.value === 'payment') {
+        // 按支付方式统计
+        orderStatsData.value = res.data.paymentStats || []
       }
-      orderStatsData.value = mockData
-      total.value = mockData.length
-    } else if (detailType.value === 'type') {
-      // 按订单类型统计
-      const mockData: OrderStatsByType[] = [
-        { type: '普通订单', orderCount: 8567, percentage: 69.4, totalAmount: 2012345.67 },
-        { type: '外卖订单', orderCount: 2345, percentage: 18.9, totalAmount: 556789.01 },
-        { type: '跑腿订单', orderCount: 1456, percentage: 11.7, totalAmount: 345678.9 },
-      ]
-      orderStatsData.value = mockData
-      total.value = mockData.length
-    } else if (detailType.value === 'payment') {
-      // 按支付方式统计
-      const mockData: OrderStatsByPayment[] = [
-        { paymentMethod: '微信支付', orderCount: 9876, percentage: 79.8, totalAmount: 2345678.9 },
-        { paymentMethod: '支付宝', orderCount: 2134, percentage: 17.2, totalAmount: 501234.56 },
-        { paymentMethod: '余额支付', orderCount: 335, percentage: 3.0, totalAmount: 76543.21 },
-      ]
-      orderStatsData.value = mockData
-      total.value = mockData.length
+      total.value = orderStatsData.value.length
     }
   } catch (error) {
     ElMessage.error('获取订单统计数据失败')

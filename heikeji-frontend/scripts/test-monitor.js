@@ -5,9 +5,9 @@
  * 用于监控测试结果和性能指标
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require('fs')
+const path = require('path')
+const { execSync } = require('child_process')
 
 // 配置
 const config = {
@@ -21,129 +21,132 @@ const config = {
   testResultsDir: path.join(__dirname, '../test-results'),
   coverageDir: path.join(__dirname, '../coverage'),
   reportsDir: path.join(__dirname, '../test-reports'),
-};
+}
 
 // 确保目录存在
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true })
   }
 }
 
 // 读取测试覆盖率
 function readCoverage() {
   try {
-    const coverageFile = path.join(config.coverageDir, 'coverage-summary.json');
+    const coverageFile = path.join(config.coverageDir, 'coverage-summary.json')
     if (fs.existsSync(coverageFile)) {
-      const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+      const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'))
       return {
         lines: coverageData.total.lines.pct,
         functions: coverageData.total.functions.pct,
         branches: coverageData.total.branches.pct,
         statements: coverageData.total.statements.pct,
-      };
+      }
     }
   } catch (error) {
-    console.error('读取测试覆盖率失败:', error);
+    console.error('读取测试覆盖率失败:', error)
   }
-  return null;
+  return null
 }
 
 // 读取性能测试结果
 function readPerformanceResults() {
   try {
-    const performanceDir = path.join(config.testResultsDir, 'performance');
+    const performanceDir = path.join(config.testResultsDir, 'performance')
     if (fs.existsSync(performanceDir)) {
-      const files = fs.readdirSync(performanceDir);
-      const results = [];
-      
+      const files = fs.readdirSync(performanceDir)
+      const results = []
+
       for (const file of files) {
         if (file.endsWith('.json')) {
-          const filePath = path.join(performanceDir, file);
-          const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-          results.push(data);
+          const filePath = path.join(performanceDir, file)
+          const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+          results.push(data)
         }
       }
-      
-      return results;
+
+      return results
     }
   } catch (error) {
-    console.error('读取性能测试结果失败:', error);
+    console.error('读取性能测试结果失败:', error)
   }
-  return [];
+  return []
 }
 
 // 读取E2E测试结果
 function readE2EResults() {
   try {
-    const e2eResultsFile = path.join(config.testResultsDir, 'e2e-results.json');
+    const e2eResultsFile = path.join(config.testResultsDir, 'e2e-results.json')
     if (fs.existsSync(e2eResultsFile)) {
-      return JSON.parse(fs.readFileSync(e2eResultsFile, 'utf8'));
+      return JSON.parse(fs.readFileSync(e2eResultsFile, 'utf8'))
     }
   } catch (error) {
-    console.error('读取E2E测试结果失败:', error);
+    console.error('读取E2E测试结果失败:', error)
   }
-  return null;
+  return null
 }
 
 // 生成测试报告
 function generateTestReport() {
-  const timestamp = new Date().toISOString();
-  const coverage = readCoverage();
-  const performanceResults = readPerformanceResults();
-  const e2eResults = readE2EResults();
-  
+  const timestamp = new Date().toISOString()
+  const coverage = readCoverage()
+  const performanceResults = readPerformanceResults()
+  const e2eResults = readE2EResults()
+
   const report = {
     timestamp,
     coverage,
     performance: performanceResults,
     e2e: e2eResults,
     status: 'unknown',
-  };
-  
+  }
+
   // 确定整体状态
-  let status = 'passed';
-  
+  let status = 'passed'
+
   // 检查测试覆盖率
   if (coverage && coverage.lines < config.coverageThreshold) {
-    status = 'failed';
+    status = 'failed'
   }
-  
+
   // 检查性能指标
   for (const result of performanceResults) {
     if (result.lhr) {
-      const fcp = result.lhr.audits['first-contentful-paint'].numericValue;
-      const lcp = result.lhr.audits['largest-contentful-paint'].numericValue;
-      const cls = result.lhr.audits['cumulative-layout-shift'].numericValue;
-      const ttb = result.lhr.audits['total-blocking-time'].numericValue;
-      
+      const fcp = result.lhr.audits['first-contentful-paint'].numericValue
+      const lcp = result.lhr.audits['largest-contentful-paint'].numericValue
+      const cls = result.lhr.audits['cumulative-layout-shift'].numericValue
+      const ttb = result.lhr.audits['total-blocking-time'].numericValue
+
       if (
         fcp > config.performanceThreshold.firstContentfulPaint ||
         lcp > config.performanceThreshold.largestContentfulPaint ||
         cls > config.performanceThreshold.cumulativeLayoutShift ||
         ttb > config.performanceThreshold.totalBlockingTime
       ) {
-        status = 'failed';
+        status = 'failed'
       }
     }
   }
-  
+
   // 检查E2E测试
   if (e2eResults && e2eResults.failed > 0) {
-    status = 'failed';
+    status = 'failed'
   }
-  
-  report.status = status;
-  
+
+  report.status = status
+
   // 保存报告
-  ensureDir(config.reportsDir);
-  const reportFile = path.join(config.reportsDir, `test-report-${timestamp.replace(/[:.]/g, '-')}.json`);
-  fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
-  
+  ensureDir(config.reportsDir)
+  const reportFile = path.join(
+    config.reportsDir,
+    `test-report-${timestamp.replace(/[:.]/g, '-')}.json`
+  )
+  fs.writeFileSync(reportFile, JSON.stringify(report, null, 2))
+
   // 生成HTML报告
-  generateHtmlReport(report);
-  
-  return report;
+  generateHtmlReport(report)
+
+  return report
 }
 
 // 生成HTML报告
@@ -243,7 +246,9 @@ function generateHtmlReport(report) {
     <p>整体状态: <span class="status-${report.status}">${report.status === 'passed' ? '✅ 通过' : '❌ 失败'}</span></p>
   </div>
   
-  ${report.coverage ? `
+  ${
+    report.coverage
+      ? `
   <div class="section">
     <div class="section-header">测试覆盖率</div>
     <div class="section-content">
@@ -280,13 +285,19 @@ function generateHtmlReport(report) {
       </div>
     </div>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
   
-  ${report.performance && report.performance.length > 0 ? `
+  ${
+    report.performance && report.performance.length > 0
+      ? `
   <div class="section">
     <div class="section-header">性能测试结果</div>
     <div class="section-content">
-      ${report.performance.map(result => `
+      ${report.performance
+        .map(
+          result => `
         <div class="performance-item">
           <h4>${result.url || '未知页面'}</h4>
           <p>首次内容绘制 (FCP): <span class="performance-value ${result.lhr.audits['first-contentful-paint'].numericValue <= config.performanceThreshold.firstContentfulPaint ? 'performance-good' : 'performance-bad'}">${Math.round(result.lhr.audits['first-contentful-paint'].numericValue)}ms</span></p>
@@ -294,12 +305,18 @@ function generateHtmlReport(report) {
           <p>累积布局偏移 (CLS): <span class="performance-value ${result.lhr.audits['cumulative-layout-shift'].numericValue <= config.performanceThreshold.cumulativeLayoutShift ? 'performance-good' : 'performance-bad'}">${result.lhr.audits['cumulative-layout-shift'].numericValue}</span></p>
           <p>总阻塞时间 (TBT): <span class="performance-value ${result.lhr.audits['total-blocking-time'].numericValue <= config.performanceThreshold.totalBlockingTime ? 'performance-good' : 'performance-bad'}">${Math.round(result.lhr.audits['total-blocking-time'].numericValue)}ms</span></p>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
   
-  ${report.e2e ? `
+  ${
+    report.e2e
+      ? `
   <div class="section">
     <div class="section-header">E2E测试结果</div>
     <div class="section-content">
@@ -321,36 +338,42 @@ function generateHtmlReport(report) {
       </table>
     </div>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 </body>
 </html>
-  `;
-  
-  ensureDir(config.reportsDir);
-  const reportFile = path.join(config.reportsDir, `test-report-${new Date(report.timestamp).getTime()}.html`);
-  fs.writeFileSync(reportFile, html);
-  
-  return reportFile;
+  `
+
+  ensureDir(config.reportsDir)
+  const reportFile = path.join(
+    config.reportsDir,
+    `test-report-${new Date(report.timestamp).getTime()}.html`
+  )
+  fs.writeFileSync(reportFile, html)
+
+  return reportFile
 }
 
 // 主函数
 function main() {
-  console.log('开始生成测试监控报告...');
-  
-  const report = generateTestReport();
-  
-  console.log(`测试监控报告已生成，状态: ${report.status}`);
-  console.log(`报告文件: ${path.join(config.reportsDir, `test-report-${new Date(report.timestamp).getTime()}.html`)}`);
-  
+  console.log('开始生成测试监控报告...')
+
+  const report = generateTestReport()
+
+  console.log(`测试监控报告已生成，状态: ${report.status}`)
+  console.log(
+    `报告文件: ${path.join(config.reportsDir, `test-report-${new Date(report.timestamp).getTime()}.html`)}`
+
   // 如果测试失败，退出码为1
   if (report.status === 'failed') {
-    process.exit(1);
+    process.exit(1)
   }
 }
 
 // 如果直接运行此脚本
 if (require.main === module) {
-  main();
+  main()
 }
 
 module.exports = {
@@ -358,4 +381,4 @@ module.exports = {
   readCoverage,
   readPerformanceResults,
   readE2EResults,
-};
+}

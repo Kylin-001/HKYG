@@ -74,7 +74,7 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
@@ -100,7 +100,7 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/login' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
@@ -117,11 +117,11 @@ describe('API Security', () => {
       }
 
       const results = await Promise.allSettled(promises)
-      
+
       // 前5个请求应该成功，后面的应该失败
       const successful = results.filter(r => r.status === 'fulfilled').length
       const failed = results.filter(r => r.status === 'rejected').length
-      
+
       expect(successful).toBeLessThanOrEqual(5) // 登录API限制为每分钟5次
       expect(failed).toBeGreaterThan(0)
     })
@@ -133,7 +133,7 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
@@ -166,24 +166,28 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
-          request: { use: vi.fn((config) => config) },
+          request: { use: vi.fn(config => config) },
           response: { use: vi.fn() },
         },
         post: mockPost,
       })
 
       const password = 'test-password'
-      await request.post('/api/test', { 
-        username: 'test', 
-        password 
-      }, {
-        encrypt: true,
-        encryptFields: ['password']
-      })
+      await request.post(
+        '/api/test',
+        {
+          username: 'test',
+          password,
+        },
+        {
+          encrypt: true,
+          encryptFields: ['password'],
+        }
+      )
 
       // 检查密码是否被加密
       const callConfig = mockPost.mock.calls[0][1]
@@ -198,11 +202,11 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
-          request: { use: vi.fn((config) => config) },
+          request: { use: vi.fn(config => config) },
           response: { use: vi.fn() },
         },
         post: mockPost,
@@ -210,7 +214,7 @@ describe('API Security', () => {
 
       const data = { username: 'test', password: 'test-password' }
       await request.post('/api/test', data, {
-        encrypt: true
+        encrypt: true,
       })
 
       // 检查整个数据对象是否被加密
@@ -223,30 +227,34 @@ describe('API Security', () => {
       // 模拟加密的响应数据
       const encryptedData = defaultEncryption.encryptObject({ secret: 'test-secret' })
       const mockResponse = {
-        data: { 
-          code: 20000, 
-          message: 'success', 
+        data: {
+          code: 20000,
+          message: 'success',
           data: {
             encrypted: true,
-            data: encryptedData
-          }
+            data: encryptedData,
+          },
         },
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
           request: { use: vi.fn() },
-          response: { use: vi.fn((response) => response) },
+          response: { use: vi.fn(response => response) },
         },
         post: mockPost,
       })
 
-      const result = await request.post('/api/test', {}, {
-        decryptResponse: true
-      })
+      const result = await request.post(
+        '/api/test',
+        {},
+        {
+          decryptResponse: true,
+        }
+      )
 
       // 检查响应数据是否被解密
       expect(result.data).toEqual({ secret: 'test-secret' })
@@ -256,11 +264,11 @@ describe('API Security', () => {
   describe('Encryption Utilities', () => {
     it('should encrypt and decrypt strings correctly', () => {
       const originalText = 'This is a secret message'
-      
+
       const encrypted = defaultEncryption.encrypt(originalText)
       expect(encrypted).not.toBe(originalText)
       expect(encrypted).toMatch(/^[A-Za-z0-9+/=]+$/) // Base64格式
-      
+
       const decrypted = defaultEncryption.decrypt(encrypted)
       expect(decrypted).toBe(originalText)
     })
@@ -269,23 +277,23 @@ describe('API Security', () => {
       const originalObject = {
         username: 'testuser',
         password: 'testpassword',
-        email: 'test@example.com'
+        email: 'test@example.com',
       }
-      
+
       const encrypted = defaultEncryption.encryptObject(originalObject)
       expect(encrypted).not.toBe(JSON.stringify(originalObject))
       expect(encrypted).toMatch(/^[A-Za-z0-9+/=]+$/) // Base64格式
-      
+
       const decrypted = defaultEncryption.decryptObject(originalObject)
       expect(decrypted).toEqual(originalObject)
     })
 
     it('should generate consistent hashes for the same data', () => {
       const data = 'test-data'
-      
+
       const hash1 = defaultEncryption.hash(data)
       const hash2 = defaultEncryption.hash(data)
-      
+
       expect(hash1).toBe(hash2)
       expect(hash1).toMatch(/^[a-f0-9]{64}$/i) // SHA256格式
     })
@@ -293,7 +301,7 @@ describe('API Security', () => {
     it('should compare hashes correctly', () => {
       const data = 'test-data'
       const hash = defaultEncryption.hash(data)
-      
+
       expect(defaultEncryption.compareHash(data, hash)).toBe(true)
       expect(defaultEncryption.compareHash('wrong-data', hash)).toBe(false)
     })
@@ -301,7 +309,7 @@ describe('API Security', () => {
     it('should generate random keys', () => {
       const key1 = defaultEncryption.generateKey()
       const key2 = defaultEncryption.generateKey()
-      
+
       expect(key1).not.toBe(key2)
       expect(key1).toMatch(/^[a-f0-9]+$/i) // Hex格式
       expect(key2).toMatch(/^[a-f0-9]+$/i) // Hex格式
@@ -316,7 +324,7 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/login' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
@@ -333,15 +341,14 @@ describe('API Security', () => {
       }
 
       const results = await Promise.allSettled(promises)
-      
+
       // 检查是否有速率限制错误
       const failed = results.filter(r => r.status === 'rejected')
       expect(failed.length).toBeGreaterThan(0)
-      
+
       // 检查错误消息
-      const rateLimitErrors = failed.filter(r => 
-        r.status === 'rejected' && 
-        r.reason.message.includes('请求过于频繁')
+      const rateLimitErrors = failed.filter(
+        r => r.status === 'rejected' && r.reason.message.includes('请求过于频繁')
       )
       expect(rateLimitErrors.length).toBeGreaterThan(0)
     })
@@ -358,24 +365,28 @@ describe('API Security', () => {
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
-          request: { use: vi.fn((config) => config) },
+          request: { use: vi.fn(config => config) },
           response: { use: vi.fn() },
         },
         post: mockPost,
       })
 
       // 发送加密请求
-      const promise = request.post('/api/test', { 
-        username: 'test', 
-        password: 'test' 
-      }, {
-        encrypt: true,
-        encryptFields: ['password']
-      })
+      const promise = request.post(
+        '/api/test',
+        {
+          username: 'test',
+          password: 'test',
+        },
+        {
+          encrypt: true,
+          encryptFields: ['password'],
+        }
+      )
 
       // 检查是否抛出加密错误
       await expect(promise).rejects.toThrow('数据加密失败')
@@ -389,31 +400,35 @@ describe('API Security', () => {
 
       // 模拟加密的响应数据
       const mockResponse = {
-        data: { 
-          code: 20000, 
-          message: 'success', 
+        data: {
+          code: 20000,
+          message: 'success',
           data: {
             encrypted: true,
-            data: 'invalid-encrypted-data'
-          }
+            data: 'invalid-encrypted-data',
+          },
         },
         status: 200,
         config: { url: '/api/test' },
       }
-      
+
       const mockPost = vi.fn().mockResolvedValue(mockResponse)
       axios.create = vi.fn().mockReturnValue({
         interceptors: {
           request: { use: vi.fn() },
-          response: { use: vi.fn((response) => response) },
+          response: { use: vi.fn(response => response) },
         },
         post: mockPost,
       })
 
       // 发送解密请求
-      const promise = request.post('/api/test', {}, {
-        decryptResponse: true
-      })
+      const promise = request.post(
+        '/api/test',
+        {},
+        {
+          decryptResponse: true,
+        }
+      )
 
       // 检查是否抛出解密错误
       await expect(promise).rejects.toThrow('数据解密失败')

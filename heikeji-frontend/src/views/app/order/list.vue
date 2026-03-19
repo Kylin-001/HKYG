@@ -25,7 +25,7 @@
     <div class="order-list">
       <!-- 加载状态 -->
       <div v-if="loading" class="loading-container">
-        <el-loading-spinner></el-loading-spinner>
+        <div class="custom-loading-spinner"></div>
         <span>正在加载...</span>
       </div>
 
@@ -666,6 +666,25 @@ onMounted(() => {
 .detail-btn {
   color: #909399;
   border-color: #dcdfe6;
+}
+
+/* 自定义加载动画 */
+.custom-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 分页 */

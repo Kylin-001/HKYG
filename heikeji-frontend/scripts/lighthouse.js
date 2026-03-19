@@ -18,10 +18,10 @@ const config = {
     'http://localhost:3000/login',
     'http://localhost:3000/app/product/list',
   ],
-  
+
   // 输出目录
   outputDir: path.join(__dirname, '../lighthouse-reports'),
-  
+
   // Lighthouse配置
   lighthouseConfig: {
     extends: 'lighthouse:default',
@@ -45,7 +45,7 @@ const config = {
       },
     },
   },
-  
+
   // 性能预算
   budgets: [
     {
@@ -83,10 +83,10 @@ async function runLighthouse(url) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
   const reportName = `lighthouse-${url.replace(/[^a-zA-Z0-9]/g, '-')}-${timestamp}`
   const reportPath = path.join(config.outputDir, reportName)
-  
+
   try {
     console.log(`开始测试: ${url}`)
-    
+
     // 构建Lighthouse命令
     const lighthouseCmd = [
       'npx',
@@ -98,34 +98,34 @@ async function runLighthouse(url) {
       '--chrome-flags="--headless"',
       '--quiet',
     ]
-    
+
     // 添加配置
     const configPath = path.join(config.outputDir, 'lighthouse-config.json')
     fs.writeFileSync(configPath, JSON.stringify(config.lighthouseConfig, null, 2))
     lighthouseCmd.push(`--config-path=${configPath}`)
-    
+
     // 添加预算
     const budgetsPath = path.join(config.outputDir, 'budgets.json')
     fs.writeFileSync(budgetsPath, JSON.stringify(config.budgets, null, 2))
     lighthouseCmd.push(`--budget-path=${budgetsPath}`)
-    
+
     // 执行Lighthouse测试
     execSync(lighthouseCmd.join(' '), { stdio: 'inherit' })
-    
+
     // 读取测试结果
     const resultsPath = `${reportPath}.report.json`
     if (fs.existsSync(resultsPath)) {
       const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'))
-      
+
       // 生成摘要报告
       const summary = generateSummary(results, url)
       const summaryPath = `${reportPath}-summary.json`
       fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2))
-      
+
       console.log(`测试完成: ${url}`)
       console.log(`性能评分: ${summary.performanceScore}`)
       console.log(`报告路径: ${reportPath}.html`)
-      
+
       return {
         url,
         results,
@@ -148,23 +148,23 @@ async function runLighthouse(url) {
 // 生成测试摘要
 function generateSummary(results, url) {
   const { lhr } = results
-  
+
   // 提取关键指标
   const fcp = lhr.audits['first-contentful-paint']?.numericValue || 0
   const lcp = lhr.audits['largest-contentful-paint']?.numericValue || 0
   const tti = lhr.audits['interactive']?.numericValue || 0
   const cls = lhr.audits['cumulative-layout-shift']?.numericValue || 0
   const si = lhr.audits['speed-index']?.numericValue || 0
-  
+
   // 计算性能评分
   const performanceScore = Math.round(lhr.categories.performance.score * 100)
   const accessibilityScore = Math.round(lhr.categories.accessibility.score * 100)
   const bestPracticesScore = Math.round(lhr.categories['best-practices'].score * 100)
   const seoScore = Math.round(lhr.categories.seo.score * 100)
-  
+
   // 生成建议
   const recommendations = []
-  
+
   // 性能建议
   if (fcp > 2000) {
     recommendations.push({
@@ -174,7 +174,7 @@ function generateSummary(results, url) {
       description: '首屏绘制时间超过2秒，建议优化关键渲染路径',
     })
   }
-  
+
   if (lcp > 2500) {
     recommendations.push({
       type: 'performance',
@@ -183,7 +183,7 @@ function generateSummary(results, url) {
       description: '最大内容绘制时间超过2.5秒，建议优化图片和关键资源',
     })
   }
-  
+
   if (tti > 3000) {
     recommendations.push({
       type: 'performance',
@@ -192,7 +192,7 @@ function generateSummary(results, url) {
       description: '页面可交互时间超过3秒，建议减少JavaScript执行时间',
     })
   }
-  
+
   if (cls > 0.1) {
     recommendations.push({
       type: 'performance',
@@ -201,7 +201,7 @@ function generateSummary(results, url) {
       description: '累积布局偏移超过0.1，建议为动态内容预留空间',
     })
   }
-  
+
   // 可访问性建议
   if (accessibilityScore < 90) {
     recommendations.push({
@@ -211,7 +211,7 @@ function generateSummary(results, url) {
       description: '可访问性评分低于90分，建议改进ARIA标签和键盘导航',
     })
   }
-  
+
   // SEO建议
   if (seoScore < 80) {
     recommendations.push({
@@ -221,7 +221,7 @@ function generateSummary(results, url) {
       description: 'SEO评分低于80分，建议优化meta标签和结构化数据',
     })
   }
-  
+
   return {
     url,
     timestamp: new Date().toISOString(),
@@ -256,7 +256,7 @@ function getGrade(score) {
 function generateAggregateReport(results) {
   const successfulResults = results.filter(r => !r.error)
   const failedResults = results.filter(r => r.error)
-  
+
   if (successfulResults.length === 0) {
     return {
       success: false,
@@ -264,32 +264,35 @@ function generateAggregateReport(results) {
       errors: failedResults.map(r => r.error),
     }
   }
-  
+
   // 计算平均分数
   const avgPerformanceScore = Math.round(
-    successfulResults.reduce((sum, r) => sum + r.summary.scores.performance, 0) / successfulResults.length
+    successfulResults.reduce((sum, r) => sum + r.summary.scores.performance, 0) /
+      successfulResults.length
   )
   const avgAccessibilityScore = Math.round(
-    successfulResults.reduce((sum, r) => sum + r.summary.scores.accessibility, 0) / successfulResults.length
+    successfulResults.reduce((sum, r) => sum + r.summary.scores.accessibility, 0) /
+      successfulResults.length
   )
   const avgBestPracticesScore = Math.round(
-    successfulResults.reduce((sum, r) => sum + r.summary.scores.bestPractices, 0) / successfulResults.length
+    successfulResults.reduce((sum, r) => sum + r.summary.scores.bestPractices, 0) /
+      successfulResults.length
   )
   const avgSeoScore = Math.round(
     successfulResults.reduce((sum, r) => sum + r.summary.scores.seo, 0) / successfulResults.length
   )
-  
+
   // 统计建议
   const allRecommendations = successfulResults.flatMap(r => r.summary.recommendations)
   const recommendationsByType = {}
-  
+
   allRecommendations.forEach(rec => {
     if (!recommendationsByType[rec.type]) {
       recommendationsByType[rec.type] = []
     }
     recommendationsByType[rec.type].push(rec)
   })
-  
+
   // 生成报告
   const report = {
     timestamp: new Date().toISOString(),
@@ -318,31 +321,31 @@ function generateAggregateReport(results) {
     })),
     recommendations: recommendationsByType,
   }
-  
+
   // 保存报告
   const reportPath = path.join(config.outputDir, 'aggregate-report.json')
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2))
-  
+
   return report
 }
 
 // 主函数
 async function main() {
   console.log('开始Lighthouse性能测试...')
-  
+
   // 确保输出目录存在
   ensureDir(config.outputDir)
-  
+
   // 运行测试
   const results = []
   for (const url of config.urls) {
     const result = await runLighthouse(url)
     results.push(result)
   }
-  
+
   // 生成综合报告
   const aggregateReport = generateAggregateReport(results)
-  
+
   // 输出摘要
   console.log('\n=== 测试摘要 ===')
   console.log(`总测试数: ${aggregateReport.summary.totalTests}`)
@@ -350,7 +353,7 @@ async function main() {
   console.log(`失败测试数: ${aggregateReport.summary.failedTests}`)
   console.log(`平均性能评分: ${aggregateReport.summary.averageScores.performance}`)
   console.log(`性能等级: ${aggregateReport.summary.grade}`)
-  
+
   // 输出建议
   if (Object.keys(aggregateReport.recommendations).length > 0) {
     console.log('\n=== 优化建议 ===')
@@ -362,9 +365,9 @@ async function main() {
       })
     })
   }
-  
+
   console.log(`\n详细报告已保存到: ${path.join(config.outputDir, 'aggregate-report.json')}`)
-  
+
   // 如果有失败的测试，退出码为1
   if (aggregateReport.summary.failedTests > 0) {
     process.exit(1)

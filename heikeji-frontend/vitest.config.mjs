@@ -15,7 +15,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}', 'src-vue3/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}', 'tests/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}'],
+    include: [
+      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}',
+      'src-vue3/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,vue}',
+      'tests/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}',
+    ],
     exclude: ['**/node_modules/**', '**/e2e/**', '**/dist/**'],
     pool: 'forks',
     singleFork: true,

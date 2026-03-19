@@ -19,7 +19,9 @@ export const contentSecurityPolicy = `
   form-action 'self';
   frame-ancestors 'none';
   upgrade-insecure-requests;
-`.replace(/\s{2,}/g, ' ').trim()
+`
+  .replace(/\s{2,}/g, ' ')
+  .trim()
 
 // 安全头部
 export const securityHeaders = {
@@ -43,7 +45,7 @@ export const xssProtection = {
       .replace(/javascript:/gi, '')
       .replace(/on\w+\s*=/gi, '')
   },
-  
+
   // 清理URL
   sanitizeUrl: (url: string): string => {
     try {
@@ -57,7 +59,7 @@ export const xssProtection = {
       return '#'
     }
   },
-  
+
   // 清理用户输入
   sanitizeInput: (input: string): string => {
     return input
@@ -75,7 +77,7 @@ export const csrfProtection = {
     crypto.getRandomValues(array)
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
   },
-  
+
   // 验证CSRF令牌
   validateToken: (token: string, sessionToken: string): boolean => {
     return token === sessionToken
@@ -94,13 +96,13 @@ export const secureStorage = {
       console.error('存储数据失败:', error)
     }
   },
-  
+
   // 安全的本地存储获取
   getItem: (key: string): string | null => {
     try {
       const encrypted = localStorage.getItem(key)
       if (!encrypted) return null
-      
+
       // 简单的解密
       return atob(encrypted)
     } catch (error) {
@@ -108,7 +110,7 @@ export const secureStorage = {
       return null
     }
   },
-  
+
   // 安全的会话存储
   setSessionItem: (key: string, value: string): void => {
     try {
@@ -118,13 +120,13 @@ export const secureStorage = {
       console.error('存储会话数据失败:', error)
     }
   },
-  
+
   // 安全的会话存储获取
   getSessionItem: (key: string): string | null => {
     try {
       const encrypted = sessionStorage.getItem(key)
       if (!encrypted) return null
-      
+
       return atob(encrypted)
     } catch (error) {
       console.error('获取会话数据失败:', error)
@@ -137,25 +139,20 @@ export const secureStorage = {
 export const securityChecks = {
   // 检查是否为安全环境
   isSecureEnvironment: (): boolean => {
-    return (
-      process.env.NODE_ENV === 'production' &&
-      location.protocol === 'https:'
-    )
+    return process.env.NODE_ENV === 'production' && location.protocol === 'https:'
   },
-  
+
   // 检查浏览器支持
   checkBrowserSupport: (): boolean => {
     return (
-      typeof crypto !== 'undefined' &&
-      typeof btoa !== 'undefined' &&
-      typeof atob !== 'undefined'
+      typeof crypto !== 'undefined' && typeof btoa !== 'undefined' && typeof atob !== 'undefined'
     )
   },
-  
+
   // 检查控制台访问
   checkConsoleAccess: (): boolean => {
     try {
-      const console = window.console
+      const { console } = window
       return !!console
     } catch (error) {
       return false
@@ -167,15 +164,14 @@ export const securityChecks = {
 export const securityUtils = {
   // 生成随机ID
   generateRandomId: (): string => {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15)
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
   },
-  
+
   // 生成时间戳
   generateTimestamp: (): number => {
     return Date.now()
   },
-  
+
   // 检查是否为有效URL
   isValidUrl: (url: string): boolean => {
     try {
@@ -185,17 +181,18 @@ export const securityUtils = {
       return false
     }
   },
-  
+
   // 检查是否为有效邮箱
   isValidEmail: (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   },
-  
+
   // 检查是否为强密码
   isStrongPassword: (password: string): boolean => {
     // 至少8个字符，包含大小写字母、数字和特殊字符
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     return strongPasswordRegex.test(password)
   },
 }
@@ -211,7 +208,7 @@ export const securityPlugin = {
       utils: securityUtils,
       checks: securityChecks,
     }
-    
+
     // 设置安全头部（如果在浏览器环境中）
     if (typeof window !== 'undefined') {
       Object.entries(securityHeaders).forEach(([key, value]) => {
@@ -220,7 +217,7 @@ export const securityPlugin = {
         console.log(`安全头部 ${key}: ${value}`)
       })
     }
-  }
+  },
 }
 
 export default securityPlugin

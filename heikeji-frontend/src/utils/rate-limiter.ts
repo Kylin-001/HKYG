@@ -174,9 +174,15 @@ class RateLimiter {
    * 获取所有限制的状态
    * @returns 所有限制状态
    */
-  getStatus(): Record<string, { count: number; remaining: number; resetTime: number; lastRequestTime: number }> {
-    const status: Record<string, { count: number; remaining: number; resetTime: number; lastRequestTime: number }> = {}
-    
+  getStatus(): Record<
+    string,
+    { count: number; remaining: number; resetTime: number; lastRequestTime: number }
+  > {
+    const status: Record<
+      string,
+      { count: number; remaining: number; resetTime: number; lastRequestTime: number }
+    > = {}
+
     for (const [key, entry] of this.store.entries()) {
       status[key] = {
         count: entry.count,
@@ -185,7 +191,7 @@ class RateLimiter {
         lastRequestTime: entry.lastRequestTime,
       }
     }
-    
+
     return status
   }
 }
@@ -202,31 +208,31 @@ export const RATE_LIMIT_CONFIGS = {
     windowMs: parseInt(import.meta.env.VITE_APP_RATE_LIMIT_WINDOW || '60') * 1000,
     maxRequests: parseInt(import.meta.env.VITE_APP_RATE_LIMIT_MAX_REQUESTS || '60'),
   },
-  
+
   // 登录API限制：每分钟5次请求
   login: {
     windowMs: parseInt(import.meta.env.VITE_APP_LOGIN_RATE_LIMIT_WINDOW || '60') * 1000,
     maxRequests: parseInt(import.meta.env.VITE_APP_LOGIN_RATE_LIMIT_MAX_REQUESTS || '5'),
   },
-  
+
   // 注册API限制：每小时3次请求
   register: {
     windowMs: parseInt(import.meta.env.VITE_APP_REGISTER_RATE_LIMIT_WINDOW || '3600') * 1000,
     maxRequests: parseInt(import.meta.env.VITE_APP_REGISTER_RATE_LIMIT_MAX_REQUESTS || '3'),
   },
-  
+
   // 敏感操作API限制：每分钟10次请求
   sensitive: {
     windowMs: parseInt(import.meta.env.VITE_APP_SENSITIVE_RATE_LIMIT_WINDOW || '60') * 1000,
     maxRequests: parseInt(import.meta.env.VITE_APP_SENSITIVE_RATE_LIMIT_MAX_REQUESTS || '10'),
   },
-  
+
   // 文件上传API限制：每分钟5次请求
   upload: {
     windowMs: parseInt(import.meta.env.VITE_APP_UPLOAD_RATE_LIMIT_WINDOW || '60') * 1000,
     maxRequests: parseInt(import.meta.env.VITE_APP_UPLOAD_RATE_LIMIT_MAX_REQUESTS || '5'),
   },
-  
+
   // 搜索API限制：每分钟30次请求
   search: {
     windowMs: parseInt(import.meta.env.VITE_APP_SEARCH_RATE_LIMIT_WINDOW || '60') * 1000,

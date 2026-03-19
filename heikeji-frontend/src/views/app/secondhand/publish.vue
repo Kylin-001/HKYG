@@ -152,7 +152,7 @@ export default {
         if (valid) {
           const tradeType = this.tradeTypes.length === 2 ? 2 : (this.tradeTypes[0] === '0' ? 0 : 1)
           this.form.tradeType = tradeType
-          
+
           publishSecondhand(this.form).then(() => {
             this.$message.success('发布成功，等待审核')
             this.$router.push('/app/secondhand/list')

@@ -15,7 +15,10 @@ export const useAnalyticsStore = defineStore('analytics', () => {
   const loading = ref(false)
   const selectedTimeRange = ref<'day' | 'week' | 'month'>('day')
 
-  async function fetchUserBehaviorStats(userId: number, timeRange: 'day' | 'week' | 'month' = 'day') {
+  async function fetchUserBehaviorStats(
+    userId: number,
+    timeRange: 'day' | 'week' | 'month' = 'day'
+  ) {
     try {
       loading.value = true
       const res = await analyticsApi.getUserBehaviorStats(userId, timeRange)
@@ -45,7 +48,10 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     }
   }
 
-  async function fetchCategorySales(categoryId: number, timeRange: 'day' | 'week' | 'month' = 'day') {
+  async function fetchCategorySales(
+    categoryId: number,
+    timeRange: 'day' | 'week' | 'month' = 'day'
+  ) {
     try {
       loading.value = true
       const res = await analyticsApi.getCategorySales(categoryId, timeRange)
@@ -131,7 +137,11 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     }
   }
 
-  async function logRecommendationExposure(data: { userId: number; productId: number; sessionId: string }) {
+  async function logRecommendationExposure(data: {
+    userId: number
+    productId: number
+    sessionId: string
+  }) {
     try {
       await analyticsApi.logRecommendationExposure(data)
     } catch (error: unknown) {
@@ -141,7 +151,11 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     }
   }
 
-  async function logRecommendationClick(data: { userId: number; productId: number; sessionId: string }) {
+  async function logRecommendationClick(data: {
+    userId: number
+    productId: number
+    sessionId: string
+  }) {
     try {
       await analyticsApi.logRecommendationClick(data)
     } catch (error: unknown) {
@@ -151,7 +165,11 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     }
   }
 
-  async function logRecommendationPurchase(data: { userId: number; productId: number; sessionId: string }) {
+  async function logRecommendationPurchase(data: {
+    userId: number
+    productId: number
+    sessionId: string
+  }) {
     try {
       await analyticsApi.logRecommendationPurchase(data)
     } catch (error: unknown) {

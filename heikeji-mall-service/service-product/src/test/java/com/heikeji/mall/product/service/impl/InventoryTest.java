@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,6 +35,9 @@ public class InventoryTest {
         testProduct.setVersion(1);
         testProduct.setStatus(1); // 已上架
         testProduct.setDelFlag(0); // 未删除
+        
+        // 使用反射设置baseMapper
+        ReflectionTestUtils.setField(productService, "baseMapper", productMapper);
     }
 
     @Test
