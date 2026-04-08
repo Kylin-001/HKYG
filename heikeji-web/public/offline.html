@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>离线 - 黑科易购</title>
+  <meta name="theme-color" content="#000AB0">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #000AB0;
+      --primary-dark: #000880;
+      --primary-light: #335ECC;
+      --bg: #F5F7FA;
+      --text-primary: #1a1a2e;
+      --text-secondary: #64748b;
+      --white: #ffffff;
+      --shadow-sm: 0 2px 8px rgba(0, 10, 176, 0.08);
+      --shadow-md: 0 4px 24px rgba(0, 10, 176, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #E8EEF5 50%, #D4E3F3 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text-primary);
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 80%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 10, 176, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -20%;
+      width: 70%;
+      height: 90%;
+      background: radial-gradient(circle, rgba(51, 94, 204, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      padding: 48px 36px 40px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: var(--radius-md);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 2px;
+      box-shadow: 0 4px 14px rgba(0, 10, 176, 0.35);
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .offline-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 28px;
+      position: relative;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .offline-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .description {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 340px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-retry {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 40px;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0, 10, 176, 0.3);
+      text-decoration: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-retry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0, 10, 176, 0.4);
+    }
+
+    .btn-retry:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 12px rgba(0, 10, 176, 0.3);
+    }
+
+    .btn-retry svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.5s ease;
+    }
+
+    .btn-retry:hover svg {
+      transform: rotate(180deg);
+    }
+
+    .status-hint {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    .status-dot.online {
+      background: #22c55e;
+      animation: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0, 10, 176, 0.08);
+      font-size: 12px;
+      color: var(--text-secondary);
+      opacity: 0.6;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    @media (max-width: 520px) {
+      .container {
+        padding: 36px 24px 32px;
+        border-radius: var(--radius-md);
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+      }
+
+      .logo-text {
+        font-size: 24px;
+      }
+
+      .offline-icon {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 22px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .description {
+        font-size: 14px;
+        margin-bottom: 26px;
+      }
+
+      .btn-retry {
+        padding: 12px 32px;
+        font-size: 15px;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 380px) {
+      body {
+        padding: 16px;
+      }
+
+      .container {
+        padding: 28px 20px 28px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-wrapper">
+      <div class="logo">
+        <span class="logo-icon">黑科</span>
+        <span class="logo-text">易购</span>
+      </div>
+    </div>
+
+    <div class="offline-icon">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M95 72C105.493 72 114 63.4934 114 53C114 43.3873 106.83 35.4309 97.54 34.1559C96.2622 21.8617 85.8077 12 73 12C61.0896 12 51.2362 20.5744 49.0017 31.8509C48.3373 31.7203 47.6516 31.65 46.95 31.65C39.0964 31.65 32.65 38.0964 32.65 45.95C32.65 46.3034 32.6638 46.6535 32.691 47H32C23.7157 47 17 53.7157 17 62C17 70.2843 23.7157 77 32 77H95V72Z" fill="#E2E8F0"/>
+        <circle cx="60" cy="88" r="6" fill="#94A3B8"/>
+        <path d="M60 76C52.268 76 45.5 79.58 41 85" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"/>
+        <path d="M60 68C48.954 68 39.27 73.16 33 81" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
+        <path d="M60 60C45.64 60 33.04 67.74 25 79" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/>
+        <line x1="82" y1="70" x2="98" y2="54" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1>网络连接已断开</h1>
+
+    <p class="description">请检查您的网络连接后重试。网络恢复后将自动刷新页面。</p>
+
+    <button class="btn-retry" onclick="retryConnection()" id="retryBtn">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" id="refreshIcon">
+        <path d="M4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C9.25 4 6.84 5.39 5.42 7.5M5.42 7.5V3M5.42 7.5H9.92" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      重新连接
+    </button>
+
+    <div class="status-hint">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">当前离线</span>
+    </div>
+
+    <div class="footer">
+      黑科易购 · 黑龙江科技大学校园服务平台
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const retryBtn = document.getElementById('retryBtn');
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+
+      function updateOnlineStatus() {
+        if (navigator.onLine) {
+          statusDot.classList.add('online');
+          statusText.textContent = '网络已恢复';
+          retryBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            正在跳转...
+          `;
+          setTimeout(function() {
+            window.location.reload();
+          }, 800);
+        } else {
+          statusDot.classList.remove('online');
+          statusText.textContent = '当前离线';
+        }
+      }
+
+      window.retryConnection = function() {
+        retryBtn.style.transform = 'scale(0.96)';
+        setTimeout(function() {
+          retryBtn.style.transform = '';
+        }, 150);
+
+        if (navigator.onLine) {
+          updateOnlineStatus();
+        } else {
+          fetch(window.location.href, { method: 'HEAD', cache: 'no-store' })
+            .then(function() {
+              updateOnlineStatus();
+            })
+            .catch(function() {
+              const originalText = statusText.textContent;
+              statusText.textContent = '仍无网络...';
+              setTimeout(function() {
+                if (!navigator.onLine) {
+                  statusText.textContent = originalText;
+                }
+              }, 2000);
+            });
+        }
+      };
+
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', function() {
+        statusDot.classList.remove('online');
+        statusText.textContent = '当前离线';
+      });
+
+      updateOnlineStatus();
+    })();
+  </script>
+</body>
+</html>
