@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<script setup lang="ts">
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -275,8 +275,9 @@ onUnmounted(() => {
           <div :class="['flex items-center justify-between transition-all duration-300', isScrolled ? 'h-14' : 'h-16']">
 
             <!-- ====== 左侧区域：品牌 Logo ====== -->
-            <div class="flex items-center gap-3 shrink-0">
-              <USTHLogo size="md" :show-text="true" class="hover:scale-105 transition-transform duration-200" />
+            <div class="flex items-center gap-2 shrink-0">
+              <USTHLogo size="sm" :show-text="false" class="hover:scale-105 transition-transform duration-200" />
+              <span class="hidden sm:block font-bold text-base text-text-primary">黑科易购</span>
             </div>
 
             <!-- ====== 中间区域：主导航菜单（桌面端 ≥1024px）====== -->
@@ -457,7 +458,7 @@ onUnmounted(() => {
       </header>
 
       <!-- 主内容区域 -->
-      <main id="main-content" :class="['min-h-screen bg-surface-secondary', `pt-[${headerHeight.value}px]`, 'pb-20 md:pb-8']" role="main" aria-label="主要内容">
+      <main id="main-content" :class="['min-h-screen bg-surface-secondary', 'pb-20 md:pb-8']" :style="{ paddingTop: headerHeight + 'px' }" role="main" aria-label="主要内容">
         <ErrorLayout>
           <RouterView v-slot="{ Component, route: currentRoute }">
             <keep-alive :include="['Home', 'ProductList', 'CommunityForum']">
@@ -475,7 +476,7 @@ onUnmounted(() => {
           <router-link v-for="item in mobileNavItems" :key="item.path" :to="item.path"
             :aria-current="route.path === item.path ? 'page' : undefined"
             :class="['flex flex-col items-center justify-center flex-1 h-full transition-colors',
-              route.path.startsWith(item.path) || (item.path === '/' && route.path === '/')
+              route.path === item.path || (item.path !== '/' && route.path.startsWith(item.path))
                 ? 'text-primary' : 'text-text-tertiary']">
             <el-icon :size="22"><component :is="item.icon" /></el-icon>
             <span class="text-[10px] mt-0.5 font-medium">{{ item.label }}</span>

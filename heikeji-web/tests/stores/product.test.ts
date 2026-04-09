@@ -182,12 +182,12 @@ describe('useProductStore', () => {
       vi.mocked(productApi.getProductList).mockReturnValue(promise)
 
       const fetchPromise = store.fetchList()
-      
+
       expect(store.loading).toBe(true)
-      
+
       resolvePromise!(mockProductListResponse)
       await fetchPromise
-      
+
       expect(store.loading).toBe(false)
     })
   })
@@ -372,7 +372,7 @@ describe('useProductStore', () => {
 
       it('超过4个商品时返回false', () => {
         const store = useProductStore()
-        
+
         for (let i = 1; i <= 4; i++) {
           store.addToCompare({ id: i, name: `商品${i}`, price: i * 10 } as any)
         }
@@ -386,7 +386,7 @@ describe('useProductStore', () => {
       it('重复添加同一商品返回false', () => {
         const store = useProductStore()
         const item = { id: 1, name: '商品A', price: 100 }
-        
+
         store.addToCompare(item as any)
         const result = store.addToCompare(item as any)
 
@@ -676,7 +676,7 @@ describe('useProductStore', () => {
 
       const promise = store.fetchList()
       expect(store.loading).toBe(true)
-      
+
       await promise
       expect(store.loading).toBe(false)
     })
@@ -687,7 +687,7 @@ describe('useProductStore', () => {
 
       const promise = store.fetchDetail(1)
       expect(store.loading).toBe(true)
-      
+
       await promise
       expect(store.loading).toBe(false)
     })
@@ -766,8 +766,8 @@ describe('useProductStore', () => {
 
     it('大量商品列表处理', async () => {
       const store = useProductStore()
-      const largeList = Array.from({ length: 100 }, (_, i) => ({ 
-        id: i + 1, 
+      const largeList = Array.from({ length: 100 }, (_, i) => ({
+        id: i + 1,
         name: `商品${i + 1}`,
         price: Math.random() * 1000,
         status: 'active',

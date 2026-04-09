@@ -481,10 +481,10 @@ const cartItems = computed<CartItem[]>(() => {
     .filter(item => item.selected !== false)
     .map(item => ({
       id: item.id,
-      name: item.name || item.productName || '',
-      image: item.image || item.productImage || '',
-      specs: item.spec || item.skuName || '',
-      price: item.price,
+      name: item.product?.name || '',
+      image: item.product?.image || '',
+      specs: item.specifications ? Object.entries(item.specifications).map(([k, v]) => `${k}:${v}`).join(' ') : '',
+      price: item.product?.price ?? 0,
       quantity: item.quantity
     }))
 })
@@ -495,9 +495,9 @@ const addresses = computed<Address[]>(() => {
     id: addr.id,
     name: addr.recipientName || addr.receiverName || addr.name || '',
     phone: addr.phone || '',
-    city: addr.city || addr.province + addr.city || '',
+    city: [addr.province, addr.city, addr.district].filter(Boolean).join('') || '',
     detail: addr.detailAddress || addr.detail || addr.address || '',
-    fullAddress: addr.fullAddress || addr.address || (addr.province + addr.city + addr.district + (addr.detailAddress || addr.detail || '')),
+    fullAddress: addr.fullAddress || [addr.province, addr.city, addr.district, addr.detailAddress || addr.detail || ''].filter(Boolean).join(''),
     isDefault: addr.isDefault ?? false
   }))
 })

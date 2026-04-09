@@ -30,7 +30,7 @@ describe('useSmartSearch Composable', () => {
     it('应该更新searchQuery值', () => {
       const searchQuery = ref('')
       searchQuery.value = '手机'
-      
+
       expect(searchQuery.value).toBe('手机')
     })
 
@@ -103,7 +103,7 @@ describe('useSmartSearch Composable', () => {
       const searchHistory = ref<string[]>([])
 
       searchHistory.value.unshift('手机')
-      
+
       expect(searchHistory.value[0]).toBe('手机')
       expect(searchHistory.value.length).toBe(1)
     })
@@ -277,9 +277,14 @@ describe('useSmartSearch Composable', () => {
     it('快速连续输入应重置计时器', () => {
       const debounceMs = 300
       let callCount = 0
+      let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
       const debouncedSearch = () => {
-        setTimeout(() => {
+        if (debounceTimer !== null) {
+          clearTimeout(debounceTimer)
+        }
+
+        debounceTimer = setTimeout(() => {
           callCount++
         }, debounceMs)
       }

@@ -11,52 +11,52 @@ export interface PerformanceThresholds {
 export interface PerformanceBudgetConfig {
   /** Web Vitals 阈值（毫秒） */
   vitals: {
-    LCP: PerformanceThresholds  // Largest Contentful Paint - 最大内容绘制
-    FID: PerformanceThresholds  // First Input Delay - 首次输入延迟
-    CLS: PerformanceThresholds  // Cumulative Layout Shift - 累积布局偏移
-    FCP: PerformanceThresholds  // First Contentful Paint - 首次内容绘制
+    LCP: PerformanceThresholds // Largest Contentful Paint - 最大内容绘制
+    FID: PerformanceThresholds // First Input Delay - 首次输入延迟
+    CLS: PerformanceThresholds // Cumulative Layout Shift - 累积布局偏移
+    FCP: PerformanceThresholds // First Contentful Paint - 首次内容绘制
     TTFB: PerformanceThresholds // Time to First Byte - 首字节时间
     INP?: PerformanceThresholds // Interaction to Next Paint - 交互到下一次绘制
   }
 
   /** 资源大小限制（KB） */
   resources: {
-    totalJS: number        // JS总大小
-    totalCSS: number       // CSS总大小
-    totalImages: number    // 图片总大小
-    singleBundle: number   // 单个bundle大小
-    font: number           // 字体大小
-    thirdParty: number     // 第三方资源总大小
+    totalJS: number // JS总大小
+    totalCSS: number // CSS总大小
+    totalImages: number // 图片总大小
+    singleBundle: number // 单个bundle大小
+    font: number // 字体大小
+    thirdParty: number // 第三方资源总大小
   }
 
   /** 自定义性能阈值（毫秒） */
   custom: {
-    routeChange: number      // 路由切换耗时
-    apiResponse: number      // API响应时间
-    componentRender: number  // 组件渲染耗时
-    longTask: number         // 长任务阈值
-    hydration: number        // SSR水合时间
-    firstScreen: number      // 首屏时间
+    routeChange: number // 路由切换耗时
+    apiResponse: number // API响应时间
+    componentRender: number // 组件渲染耗时
+    longTask: number // 长任务阈值
+    hydration: number // SSR水合时间
+    firstScreen: number // 首屏时间
   }
 
   /** 告警规则 */
   alerts: {
-    enableConsoleWarning: boolean   // 控制台告警
-    enableToast: boolean            // Toast提示
-    slowApiThreshold: number        // 慢API阈值(ms)
-    largeBundleThreshold: number    // 大包阈值(KB)
-    memoryUsageThreshold: number    // 内存使用率阈值(MB)
-    errorRateThreshold: number      // 错误率阈值(%)
+    enableConsoleWarning: boolean // 控制台告警
+    enableToast: boolean // Toast提示
+    slowApiThreshold: number // 慢API阈值(ms)
+    largeBundleThreshold: number // 大包阈值(KB)
+    memoryUsageThreshold: number // 内存使用率阈值(MB)
+    errorRateThreshold: number // 错误率阈值(%)
   }
 
   /** 上报配置 */
   reporting: {
-    endpoint: string                // 上报接口
-    sampleRate: number              // 采样率(0-1)
-    batchSize: number               // 批量大小
-    flushInterval: number           // 刷新间隔(ms)
-    sendOnPageHide: boolean         // 页面隐藏时发送
-    maxQueueSize: number            // 最大队列大小
+    endpoint: string // 上报接口
+    sampleRate: number // 采样率(0-1)
+    batchSize: number // 批量大小
+    flushInterval: number // 刷新间隔(ms)
+    sendOnPageHide: boolean // 页面隐藏时发送
+    maxQueueSize: number // 最大队列大小
   }
 }
 

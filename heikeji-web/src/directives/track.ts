@@ -55,7 +55,7 @@ interface ViewTrackConfig extends TrackDirectiveConfig {
 const directiveState = new WeakMap<HTMLElement, {
   hasTracked: Set<string>
   observer?: IntersectionObserver
-  scrollHandler?: () => void
+  scrollHandler?:() => void
 }>()
 
 /**

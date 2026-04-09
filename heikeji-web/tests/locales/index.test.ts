@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { setLocale, getLocale, availableLocales } from '@/locales/index'
-import i18n from '@/locales/index'
+import i18n, { setLocale, getLocale, availableLocales } from '@/locales/index'
 
 describe('i18n 国际化 (locales/index.ts)', () => {
   beforeEach(() => {
@@ -13,19 +12,19 @@ describe('i18n 国际化 (locales/index.ts)', () => {
     it('默认语言应该是zh-CN', () => {
       // 清除localStorage以测试默认值
       localStorage.removeItem('heikeji-locale')
-      
+
       // 由于i18n是单例，我们需要检查初始状态
       // 在实际应用中，默认语言在创建时就已经设置
       const currentLocale = i18n.global.locale.value
-      
+
       expect(currentLocale).toBe('zh-CN')
     })
 
     it('没有localStorage时应该使用zh-CN', () => {
       localStorage.removeItem('heikeji-locale')
-      
+
       const locale = getLocale()
-      
+
       expect(locale).toBe('zh-CN')
     })
   })
@@ -35,7 +34,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
       setLocale('en-US')
 
       const locale = getLocale()
-      
+
       expect(locale).toBe('en-US')
       expect(localStorage.getItem('heikeji-locale')).toBe('en-US')
     })
@@ -44,10 +43,10 @@ describe('i18n 国际化 (locales/index.ts)', () => {
       // 先设置为英文
       setLocale('en-US')
       expect(getLocale()).toBe('en-US')
-      
+
       // 再切回中文
       setLocale('zh-CN')
-      
+
       expect(getLocale()).toBe('zh-CN')
       expect(localStorage.getItem('heikeji-locale')).toBe('zh-CN')
     })
@@ -74,7 +73,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
 
     it('返回值类型应该是Locale类型', () => {
       const locale = getLocale()
-      
+
       // TypeScript 类型检查：locale 应该是 'zh-CN' | 'en-US'
       const validLocales: Array<'zh-CN' | 'en-US'> = ['zh-CN', 'en-US']
       expect(validLocales).toContain(locale)
@@ -86,7 +85,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
       setLocale('zh-CN')
 
       const t = i18n.global.t
-      
+
       expect(t('common.confirm')).toBe('确认')
       expect(t('nav.home')).toBe('首页')
       expect(t('auth.login')).toBe('登录')
@@ -99,7 +98,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
       setLocale('en-US')
 
       const t = i18n.global.t
-      
+
       expect(t('common.confirm')).toBe('Confirm')
       expect(t('nav.home')).toBe('Home')
       expect(t('auth.login')).toBe('Sign In')
@@ -131,7 +130,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
       const t = i18n.global.t
 
       const result = t('nonexistent.key.path')
-      
+
       // vue-i18n 默认行为：返回 key 本身
       expect(result).toBeDefined()
     })
@@ -141,7 +140,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
     it('无效的locale不应该崩溃', () => {
       // 先记录当前locale
       const beforeLocale = getLocale()
-      
+
       // 尝试设置一个不存在的locale（TypeScript会阻止，但运行时可能发生）
       expect(() => {
         // @ts-ignore - 故意传入无效值测试容错性
@@ -153,7 +152,7 @@ describe('i18n 国际化 (locales/index.ts)', () => {
       const locale = getLocale()
       expect(typeof locale).toBe('string')
       expect(locale.length).toBeGreaterThan(0)
-      
+
       // 恢复为有效locale
       setLocale(beforeLocale)
     })
@@ -212,16 +211,16 @@ describe('i18n 国际化 (locales/index.ts)', () => {
   describe('localStorage持久化', () => {
     it('设置语言后localStorage应该有数据', () => {
       localStorage.removeItem('heikeji-locale')
-      
+
       setLocale('en-US')
-      
+
       expect(localStorage.getItem('heikeji-locale')).toBe('en-US')
     })
 
     it('从localStorage恢复语言设置', () => {
       // 模拟之前保存的语言偏好
       localStorage.setItem('heikeji-locale', 'en-US')
-      
+
       // 注意：由于i18n实例已经在模块加载时创建，
       // 这里我们主要验证getLocale能正确返回当前设置
       // 实际恢复逻辑在i18n初始化时完成

@@ -48,7 +48,9 @@ module.exports = {
       rules: {
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-non-null-assertion': 'warn'
+        '@typescript-eslint/no-non-null-assertion': 'warn',
+        'no-use-before-define': 'off',
+        '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, typedefs: false }]
       }
     }
   ]

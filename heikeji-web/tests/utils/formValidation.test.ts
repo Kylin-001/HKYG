@@ -9,7 +9,7 @@ describe('formValidation 工具函数', () => {
     it('应该接受有效的中国手机号', () => {
       const rule = commonValidators.phone()
       expect(rule.pattern).toBeDefined()
-      
+
       const validPhones = ['13800138000', '15912345678', '18600001111']
       validPhones.forEach(phone => {
         expect(rule.pattern!.test(phone)).toBe(true)
@@ -19,12 +19,12 @@ describe('formValidation 工具函数', () => {
     it('应该拒绝无效的手机号格式', () => {
       const rule = commonValidators.phone()
       const invalidPhones = [
-        '12345678901',  // 首位不是1
-        '12800138000',  // 第二位不在3-9
-        '1380013800',   // 少一位
+        '12345678901', // 首位不是1
+        '12800138000', // 第二位不在3-9
+        '1380013800', // 少一位
         '138001380001', // 多一位
-        'abc12345678',  // 含字母
-        '',              // 空
+        'abc12345678', // 含字母
+        '', // 空
       ]
       invalidPhones.forEach(phone => {
         expect(rule.pattern!.test(phone)).toBe(false)
@@ -132,9 +132,9 @@ describe('formValidation 工具函数', () => {
     it('应该接受有效的身份证号（18位）', () => {
       const rule = commonValidators.idCard()
       const validIds = [
-        '110105199003071234',  // 标准格式
-        '11010519900307123X',  // 以X结尾
-        '11010519900307123x',  // 小写x
+        '110105199003071234', // 标准格式
+        '11010519900307123X', // 以X结尾
+        '11010519900307123x', // 小写x
       ]
       validIds.forEach(id => {
         expect(rule.pattern!.test(id)).toBe(true)
@@ -144,10 +144,10 @@ describe('formValidation 工具函数', () => {
     it('应该拒绝无效的身份证号', () => {
       const rule = commonValidators.idCard()
       const invalidIds = [
-        '11010519900307123',   // 17位
+        '11010519900307123', // 17位
         '1101051990030712345', // 19位
-        'abcdefghijklnmopqr',   // 全字母
-        '',                     // 空
+        'abcdefghijklnmopqr', // 全字母
+        '', // 空
       ]
       invalidIds.forEach(id => {
         expect(rule.pattern!.test(id)).toBe(false)
@@ -194,9 +194,9 @@ describe('formValidation 工具函数', () => {
     it('应该拒绝无效的URL', () => {
       const rule = commonValidators.url()
       const invalidUrls = [
-        'example.com',     // 无协议
-        'ftp://test.com',  // 非http/https
-        '',               // 空
+        'example.com', // 无协议
+        'ftp://test.com', // 非http/https
+        '', // 空
         'not a url',
       ]
       invalidUrls.forEach(url => {
@@ -309,14 +309,14 @@ describe('formValidation 工具函数', () => {
     it('空值时应报错', async () => {
       const rule = commonValidators.confirmPassword('password')
       let capturedError: Error | undefined
-      
+
       await new Promise<void>(resolve => {
         rule.validator!({}, null, (error?: Error) => {
           capturedError = error
           resolve()
         })
       })
-      
+
       expect(capturedError).toBeDefined()
     })
 

@@ -18,24 +18,24 @@ export interface PerformanceMetric {
 
 /** 核心Web Vitals集合 */
 export interface CoreWebVitals {
-  FCP: PerformanceMetric | null   // First Contentful Paint - 首次内容绘制
-  LCP: PerformanceMetric | null   // Largest Contentful Paint - 最大内容绘制
-  FID: PerformanceMetric | null   // First Input Delay - 首次输入延迟
-  CLS: PerformanceMetric | null   // Cumulative Layout Shift - 累积布局偏移
-  TTFB: PerformanceMetric | null  // Time to First Byte - 首字节时间
-  INP: PerformanceMetric | null   // Interaction to Next Paint - 交互到下一帧
-  TTI: PerformanceMetric | null   // Time to Interactive - 可交互时间
-  FMP: PerformanceMetric | null   // First Meaningful Paint - 首次有意义的绘制
+  FCP: PerformanceMetric | null // First Contentful Paint - 首次内容绘制
+  LCP: PerformanceMetric | null // Largest Contentful Paint - 最大内容绘制
+  FID: PerformanceMetric | null // First Input Delay - 首次输入延迟
+  CLS: PerformanceMetric | null // Cumulative Layout Shift - 累积布局偏移
+  TTFB: PerformanceMetric | null // Time to First Byte - 首字节时间
+  INP: PerformanceMetric | null // Interaction to Next Paint - 交互到下一帧
+  TTI: PerformanceMetric | null // Time to Interactive - 可交互时间
+  FMP: PerformanceMetric | null // First Meaningful Paint - 首次有意义的绘制
 }
 
 /** 自定义性能指标 */
 export interface CustomMetrics {
-  routeChangeTime?: number        // 路由切换耗时(ms)
+  routeChangeTime?: number // 路由切换耗时(ms)
   apiResponseTimes: Map<string, number[]> // API响应时间分布
   componentRenderTimes: Map<string, number> // 组件渲染耗时
   resourceLoadTimes: Map<string, ResourceTimingInfo> // 资源加载信息
-  memoryUsage: MemoryInfo          // 内存使用量
-  longTasks: LongTaskInfo[]        // 长任务列表
+  memoryUsage: MemoryInfo // 内存使用量
+  longTasks: LongTaskInfo[] // 长任务列表
 }
 
 /** 资源加载信息 */
@@ -84,6 +84,7 @@ class PerformanceMonitor {
     memoryUsage: { usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0, timestamp: 0 },
     longTasks: []
   }
+
   private routeChangeStartTime: number = 0
   private isInitialized = false
 
@@ -673,7 +674,7 @@ class PerformanceMonitor {
     customMetrics: CustomMetrics
     allMetrics: PerformanceMetric[]
     exportTimestamp: number
-  } {
+    } {
     return {
       coreWebVitals: this.getCoreWebVitals(),
       customMetrics: this.getCustomMetrics(),

@@ -18,13 +18,17 @@ export interface SecondhandItem {
   sellerAvatar: string
   location: string
   views: number
+  viewCount?: number
   likes: number
   comments: number
   status: ItemStatus
   tags: string[]
   isNegotiable: boolean
   publishedAt: string
+  publishTime?: string
+  createdAt?: string
   updatedAt: string
+  isFavorite?: boolean
   // ====== 新增字段 ======
   isTop?: boolean // 是否置顶
   isPromoted?: boolean // 是否推广
@@ -167,4 +171,28 @@ export interface SafetyVerification {
   verifyMethod?: 'student_id' | 'phone' | 'id_card'
   safetyScore: number // 0-100
   tips: string[] // 安全提示
+}
+
+// ====== 新增：发布商品请求类型 ======
+export interface PublishSecondhandRequest {
+  title: string
+  description: string
+  price: number
+  originalPrice?: number
+  category: string
+  condition: ItemCondition
+  images: string[]
+  location?: string
+  contactMethod?: string
+  isNegotiable?: boolean
+}
+
+// ====== 新增：上传图片类型 ======
+export interface UploadedImage {
+  id: string
+  url: string
+  thumbnailUrl?: string
+  name: string
+  size: number
+  file?: File
 }

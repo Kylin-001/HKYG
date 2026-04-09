@@ -106,7 +106,7 @@ class Logger {
 
   private outputToConsole(entry: LogEntry): void {
     const prefix = `[${entry.timestamp}] [${LogLevel[entry.level]}]`
-    
+
     switch (entry.level) {
       case LogLevel.DEBUG:
         console.debug(prefix, entry.message, entry.data)

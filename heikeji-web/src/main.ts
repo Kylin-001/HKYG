@@ -62,15 +62,17 @@ if (userStore.token) {
   userStore.fetchUserInfo().catch(() => {})
 }
 
-// 初始化PWA增强版Service Worker
-initPWA({
-  onUpdateFound: (registration) => {
-    console.log('[PWA] 新版本可用，正在后台更新...')
-  },
-  onActivated: () => {
-    console.log('[PWA] Service Worker 已激活')
-  }
-})
+// 初始化PWA增强版Service Worker（仅生产环境）
+if (import.meta.env.PROD) {
+  initPWA({
+    onUpdateFound: (registration) => {
+      console.log('[PWA] 新版本可用，正在后台更新...')
+    },
+    onActivated: () => {
+      console.log('[PWA] Service Worker 已激活')
+    }
+  })
+}
 
 // 初始化性能监控（仅在开发环境或带perf参数时）
 if (import.meta.env.DEV || new URLSearchParams(window.location.search).has('perf')) {
@@ -82,20 +84,24 @@ if (import.meta.env.DEV || new URLSearchParams(window.location.search).has('perf
     console.warn('[Perf] 性能监控初始化失败，已忽略')
   }
 }
-connectMonitorToReporter()
+
+// 性能数据上报（仅生产环境，开发环境静默）
+if (import.meta.env.PROD) {
+  connectMonitorToReporter()
+}
 
 // 初始化用户行为追踪系统
 initAnalytics()
 
-// 原有Service Worker注册（降级方案）
-if ('serviceWorker' in navigator && !navigator.serviceWorker.controller) {
+// Service Worker注册（仅生产环境）
+if (import.meta.env.PROD && 'serviceWorker' in navigator && !navigator.serviceWorker.controller) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('[SW] Service Worker registered with scope:', registration.scope)
       })
       .catch((error) => {
-        console.error('[SW] Service Worker registration failed:', error)
+        console.warn('[SW] Service Worker registration skipped:', error.message)
       })
   })
 }

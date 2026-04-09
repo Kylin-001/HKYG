@@ -1,4 +1,4 @@
-import { get, post, put } from '@/utils/request'
+import { get, post } from '@/utils/request'
 import type {
   CourseSchedule, GradeRecord, GPAInfo, Classroom,
   TimeSlot, DormitoryInfo, RepairRecord, LibraryBookSearchResult
@@ -29,7 +29,13 @@ export function getClassroomTimeSlots(roomId: string, date: string): Promise<Tim
   return get(`/campus/classrooms/${roomId}/slots`, { params: { date } })
 }
 
-export function bookClassroom(roomId: string, data: { date: string; periods: number[]; reason?: string }): Promise<any> {
+export interface BookClassroomResponse {
+  success: boolean
+  message: string
+  bookingId?: string
+}
+
+export function bookClassroom(roomId: string, data: { date: string; periods: number[]; reason?: string }): Promise<BookClassroomResponse> {
   return post(`/campus/classrooms/${roomId}/book`, data)
 }
 
@@ -53,6 +59,20 @@ export function searchBooks(keyword: string, page?: number): Promise<{ results: 
   return get('/campus/library/search', { params: { keyword, page } })
 }
 
-export function getCampusMapData(): Promise<{ buildings: any[]; routes: any[] }> {
+export interface CampusMapBuilding {
+  id: string
+  name: string
+  position: { lat: number; lng: number }
+  type?: string
+}
+
+export interface CampusMapRoute {
+  id: string
+  from: string
+  to: string
+  path: { lat: number; lng: number }[]
+}
+
+export function getCampusMapData(): Promise<{ buildings: CampusMapBuilding[]; routes: CampusMapRoute[] }> {
   return get('/campus/map/data')
 }

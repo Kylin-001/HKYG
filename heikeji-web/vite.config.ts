@@ -4,33 +4,38 @@ import { resolve } from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-// import { mockServerPlugin } from './src/mock/index' // 已禁用
+import { viteMockServe } from 'vite-plugin-mock'
 import compression from 'vite-plugin-compression'
 
 export default defineConfig({
   plugins: [
     vue(),
-    
+
     AutoImport({
       imports: ['vue', 'vue-router', 'pinia'],
       dts: 'src/auto-imports.d.ts',
       resolvers: [ElementPlusResolver()],
     }),
-    
+
     Components({
       resolvers: [ElementPlusResolver({ importStyle: 'sass' })],
       dts: 'src/components.d.ts',
     }),
-    
-    // mockServerPlugin(), // 已禁用：Mock 服务器未安装
-    
+
+    viteMockServe({
+      mockPath: 'src/mock',
+      enable: true,
+      watchFiles: true,
+      logger: true,
+    }),
+
     compression({
       algorithm: 'brotliCompress',
       threshold: 10240,
       deleteOriginFile: false,
     }),
   ],
-  
+
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -45,15 +50,15 @@ export default defineConfig({
       '@styles': resolve(__dirname, 'src/styles'),
     },
   },
-  
+
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@use "@/styles/_variables" as *;`,
+        additionalData: '@use "@/styles/_variables" as *;',
       },
     },
   },
-  
+
   server: {
     port: 5174,
     open: true,
@@ -63,7 +68,7 @@ export default defineConfig({
       strict: false
     }
   },
-  
+
   build: {
     target: 'esnext',
     outDir: 'dist',
@@ -99,7 +104,7 @@ export default defineConfig({
       },
     },
   },
-  
+
   optimizeDeps: {
     include: ['vue', 'vue-router', 'pinia', 'element-plus', 'axios', '@vueuse/core'],
   },

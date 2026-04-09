@@ -34,12 +34,12 @@ export function usePerformanceMonitor() {
         const entries = list.getEntries()
         const lastEntry = entries[entries.length - 1]
         metrics.value.LCP = Math.round(lastEntry.startTime)
-        
+
         if (metrics.value.LCP > 2500) {
           console.warn(`[Perf] LCP 较慢 (${metrics.value.LCP}ms)，建议优化`)
         }
       })
-      
+
       lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true })
       observer = lcpObserver
     } catch (err) {
@@ -52,12 +52,12 @@ export function usePerformanceMonitor() {
       const fidObserver = new PerformanceObserver((list) => {
         const firstInput = list.getEntries()[0]
         metrics.value.FID = Math.round(firstInput.processingStart - firstInput.startTime)
-        
+
         if (metrics.value.FID! > 100) {
           console.warn(`[Perf] FID 较慢 (${metrics.value.FID}ms)，建议优化交互响应`)
         }
       })
-      
+
       fidObserver.observe({ type: 'first-input', buffered: true })
     } catch (err) {
       console.warn('[Perf] FID观察器创建失败:', err)
@@ -74,12 +74,12 @@ export function usePerformanceMonitor() {
           }
         }
         metrics.value.CLS = Math.round(clsValue * 1000) / 1000
-        
+
         if (metrics.value.CLS > 0.1) {
           console.warn(`[Perf] CLS 较高 (${metrics.value.CLS})，建议优化布局稳定性`)
         }
       })
-      
+
       clsObserver.observe({ type: 'layout-shift', buffered: true })
     } catch (err) {
       console.warn('[Perf] CLS观察器创建失败:', err)
@@ -104,7 +104,7 @@ export function usePerformanceMonitor() {
           metrics: metrics.value,
           userAgent: navigator.userAgent,
         }
-        
+
         const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
         navigator.sendBeacon('/api/performance', blob)
       } catch (err) {
@@ -127,10 +127,10 @@ export function usePerformanceMonitor() {
       measureFID()
       measureCLS()
     }
-    
+
     measureFCP()
     measureTTFB()
-    
+
     setTimeout(reportMetrics, 3000)
   })
 

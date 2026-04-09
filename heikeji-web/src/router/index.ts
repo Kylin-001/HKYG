@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import(/* webpackPrefetch: true */ '@/views/home/Index.vue'),
     meta: { title: '首页 - 黑科易购', transition: 'page-fade' },
   },
-  
+
   // ====== 认证模块 ======
   {
     path: '/auth',

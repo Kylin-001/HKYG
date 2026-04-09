@@ -128,7 +128,7 @@ export function createPersistedState(options?: Partial<PersistOptions>) {
       window.addEventListener('storage', (event: StorageEvent) => {
         if (event.key === key && event.newValue) {
           const newData = persistOptions.serializer.deserialize(event.newValue)
-          
+
           if (newData) {
             store.$patch(newData)
           }

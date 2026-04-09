@@ -69,9 +69,9 @@ class WebSocketManager {
       this.ws.onopen = (event) => {
         this.status.value = 'connected'
         this.reconnectAttempts = 0
-        
+
         this.startHeartbeat()
-        
+
         while (this.messageQueue.length > 0) {
           const message = this.messageQueue.shift()
           if (message) {
@@ -85,7 +85,7 @@ class WebSocketManager {
       this.ws.onmessage = (event) => {
         try {
           let parsedData: WebSocketMessage
-          
+
           if (typeof event.data === 'string') {
             parsedData = JSON.parse(event.data)
           } else {
@@ -135,9 +135,9 @@ class WebSocketManager {
 
   disconnect(): void {
     this.isManualClose = true
-    
+
     this.stopHeartbeat()
-    
+
     if (this.reconnectTimer !== null) {
       clearTimeout(this.reconnectTimer)
       this.reconnectTimer = null
@@ -211,7 +211,7 @@ class WebSocketManager {
         const message = typeof this.options.heartbeatMessage === 'string'
           ? this.options.heartbeatMessage
           : JSON.stringify(this.options.heartbeatMessage)
-        
+
         this.ws.send(message)
       }
     }, this.options.heartbeatInterval)
@@ -264,11 +264,11 @@ export function useWebSocket(options: WebSocketOptions) {
       onMessage: (message) => {
         lastMessage.value = message
         messageHistory.value.unshift(message)
-        
+
         if (messageHistory.value.length > maxHistoryLength) {
           messageHistory.value = messageHistory.value.slice(0, maxHistoryLength)
         }
-        
+
         options.onMessage?.(message)
       },
       onClose: (event) => {

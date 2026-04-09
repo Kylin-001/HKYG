@@ -83,3 +83,54 @@ export interface DormitoryInfo {
   electricityBalance: number
   waterBalance: number
 }
+
+export interface CourseSchedule {
+  id: string
+  dayOfWeek: number
+  courseName: string
+  teacher: string
+  classroom: string
+  startSection: number
+  endSection: number
+  startTime: string
+  endTime: string
+  weeks: string
+  color?: string
+}
+
+export interface GradeRecord {
+  id: string
+  courseName: string
+  credit: number
+  score: number
+  gpa: number
+  semester: string
+  type: 'required' | 'elective' | 'public'
+}
+
+export interface GPAInfo {
+  totalGPA: number
+  totalCredits: number
+  semesterGPA: Record<string, number>
+}
+
+export interface TimeSlot {
+  id: string
+  roomId: string
+  date: string
+  period: number
+  startTime: string
+  endTime: string
+  available: boolean
+  reason?: string
+}
+
+export interface LibraryBookSearchResult {
+  id: string
+  title: string
+  author: string
+  publisher: string
+  isbn: string
+  status: 'available' | 'borrowed' | 'reserved'
+  location: string
+}

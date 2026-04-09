@@ -107,11 +107,11 @@ const DEFAULT_TTL = 5 * 60 * 1000
 
 // TTL预设值 (毫秒)
 export const TTL = {
-  SHORT: 1 * 60 * 1000,      // 1分钟 - 实时性数据
-  MEDIUM: 5 * 60 * 1000,     // 5分钟 - 一般数据 (默认)
-  LONG: 30 * 60 * 1000,      // 30分钟 - 较少变化的数据
-  HOUR: 60 * 60 * 1000,       // 1小时 - 静态数据
-  DAY: 24 * 60 * 60 * 1000,   // 1天 - 基本不变的数据
+  SHORT: 1 * 60 * 1000, // 1分钟 - 实时性数据
+  MEDIUM: 5 * 60 * 1000, // 5分钟 - 一般数据 (默认)
+  LONG: 30 * 60 * 1000, // 30分钟 - 较少变化的数据
+  HOUR: 60 * 60 * 1000, // 1小时 - 静态数据
+  DAY: 24 * 60 * 60 * 1000, // 1天 - 基本不变的数据
 } as const
 
 /** 最大缓存条目数 */
@@ -361,7 +361,7 @@ export function clearExpiredCache(): number {
 export function getCacheStats(): CacheStats & {
   keys: string[]
   topHitKeys: Array<{ key: string; count: number }>
-} {
+  } {
   // 找出访问次数最多的前10个key
   const topKeys = Array.from(cache.entries())
     .sort((a, b) => (b[1].accessCount || 0) - (a[1].accessCount || 0))

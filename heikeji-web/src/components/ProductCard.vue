@@ -81,23 +81,24 @@ const discountPercentage = computed(() => {
 
 /** 折扣节省金额 */
 const savingsAmount = computed(() => {
-  if (!props.product.originalPrice || props.product.originalPrice <= props.product.price) {
+  if (!props.product.originalPrice || !props.product.price || props.product.originalPrice <= props.product.price) {
     return 0
   }
   return props.product.originalPrice - props.product.price
 })
 
 /** 格式化价格显示 */
-function formatPrice(price: number): string {
-  return price.toFixed(2)
+function formatPrice(price: number | undefined): string {
+  return (price ?? 0).toFixed(2)
 }
 
 /** 格式化销量显示 */
-function formatSales(sales: number): string {
-  if (sales >= 10000) {
-    return `${(sales / 10000).toFixed(1)}万`
+function formatSales(sales: number | undefined): string {
+  const s = sales ?? 0
+  if (s >= 10000) {
+    return `${(s / 10000).toFixed(1)}万`
   }
-  return sales.toString()
+  return s.toString()
 }
 
 /** 是否显示标签徽章 */

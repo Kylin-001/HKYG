@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 
+import EmptyState from '@/components/global/EmptyState.vue'
+
 // Mock @element-plus/icons-vue
 vi.mock('@element-plus/icons-vue', () => ({
   Document: { template: '<svg class="icon-document"></svg>' },
@@ -16,8 +18,6 @@ vi.mock('@element-plus/icons-vue', () => ({
   CircleClose: { template: '<svg class="icon-circle-close"></svg>' },
   InfoFilled: { template: '<svg class="icon-info-filled"></svg>' },
 }))
-
-import EmptyState from '@/components/global/EmptyState.vue'
 
 describe('EmptyState.vue', () => {
   const createWrapper = (props = {}, slots = {}) => {

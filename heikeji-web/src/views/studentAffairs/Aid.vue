@@ -37,7 +37,7 @@ const typeOptions = [
     description: '中央和地方政府共同出资设立的助学金',
     amountRange: '2000-4000元/年',
     deadline: '每年9月30日',
-    icon: SchoolBuilding
+    icon: '🏛️'
   },
   {
     value: 'school' as const,
@@ -45,7 +45,7 @@ const typeOptions = [
     description: '学校设立的助学金项目',
     amountRange: '1000-3000元/年',
     deadline: '每年10月15日',
-    icon: SchoolBuilding
+    icon: '🏛️'
   },
   {
     value: 'temporary' as const,
@@ -53,7 +53,7 @@ const typeOptions = [
     description: '针对突发性、临时性困难的补助',
     amountRange: '500-2000元/次',
     deadline: '随时可申请',
-    icon: WarningFilled
+    icon: '⚠️'
   }
 ]
 
@@ -64,23 +64,23 @@ const difficultyLevels = [
 ]
 
 const specialDifficultyTypes = [
-  { value: '建档立卡贫困户', label: '建档立卡贫困户', icon: Document },
-  { value: '低保户', label: '低保家庭', icon: Wallet },
-  { value: '残疾', label: '残疾学生/残疾人子女', icon: WarningFilled },
-  { value: '单亲', label: '单亲家庭', icon: User },
-  { value: '孤儿', label: '孤儿/事实无人抚养', icon: User },
-  { value: '烈士子女', label: '烈士子女', icon: Star },
-  { value: '特困供养', label: '特困供养人员', icon: Handshake },
-  { value: '其他', label: '其他特殊情况', icon: QuestionFilled }
+  { value: '建档立卡贫困户', label: '建档立卡贫困户', icon: '📄' },
+  { value: '低保户', label: '低保家庭', icon: '💰' },
+  { value: '残疾', label: '残疾学生/残疾人子女', icon: '⚠️' },
+  { value: '单亲', label: '单亲家庭', icon: '🏆' },
+  { value: '孤儿', label: '孤儿/事实无人抚养', icon: '🏆' },
+  { value: '烈士子女', label: '烈士子女', icon: '⭐' },
+  { value: '特困供养', label: '特困供养人员', icon: '⭐' },
+  { value: '其他', label: '其他特殊情况', icon: '⚠️' }
 ]
 
-const statusMap: Record<string, { label: string; color: string; icon: any }> = {
-  submitted: { label: '已提交', color: 'text-primary bg-primary/10 border-primary/20', icon: EditPen },
-  reviewing: { label: '审核中', color: 'text-warning bg-warning/10 border-warning/20', icon: Search },
-  publicized: { label: '公示中', color: 'text-info bg-info/10 border-info/20', icon: Promotion },
-  approved: { label: '已批准', color: 'text-pine bg-pine/10 border-pine/20', icon: CircleCheckFilled },
-  rejected: { label: '已拒绝', color: 'text-crimson bg-crimson/10 border-crimson/20', icon: CircleCloseFilled },
-  issued: { label: '已发放', color: 'text-gold bg-gold/10 border-gold/20', icon: Money }
+const statusMap: Record<string, { label: string; color: string; icon: string }> = {
+  submitted: { label: '已提交', color: 'text-primary bg-primary/10 border-primary/20', icon: '✏️' },
+  reviewing: { label: '审核中', color: 'text-warning bg-warning/10 border-warning/20', icon: '⏳' },
+  publicized: { label: '公示中', color: 'text-info bg-info/10 border-info/20', icon: '⏳' },
+  approved: { label: '已批准', color: 'text-pine bg-pine/10 border-pine/20', icon: '✅' },
+  rejected: { label: '已拒绝', color: 'text-crimson bg-crimson/10 border-crimson/20', icon: '❌' },
+  issued: { label: '已发放', color: 'text-gold bg-gold/10 border-gold/20', icon: '✅' }
 }
 
 // 步骤配置

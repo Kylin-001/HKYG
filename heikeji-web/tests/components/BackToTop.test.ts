@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
+import BackToTop from '@/components/global/BackToTop.vue'
+
 // Mock @element-plus/icons-vue
 vi.mock('@element-plus/icons-vue', () => ({
   Top: { template: '<svg class="top-icon"></svg>' },
 }))
-
-import BackToTop from '@/components/global/BackToTop.vue'
 
 describe('BackToTop.vue', () => {
   let wrapper: ReturnType<typeof mount>

@@ -186,12 +186,12 @@
             >
               <div class="item-image-wrapper">
                 <img :src="item.images[0]" :alt="item.title" class="item-image" loading="lazy" />
-                <span v-if="item.condition !== '全新'" class="condition-badge" :class="item.condition">
+                <span v-if="item.condition !== 'brand_new'" class="condition-badge" :class="item.condition">
                   {{ getConditionLabel(item.condition) }}
                 </span>
                 <span v-if="item.isNegotiable" class="negotiable-badge">可议价</span>
                 <button class="favorite-btn" @click.stop="toggleFavorite(item.id)">
-                  <el-icon :class="{ 'is-favorite': item.isFavorite }"><StarFilled v-if="item.isFavorite" /><Star v-else /></el-icon>
+                  <el-icon :class="{ 'is-favorite': item.isFavorite ?? false }"><StarFilled v-if="item.isFavorite ?? false" /><Star v-else /></el-icon>
                 </button>
               </div>
               <div class="item-info">
@@ -208,7 +208,7 @@
                     <el-icon><Location /></el-icon>
                     {{ item.location }}
                   </span>
-                  <span class="item-time">{{ formatTime(item.publishTime) }}</span>
+                  <span class="item-time">{{ formatTime(item.publishedAt || item.publishTime || '') }}</span>
                 </div>
               </div>
             </article>
@@ -262,8 +262,8 @@ const categories = [
 
 const conditions = [
   { value: 'all', label: '不限' },
-  { value: 'brandNew', label: '全新' },
-  { value: 'likeNew', label: '几乎全新' },
+  { value: 'brand_new', label: '全新' },
+  { value: 'like_new', label: '几乎全新' },
   { value: 'good', label: '良好' },
   { value: 'fair', label: '一般' }
 ]
@@ -333,7 +333,7 @@ const filteredItems = computed(() => {
       break
     case 'newest':
     default:
-      result.sort((a, b) => new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime())
+      result.sort((a, b) => new Date(b.publishedAt || b.publishTime).getTime() - new Date(a.publishedAt || a.publishTime).getTime())
       break
   }
 
@@ -342,8 +342,8 @@ const filteredItems = computed(() => {
 
 function getConditionLabel(condition: string): string {
   const map: Record<string, string> = {
-    brandNew: '全新',
-    likeNew: '几乎全新',
+    brand_new: '全新',
+    like_new: '几乎全新',
     good: '良好',
     fair: '一般'
   }
@@ -884,11 +884,11 @@ onMounted(() => {
   color: white;
 }
 
-.condition-badge.brandNew {
+.condition-badge.brand_new {
   background: #10b981;
 }
 
-.condition-badge.likeNew {
+.condition-badge.like_new {
   background: #3b82f6;
 }
 

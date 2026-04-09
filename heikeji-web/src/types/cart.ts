@@ -36,3 +36,12 @@ export interface UpdateCartRequest {
   quantity?: number
   selected?: boolean
 }
+
+export interface CartResponse {
+  items: CartItem[]
+  totalItems: number
+  totalAmount: number
+  savedAmount?: number
+  selectedCount: number
+  selectedAmount: number
+}

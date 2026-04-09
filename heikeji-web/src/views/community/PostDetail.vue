@@ -355,11 +355,15 @@ const post = computed(() => {
       authorFollowing: currentPost.authorFollowing || 0,
       board: currentPost.boardName || '未分类',
       boardColor: '#3b82f6',
-      publishTime: currentPost.publishTime || new Date().toISOString(),
+      publishTime: currentPost.publishTime || currentPost.createdAt || new Date().toISOString(),
       views: currentPost.views || 0,
       likes: currentPost.likes || 0,
       tags: currentPost.tags || [],
-      contentBlocks: (currentPost.contentBlocks || []) as ContentBlock[]
+      contentBlocks: (currentPost.contentBlocks && currentPost.contentBlocks.length > 0
+        ? currentPost.contentBlocks
+        : currentPost.content
+          ? [{ type: 'text', text: currentPost.content, content: currentPost.content }]
+          : []) as ContentBlock[]
     }
   }
   return {

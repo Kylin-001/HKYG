@@ -1,4 +1,4 @@
-+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import {
   defineComponent,
@@ -195,7 +195,13 @@ describe('useError Composable', () => {
 
       try {
         for (let i = 0; i <= maxRetries; i++) {
-          await failingFn()
+          try {
+            await failingFn()
+          } catch (e) {
+            if (i === maxRetries) {
+              finalError = e as Error
+            }
+          }
         }
       } catch (e) {
         finalError = e as Error
@@ -238,14 +244,15 @@ describe('useError Composable', () => {
       const fn = vi.fn().mockRejectedValue(new Error('fail'))
 
       let attempts = 0
-      try {
-        for (let i = 0; i <= customMaxRetries; i++) {
-          attempts++
+      for (let i = 0; i <= customMaxRetries; i++) {
+        attempts++
+        try {
           await fn()
-        }
-      } catch {}
+        } catch {}
+      }
 
       expect(attempts).toBe(customMaxRetries + 1)
+      expect(fn).toHaveBeenCalledTimes(customMaxRetries + 1)
     })
 
     it('不同类型的错误都应支持重试', async () => {

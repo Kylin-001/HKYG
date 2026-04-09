@@ -583,7 +583,7 @@ describe('useUserStore', () => {
 
     it('并发操作时的状态一致性', async () => {
       const store = useUserStore()
-      
+
       // 模拟login进行中
       let resolveLogin: (v: any) => void
       const loginPromise = new Promise(r => { resolveLogin = r })

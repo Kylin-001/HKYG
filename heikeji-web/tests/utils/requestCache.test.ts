@@ -119,7 +119,7 @@ describe('requestCache 工具函数', () => {
       expect(getFromCache('user:1')).toBeNull()
       expect(getFromCache('user:2')).toBeNull()
       expect(getFromCache('product:1')).toBe('data3') // 不受影响
-      expect(getFromCache('order:1')).toBe('data4')   // 不受影响
+      expect(getFromCache('order:1')).toBe('data4') // 不受影响
     })
 
     it('invalidateCache不传参数应清空所有缓存', () => {
@@ -224,10 +224,10 @@ describe('requestCache 工具函数', () => {
 
     it('hitRate应正确计算', () => {
       setCache('k', 'v')
-      getFromCache('k')   // hit
-      getFromCache('k')   // hit
-      getFromCache('x')   // miss
-      getFromCache('y')   // miss
+      getFromCache('k') // hit
+      getFromCache('k') // hit
+      getFromCache('x') // miss
+      getFromCache('y') // miss
 
       const stats = getCacheStats()
       expect(stats.hits).toBe(2)
@@ -391,11 +391,11 @@ describe('requestCache 工具函数', () => {
   // ============================================
   describe('TTL预设值', () => {
     it('应该定义常用的TTL预设值', () => {
-      expect(TTL.SHORT).toBe(1 * 60 * 1000)       // 1分钟
-      expect(TTL.MEDIUM).toBe(5 * 60 * 1000)      // 5分钟
-      expect(TTL.LONG).toBe(30 * 60 * 1000)       // 30分钟
-      expect(TTL.HOUR).toBe(60 * 60 * 1000)        // 1小时
-      expect(TTL.DAY).toBe(24 * 60 * 60 * 1000)   // 1天
+      expect(TTL.SHORT).toBe(1 * 60 * 1000) // 1分钟
+      expect(TTL.MEDIUM).toBe(5 * 60 * 1000) // 5分钟
+      expect(TTL.LONG).toBe(30 * 60 * 1000) // 30分钟
+      expect(TTL.HOUR).toBe(60 * 60 * 1000) // 1小时
+      expect(TTL.DAY).toBe(24 * 60 * 60 * 1000) // 1天
     })
   })
 

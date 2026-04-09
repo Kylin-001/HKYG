@@ -41,7 +41,7 @@ async function runTest(t) {
   try {
     const opts = {
       method: t.method,
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' }
     }
     if (t.body) opts.body = JSON.stringify(t.body)
     const res = await fetch(BASE + t.url, opts)
@@ -59,7 +59,7 @@ console.log('  目标: http://localhost:5174')
 console.log('='.repeat(70))
 
 const results = await Promise.all(tests.map(runTest))
-let pass = 0, fail = 0
+let pass = 0; let fail = 0
 
 for (const r of results) {
   const icon = r.status === 'PASS' ? '\u2705' : '\u274c'

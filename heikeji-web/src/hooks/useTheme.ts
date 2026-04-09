@@ -21,11 +21,11 @@ function getSystemTheme(): ResolvedTheme {
 
 function applyTheme(newTheme: ResolvedTheme) {
   resolvedTheme.value = newTheme
-  
+
   if (typeof document !== 'undefined') {
     document.documentElement.setAttribute('data-theme', newTheme)
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
-    
+
     const metaThemeColor = document.querySelector('meta[name="theme-color"]')
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', newTheme === 'dark' ? '#1a1a2e' : '#F5F7FA')
@@ -44,7 +44,7 @@ function resolveAndApplyTheme(currentTheme: Theme) {
 function setTheme(newTheme: Theme) {
   theme.value = newTheme
   resolveAndApplyTheme(newTheme)
-  
+
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(STORAGE_KEY, newTheme)
   }
@@ -65,12 +65,12 @@ function initTheme() {
       theme.value = savedTheme
     }
   }
-  
+
   resolveAndApplyTheme(theme.value)
 
   if (typeof window !== 'undefined' && window.matchMedia) {
     mediaQueryList = window.matchMedia(MEDIA_QUERY)
-    
+
     mediaQueryList.addEventListener('change', (e) => {
       if (theme.value === 'system') {
         applyTheme(e.matches ? 'dark' : 'light')

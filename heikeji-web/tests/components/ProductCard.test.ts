@@ -1,7 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ProductCard from '@/components/ProductCard.vue'
+
+// Mock vue-router
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRoute: () => ({ path: '/', params: {}, query: {} }),
+}))
 
 const mockProduct = {
   id: '1',
@@ -36,7 +42,7 @@ describe('ProductCard.vue', () => {
     expect(wrapper.text()).toContain(mockProduct.name)
     expect(wrapper.text()).toContain('¥99.99')
     expect(wrapper.text()).toContain('199.99')
-    expect(wrapper.find('img').attributes('alt')).toBe(mockProduct.name)
+    expect(wrapper.find('img').attributes('alt')).toBe(`${mockProduct.name}的商品图片`)
   })
 
   it('计算正确的折扣百分比', () => {
@@ -49,12 +55,12 @@ describe('ProductCard.vue', () => {
       },
     })
 
-    expect(wrapper.find('.product-card__discount-badge').text()).toBe('-50%')
+    expect(wrapper.find('.product-card__badge--discount').text()).toBe('-50%')
   })
 
   it('没有原价时不显示折扣标签', () => {
     const noDiscountProduct = { ...mockProduct, originalPrice: 0 }
-    
+
     const wrapper = mount(ProductCard, {
       props: {
         product: noDiscountProduct,
@@ -64,7 +70,7 @@ describe('ProductCard.vue', () => {
       },
     })
 
-    expect(wrapper.find('.product-card__discount-badge').exists()).toBe(false)
+    expect(wrapper.find('.product-card__badge--discount').exists()).toBe(false)
   })
 
   it('点击时触发click事件', async () => {
@@ -92,25 +98,25 @@ describe('ProductCard.vue', () => {
       },
     })
 
-    await wrapper.find('.product-card__cart-btn').trigger('click')
+    await wrapper.find('.product-card__btn--primary').trigger('click')
     expect(wrapper.emitted()).toHaveProperty('addToCart')
   })
 
-  it('支持不同的尺寸变体', () => {
-    const sizes = ['small', 'medium', 'large'] as const
+  it('支持不同的布局变体', () => {
+    const variants = ['default', 'horizontal', 'compact', 'featured'] as const
 
-    sizes.forEach((size) => {
+    variants.forEach((variant) => {
       const wrapper = mount(ProductCard, {
         props: {
           product: mockProduct,
-          size,
+          variant,
         },
         global: {
           plugins: [pinia],
         },
       })
 
-      expect(wrapper.find(`.product-card--${size}`).exists()).toBe(true)
+      expect(wrapper.find(`.product-card--${variant}`).exists()).toBe(true)
     })
   })
 

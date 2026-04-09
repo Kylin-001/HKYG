@@ -1,4 +1,4 @@
-import { get, post, del } from '@/utils/request'
+import { get, post } from '@/utils/request'
 import type { Product, ProductListParams, ProductListResponse, ProductDetail, ProductCompareItem, ShareLink, CreateReviewRequest, ReviewStats, BrowsingHistoryItem, RecommendedProduct, ProductReview } from '@/types/product'
 
 export function getProductList(params?: ProductListParams): Promise<ProductListResponse> {
@@ -80,10 +80,10 @@ const MAX_BROWSE_HISTORY = 100
 export function addToBrowsingHistory(product: Pick<Product, 'id' | 'name' | 'images' | 'price'>): void {
   try {
     const history = getBrowsingHistory()
-    
+
     // 移除已存在的记录（避免重复）
     const filtered = history.filter(item => item.productId !== product.id)
-    
+
     // 添加新记录到开头
     const newItem: BrowsingHistoryItem = {
       productId: product.id,
@@ -92,14 +92,14 @@ export function addToBrowsingHistory(product: Pick<Product, 'id' | 'name' | 'ima
       price: product.price,
       viewedAt: new Date().toISOString(),
     }
-    
+
     filtered.unshift(newItem)
-    
+
     // 限制历史记录数量
     if (filtered.length > MAX_BROWSE_HISTORY) {
       filtered.length = MAX_BROWSE_HISTORY
     }
-    
+
     localStorage.setItem(BROWSE_HISTORY_KEY, JSON.stringify(filtered))
   } catch (error) {
     console.error('保存浏览历史失败:', error)

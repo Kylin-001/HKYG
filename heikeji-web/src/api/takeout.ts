@@ -21,10 +21,28 @@ export function getDeliveryTrack(orderId: string): Promise<DeliveryTrackInfo> {
   return get(`/takeout/orders/${orderId}/track`)
 }
 
-export function createTakeoutOrder(data: CreateTakeoutOrderRequest): Promise<any> {
+export interface TakeoutOrder {
+  id: string
+  orderNo: string
+  merchantId: string
+  merchantName: string
+  items: {
+    dishId: string
+    name: string
+    price: number
+    quantity: number
+  }[]
+  totalAmount: number
+  deliveryFee: number
+  status: 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'delivered' | 'cancelled'
+  createdAt: string
+  estimatedDeliveryTime?: string
+}
+
+export function createTakeoutOrder(data: CreateTakeoutOrderRequest): Promise<TakeoutOrder> {
   return post('/takeout/orders', data)
 }
 
-export function getTakeoutOrders(params?: { status?: string; page?: number }): Promise<{ list: any[]; total: number }> {
+export function getTakeoutOrders(params?: { status?: string; page?: number }): Promise<{ list: TakeoutOrder[]; total: number }> {
   return get('/takeout/orders', { params })
 }

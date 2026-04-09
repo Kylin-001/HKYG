@@ -24,42 +24,42 @@
   --color-primary-800: #000448;
   --color-primary-900: #000230;
 
-  /* ---- 品牌辅助色 ---- */
-  --color-gold-light: #FEF3C7;
-  --color-gold: #D97706;
-  --color-gold-dark: #B45309;
-  --color-gold-bg: #FFFBEB;
+  /* ---- 品牌辅助色 (与科大蓝更协调) ---- */
+  --color-gold-light: #FDF6E3;
+  --color-gold: #B8860B;
+  --color-gold-dark: #8B6914;
+  --color-gold-bg: #FCF8E8;
 
-  --color-crimson-light: #FEE2E2;
-  --color-crimson: #DC2626;
-  --color-crimson-dark: #B91C1C;
-  --color-crimson-bg: #FEF2F2;
+  --color-crimson-light: #FCE8E8;
+  --color-crimson: #B91C1C;
+  --color-crimson-dark: #8B1515;
+  --color-crimson-bg: #FDF2F2;
 
-  --color-pine-light: #DCFCE7;
-  --color-pine: #16A34A;
-  --color-pine-dark: #15803D;
-  --color-pine-bg: #F0FDF4;
+  --color-pine-light: #E8F5E9;
+  --color-pine: #2E7D32;
+  --color-pine-dark: #1B5E20;
+  --color-pine-bg: #F1F8E9;
 
-  /* ---- 语义化颜色 (WCAG AA 合规) ---- */
-  --color-success-light: #DCFCE7;
-  --color-success: #16A34A;
-  --color-success-dark: #166534;
-  --color-success-bg: #F0FDF4;
+  /* ---- 语义化颜色 (WCAG AA 合规) - 与主色调协调 ---- */
+  --color-success-light: #E8F5E9;
+  --color-success: #2E7D32;
+  --color-success-dark: #1B5E20;
+  --color-success-bg: #F1F8E9;
 
-  --color-warning-light: #FEF3C7;
-  --color-warning: #CA8A04;
-  --color-warning-dark: #854D0E;
-  --color-warning-bg: #FFFBEB;
+  --color-warning-light: #FFF8E1;
+  --color-warning: #F57C00;
+  --color-warning-dark: #E65100;
+  --color-warning-bg: #FFFDE7;
 
-  --color-error-light: #FEE2E2;
-  --color-error: #DC2626;
-  --color-error-dark: #991B1B;
-  --color-error-bg: #FEF2F2;
+  --color-error-light: #FCE8E8;
+  --color-error: #B91C1C;
+  --color-error-dark: #8B1515;
+  --color-error-bg: #FDF2F2;
 
-  --color-info-light: #DBEAFE;
-  --color-info: #2563EB;
-  --color-info-dark: #1E40AF;
-  --color-info-bg: #EFF6FF;
+  --color-info-light: #E3F2FD;
+  --color-info: #1565C0;
+  --color-info-dark: #0D47A1;
+  --color-info-bg: #EEF5FC;
 
   /* ---- 中性色 (学术灰阶) ---- */
   --color-text-primary: #111827;      /* 对比度 18.5:1 ✓✓✓ */
@@ -83,14 +83,14 @@
   --color-border-strong: #D1D5DB;
   --color-border-focus: #3B82F6;
 
-  /* ---- 品牌渐变色 (亮色主题) ---- */
-  --gradient-primary: linear-gradient(135deg, #000AB0 0%, #3B82F6 50%, #60A5FA 100%);
-  --gradient-primary-deep: linear-gradient(135deg, #000880 0%, #000AB0 40%, #3B82F6 100%);
-  --gradient-gold: linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #FBBF24 100%);
-  --gradient-crimson: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%);
-  --gradient-pine: linear-gradient(135deg, #15803D 0%, #16A34A 50%, #22C55E 100%);
-  --gradient-campus: linear-gradient(135deg, #000AB0 0%, #15803D 100%);
-  --gradient-warm: linear-gradient(135deg, #DC2626 0%, #D97706 100%);
+  /* ---- 品牌渐变色 (亮色主题) - 更协调的配色 ---- */
+  --gradient-primary: linear-gradient(135deg, #000AB0 0%, #1565C0 50%, #42A5F5 100%);
+  --gradient-primary-deep: linear-gradient(135deg, #000880 0%, #000AB0 40%, #1565C0 100%);
+  --gradient-gold: linear-gradient(135deg, #8B6914 0%, #B8860B 50%, #D4A84B 100%);
+  --gradient-crimson: linear-gradient(135deg, #8B1515 0%, #B91C1C 50%, #D64545 100%);
+  --gradient-pine: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #4CAF50 100%);
+  --gradient-campus: linear-gradient(135deg, #000AB0 0%, #1B5E20 100%);
+  --gradient-warm: linear-gradient(135deg, #8B1515 0%, #B8860B 100%);
 
   /* ---- 阴影系统 (亮色) ---- */
   --shadow-xs: 0 1px 2px rgba(17, 24, 39, 0.04);
@@ -99,8 +99,8 @@
   --shadow-lg: 0 8px 16px rgba(17, 24, 39, 0.12), 0 4px 8px rgba(17, 24, 39, 0.08);
   --shadow-xl: 0 16px 32px rgba(17, 24, 39, 0.16), 0 8px 16px rgba(17, 24, 39, 0.12);
   --shadow-brand: 0 4px 14px rgba(0, 10, 176, 0.20), 0 0 1px rgba(0, 10, 176, 0.10);
-  --shadow-gold: 0 4px 14px rgba(217, 119, 6, 0.25);
-  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  --shadow-gold: 0 4px 14px rgba(184, 134, 11, 0.25);
+  --shadow-glow: 0 0 20px rgba(21, 101, 192, 0.3);
 
   /* ---- 圆角系统 ---- */
   --radius-xs: 4px;
@@ -154,42 +154,42 @@
   --color-primary-800: #BFDBFE;
   --color-primary-900: #DBEAFE;
 
-  /* 品牌辅助色 - 暗色模式 */
-  --color-gold-light: #422006;
-  --color-gold: #F59E0B;
-  --color-gold-dark: #FBBF24;
-  --color-gold-bg: #451A03;
+  /* 品牌辅助色 - 暗色模式 (更柔和) */
+  --color-gold-light: #3D2F05;
+  --color-gold: #D4A84B;
+  --color-gold-dark: #E8C872;
+  --color-gold-bg: #3D2F05;
 
-  --color-crimson-light: #450A0A;
-  --color-crimson: #EF4444;
-  --color-crimson-dark: #F87171;
-  --color-crimson-bg: #450A0A;
+  --color-crimson-light: #3D0A0A;
+  --color-crimson: #D64545;
+  --color-crimson-dark: #E88A8A;
+  --color-crimson-bg: #3D0A0A;
 
-  --color-pine-light: #052E16;
-  --color-pine: #22C55E;
-  --color-pine-dark: #4ADE80;
-  --color-pine-bg: #052E16;
+  --color-pine-light: #0A2910;
+  --color-pine: #4CAF50;
+  --color-pine-dark: #81C784;
+  --color-pine-bg: #0A2910;
 
-  /* 语义化颜色 - 暗色模式 (WCAG AA 合规) */
-  --color-success-light: #052E16;
-  --color-success: #22C55E;
-  --color-success-dark: #86EFAC;
-  --color-success-bg: #052E16;
+  /* 语义化颜色 - 暗色模式 (WCAG AA 合规) - 更柔和 */
+  --color-success-light: #0A2910;
+  --color-success: #4CAF50;
+  --color-success-dark: #81C784;
+  --color-success-bg: #0A2910;
 
-  --color-warning-light: #451A03;
-  --color-warning: #FBBF24;
-  --color-warning-dark: #FDE68A;
-  --color-warning-bg: #451A03;
+  --color-warning-light: #3D2805;
+  --color-warning: #FFB74D;
+  --color-warning-dark: #FFE0B2;
+  --color-warning-bg: #3D2805;
 
-  --color-error-light: #450A0A;
-  --color-error: #F87171;
-  --color-error-dark: #FCA5A5;
-  --color-error-bg: #450A0A;
+  --color-error-light: #3D0A0A;
+  --color-error: #D64545;
+  --color-error-dark: #E88A8A;
+  --color-error-bg: #3D0A0A;
 
-  --color-info-light: #172033;
-  --color-info: #60A5FA;
-  --color-info-dark: #93C5FD;
-  --color-info-bg: #172033;
+  --color-info-light: #0D1B2A;
+  --color-info: #64B5F6;
+  --color-info-dark: #90CAF9;
+  --color-info-bg: #0D1B2A;
 
   /* 中性色 - 暗色模式反转 (高对比度) */
   --color-text-primary: #F9FAFB;        /* 对比度 19.5:1 ✓✓✓ */
@@ -215,14 +215,14 @@
   --color-border-strong: #4B5563;
   --color-border-focus: #3B82F6;
 
-  /* 渐变色 - 暗色模式 */
-  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #60A5FA 50%, #93C5FD 100%);
-  --gradient-primary-deep: linear-gradient(135deg, #2563EB 0%, #3B82F6 40%, #60A5FA 100%);
-  --gradient-gold: linear-gradient(135deg, #D97706 0%, #FBBF24 50%, #FDE68A 100%);
-  --gradient-crimson: linear-gradient(135deg, #DC2626 0%, #F87171 50%, #FCA5A5 100%);
-  --gradient-pine: linear-gradient(135deg, #15803D 0%, #22C55E 50%, #86EFAC 100%);
-  --gradient-campus: linear-gradient(135deg, #3B82F6 0%, #22C55E 100%);
-  --gradient-warm: linear-gradient(135deg, #EF4444 0%, #FBBF24 100%);
+  /* 渐变色 - 暗色模式 - 更柔和 */
+  --gradient-primary: linear-gradient(135deg, #1565C0 0%, #42A5F5 50%, #90CAF9 100%);
+  --gradient-primary-deep: linear-gradient(135deg, #0D47A1 0%, #1565C0 40%, #42A5F5 100%);
+  --gradient-gold: linear-gradient(135deg, #8B6914 0%, #D4A84B 50%, #E8C872 100%);
+  --gradient-crimson: linear-gradient(135deg, #8B1515 0%, #D64545 50%, #E88A8A 100%);
+  --gradient-pine: linear-gradient(135deg, #1B5E20 0%, #4CAF50 50%, #81C784 100%);
+  --gradient-campus: linear-gradient(135deg, #42A5F5 0%, #4CAF50 100%);
+  --gradient-warm: linear-gradient(135deg, #D64545 0%, #D4A84B 100%);
 
   /* 阴影 - 暗色模式 (更深的阴影) */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -230,9 +230,9 @@
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6), 0 4px 8px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.7), 0 8px 16px rgba(0, 0, 0, 0.6);
-  --shadow-brand: 0 4px 14px rgba(59, 130, 246, 0.35), 0 0 1px rgba(59, 130, 246, 0.2);
-  --shadow-gold: 0 4px 14px rgba(251, 191, 36, 0.35);
-  --shadow-glow: 0 0 20px rgba(96, 165, 250, 0.4);
+  --shadow-brand: 0 4px 14px rgba(66, 165, 245, 0.35), 0 0 1px rgba(66, 165, 245, 0.2);
+  --shadow-gold: 0 4px 14px rgba(212, 168, 75, 0.35);
+  --shadow-glow: 0 0 20px rgba(100, 181, 246, 0.4);
 }
 
 /* ====== Base Styles ====== */

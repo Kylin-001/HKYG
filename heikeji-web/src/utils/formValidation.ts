@@ -31,7 +31,7 @@ export function useFormValidation<T extends Record<string, unknown>>(initialValu
 
     for (const [field, fieldRules] of Object.entries(rules)) {
       const rulesArray = Array.isArray(fieldRules) ? fieldRules : [fieldRules]
-      
+
       result[field] = rulesArray.map((rule) => ({
         required: rule.required,
         message: rule.message || `${field} is required`,
@@ -40,26 +40,26 @@ export function useFormValidation<T extends Record<string, unknown>>(initialValu
         max: rule.max,
         pattern: rule.pattern,
         message: rule.patternMessage || rule.message,
-        validator: rule.validator || rule.custom ? (
-          (_rule: unknown, value: unknown, callback: (error?: Error) => void) => {
-            if (rule.custom && typeof rule.custom === 'function') {
-              const result = rule.custom(value)
-              if (result === false) {
-                callback(new Error(rule.message || 'Validation failed'))
+        validator: rule.validator || rule.custom
+          ? (_rule: unknown, value: unknown, callback: (error?: Error) => void) => {
+              if (rule.custom && typeof rule.custom === 'function') {
+                const result = rule.custom(value)
+                if (result === false) {
+                  callback(new Error(rule.message || 'Validation failed'))
+                  return
+                }
+                if (typeof result === 'string') {
+                  callback(new Error(result))
+                  return
+                }
+              }
+              if (rule.validator) {
+                rule.validator(_rule, value, callback)
                 return
               }
-              if (typeof result === 'string') {
-                callback(new Error(result))
-                return
-              }
+              callback()
             }
-            if (rule.validator) {
-              rule.validator(_rule, value, callback)
-              return
-            }
-            callback()
-          }
-        ) : undefined,
+          : undefined,
       }))
     }
 
@@ -206,13 +206,13 @@ export const commonValidators = {
           callback(new Error(message || 'Please confirm your password'))
           return
         }
-        
+
         const passwordValue = (rule as any)?.form?.[passwordFieldName]
         if (passwordValue && value !== passwordValue) {
           callback(new Error('Passwords do not match'))
           return
         }
-        
+
         callback()
       },
     }
@@ -229,12 +229,12 @@ export const commonValidators = {
     return {
       custom: (value: unknown) => {
         if (value === '' || value === null || value === undefined) return true
-        
+
         const num = Number(value)
         if (isNaN(num)) return 'Please enter a valid number'
         if (min !== undefined && num < min) return `Value must be at least ${min}`
         if (max !== undefined && num > max) return `Value must be at most ${max}`
-        
+
         return true
       },
     }

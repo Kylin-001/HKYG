@@ -1,7 +1,7 @@
 const BASE = 'http://localhost:5174'
 
 async function api(method, url, body) {
-  const opts = { method, headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } }
+  const opts = { method, headers: { Accept: 'application/json', 'Content-Type': 'application/json' } }
   if (body) opts.body = JSON.stringify(body)
   const res = await fetch(BASE + url, opts)
   return await res.json()
@@ -60,7 +60,7 @@ console.log('  黑科易购 - 全面端到端功能验证 (读+写)')
 console.log('  目标: http://localhost:5174')
 console.log('='.repeat(70))
 
-let pass = 0, fail = 0, results = []
+let pass = 0; let fail = 0; const results = []
 
 for (const t of tests) {
   try {

@@ -16,23 +16,23 @@ export const useProductStore = defineStore('product', () => {
   let loadingCount = 0
 
   // ====== 新增状态 ======
-  
+
   // 商品对比
   const compareList = ref<ProductCompareItem[]>([])
   const isComparing = ref(false)
-  
+
   // 推荐商品
   const recommendedProducts = ref<RecommendedProduct[]>([])
   const personalizedRecommendations = ref<RecommendedProduct[]>([])
-  
+
   // 浏览历史
   const browsingHistory = ref<BrowsingHistoryItem[]>([])
-  
+
   // 评价相关
   const reviewStats = ref<ReviewStats | null>(null)
 
   // ====== 基础功能（保持原有） ======
-  
+
   async function fetchList(params?: ProductListParams) {
     try {
       loadingCount++
@@ -121,13 +121,13 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
-  function clearDetail() { 
+  function clearDetail() {
     detail.value = null
     recommendedProducts.value = []
   }
 
   // ====== 新增：商品对比功能 ======
-  
+
   /**
    * 添加商品到对比列表（最多4个）
    */
@@ -135,30 +135,30 @@ export const useProductStore = defineStore('product', () => {
     if (compareList.value.length >= 4) {
       return false // 已满
     }
-    
+
     // 检查是否已存在
     if (compareList.value.some(item => item.id === product.id)) {
       return false // 已存在
     }
-    
+
     compareList.value.push(product)
     return true
   }
-  
+
   /**
    * 从对比列表移除商品
    */
   function removeFromCompare(productId: number): void {
     compareList.value = compareList.value.filter(item => item.id !== productId)
   }
-  
+
   /**
    * 清空对比列表
    */
   function clearCompare(): void {
     compareList.value = []
   }
-  
+
   /**
    * 开始对比（加载完整数据）
    */
@@ -166,7 +166,7 @@ export const useProductStore = defineStore('product', () => {
     if (compareList.value.length < 2) {
       throw new Error('请至少选择2个商品进行对比')
     }
-    
+
     isComparing.value = true
     try {
       const ids = compareList.value.map(item => item.id)
@@ -177,12 +177,12 @@ export const useProductStore = defineStore('product', () => {
       isComparing.value = false
     }
   }
-  
+
   /**
    * 是否可以添加到对比
    */
   const canAddToCompare = computed(() => compareList.value.length < 4)
-  
+
   /**
    * 是否在对比列表中
    */
@@ -191,14 +191,14 @@ export const useProductStore = defineStore('product', () => {
   }
 
   // ====== 新增：浏览历史管理 ======
-  
+
   /**
    * 加载浏览历史（从本地存储）
    */
   function loadBrowsingHistory(): void {
     browsingHistory.value = productApi.getBrowsingHistory()
   }
-  
+
   /**
    * 添加到浏览历史
    */
@@ -206,7 +206,7 @@ export const useProductStore = defineStore('product', () => {
     productApi.addToBrowsingHistory(product)
     loadBrowsingHistory() // 刷新内存中的数据
   }
-  
+
   /**
    * 清空浏览历史
    */
@@ -214,7 +214,7 @@ export const useProductStore = defineStore('product', () => {
     productApi.clearBrowsingHistory()
     browsingHistory.value = []
   }
-  
+
   /**
    * 移除单条历史记录
    */
@@ -224,7 +224,7 @@ export const useProductStore = defineStore('product', () => {
   }
 
   // ====== 新增：推荐系统 ======
-  
+
   /**
    * 加载相关商品推荐
    */
@@ -238,7 +238,7 @@ export const useProductStore = defineStore('product', () => {
       return []
     }
   }
-  
+
   /**
    * 加载个性化推荐
    */
@@ -254,7 +254,7 @@ export const useProductStore = defineStore('product', () => {
   }
 
   // ====== 新增：评价系统 ======
-  
+
   /**
    * 获取评价统计
    */
@@ -268,14 +268,14 @@ export const useProductStore = defineStore('product', () => {
       throw err
     }
   }
-  
+
   /**
    * 提交评价
    */
   async function submitReview(data: CreateReviewRequest): Promise<void> {
     await productApi.createReview(data)
   }
-  
+
   /**
    * 标记评价为有用
    */
@@ -284,7 +284,7 @@ export const useProductStore = defineStore('product', () => {
   }
 
   // ====== 新增：分享功能 ======
-  
+
   /**
    * 生成分享链接
    */
@@ -292,27 +292,50 @@ export const useProductStore = defineStore('product', () => {
     return productApi.generateShareLink(productId)
   }
 
-  return { 
+  return {
     // 原有状态和方法
-    list, detail, hotProducts, total, loading, error, currentPage, 
-    fetchList, fetchDetail, fetchHotProducts, search, clearDetail,
-    
+    list,
+    detail,
+    hotProducts,
+    total,
+    loading,
+    error,
+    currentPage,
+    fetchList,
+    fetchDetail,
+    fetchHotProducts,
+    search,
+    clearDetail,
+
     // 商品对比
-    compareList, isComparing, canAddToCompare,
-    addToCompare, removeFromCompare, clearCompare, startComparison, isInCompare,
-    
+    compareList,
+    isComparing,
+    canAddToCompare,
+    addToCompare,
+    removeFromCompare,
+    clearCompare,
+    startComparison,
+    isInCompare,
+
     // 浏览历史
     browsingHistory,
-    loadBrowsingHistory, addToHistory, clearHistory, removeFromHistory,
-    
+    loadBrowsingHistory,
+    addToHistory,
+    clearHistory,
+    removeFromHistory,
+
     // 推荐系统
-    recommendedProducts, personalizedRecommendations,
-    loadRecommendedProducts, loadPersonalizedRecommendations,
-    
+    recommendedProducts,
+    personalizedRecommendations,
+    loadRecommendedProducts,
+    loadPersonalizedRecommendations,
+
     // 评价系统
     reviewStats,
-    fetchReviewStats, submitReview, markHelpful,
-    
+    fetchReviewStats,
+    submitReview,
+    markHelpful,
+
     // 分享功能
     generateShareLink,
   }

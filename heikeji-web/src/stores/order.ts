@@ -16,18 +16,18 @@ export const useOrderStore = defineStore('order', () => {
   let loadingCount = 0
 
   // ====== 新增状态 ======
-  
+
   // 订单评价
   const orderReviews = ref<OrderReview[]>([])
   const currentReview = ref<OrderReview | null>(null)
-  
+
   // 售后/退款
   const refunds = ref<RefundRequest[]>([])
   const currentRefund = ref<RefundRequest | null>(null)
-  
+
   // 发票
   const invoices = ref<InvoiceInfo[]>([])
-  
+
   // 物流信息
   const logisticsInfo = ref<LogisticsTracking | null>(null)
 
@@ -93,6 +93,11 @@ export const useOrderStore = defineStore('order', () => {
     await fetchOrders()
   }
 
+  async function deleteOrder(orderId: string | number) {
+    await orderApi.deleteOrder(orderId)
+    await fetchOrders()
+  }
+
   async function payOrder(orderId: string, paymentMethod: string, password?: string) {
     const res = await orderApi.payOrder({ orderId, paymentMethod, password })
     // 支付成功后刷新订单详情
@@ -133,7 +138,7 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   // ====== 新增：订单评价功能 ======
-  
+
   /**
    * 获取用户的订单评价列表
    */
@@ -147,7 +152,7 @@ export const useOrderStore = defineStore('order', () => {
       throw err
     }
   }
-  
+
   /**
    * 获取指定订单的评价
    */
@@ -161,7 +166,7 @@ export const useOrderStore = defineStore('order', () => {
       return null
     }
   }
-  
+
   /**
    * 提交订单评价
    */
@@ -172,7 +177,7 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   // ====== 新增：售后/退款功能 ======
-  
+
   /**
    * 获取退款列表
    */
@@ -186,7 +191,7 @@ export const useOrderStore = defineStore('order', () => {
       throw err
     }
   }
-  
+
   /**
    * 获取退款详情
    */
@@ -200,7 +205,7 @@ export const useOrderStore = defineStore('order', () => {
       throw err
     }
   }
-  
+
   /**
    * 申请退款
    */
@@ -210,7 +215,7 @@ export const useOrderStore = defineStore('order', () => {
     await fetchRefunds()
     return refund
   }
-  
+
   /**
    * 取消退款申请
    */
@@ -218,7 +223,7 @@ export const useOrderStore = defineStore('order', () => {
     await orderApi.cancelRefund(refundId)
     await fetchRefunds()
   }
-  
+
   /**
    * 提交退货物流单号
    */
@@ -228,7 +233,7 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   // ====== 新增：发票功能 ======
-  
+
   /**
    * 获取发票列表
    */
@@ -242,7 +247,7 @@ export const useOrderStore = defineStore('order', () => {
       throw err
     }
   }
-  
+
   /**
    * 申请开具发票
    */
@@ -251,7 +256,7 @@ export const useOrderStore = defineStore('order', () => {
     await fetchInvoices()
     return invoice
   }
-  
+
   /**
    * 下载发票
    */
@@ -260,7 +265,7 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   // ====== 新增：物流查询功能 ======
-  
+
   /**
    * 获取订单物流信息
    */
@@ -274,7 +279,7 @@ export const useOrderStore = defineStore('order', () => {
       throw err
     }
   }
-  
+
   /**
    * 订阅物流更新（返回取消订阅函数）
    */
@@ -283,7 +288,7 @@ export const useOrderStore = defineStore('order', () => {
   }
 
   // ====== 新增：订单导出功能 ======
-  
+
   /**
    * 导出订单
    */
@@ -296,27 +301,52 @@ export const useOrderStore = defineStore('order', () => {
 
   return {
     // 原有状态和方法
-    orders, currentOrder, addresses, total, loading, error,
-    fetchOrders, fetchOrderDetail, createOrder,
-    cancelOrder, confirmReceive, payOrder, fetchAddresses,
-    addAddress, updateAddress, deleteAddress, setDefaultAddress,
-    
+    orders,
+    currentOrder,
+    addresses,
+    total,
+    loading,
+    error,
+    fetchOrders,
+    fetchOrderDetail,
+    createOrder,
+    cancelOrder,
+    confirmReceive,
+    deleteOrder,
+    payOrder,
+    fetchAddresses,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
+
     // 订单评价
-    orderReviews, currentReview,
-    fetchOrderReviews, fetchOrderReview, submitReview,
-    
+    orderReviews,
+    currentReview,
+    fetchOrderReviews,
+    fetchOrderReview,
+    submitReview,
+
     // 售后/退款
-    refunds, currentRefund,
-    fetchRefunds, fetchRefundDetail, applyForRefund, cancelRefundApplication, submitReturnTracking,
-    
+    refunds,
+    currentRefund,
+    fetchRefunds,
+    fetchRefundDetail,
+    applyForRefund,
+    cancelRefundApplication,
+    submitReturnTracking,
+
     // 发票管理
     invoices,
-    fetchInvoices, applyForInvoice, downloadInvoiceFile,
-    
+    fetchInvoices,
+    applyForInvoice,
+    downloadInvoiceFile,
+
     // 物流查询
     logisticsInfo,
-    fetchLogistics, subscribeToLogisticsUpdates,
-    
+    fetchLogistics,
+    subscribeToLogisticsUpdates,
+
     // 订单导出
     exportOrders,
   }

@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { nextTick, defineComponent, h } from 'vue'
+
+import ErrorBoundary from '@/components/global/ErrorBoundary.vue'
 
 // Mock vue-router
 vi.mock('vue-router', () => ({
@@ -8,38 +10,31 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({ path: '/', params: {}, query: {} }),
 }))
 
-import ErrorBoundary from '@/components/global/ErrorBoundary.vue'
-
-// 创建一个会抛出错误的子组件
-const ErrorComponent = {
+// 创建一个正常渲染的子组件
+const NormalComponent = {
   template: '<div>正常内容</div>',
 }
 
+// 创建一个会抛出错误的子组件
 const ThrowingComponent = {
   name: 'ThrowingComponent',
-  template: '<div>{{ throwError() }}</div>',
-  methods: {
-    throwError() {
-      throw new Error('Test error message')
-    },
+  setup() {
+    throw new Error('Test error message')
   },
+  template: '<div>不应渲染</div>',
 }
 
 describe('ErrorBoundary.vue', () => {
-  let wrapper: ReturnType<typeof mount>
-
-  beforeEach(() => {
-    wrapper = mount(ErrorBoundary, {
+  it('默认状态渲染插槽内容', () => {
+    const wrapper = mount(ErrorBoundary, {
       slots: {
-        default: ErrorComponent,
+        default: NormalComponent,
       },
     })
-  })
 
-  it('默认状态渲染插槽内容', () => {
     expect(wrapper.text()).toContain('正常内容')
     // 错误UI不应该显示
-    expect(wrapper.find('.error-boundary-container').exists()).toBe(false)
+    expect(wrapper.find('.error-boundary').exists()).toBe(false)
   })
 
   it('子组件抛出错误时显示错误UI', async () => {
@@ -52,9 +47,9 @@ describe('ErrorBoundary.vue', () => {
     await nextTick()
 
     // 错误容器应该存在
-    expect(errorWrapper.find('.error-boundary-container').exists()).toBe(true)
+    expect(errorWrapper.find('.error-boundary').exists()).toBe(true)
     // 应该显示错误标题
-    expect(errorWrapper.find('.error-title').exists()).toBe(true)
+    expect(errorWrapper.find('.error-boundary__title').exists()).toBe(true)
     // 插槽内容应该被隐藏
     expect(errorWrapper.text()).not.toContain('正常内容')
   })
@@ -68,8 +63,8 @@ describe('ErrorBoundary.vue', () => {
 
     await nextTick()
 
-    // 找到并点击重试按钮（unknown 类型的默认按钮）
-    const retryButton = errorWrapper.find('.btn-primary')
+    // 找到并点击重试按钮
+    const retryButton = errorWrapper.find('.error-boundary__btn--primary')
     expect(retryButton.exists()).toBe(true)
 
     await retryButton.trigger('click')
@@ -82,12 +77,10 @@ describe('ErrorBoundary.vue', () => {
     const errorMessage = 'Network connection failed'
     const NetworkErrorComponent = {
       name: 'NetworkErrorComponent',
-      template: `<div>{{ throwNetworkError() }}</div>`,
-      methods: {
-        throwNetworkError() {
-          throw new Error(errorMessage)
-        },
+      setup() {
+        throw new Error(errorMessage)
       },
+      template: '<div>不应渲染</div>',
     }
 
     const errorWrapper = mount(ErrorBoundary, {
@@ -99,14 +92,14 @@ describe('ErrorBoundary.vue', () => {
     await nextTick()
     await new Promise(resolve => setTimeout(resolve, 100))
 
-    // unknown 类型错误应该显示详细错误信息
-    const errorMsgEl = errorWrapper.find('.error-message')
+    // 应该显示错误消息
+    const errorMsgEl = errorWrapper.find('.error-boundary__message')
     if (errorMsgEl.exists()) {
       expect(errorMsgEl.text()).toContain(errorMessage)
     }
   })
 
-  it('role="alert" 和 aria-live 属性存在', async () => {
+  it('显示默认的错误提示文案', async () => {
     const errorWrapper = mount(ErrorBoundary, {
       slots: {
         default: ThrowingComponent,
@@ -115,94 +108,54 @@ describe('ErrorBoundary.vue', () => {
 
     await nextTick()
 
-    const container = errorWrapper.find('.error-boundary-container')
-    expect(container.exists()).toBe(true)
-
-    // 验证无障碍属性
-    expect(container.attributes('role')).toBe('alert')
-    expect(container.attributes('aria-live')).toBe('assertive')
-    expect(container.attributes('aria-atomic')).toBe('true')
+    // 默认 fallback 文案
+    const title = errorWrapper.find('.error-boundary__title')
+    expect(title.exists()).toBe(true)
+    expect(title.text()).toBe('页面出现了一些问题')
   })
 
-  it('网络错误类型显示正确的图标和文案', async () => {
-    const NetworkErrorComponent = {
-      name: 'NetworkErrorComponent',
-      template: `<div>{{ throwNetworkError() }}</div>`,
-      methods: {
-        throwNetworkError() {
-          throw new Error('Failed to fetch - network error')
-        },
-      },
-    }
-
+  it('支持自定义 fallback 文案', async () => {
     const errorWrapper = mount(ErrorBoundary, {
+      props: {
+        fallback: '自定义错误提示',
+      },
       slots: {
-        default: NetworkErrorComponent,
+        default: ThrowingComponent,
       },
     })
 
     await nextTick()
-    await new Promise(resolve => setTimeout(resolve, 100))
 
-    // 网络错误应该显示网络错误图标（error-type-network class 或 SVG）
-    const hasNetworkClass = errorWrapper.find('.error-type-network').exists()
-    const hasErrorIcon = errorWrapper.find('.error-icon').exists()
-    expect(hasNetworkClass || hasErrorIcon).toBe(true)
-    // 按钮文字应该包含"重新连接"
-    const btnText = errorWrapper.find('.btn-primary').text()
-    expect(btnText).toBeTruthy()
+    const title = errorWrapper.find('.error-boundary__title')
+    expect(title.text()).toBe('自定义错误提示')
   })
 
-  it('权限错误类型显示去登录按钮', async () => {
-    const AuthErrorComponent = {
-      name: 'AuthErrorComponent',
-      template: `<div>{{ throwAuthError() }}</div>`,
-      methods: {
-        throwAuthError() {
-          throw new Error('Unauthorized - 401 forbidden permission denied')
-        },
-      },
-    }
+  it('重试后清除错误状态', async () => {
+    let shouldThrow = true
+    const ConditionalThrowingComponent = defineComponent({
+      setup() {
+        if (shouldThrow) {
+          throw new Error('Conditional error')
+        }
+        return () => h('div', '正常内容')
+      }
+    })
 
     const errorWrapper = mount(ErrorBoundary, {
       slots: {
-        default: AuthErrorComponent,
+        default: ConditionalThrowingComponent,
       },
     })
 
     await nextTick()
-    await new Promise(resolve => setTimeout(resolve, 100))
 
-    // 权限错误应该显示权限图标
-    expect(errorWrapper.find('.error-type-auth').exists()).toBe(true)
-    // 按钮文字应该是"去登录"
-    expect(errorWrapper.find('.btn-primary').text()).toContain('去登录')
-  })
+    expect(errorWrapper.find('.error-boundary').exists()).toBe(true)
 
-  it('渲染错误类型显示重新加载按钮', async () => {
-    const RenderErrorComponent = {
-      name: 'RenderErrorComponent',
-      template: `<div>{{ throwRenderError() }}</div>`,
-      methods: {
-        throwRenderError() {
-          throw new Error('Component render failed in virtual DOM props slot')
-        },
-      },
-    }
-
-    const errorWrapper = mount(ErrorBoundary, {
-      slots: {
-        default: RenderErrorComponent,
-      },
-    })
-
+    shouldThrow = false
+    await errorWrapper.find('.error-boundary__btn--primary').trigger('click')
     await nextTick()
-    await new Promise(resolve => setTimeout(resolve, 100))
 
-    // 渲染错误应该显示渲染图标
-    expect(errorWrapper.find('.error-type-render').exists()).toBe(true)
-    // 按钮文字应该是"重新加载"
-    expect(errorWrapper.find('.btn-primary').text()).toContain('重新加载')
+    expect(errorWrapper.find('.error-boundary').exists()).toBe(false)
   })
 
   it('触发 error 事件并传递错误对象', async () => {
@@ -221,7 +174,7 @@ describe('ErrorBoundary.vue', () => {
     expect(emittedError).toBeInstanceOf(Error)
   })
 
-  it('返回首页按钮存在（非 auth 类型）', async () => {
+  it('返回首页按钮存在', async () => {
     const errorWrapper = mount(ErrorBoundary, {
       slots: {
         default: ThrowingComponent,
@@ -231,8 +184,44 @@ describe('ErrorBoundary.vue', () => {
     await nextTick()
 
     // 应该有返回首页按钮
-    const homeButton = errorWrapper.find('.btn-secondary')
+    const homeButton = errorWrapper.find('.error-boundary__btn--secondary')
     expect(homeButton.exists()).toBe(true)
     expect(homeButton.text()).toContain('返回首页')
+  })
+
+  it('showRetry 为 false 时不显示重试按钮', async () => {
+    const errorWrapper = mount(ErrorBoundary, {
+      props: {
+        showRetry: false,
+      },
+      slots: {
+        default: ThrowingComponent,
+      },
+    })
+
+    await nextTick()
+
+    // 重试按钮不应该存在
+    const retryButton = errorWrapper.find('.error-boundary__btn--primary')
+    expect(retryButton.exists()).toBe(false)
+    // 返回首页按钮仍然存在
+    const homeButton = errorWrapper.find('.error-boundary__btn--secondary')
+    expect(homeButton.exists()).toBe(true)
+  })
+
+  it('错误图标正确显示', async () => {
+    const errorWrapper = mount(ErrorBoundary, {
+      slots: {
+        default: ThrowingComponent,
+      },
+    })
+
+    await nextTick()
+
+    // 错误图标区域应该存在
+    const icon = errorWrapper.find('.error-boundary__icon')
+    expect(icon.exists()).toBe(true)
+    // 图标内应该有 SVG
+    expect(icon.find('svg').exists()).toBe(true)
   })
 })

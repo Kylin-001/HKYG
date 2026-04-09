@@ -1,9 +1,17 @@
 <template>
   <Transition name="back-to-top">
-    <button v-show="visible" @click="scrollToTop"
+    <button
+      v-show="visible"
       class="fixed right-5 bottom-24 md:bottom-8 z-[var(--z-back-to-top)] w-11 h-11 rounded-full bg-white shadow-brand border border-primary-100 flex items-center justify-center text-text-tertiary hover:text-primary hover:border-primary-300 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 group"
-      :title="'返回顶部'">
-      <el-icon :size="20" class="group-hover:-translate-y-0.5 transition-transform"><Top /></el-icon>
+      :title="'返回顶部'"
+      @click="scrollToTop"
+    >
+      <el-icon
+        :size="20"
+        class="group-hover:-translate-y-0.5 transition-transform"
+      >
+        <Top />
+      </el-icon>
     </button>
   </Transition>
 </template>

@@ -11,7 +11,7 @@ export type ConsentType = 'necessary' | 'analytics' | 'marketing' | 'all'
 
 /** 用户同意状态 */
 export interface ConsentState {
-  necessary: boolean  // 必要Cookie（始终为true）
+  necessary: boolean // 必要Cookie（始终为true）
   analytics: boolean // 分析追踪
   marketing: boolean // 营销追踪
   timestamp: number
@@ -170,7 +170,7 @@ class PrivacyManager {
       return `user_${Math.abs(hash).toString(36)}`
     } catch (error) {
       console.warn('[Privacy] 用户ID哈希失败:', error)
-      return `user_anonymous`
+      return 'user_anonymous'
     }
   }
 

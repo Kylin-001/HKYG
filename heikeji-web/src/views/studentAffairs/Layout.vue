@@ -117,12 +117,12 @@ const tabs = [
 // 判断标签是否激活
 function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boolean {
   if (tab.exact) {
-    return window.location.pathname === tab.path
+    return route.path === tab.path
   }
   if (tab.base) {
-    return window.location.pathname.startsWith(tab.base)
+    return route.path.startsWith(tab.base)
   }
-  return window.location.pathname === tab.path
+  return route.path === tab.path
 }
 </script>
 

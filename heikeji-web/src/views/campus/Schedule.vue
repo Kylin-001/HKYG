@@ -302,7 +302,7 @@ const courses = computed<Course[]>(() => {
     endPeriod: item.endSection || 2,
     startTime: item.startTime || '08:00',
     endTime: item.endTime || '09:40',
-    color: ['#667eea', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'][index % 9]
+    color: item.color || ['#667eea', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'][index % 9]
   }))
 })
 
@@ -375,7 +375,10 @@ const allCourses = computed(() => [...courses.value].sort((a, b) => {
   return dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day) || a.startPeriod - b.startPeriod
 }))
 
-const isCurrentDay = computed(() => true)
+const isCurrentDay = computed(() => {
+  const today = new Date().toISOString().split('T')[0]
+  return selectedDate.value === today
+})
 
 const nowIndicatorTop = computed(() => {
   const now = new Date()
@@ -433,6 +436,7 @@ function nextWeek() {
 }
 
 function goToToday() {
+  selectedDate.value = new Date().toISOString().split('T')[0]
   currentWeek.value = 8
 }
 

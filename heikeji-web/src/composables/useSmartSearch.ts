@@ -145,12 +145,12 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
       // 应用筛选条件
       let filteredItems = items.value
 
-      activeFilters.forEach((value, key) => {
+      activeFilters.value.forEach((value, key) => {
         filteredItems = applyFilter(filteredItems, key, value)
       })
 
       // 如果有筛选条件且没有关键词，返回筛选后的所有项目
-      if (!keyword.trim() && activeFilters.size > 0) {
+      if (!keyword.trim() && activeFilters.value.size > 0) {
         searchResults.value = filteredItems.map((item) => ({
           item,
           score: 1,
@@ -487,9 +487,9 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
    */
   function setFilter(filterKey: string, value: any): void {
     if (value === null || value === undefined || value === '') {
-      activeFilters.delete(filterKey)
+      activeFilters.value.delete(filterKey)
     } else {
-      activeFilters.set(filterKey, value)
+      activeFilters.value.set(filterKey, value)
     }
 
     // 持久化
@@ -507,7 +507,7 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
    * 清除指定筛选条件
    */
   function clearFilter(filterKey: string): void {
-    activeFilters.delete(filterKey)
+    activeFilters.value.delete(filterKey)
 
     if (persistFilters) {
       saveFilters()
@@ -522,7 +522,7 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
    * 清除所有筛选条件
    */
   function clearAllFilters(): void {
-    activeFilters.clear()
+    activeFilters.value.clear()
 
     if (persistFilters) {
       saveFilters()
@@ -543,7 +543,7 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
       const saved = localStorage.getItem(FILTERS_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        activeFilters = new Map(Object.entries(parsed))
+        activeFilters.value = new Map(Object.entries(parsed))
       }
     } catch (e) {
       console.warn('[SmartSearch] Failed to load filters:', e)
@@ -566,7 +566,7 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
    * 获取筛选条件的显示值
    */
   function getFilterDisplayValue(filterKey: string): string {
-    const value = activeFilters.get(filterKey)
+    const value = activeFilters.value.get(filterKey)
     const filterDef = filters.find(f => f.key === filterKey)
 
     if (!filterDef || !value) return ''
@@ -621,7 +621,7 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
   // 计算属性
   const hasResults = computed(() => searchResults.value.length > 0)
   const hasHistory = computed(() => searchHistory.value.length > 0)
-  const hasActiveFilters = computed(() => activeFilters.size > 0)
+  const hasActiveFilters = computed(() => activeFilters.value.size > 0)
 
   const suggestionItems = computed(() => {
     if (suggestions.value.length > 0) {
@@ -654,7 +654,7 @@ export function useSmartSearch<T extends SearchableItem>(options: UseSmartSearch
     () => {
       initFuse()
       // 如果有搜索词或筛选条件，自动重新搜索
-      if (searchKeyword.value || activeFilters.size > 0) {
+      if (searchKeyword.value || activeFilters.value.size > 0) {
         search(searchKeyword.value)
       }
     },

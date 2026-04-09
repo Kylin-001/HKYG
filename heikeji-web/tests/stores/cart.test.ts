@@ -333,7 +333,7 @@ describe('useCartStore', () => {
         items: [mockCartItem1],
         savedAt: Date.now(),
       }))
-      
+
       vi.mocked(cartApi.getCart).mockRejectedValue(new Error('网络错误'))
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -347,7 +347,7 @@ describe('useCartStore', () => {
     it('离线模式且本地有数据时应使用本地数据', async () => {
       const store = useCartStore()
       Object.defineProperty(navigator, 'onLine', { value: false, writable: true })
-      
+
       // 先添加一些数据到store
       store.items.push(mockCartItem1 as any)
       store.totalItems = 2
@@ -361,7 +361,7 @@ describe('useCartStore', () => {
     it('强制刷新时应忽略离线状态', async () => {
       const store = useCartStore()
       Object.defineProperty(navigator, 'onLine', { value: false, writable: true })
-      
+
       vi.mocked(cartApi.getCart).mockResolvedValue(mockCartResponse)
 
       await store.fetchCart(true) // forceRefresh = true
@@ -420,9 +420,9 @@ describe('useCartStore', () => {
 
     it('成功同步后应更新ID和标记', async () => {
       const store = useCartStore()
-      vi.mocked(cartApi.addToCart).mockResolvedValue({ 
-        id: 999, 
-        product: mockCartItem1.product 
+      vi.mocked(cartApi.addToCart).mockResolvedValue({
+        id: 999,
+        product: mockCartItem1.product
       })
 
       await store.addItem(101, 1)

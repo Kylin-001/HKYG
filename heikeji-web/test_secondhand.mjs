@@ -1,7 +1,7 @@
 const BASE = 'http://localhost:5174'
 
 async function api(method, url, body) {
-  const opts = { method, headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } }
+  const opts = { method, headers: { Accept: 'application/json', 'Content-Type': 'application/json' } }
   if (body) opts.body = JSON.stringify(body)
   const res = await fetch(BASE + url, opts)
   return await res.json()

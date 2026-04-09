@@ -57,8 +57,8 @@ const INSTALL_DEFERRED_DAYS = 3
 
 let registration: SWRegistration | null = null
 let broadcastChannel: BroadcastChannel | null = null
-let messageHandlers: Map<string, Set<MessageHandler>> = new Map()
-let onlineStatusListeners: Set<(online: boolean) => void> = new Set()
+const messageHandlers: Map<string, Set<MessageHandler>> = new Map()
+const onlineStatusListeners: Set<(online: boolean) => void> = new Set()
 
 // ==================== Service Worker Registration ====================
 
@@ -87,11 +87,11 @@ export async function registerServiceWorker(
 
     console.log(`[PWA-Helper] Registering Service Worker from: ${swUrl}`)
 
-    reg = await navigator.serviceWorker.register(swUrl, { scope })
+    registration = await navigator.serviceWorker.register(swUrl, { scope })
 
     // Handle updates
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing
 
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
@@ -99,7 +99,7 @@ export async function registerServiceWorker(
 
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New version available
-            options?.onUpdateFound?.(reg)
+            options?.onUpdateFound?.(registration)
             notifyUpdateAvailable()
           }
         })
@@ -115,12 +115,10 @@ export async function registerServiceWorker(
       window.location.reload()
     })
 
-    registration = reg
-    options?.onSuccess?.(reg)
+    options?.onSuccess?.(registration)
 
-    console.log(`[PWA-Helper] Service Worker registered successfully with scope: ${reg.scope}`)
-    return reg
-
+    console.log(`[PWA-Helper] Service Worker registered successfully with scope: ${registration.scope}`)
+    return registration
   } catch (error) {
     console.error('[PWA-Helper] Service Worker registration failed:', error)
     options?.onError?.(error as Error)

@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
+import SearchBar from '@/components/SearchBar.vue'
+
 // Mock @element-plus/icons-vue
 vi.mock('@element-plus/icons-vue', () => ({
   Search: { template: '<svg class="icon-search"></svg>' },
@@ -27,8 +29,6 @@ const localStorageMock = (() => {
 })()
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-
-import SearchBar from '@/components/SearchBar.vue'
 
 describe('SearchBar.vue - v3.0', () => {
   let wrapper: ReturnType<typeof mount>
@@ -73,7 +73,7 @@ describe('SearchBar.vue - v3.0', () => {
       const customWrapper = createWrapper({
         placeholder: '请输入搜索内容',
       })
-      
+
       const input = customWrapper.find('.search-bar__input')
       expect(input.attributes('placeholder')).toBe('请输入搜索内容')
     })
@@ -103,7 +103,7 @@ describe('SearchBar.vue - v3.0', () => {
     sizes.forEach((size) => {
       it(`支持 ${size} 尺寸`, () => {
         const sizeWrapper = createWrapper({ size })
-        
+
         expect(sizeWrapper.find('.search-bar').classes()).toContain(`search-bar--${size}`)
       })
     })
@@ -134,7 +134,7 @@ describe('SearchBar.vue - v3.0', () => {
     variants.forEach((variant) => {
       it(`支持 ${variant} 变体`, () => {
         const variantWrapper = createWrapper({ variant })
-        
+
         expect(variantWrapper.find('.search-bar').classes()).toContain(`search-bar--${variant}`)
       })
     })
@@ -150,7 +150,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('v-model 双向绑定', () => {
     it('输入触发 update:modelValue 事件', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('测试搜索')
 
       expect(wrapper.emitted()).toHaveProperty('update:modelValue')
@@ -166,10 +166,10 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('实时更新值', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('第一段文字')
       expect(wrapper.emitted('update:modelValue')?.slice(-1)).toEqual([['第一段文字']])
-      
+
       await input.setValue('第二段文字')
       expect(wrapper.emitted('update:modelValue')?.slice(-1)).toEqual([['第二段文字']])
     })
@@ -180,7 +180,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('搜索功能', () => {
     it('Enter 键触发 search 事件', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('手机壳')
       await input.trigger('keydown', { key: 'Enter' })
 
@@ -190,7 +190,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('Enter 键不提交空搜索', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('')
       await input.trigger('keydown', { key: 'Enter' })
 
@@ -199,7 +199,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('Enter 键自动 trim 空白字符', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('  测试  ')
       await input.trigger('keydown', { key: 'Enter' })
 
@@ -242,7 +242,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('清除功能', () => {
     it('有值且聚焦时显示清除按钮', async () => {
       await wrapper.setProps({ modelValue: '一些文字' })
-      
+
       const input = wrapper.find('.search-bar__input')
       await input.trigger('focus')
       await nextTick()
@@ -253,7 +253,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('无值时不显示清除按钮', async () => {
       await wrapper.setProps({ modelValue: '' })
-      
+
       const input = wrapper.find('.search-bar__input')
       await input.trigger('focus')
       await nextTick()
@@ -271,7 +271,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('点击清除按钮清空输入并触发事件', async () => {
       await wrapper.setProps({ modelValue: '测试文字' })
-      
+
       const input = wrapper.find('.search-bar__input')
       await input.trigger('focus')
       await nextTick()
@@ -316,7 +316,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('失焦后移除 focused 类', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.trigger('focus')
       await nextTick()
       expect(wrapper.find('.search-bar').classes()).toContain('search-bar--focused')
@@ -331,7 +331,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('聚焦时触发 focus 事件', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.trigger('focus')
 
       expect(wrapper.emitted()).toHaveProperty('focus')
@@ -339,7 +339,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('失焦时触发 blur 事件', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.trigger('blur')
 
       expect(wrapper.emitted()).toHaveProperty('blur')
@@ -586,7 +586,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('防抖功能', () => {
     it('默认启用防抖（300ms）', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('测试')
 
       // 立即检查 - 应该还没有触发 input 事件（防抖中）
@@ -603,7 +603,7 @@ describe('SearchBar.vue - v3.0', () => {
     it('自定义防抖延迟', async () => {
       const customDebounceWrapper = createWrapper({ debounceDelay: 500 })
       const input = customDebounceWrapper.find('.search-bar__input')
-      
+
       await input.setValue('测试')
 
       // 400ms 后仍未触发
@@ -618,7 +618,7 @@ describe('SearchBar.vue - v3.0', () => {
     it('debounceDelay=0 禁用防抖', async () => {
       const noDebounceWrapper = createWrapper({ debounceDelay: 0 })
       const input = noDebounceWrapper.find('.search-bar__input')
-      
+
       await input.setValue('测试')
 
       // 应该立即触发
@@ -627,13 +627,13 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('连续输入只触发最后一次', async () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       await input.setValue('第1次')
       await new Promise(resolve => setTimeout(resolve, 100))
-      
+
       await input.setValue('第2次')
       await new Promise(resolve => setTimeout(resolve, 100))
-      
+
       await input.setValue('第3次')
       await new Promise(resolve => setTimeout(resolve, 350))
 
@@ -649,7 +649,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('自动聚焦', () => {
     it('autofocus=true 时自动聚焦', async () => {
       const autofocusWrapper = createWrapper({ autofocus: true })
-      
+
       await nextTick()
       // 检查是否调用了 focus 方法（通过 ref）
       // 注意：实际测试可能需要 mock ref
@@ -661,8 +661,8 @@ describe('SearchBar.vue - v3.0', () => {
   describe('自定义图标', () => {
     it('支持自定义搜索图标', () => {
       const CustomIcon = { template: '<svg class="custom-icon"></svg>' }
-      const customIconWrapper = createWrapper({ 
-        searchIcon: CustomIcon 
+      const customIconWrapper = createWrapper({
+        searchIcon: CustomIcon
       })
 
       const icon = customIconWrapper.find('.custom-icon')
@@ -675,7 +675,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('键盘导航', () => {
     it('Escape 键清空输入', async () => {
       await wrapper.setProps({ modelValue: '一些文字' })
-      
+
       const input = wrapper.find('.search-bar__input')
       await input.trigger('keydown', { key: 'Escape' })
 
@@ -689,7 +689,7 @@ describe('SearchBar.vue - v3.0', () => {
       // 检查所有按钮和输入框的 tabindex
       const input = wrapper.find('.search-bar__input')
       expect(input.attributes('tabindex')).toBeUndefined() // input 默认可聚焦
-      
+
       // 清除按钮应该在特定条件下出现并可聚焦
     })
   })
@@ -699,7 +699,7 @@ describe('SearchBar.vue - v3.0', () => {
   describe('可访问性 (A11y)', () => {
     it('输入框具有正确的 ARIA 属性', () => {
       const input = wrapper.find('.search-bar__input')
-      
+
       expect(input.attributes('role')).toBe('searchbox')
       expect(input.attributes('aria-label')).toBeTruthy()
       expect(input.attributes('aria-labelledby')).toBeTruthy()
@@ -718,7 +718,7 @@ describe('SearchBar.vue - v3.0', () => {
 
     it('搜索按钮具有 aria-label', () => {
       const btnWrapper = createWrapper({ showButton: true })
-      
+
       const searchBtn = btnWrapper.find('.search-bar__search-btn')
       expect(searchBtn.attributes('aria-label')).toBe('搜索')
     })
@@ -765,7 +765,7 @@ describe('SearchBar.vue - v3.0', () => {
       })
 
       const classes = combinedWrapper.find('.search-bar').classes()
-      
+
       expect(classes).toContain('search-bar')
       expect(classes).toContain('search-bar--lg')
       expect(classes).toContain('search-bar--rounded')

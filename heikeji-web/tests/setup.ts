@@ -22,14 +22,14 @@ beforeAll(() => {
     }),
   })
 
-  window.ResizeObserver = vi.fn().mockImplementation(function(this: any, callback: ResizeObserverCallback) {
+  window.ResizeObserver = vi.fn().mockImplementation(function (this: any, callback: ResizeObserverCallback) {
     this.observe = vi.fn()
     this.unobserve = vi.fn()
     this.disconnect = vi.fn()
     return this
   }) as unknown as typeof ResizeObserver
 
-  window.IntersectionObserver = vi.fn().mockImplementation(function(this: any, callback: IntersectionObserverCallback) {
+  window.IntersectionObserver = vi.fn().mockImplementation(function (this: any, callback: IntersectionObserverCallback) {
     this.observe = vi.fn()
     this.unobserve = vi.fn()
     this.disconnect = vi.fn()

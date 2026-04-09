@@ -2,9 +2,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowRight, Search, View, ChatDotRound, Star } from '@element-plus/icons-vue'
+import { ArrowRight, Search, View, ChatDotRound, Star, Reading } from '@element-plus/icons-vue'
 import { useProductStore } from '@/stores/product'
 import { useCommunityStore } from '@/stores/community'
+import { useCartStore } from '@/stores/cart'
 import BaseButton from '@/components/base/BaseButton.vue'
 import ProductCard from '@/components/ProductCard.vue'
 // 导入设计令牌系统
@@ -15,6 +16,7 @@ import { borderRadiusTokens } from '@/tokens/spacing'
 
 const router = useRouter()
 const productStore = useProductStore()
+const cartStore = useCartStore()
 const communityStore = useCommunityStore()
 
 // Banner 自动轮播
@@ -44,7 +46,18 @@ function goToProduct(productId: number | string) {
 
 // 加入购物车
 function handleAddToCart(product: any) {
-  ElMessage.success(`已将「${product.name}」加入购物车`)
+  try {
+    cartStore.addItem({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0] || product.image || '',
+      quantity: 1
+    })
+    ElMessage.success(`已将「${product.name}」加入购物车`)
+  } catch {
+    ElMessage.error('加入购物车失败，请重试')
+  }
 }
 
 // Banner 数据 - 使用品牌渐变色
@@ -84,16 +97,16 @@ const banners = ref([
   },
 ])
 
-// 快捷入口数据
+// 快捷入口数据 - 使用协调的配色方案
 const quickEntries = [
-  { icon: '🍔', name: '外卖', path: '/takeout', color: `bg-[${lightColorTokens.crimson.light}] text-[${lightColorTokens.crimson.DEFAULT}]` },
-  { icon: '📚', name: '商品', path: '/products', color: `bg-[${lightColorTokens.primary[25]}] text-[${lightColorTokens.primary[500]}]` },
-  { icon: '♻️', name: '二手', path: '/secondhand', color: `bg-[${lightColorTokens.pine.light}] text-[${lightColorTokens.pine.DEFAULT}]` },
-  { icon: '📋', name: '学工', path: '/student-affairs', color: `bg-[${lightColorTokens.primary[25]}] text-[${lightColorTokens.primary[500]}]` },
-  { icon: '💰', name: '缴费', path: '/payment', color: `bg-[${lightColorTokens.gold.bg}] text-[${lightColorTokens.gold.DEFAULT}]` },
-  { icon: '🏫', name: '校园', path: '/campus/schedule', color: `bg-[${lightColorTokens.primary[50]}] text-[${lightColorTokens.primary[400]}]` },
-  { icon: '💬', name: '社区', path: '/community/forum', color: `bg-[${lightColorTokens.info.light}] text-[${lightColorTokens.info.DEFAULT}]` },
-  { icon: '📢', name: '公告', path: '/announcements', color: `bg-[${lightColorTokens.crimson.light}] text-[${lightColorTokens.crimson.dark}]` },
+  { icon: '🍔', name: '外卖', path: '/takeout', color: 'bg-orange-50 text-orange-600' },
+  { icon: '📚', name: '商品', path: '/products', color: 'bg-blue-50 text-blue-600' },
+  { icon: '♻️', name: '二手', path: '/secondhand', color: 'bg-green-50 text-green-600' },
+  { icon: '📋', name: '学工', path: '/student-affairs', color: 'bg-indigo-50 text-indigo-600' },
+  { icon: '💰', name: '缴费', path: '/payment', color: 'bg-amber-50 text-amber-600' },
+  { icon: '🏫', name: '校园', path: '/campus/schedule', color: 'bg-cyan-50 text-cyan-600' },
+  { icon: '💬', name: '社区', path: '/community/forum', color: 'bg-purple-50 text-purple-600' },
+  { icon: '📢', name: '公告', path: '/announcements', color: 'bg-rose-50 text-rose-600' },
 ]
 
 // 校园服务数据
@@ -184,91 +197,85 @@ onUnmounted(() => {
   <main class="page min-h-screen" role="main">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
-      <!-- ==================== Hero Banner 区域 ==================== -->
+      <!-- ==================== Hero Banner 区域 - 图片在上，内容在下 ==================== -->
       <section class="relative mb-8 group" aria-label="首页横幅">
         <div
-          :class="[
-            'aspect-[21/7] sm:aspect-[28/9] relative overflow-hidden rounded-2xl',
-            'transition-all duration-300'
-          ]"
-          :style="{ background: banners[currentBanner].gradient }"
+          class="relative overflow-hidden rounded-2xl bg-surface shadow-lg transition-all duration-300"
         >
-          <!-- 装饰性背景元素 -->
-          <div class="absolute top-0 right-0 w-56 h-56 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-          <div class="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
-          <div class="absolute top-1/2 right-1/3 w-24 h-24 bg-gold/10 rounded-full -translate-y-1/2 pointer-events-none"></div>
-
-          <!-- Banner 内容 -->
-          <div class="absolute inset-0 flex items-center">
-            <div class="px-8 sm:px-12 max-w-xl">
-              <!-- 标签和学校名称 -->
-              <div class="flex items-center gap-2 mb-4">
-                <span
-                  :class="[
-                    'inline-block px-3 py-1.5 rounded-full backdrop-blur-sm text-white font-semibold tracking-wider uppercase',
-                    'text-xs transition-transform hover:scale-105'
-                  ]"
-                  :style="{ backgroundColor: 'rgba(217, 119, 6, 0.9)' }"
-                >
-                  {{ banners[currentBanner].tag }}
-                </span>
-                <span class="text-white/60 text-xs font-medium">|</span>
-                <span class="text-white/70 text-xs font-medium">黑龙江科技大学</span>
-              </div>
-
-              <!-- 主标题 - 使用展示字体层级 -->
-              <h2
-                :class="['text-white mb-3 tracking-tight leading-tight']"
-                :style="{
-                  fontSize: typographyTokens.textHierarchy.display.fontSize,
-                  fontWeight: typographyTokens.textHierarchy.display.fontWeight,
-                  lineHeight: String(typographyTokens.textHierarchy.display.lineHeight),
-                  letterSpacing: typographyTokens.textHierarchy.display.letterSpacing
-                }"
-              >
-                {{ banners[currentBanner].title }}
-              </h2>
-
-              <!-- 副标题 -->
-              <p class="text-white/80 text-base mb-2 leading-relaxed font-normal">{{ banners[currentBanner].subtitle }}</p>
-
-              <!-- 高亮信息 -->
-              <p
-                :class="['font-medium mb-6 flex items-center gap-2']"
-                :style="{ color: '#FBBF24' }"
-              >
-                <span class="inline-block animate-pulse">✨</span>
-                {{ banners[currentBanner].highlight }}
-              </p>
-
-              <!-- CTA 按钮 - 使用 BaseButton 组件 -->
-              <BaseButton
-                variant="brand"
-                size="md"
-                :aria-label="'立即查看详情'"
-                class="!shadow-lg hover:!shadow-xl !border !border-white/20 !backdrop-blur-sm"
-                @click="$router.push(banners[currentBanner].link)"
-              >
-                立即查看 →
-              </BaseButton>
+          <!-- 上方：真实照片区域 -->
+          <div class="relative w-full h-[200px] sm:h-[260px] lg:h-[320px] overflow-hidden">
+            <!-- 真实照片占位 - 请替换为碳谷大厦实际照片路径 -->
+            <img 
+              src="https://images.unsplash.com/photo-1562774053-701939374585?w=1200&h=400&fit=crop" 
+              alt="碳谷大厦 - 黑龙江科技大学标志性建筑"
+              class="w-full h-full object-cover"
+            />
+            <!-- 底部渐变遮罩，确保与下方内容衔接自然 -->
+            <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-primary to-transparent"></div>
+            
+            <!-- 学校名称水印 -->
+            <div class="absolute top-4 right-4 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full">
+              <span class="text-white text-xs font-medium">黑龙江科技大学</span>
             </div>
           </div>
-
-          <!-- Banner 切换指示器 -->
-          <nav class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2.5" aria-label="横幅导航">
-            <button
-              v-for="(b, i) in banners"
-              :key="b.id"
-              @click="currentBanner = i; stopBannerAutoPlay(); startBannerAutoPlay()"
-              :class="[
-                'rounded-full transition-all duration-300 ease-out',
-                'focus:outline-none focus:ring-2 focus:ring-white/50',
-                currentBanner === i ? 'w-7 h-2.5 bg-gold' : 'w-2 h-2.5 bg-white/40 hover:bg-white/60 hover:w-3'
-              ]"
-              :aria-label="`切换到第 ${i + 1} 个横幅`"
-              :aria-current="currentBanner === i ? 'true' : 'false'"
-            ></button>
-          </nav>
+          
+          <!-- 下方：文字内容区域（独立区块，不会覆盖图片） -->
+          <div class="relative bg-primary px-6 py-5 sm:px-8 sm:py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <!-- 左侧文字内容 -->
+              <div class="flex-1">
+                <!-- 标签和标题 -->
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="inline-block px-2.5 py-0.5 rounded bg-gold text-white text-xs font-semibold tracking-wider uppercase">
+                    {{ banners[currentBanner].tag }}
+                  </span>
+                  <span class="text-white/50 text-xs">|</span>
+                  <span class="text-white/70 text-xs">碳谷大厦</span>
+                </div>
+                
+                <h2 class="text-white text-xl sm:text-2xl font-bold mb-1 leading-tight">
+                  {{ banners[currentBanner].title }}
+                </h2>
+                
+                <p class="text-white/80 text-sm mb-1">
+                  {{ banners[currentBanner].subtitle }}
+                </p>
+                
+                <p class="text-gold-light text-sm font-medium flex items-center gap-1.5">
+                  <span class="animate-pulse">✨</span>
+                  {{ banners[currentBanner].highlight }}
+                </p>
+              </div>
+              
+              <!-- 右侧按钮和指示器 -->
+              <div class="flex flex-row sm:flex-col items-center sm:items-end gap-3">
+                <BaseButton
+                  variant="brand"
+                  size="sm"
+                  :aria-label="'立即查看详情'"
+                  class="!bg-white !text-primary hover:!bg-white/90 !shadow-md whitespace-nowrap"
+                  @click="$router.push(banners[currentBanner].link)"
+                >
+                  立即查看 →
+                </BaseButton>
+                
+                <!-- Banner 切换指示器 -->
+                <nav class="flex gap-1.5" aria-label="横幅导航">
+                  <button
+                    v-for="(b, i) in banners"
+                    :key="b.id"
+                    @click="currentBanner = i; stopBannerAutoPlay(); startBannerAutoPlay()"
+                    :class="[
+                      'rounded-full transition-all duration-300',
+                      currentBanner === i ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
+                    ]"
+                    :aria-label="`切换到第 ${i + 1} 个横幅`"
+                    :aria-current="currentBanner === i ? 'true' : 'false'"
+                  ></button>
+                </nav>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -323,50 +330,40 @@ onUnmounted(() => {
 
       <!-- ==================== 快捷入口区域 ==================== -->
       <section class="mb-10" aria-label="快捷服务入口">
-        <div class="grid grid-cols-4 sm:grid-cols-8 gap-3 sm:gap-4">
-          <button
-            v-for="entry in quickEntries"
-            :key="entry.name"
-            @click="$router.push(entry.path)"
-            :class="[
-              'flex flex-col items-center gap-2 p-3 sm:p-4',
-              'rounded-2xl cursor-pointer group',
-              'hover:bg-primary-50/60 active:scale-[0.97]',
-              'transition-all duration-200 ease-out',
-              'focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-inset',
-              'min-h-[88px] sm:min-h-[100px]'
-            ]"
-            :style="{ borderRadius: borderRadiusTokens['2xl'] }"
-            :aria-label="`进入${entry.name}`"
-          >
-            <!-- 图标容器 -->
-            <span
+        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+          <div class="grid grid-cols-4 gap-4 sm:gap-6">
+            <button
+              v-for="entry in quickEntries"
+              :key="entry.name"
+              @click="$router.push(entry.path)"
               :class="[
-                entry.color,
-                'w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center',
-                'text-2xl sm:text-3xl shadow-sm',
-                'group-hover:scale-110 group-hover:shadow-md',
-                'transition-all duration-200 ease-out'
+                'flex flex-col items-center gap-2 p-2 sm:p-3',
+                'rounded-xl cursor-pointer group',
+                'hover:bg-gray-50 active:scale-[0.97]',
+                'transition-all duration-200 ease-out',
+                'focus:outline-none focus:ring-2 focus:ring-primary-200'
               ]"
-              :style="{ borderRadius: borderRadiusTokens.xl }"
+              :aria-label="`进入${entry.name}`"
             >
-              {{ entry.icon }}
-            </span>
+              <!-- 图标容器 - 统一尺寸和颜色 -->
+              <span
+                :class="[
+                  'w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center',
+                  'text-xl sm:text-2xl',
+                  'group-hover:scale-105 group-hover:shadow-md',
+                  'transition-all duration-200 ease-out',
+                  entry.color
+                ]"
+              >
+                {{ entry.icon }}
+              </span>
 
-            <!-- 名称文字 -->
-            <span
-              :class="[
-                'font-medium group-hover:text-text-primary',
-                'transition-colors duration-150'
-              ]"
-              :style="{
-                color: lightColorTokens.text.secondary,
-                fontSize: typographyTokens.textHierarchy.overline.fontSize
-              }"
-            >
-              {{ entry.name }}
-            </span>
-          </button>
+              <!-- 名称文字 -->
+              <span class="text-xs sm:text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors">
+                {{ entry.name }}
+              </span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -374,7 +371,7 @@ onUnmounted(() => {
       <section
         class="mb-10 relative overflow-hidden rounded-2xl p-6 text-white"
         :style="{
-          background: gradientPresets.light.warm,
+          background: 'linear-gradient(135deg, #DC2626 0%, #EA580C 50%, #F97316 100%)',
           borderRadius: borderRadiusTokens['2xl']
         }"
         aria-label="限时秒杀活动"
@@ -386,28 +383,16 @@ onUnmounted(() => {
         <div class="relative z-10 flex items-center justify-between flex-wrap gap-4">
           <!-- 左侧信息 -->
           <div>
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-2 flex-wrap">
               <span class="text-2xl animate-pulse" aria-hidden="true">⚡</span>
-              <h3
-                :class="['font-bold']"
-                :style="{
-                  fontSize: typographyTokens.textHierarchy.h3.fontSize,
-                  fontWeight: typographyTokens.textHierarchy.h3.fontWeight
-                }"
-              >
+              <h3 class="font-bold text-xl sm:text-2xl text-white drop-shadow-sm">
                 限时秒杀
               </h3>
-              <span
-                class="px-2.5 py-1 rounded-lg font-bold tracking-wide uppercase"
-                :style="{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  fontSize: typographyTokens.textHierarchy.overline.fontSize
-                }"
-              >
+              <span class="px-2.5 py-1 rounded-lg font-semibold tracking-wide text-sm bg-white/90 text-red-600 shadow-sm">
                 距结束 02:34:15
               </span>
             </div>
-            <p class="text-white/85 text-base font-normal mt-2">每日10点/20点开抢 · 先到先得</p>
+            <p class="text-white text-base font-medium mt-2 drop-shadow-sm">每日10点/20点开抢 · 先到先得</p>
           </div>
 
           <!-- 右侧按钮 - 使用 BaseButton 组件 -->
@@ -427,25 +412,17 @@ onUnmounted(() => {
       <section class="mb-10" aria-labelledby="hot-products-heading">
         <!-- 区块标题 -->
         <header class="flex items-center justify-between mb-6">
-          <h2
-            id="hot-products-heading"
-            :class="['flex items-center gap-3']"
-            :style="{
-              color: lightColorTokens.text.primary,
-              fontSize: typographyTokens.textHierarchy.h2.fontSize,
-              fontWeight: typographyTokens.textHierarchy.h2.fontWeight,
-              letterSpacing: typographyTokens.textHierarchy.h2.letterSpacing
-            }"
-          >
-            <span
-              class="w-1.5 h-7 rounded-full"
-              :style="{
-                background: gradientPresets.light.primary,
-                borderRadius: borderRadiusTokens.full
-              }"
-            ></span>
-            热门推荐
-          </h2>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-400 flex items-center justify-center shadow-md">
+              <el-icon :size="20" class="text-white"><Star /></el-icon>
+            </div>
+            <div>
+              <h2 id="hot-products-heading" class="text-xl font-bold text-text-primary">
+                热门推荐
+              </h2>
+              <p class="text-xs text-text-tertiary">精选校园好物</p>
+            </div>
+          </div>
           <BaseButton
             variant="ghost"
             size="sm"
@@ -467,10 +444,10 @@ onUnmounted(() => {
               name: product.name,
               price: product.price,
               originalPrice: product.originalPrice,
-              image: product.image,
+              image: product.images?.[0] || '',
               sales: product.sales,
-              isHot: product.isHot,
-              isNew: product.isNew
+              isHot: product.tags?.includes('热销'),
+              isNew: product.tags?.includes('新品')
             }"
             variant="default"
             :show-actions="true"
@@ -487,25 +464,17 @@ onUnmounted(() => {
       <section class="mb-10" aria-labelledby="campus-services-heading">
         <!-- 区块标题 -->
         <header class="flex items-center justify-between mb-6">
-          <h2
-            id="campus-services-heading"
-            :class="['flex items-center gap-3']"
-            :style="{
-              color: lightColorTokens.text.primary,
-              fontSize: typographyTokens.textHierarchy.h2.fontSize,
-              fontWeight: typographyTokens.textHierarchy.h2.fontWeight,
-              letterSpacing: typographyTokens.textHierarchy.h2.letterSpacing
-            }"
-          >
-            <span
-              class="w-1.5 h-7 rounded-full"
-              :style="{
-                background: gradientPresets.light.pine,
-                borderRadius: borderRadiusTokens.full
-              }"
-            ></span>
-            校园服务
-          </h2>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
+              <el-icon :size="20" class="text-white"><Reading /></el-icon>
+            </div>
+            <div>
+              <h2 id="campus-services-heading" class="text-xl font-bold text-text-primary">
+                校园服务
+              </h2>
+              <p class="text-xs text-text-tertiary">便捷校园生活</p>
+            </div>
+          </div>
           <BaseButton
             variant="ghost"
             size="sm"
@@ -646,7 +615,7 @@ onUnmounted(() => {
               'focus-within:ring-2 focus-within:ring-white/50'
             ]"
             :style="{
-              background: 'linear-gradient(135deg, #B45309 0%, #D97706 45%, #DC2626 100%)',
+              background: 'linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%)',
               borderRadius: borderRadiusTokens['2xl']
             }"
             tabindex="0"
@@ -752,8 +721,8 @@ onUnmounted(() => {
             <!-- 用户头像和信息 -->
             <div class="flex items-start gap-3 mb-4">
               <img
-                :src="post.avatar"
-                :alt="`${post.author}的头像`"
+                :src="post.authorAvatar"
+                :alt="`${post.authorName}的头像`"
                 loading="lazy"
                 class="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-primary-50"
               />
@@ -766,7 +735,7 @@ onUnmounted(() => {
                       fontSize: typographyTokens.textHierarchy.body.fontSize
                     }"
                   >
-                    {{ post.author }}
+                    {{ post.authorName }}
                   </span>
                   <span
                     :class="['px-2 py-0.5 rounded font-medium shrink-0']"
@@ -777,7 +746,7 @@ onUnmounted(() => {
                       borderRadius: borderRadiusTokens.md
                     }"
                   >
-                    {{ post.board }}
+                    {{ post.boardName }}
                   </span>
                 </div>
                 <time
@@ -786,7 +755,7 @@ onUnmounted(() => {
                     fontSize: typographyTokens.textHierarchy.overline.fontSize
                   }"
                 >
-                  {{ post.time }}
+                  {{ post.createdAt }}
                 </time>
               </div>
             </div>
@@ -815,7 +784,7 @@ onUnmounted(() => {
                 <el-icon :size="14"><View /></el-icon>{{ post.views }}
               </span>
               <span class="flex items-center gap-1" :style="{ fontSize: typographyTokens.textHierarchy.overline.fontSize }">
-                <el-icon :size="14"><ChatDotRound /></el-icon>{{ post.comments }}
+                <el-icon :size="14"><ChatDotRound /></el-icon>{{ post.commentCount }}
               </span>
               <span class="flex items-center gap-1" :style="{ fontSize: typographyTokens.textHierarchy.overline.fontSize }">
                 <el-icon :size="14"><Star /></el-icon>{{ post.likes }}

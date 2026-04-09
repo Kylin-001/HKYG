@@ -70,10 +70,10 @@
             <div class="card-footer">
               <div class="total-info">
                 <span v-if="order.status === 'completed' || order.status === 'delivered'">
-                  实付款 <strong>¥{{ (order.payAmount ?? 0).toFixed(2) }}</strong>
+                  实付款 <strong>¥{{ (order.finalAmount ?? 0).toFixed(2) }}</strong>
                 </span>
                 <span v-else>
-                  共 <strong>{{ order.items?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0 }}</strong> 件，合计 <strong>¥{{ (order.payAmount ?? 0).toFixed(2) }}</strong>
+                  共 <strong>{{ order.items?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0 }}</strong> 件，合计 <strong>¥{{ (order.finalAmount ?? 0).toFixed(2) }}</strong>
                 </span>
               </div>
               <div class="action-btns">
@@ -164,6 +164,7 @@ const currentTabLabel = computed(() => {
 
 const hasMore = computed(() => orderStore.orders.length < orderStore.total)
 const loadingMore = ref(false)
+const currentPage = ref(1)
 
 const orderGroups = computed(() => {
   const groups: { date: string; displayDate: string; orders: Order[] }[] = []
@@ -243,8 +244,16 @@ async function confirmReceive(order: Order) {
   } catch {}
 }
 
-function deleteOrder(order: Order) {
-  ElMessage.success('订单已删除')
+async function deleteOrder(order: Order) {
+  try {
+    await ElMessageBox.confirm('确定要删除该订单吗？删除后不可恢复', '删除订单', {
+      confirmButtonText: '确认删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await orderStore.deleteOrder(order.id)
+    ElMessage.success('订单已删除')
+  } catch {}
 }
 
 function buyAgain(order: Order) {
@@ -254,10 +263,13 @@ function buyAgain(order: Order) {
 async function loadMoreOrders() {
   loadingMore.value = true
   try {
-    // 实际项目中这里应该传入下一页参数
-    // 暂时保持现有逻辑
+    currentPage.value++
+    await orderStore.fetchOrders({ page: currentPage.value, pageSize: 20 })
+  } catch (err: any) {
+    ElMessage.error(err.message || '加载更多订单失败')
+    currentPage.value--
   } finally {
-    setTimeout(() => { loadingMore.value = false }, 800)
+    loadingMore.value = false
   }
 }
 

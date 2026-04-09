@@ -57,15 +57,15 @@ describe('useA11y Composable', () => {
     it('should manage focusable elements', () => {
       const focusableElements = ref<HTMLElement[]>([])
       const container = document.createElement('div')
-      
+
       const button1 = document.createElement('button')
       const button2 = document.createElement('button')
       const input = document.createElement('input')
-      
+
       container.appendChild(button1)
       container.appendChild(button2)
       container.appendChild(input)
-      
+
       focusableElements.value = Array.from(
         container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
       ) as HTMLElement[]
@@ -140,7 +140,7 @@ describe('useA11y Composable', () => {
   describe('ARIA标签设置', () => {
     it('setAriaLabel应设置元素的aria-label属性', () => {
       const button = document.createElement('button')
-      
+
       button.setAttribute('aria-label', '关闭对话框')
 
       expect(button.getAttribute('aria-label')).toBe('关闭对话框')

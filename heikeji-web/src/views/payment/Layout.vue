@@ -1,12 +1,13 @@
 <template>
   <!-- ============================================
        缴费中心布局 - Design System v3.0
-       品牌头部（金色主题）+ 功能标签导航 + 主内容区
+       品牌头部（品牌蓝+金色调和）+ 功能标签导航 + 主内容区
+       UI优化: 统一使用科大蓝主色系，保留金色点缀体现财务属性
        ============================================ -->
   <div class="min-h-screen">
 
-    <!-- ====== 品牌头部区域（金色主题）====== -->
-    <header class="relative overflow-hidden bg-gradient-to-r from-gold-dark via-gold to-gold-light">
+    <!-- ====== 品牌头部区域（蓝色+金色调和）====== -->
+    <header class="relative overflow-hidden bg-gradient-to-r from-[#001D5C] via-[#003380] to-[#0055AA]">
       <!-- 装饰性背景 -->
       <div class="absolute top-0 right-0 w-56 h-56 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
       <div class="absolute bottom-0 left-1/4 w-32 h-32 bg-white/5 rounded-full translate-y-1/2"></div>
@@ -51,9 +52,9 @@
               'relative flex items-center gap-1.5 px-4 py-3.5',
               'text-sm font-medium whitespace-nowrap rounded-t-lg',
               'transition-all duration-200 ease-out',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
               isTabActive(tab)
-                ? 'text-gold font-semibold bg-gold/5'
+                ? 'text-primary font-semibold bg-primary/5'
                 : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
             ]">
 
@@ -69,16 +70,16 @@
                 'text-[10px] font-bold rounded-full',
                 'flex items-center justify-center leading-none',
                 isTabActive(tab)
-                  ? 'bg-gold text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-crimson text-white ring-2 ring-white'
               ]">
               {{ tab.badge }}
             </span>
 
-            <!-- 选中态下划线（金色） -->
+            <!-- 选中态下划线（品牌蓝） -->
             <span
               v-if="isTabActive(tab)"
-              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-gold rounded-full"></span>
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"></span>
           </router-link>
         </div>
       </div>

@@ -1,8 +1,8 @@
 /**
  * Lighthouse 性能基线配置
- * 
+ *
  * 用于CI/CD性能回归检测和开发环境性能监控
- * 
+ *
  * 使用方式:
  * - CI: npx lighthouse http://localhost:4173 --config-path=lighthouse.config.js
  * - 开发: npm run perf:audit
@@ -229,7 +229,7 @@ export function generateLighthouseConfig(): object {
     extends: 'lighthouse:default',
     settings: {
       onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-      formFactor: 'mobile',  // 移动端测试 (更严格)
+      formFactor: 'mobile', // 移动端测试 (更严格)
       screenEmulation: {
         mobile: true,
         width: 375,
@@ -288,7 +288,7 @@ export function auditMetric(
     }
   } else {
     const isLowerBetter = ['ms', 'bytes'].includes(baseline.unit)
-    
+
     if (isLowerBetter ? actualValue <= baseline.target : actualValue >= baseline.target) {
       status = 'pass'
       message = `✅ ${baseline.name}: ${formatValue(actualValue, baseline.unit)} (目标≤${formatValue(baseline.target, baseline.unit)})`
@@ -336,18 +336,18 @@ function calculateScore(baseline: PerformanceBaseline, actual: number): number {
   }
 
   const isLowerBetter = ['ms', 'bytes'].includes(baseline.unit)
-  
+
   if (isLowerBetter) {
     if (actual <= baseline.target) return 100
     if (actual >= baseline.warning) return 0
-    
+
     const range = baseline.warning - baseline.target
     const offset = actual - baseline.target
     return Math.round(100 - (offset / range) * 100)
   } else {
     if (actual >= baseline.target) return 100
     if (actual <= baseline.warning) return 0
-    
+
     const range = baseline.target - baseline.warning
     const offset = actual - baseline.warning
     return Math.round((offset / range) * 100)
@@ -373,7 +373,7 @@ export function calculateOverallScore(results: AuditResult[]): {
   const overallScore = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0
 
   let grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
-  
+
   if (overallScore >= 97) grade = 'A+'
   else if (overallScore >= 93) grade = 'A'
   else if (overallScore >= 83) grade = 'B'
@@ -392,20 +392,20 @@ export function calculateOverallScore(results: AuditResult[]): {
 export function generatePerformanceReport(results: AuditResult[]): string {
   const overall = calculateOverallScore(results)
 
-  let report = `# 📊 性能审计报告\n\n`
+  let report = '# 📊 性能审计报告\n\n'
   report += `**审计时间**: ${new Date().toLocaleString('zh-CN')}\n\n`
-  report += `## 🎯 综合评分\n\n`
+  report += '## 🎯 综合评分\n\n'
   report += `### ${overall.summary}\n\n`
 
-  report += `| 指标 | 实际值 | 目标值 | 状态 | 得分 |\n`
-  report += `|------|--------|--------|------|------|\n`
+  report += '| 指标 | 实际值 | 目标值 | 状态 | 得分 |\n'
+  report += '|------|--------|--------|------|------|\n'
 
   for (const result of results) {
     const icon = result.status === 'pass' ? '✅' : result.status === 'warning' ? '⚠️' : '❌'
     report += `| ${result.baseline.name} | ${formatValue(result.actual, result.baseline.unit)} | ${formatValue(result.baseline.target, result.baseline.unit)} | ${icon} ${result.status} | ${result.score}/100 |\n`
   }
 
-  report += `\n## 📈 详细分析\n\n`
+  report += '\n## 📈 详细分析\n\n'
 
   for (const result of results) {
     if (result.status !== 'pass') {
@@ -413,7 +413,7 @@ export function generatePerformanceReport(results: AuditResult[]): string {
       report += `- **状态**: ${result.status}\n`
       report += `- **实际值**: ${formatValue(result.actual, result.baseline.unit)}\n`
       report += `- **目标值**: ${formatValue(result.baseline.target, result.baseline.unit)}\n`
-      report += `- **建议**: \n\n`
+      report += '- **建议**: \n\n'
     }
   }
 

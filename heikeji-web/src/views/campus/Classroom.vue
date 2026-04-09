@@ -369,17 +369,12 @@ const rooms = computed(() => {
   if (campusStore.classrooms?.length) {
     return campusStore.classrooms.map(room => ({
       id: room.id,
-      number: room.number || room.name,
+      number: room.roomNumber,
       building: room.building || buildings[0],
-      floor: room.floor || 1,
-      type: room.type || 'normal',
+      type: room.type === 'lecture' ? 'normal' : room.type === 'lab' ? 'lab' : room.type === 'multimedia' ? 'multi' : 'normal',
       capacity: room.capacity || 45,
-      equipment: room.equipment || ['投影仪', '空调'],
-      location: room.location || '',
-      status: room.status || 'available',
-      availableSlots: room.availableSlots || [],
-      currentClass: room.currentClass,
-      freeAt: room.freeAt
+      equipment: room.facilities || ['投影仪', '空调'],
+      status: room.isAvailable ? 'available' : 'occupied'
     }))
   }
   return mockClassrooms

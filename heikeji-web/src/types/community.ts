@@ -7,20 +7,32 @@ export interface ForumPost {
   authorId: string
   authorName: string
   authorAvatar: string
+  authorBio?: string
+  authorPosts?: number
+  authorFollowers?: number
+  authorFollowing?: number
   boardId: string
   boardName: string
+  board?: string
   title: string
   content: string
+  excerpt?: string
+  tags?: string[]
+  contentBlocks?: Array<{ type: string; content: string; text?: string; src?: string }>
   images?: string[]
   views: number
   likes: number
+  likeCount?: number
   commentCount: number
+  comments?: number
   isTop: boolean
   isEssence: boolean
   status: PostStatus
   createdAt: string
+  publishTime?: string
   updatedAt: string
   lastReplyAt?: string
+  lastReplyTime?: string
 }
 
 export type PostStatus = 'normal' | 'hidden' | 'deleted' | 'auditing'

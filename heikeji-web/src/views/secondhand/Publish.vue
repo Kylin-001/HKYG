@@ -350,6 +350,7 @@ import {
   InfoFilled, Warning, Clock
 } from '@element-plus/icons-vue'
 import { useSecondhandStore } from '@/stores/secondhand'
+import type { PublishSecondhandRequest, UploadedImage, ItemCondition } from '@/types/secondhand'
 
 const router = useRouter()
 const secondhandStore = useSecondhandStore()
@@ -362,7 +363,7 @@ const images = ref<UploadedImage[]>([])
 const form = reactive({
   title: '',
   category: '',
-  condition: '',
+  condition: '' as ItemCondition | '',
   price: null as number | null,
   originalPrice: null as number | null,
   isNegotiable: false,
@@ -386,9 +387,9 @@ const categories = [
   { value: 'other', label: '其他', icon: '🎁' }
 ]
 
-const conditions = [
-  { value: 'brandNew', label: '全新', color: '#10b981' },
-  { value: 'likeNew', label: '几乎全新', color: '#3b82f6' },
+const conditions: { value: ItemCondition; label: string; color: string }[] = [
+  { value: 'brand_new', label: '全新', color: '#10b981' },
+  { value: 'like_new', label: '几乎全新', color: '#3b82f6' },
   { value: 'good', label: '良好', color: '#f59e0b' },
   { value: 'fair', label: '一般', color: '#9ca3af' }
 ]
@@ -427,7 +428,13 @@ function handleFiles(fileList: FileList) {
     }
 
     const url = URL.createObjectURL(file)
-    images.value.push({ url, file })
+    images.value.push({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      url,
+      name: file.name,
+      size: file.size,
+      file
+    })
   })
 }
 
@@ -475,11 +482,11 @@ async function handleSubmit() {
       price: form.price || 0,
       originalPrice: form.originalPrice || undefined,
       category: form.category,
-      condition: form.condition,
+      condition: form.condition as ItemCondition,
       isNegotiable: form.isNegotiable,
       images: images.value.map(img => img.url),
       location: `${form.area}${form.locationDetail}`,
-    })
+    } as PublishSecondhandRequest)
     ElMessage.success('发布成功！')
     router.push('/secondhand')
   } catch {

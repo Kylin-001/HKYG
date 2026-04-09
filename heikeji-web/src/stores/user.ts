@@ -12,15 +12,15 @@ export const useUserStore = defineStore('user', () => {
 
   // ====== Getters ======
   const isAuthenticated = computed(() => !!token.value && !!user.value)
-  
-  const userName = computed(() => 
+
+  const userName = computed(() =>
     user.value?.nickname || user.value?.username || '未登录用户'
   )
-  
-  const userAvatar = computed(() => 
+
+  const userAvatar = computed(() =>
     user.value?.avatar || '/default-avatar.png'
   )
-  
+
   const userId = computed(() => user.value?.id)
 
   // ====== Actions ======
@@ -32,16 +32,16 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
       error.value = null
-      
+
       const response = await userApi.login(loginData)
-      
+
       token.value = response.data.token
       user.value = response.data.user
-      
+
       // 持久化存储
       localStorage.setItem('token', token.value)
       localStorage.setItem('user', JSON.stringify(user.value))
-      
+
       return response.data
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
@@ -59,9 +59,9 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
       error.value = null
-      
+
       const response = await userApi.register(registerData)
-      
+
       return response.data
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
@@ -99,7 +99,7 @@ export const useUserStore = defineStore('user', () => {
    */
   async function fetchUserInfo() {
     if (!token.value) return
-    
+
     try {
       isLoading.value = true
       const response = await userApi.getUserInfo()
@@ -121,11 +121,11 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
       error.value = null
-      
+
       const response = await userApi.updateProfile(profileData)
       user.value = { ...user.value!, ...response.data }
       localStorage.setItem('user', JSON.stringify(user.value))
-      
+
       return response.data
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
@@ -143,12 +143,12 @@ export const useUserStore = defineStore('user', () => {
     try {
       isLoading.value = true
       const response = await userApi.uploadAvatar(file)
-      
+
       if (user.value) {
         user.value.avatar = response.data.url
         localStorage.setItem('user', JSON.stringify(user.value))
       }
-      
+
       return response.data
     } catch (err: unknown) {
       error.value = '上传头像失败'
@@ -179,7 +179,7 @@ export const useUserStore = defineStore('user', () => {
   function restoreSession() {
     const savedToken = localStorage.getItem('token')
     const savedUser = localStorage.getItem('user')
-    
+
     if (savedToken) {
       token.value = savedToken
       if (savedUser) {
@@ -205,13 +205,13 @@ export const useUserStore = defineStore('user', () => {
     token,
     isLoading,
     error,
-    
+
     // Getters
     isAuthenticated,
     userName,
     userAvatar,
     userId,
-    
+
     // Actions
     login,
     register,

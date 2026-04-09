@@ -111,7 +111,7 @@ export class RBACManager {
     const oldRole = this.currentRole
     this.currentRole = newRole
     this.listeners.forEach((listener) => listener(newRole))
-    
+
     console.log(`[RBAC] Role changed from ${oldRole} to ${newRole}`)
   }
 
@@ -188,7 +188,7 @@ export function usePermission() {
     } else if (role && globalRbacInstance.role !== role) {
       globalRbacInstance.role = role
     }
-    
+
     return globalRbacInstance
   }
 
@@ -217,8 +217,8 @@ export function usePermission() {
   }
 
   function isLoggedIn(): boolean {
-    return (globalRbacInstance?.hasRole('user') ?? false) || 
-           (globalRbacInstance?.hasRole('moderator') ?? false) || 
+    return (globalRbacInstance?.hasRole('user') ?? false) ||
+           (globalRbacInstance?.hasRole('moderator') ?? false) ||
            (globalRbacInstance?.hasRole('admin') ?? false)
   }
 

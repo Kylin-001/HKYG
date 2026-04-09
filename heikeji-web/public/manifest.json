@@ -1,1 +1,74 @@
-{"name": "黑科易购", "short_name": "黑科易购", "description": "黑龙江科技大学校园服务平台 - 一站式校园生活服务，涵盖商城、外卖、学工办理、缴费中心等", "start_url": "/", "display": "standalone", "background_color": "#F5F7FA", "theme_color": "#000AB0", "orientation": "portrait-primary", "scope": "/", "lang": "zh-CN", "categories": ["education", "shopping", "lifestyle"], "icons": [{"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable any"}], "shortcuts": [{"name": "商品列表", "short_name": "商品", "url": "/products", "description": "浏览校园商城商品", "icons": [{"src": "/favicon.svg", "sizes": "any"}]}, {"name": "外卖点餐", "short_name": "外卖", "url": "/takeout", "description": "校园外卖配送服务", "icons": [{"src": "/favicon.svg", "sizes": "any"}]}, {"name": "社区论坛", "short_name": "社区", "url": "/community/forum", "description": "校园社区交流平台", "icons": [{"src": "/favicon.svg", "sizes": "any"}]}, {"name": "学工办理", "short_name": "学工", "url": "/student-affairs", "description": "请假、助学金、校园卡等服务", "icons": [{"src": "/favicon.svg", "sizes": "any"}]}, {"name": "缴费中心", "short_name": "缴费", "url": "/payment", "description": "学费、住宿费缴纳与记录查询", "icons": [{"src": "/favicon.svg", "sizes": "any"}]}, {"name": "帮助中心", "short_name": "帮助", "url": "/help", "description": "常见问题与使用指南", "icons": [{"src": "/favicon.svg", "sizes": "any"}]}], "screenshots": [], "related_applications": [], "prefer_related_applications": false}
+{
+  "name": "黑科易购 - 黑龙江科技大学校园服务平台",
+  "short_name": "黑科易购",
+  "description": "黑龙江科技大学校园服务平台 - 一站式校园生活服务，涵盖商城、外卖、学工办理、缴费中心等",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F7FA",
+  "theme_color": "#000AB0",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "zh-CN",
+  "categories": ["education", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "商品列表",
+      "short_name": "商品",
+      "url": "/products",
+      "description": "浏览校园商城商品",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "外卖点餐",
+      "short_name": "外卖",
+      "url": "/takeout",
+      "description": "校园外卖配送服务",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "社区论坛",
+      "short_name": "社区",
+      "url": "/community/forum",
+      "description": "校园社区交流平台",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "学工办理",
+      "short_name": "学工",
+      "url": "/student-affairs",
+      "description": "请假、助学金、校园卡等服务",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "缴费中心",
+      "short_name": "缴费",
+      "url": "/payment",
+      "description": "学费、住宿费缴纳与记录查询",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "帮助中心",
+      "short_name": "帮助",
+      "url": "/help",
+      "description": "常见问题与使用指南",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

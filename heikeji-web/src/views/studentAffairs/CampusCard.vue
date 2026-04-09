@@ -290,7 +290,7 @@ onMounted(() => {
             <p class="text-4xl font-bold">¥{{ cardInfo.balance.toFixed(2) }}</p>
           </div>
           <div class="flex items-center gap-2">
-            <span :class="['px-3 py-1 rounded-full text-xs font-medium border border-white/30', cardStatusText.color.replace('bg-', 'bg-white/').replace('border-', 'border-white/').replace('text-', 'text-white')]">
+            <span class="px-3 py-1 rounded-full text-xs font-medium border border-white/30 text-white bg-white/20">
               {{ cardStatusText.text }}
             </span>
           </div>

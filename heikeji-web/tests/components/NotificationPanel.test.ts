@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
+import NotificationPanel from '@/components/global/NotificationPanel.vue'
+
 // Mock @element-plus/icons-vue
 vi.mock('@element-plus/icons-vue', () => ({
   Close: { template: '<svg class="icon-close"></svg>' },
 }))
-
-import NotificationPanel from '@/components/global/NotificationPanel.vue'
 
 describe('NotificationPanel.vue', () => {
   let wrapper: ReturnType<typeof mount>

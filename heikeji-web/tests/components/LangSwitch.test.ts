@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
+import LangSwitch from '@/components/LangSwitch.vue'
+
 // Mock vue-i18n
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key, locale: { value: 'zh-CN' } }),
@@ -26,8 +28,6 @@ vi.mock('@/locales', () => {
     ],
   }
 })
-
-import LangSwitch from '@/components/LangSwitch.vue'
 
 describe('LangSwitch.vue', () => {
   let wrapper: ReturnType<typeof mount>

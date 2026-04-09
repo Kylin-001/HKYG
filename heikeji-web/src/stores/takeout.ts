@@ -95,9 +95,20 @@ export const useTakeoutStore = defineStore('takeout', () => {
   }
 
   return {
-    merchants, merchantDetail, nearbyMerchants, hotMerchants,
-    deliveryTrack, myOrders, loading, error,
-    fetchMerchants, fetchMerchantDetail, fetchNearbyMerchants,
-    fetchHotMerchants, fetchDeliveryTrack, createOrder, fetchMyOrders,
+    merchants,
+    merchantDetail,
+    nearbyMerchants,
+    hotMerchants,
+    deliveryTrack,
+    myOrders,
+    loading,
+    error,
+    fetchMerchants,
+    fetchMerchantDetail,
+    fetchNearbyMerchants,
+    fetchHotMerchants,
+    fetchDeliveryTrack,
+    createOrder,
+    fetchMyOrders,
   }
 })

@@ -52,7 +52,7 @@ describe('useKeyboardShortcuts Composable', () => {
       ]
 
       const TestComponent = createTestComponent(shortcuts)
-      
+
       expect(() => mount(TestComponent)).not.toThrow()
     })
   })
@@ -173,12 +173,12 @@ describe('useKeyboardShortcuts Composable', () => {
     it('Ctrl+Shift+P应该触发对应处理器', () => {
       const handler = vi.fn()
       const shortcuts = [
-        { 
-          key: 'p', 
-          ctrl: true, 
-          shift: true, 
-          handler, 
-          description: '命令面板' 
+        {
+          key: 'p',
+          ctrl: true,
+          shift: true,
+          handler,
+          description: '命令面板'
         },
       ]
 
@@ -199,12 +199,12 @@ describe('useKeyboardShortcuts Composable', () => {
     it('缺少Shift不应该触发需要Shift的快捷键', () => {
       const handler = vi.fn()
       const shortcuts = [
-        { 
-          key: 'p', 
-          ctrl: true, 
-          shift: true, 
-          handler, 
-          description: '命令面板' 
+        {
+          key: 'p',
+          ctrl: true,
+          shift: true,
+          handler,
+          description: '命令面板'
         },
       ]
 
@@ -226,11 +226,11 @@ describe('useKeyboardShortcuts Composable', () => {
     it('Alt组合键应该工作', () => {
       const handler = vi.fn()
       const shortcuts = [
-        { 
-          key: 'f', 
-          alt: true, 
-          handler, 
-          description: '查找' 
+        {
+          key: 'f',
+          alt: true,
+          handler,
+          description: '查找'
         },
       ]
 
@@ -266,10 +266,10 @@ describe('useKeyboardShortcuts Composable', () => {
         shiftKey: false,
         altKey: false,
       }) as any
-      
+
       // 覆盖preventDefault来检测是否被调用
       event.preventDefault = () => { defaultPrevented = true }
-      
+
       window.dispatchEvent(event)
 
       expect(defaultPrevented).toBe(true)
@@ -292,9 +292,9 @@ describe('useKeyboardShortcuts Composable', () => {
         shiftKey: false,
         altKey: false,
       }) as any
-      
+
       event.preventDefault = () => { defaultPrevented = true }
-      
+
       window.dispatchEvent(event)
 
       expect(defaultPrevented).toBe(false)

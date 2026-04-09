@@ -1210,7 +1210,7 @@ onUnmounted(() => {
     <Teleport to="body">
       <Transition name="fade">
         <div
-          v-if="showLightbox"
+          v-if="showLightbox && product"
           class="lightbox-overlay"
           @click.self="closeLightbox"
           role="dialog"
@@ -1276,7 +1276,7 @@ onUnmounted(() => {
     <!-- ====== 移动端固定底部操作栏 ====== -->
     <Teleport to="body">
       <Transition name="slide-up">
-        <div v-if="showMobileActionBar" class="mobile-action-bar" role="complementary" aria-label="快捷操作">
+        <div v-if="showMobileActionBar && product" class="mobile-action-bar" role="complementary" aria-label="快捷操作">
           <div class="mobile-bar-left">
             <button class="mobile-tool-btn" @click="toggleFavorite" :aria-label="isFavorite ? '取消收藏' : '收藏'">
               <svg width="24" height="24" viewBox="0 0 24 24" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">

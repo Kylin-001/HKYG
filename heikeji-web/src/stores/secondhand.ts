@@ -89,8 +89,20 @@ export const useSecondhandStore = defineStore('secondhand', () => {
   }
 
   return {
-    list, currentItem, myItems, categories, total, loading, error,
-    fetchList, fetchDetail, publishItem, likeItem, unlikeItem,
-    deleteItem, fetchMyItems, fetchCategories,
+    list,
+    currentItem,
+    myItems,
+    categories,
+    total,
+    loading,
+    error,
+    fetchList,
+    fetchDetail,
+    publishItem,
+    likeItem,
+    unlikeItem,
+    deleteItem,
+    fetchMyItems,
+    fetchCategories,
   }
 })

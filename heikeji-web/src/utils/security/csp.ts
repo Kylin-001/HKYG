@@ -1,6 +1,6 @@
 /**
  * Content Security Policy (CSP) 配置
- * 
+ *
  * 用于防止XSS攻击、数据注入等安全威胁
  * 支持开发/生产环境不同严格程度
  */
@@ -52,7 +52,7 @@ export function generateNonce(): string {
  */
 export function getCurrentNonce(): string | null {
   if (typeof window === 'undefined') return null
-  
+
   const meta = document.querySelector('meta[name="csp-nonce"]')
   return meta?.getAttribute('content') || null
 }
@@ -62,15 +62,15 @@ export function getCurrentNonce(): string | null {
  */
 export function setNonceMeta(nonce: string): void {
   if (typeof document === 'undefined') return
-  
+
   let meta = document.querySelector('meta[name="csp-nonce"]')
-  
+
   if (!meta) {
     meta = document.createElement('meta')
     meta.setAttribute('name', 'csp-nonce')
     document.head.appendChild(meta)
   }
-  
+
   meta.setAttribute('content', nonce)
 }
 
@@ -130,13 +130,13 @@ export const PRODUCTION_CSP: CSPConfig = {
   ],
   'style-src': [
     "'self'",
-    "'unsafe-inline",  // CSS允许inline (框架限制)
+    "'unsafe-inline", // CSS允许inline (框架限制)
     'https://fonts.googleapis.com',
   ],
   'img-src': [
     "'self'",
-    'data:',           // base64图片
-    'blob:',           // blob URL
+    'data:', // base64图片
+    'blob:', // blob URL
     'https://cdn.yourdomain.com',
     '*.cloudfront.net',
   ],
@@ -154,7 +154,7 @@ export const PRODUCTION_CSP: CSPConfig = {
   'object-src': ["'none'"],
   'frame-src': [
     "'self'",
-    'https://www.youtube.com',  // 视频嵌入
+    'https://www.youtube.com', // 视频嵌入
   ],
   'worker-src': ["'self'"],
   'base-uri': ["'self'"],
@@ -171,15 +171,15 @@ export function buildCSPHeader(config: CSPConfig, nonce?: string): string {
 
   for (const [directive, sources] of Object.entries(config)) {
     if (directive === 'reportOnly' || directive === 'reportUri') continue
-    
+
     if (Array.isArray(sources) && sources.length > 0) {
       let sourceStr = sources.join(' ')
-      
+
       // 替换nonce占位符
       if (nonce && sourceStr.includes('${NONCE}')) {
         sourceStr = sourceStr.replace(/\${NONCE}/g, nonce)
       }
-      
+
       directives.push(`${directive} ${sourceStr}`)
     }
   }
@@ -187,7 +187,7 @@ export function buildCSPHeader(config: CSPConfig, nonce?: string): string {
   // 添加报告URI
   if (config.reportUri) {
     directives.push(`report-uri ${config.reportUri}`)
-    directives.push(`report-to csp-endpoint`)
+    directives.push('report-to csp-endpoint')
   }
 
   return directives.join('; ')
@@ -200,7 +200,7 @@ export function createCSPMetaTag(config: CSPConfig, nonce?: string): HTMLMetaEle
   const meta = document.createElement('meta')
   meta.httpEquiv = 'Content-Security-Policy'
   meta.content = buildCSPHeader(config, nonce)
-  
+
   return meta
 }
 

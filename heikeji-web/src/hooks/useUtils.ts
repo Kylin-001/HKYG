@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
-export function useDebounce<T extends (...args: any[]) => any>(fn: T, delay = 300): T {
+export function useDebounce<T extends(...args: any[]) => any>(fn: T, delay = 300): T {
   let timer: ReturnType<typeof setTimeout> | null = null
   return ((...args: any[]) => {
     if (timer) clearTimeout(timer)
@@ -8,7 +8,7 @@ export function useDebounce<T extends (...args: any[]) => any>(fn: T, delay = 30
   }) as unknown as T
 }
 
-export function useThrottle<T extends (...args: any[]) => any>(fn: T, limit = 200): T {
+export function useThrottle<T extends(...args: any[]) => any>(fn: T, limit = 200): T {
   let inThrottle = false
   return ((...args: any[]) => {
     if (!inThrottle) {

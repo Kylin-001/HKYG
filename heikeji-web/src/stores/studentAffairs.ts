@@ -172,12 +172,27 @@ export const useStudentAffairsStore = defineStore('studentAffairs', () => {
   }
 
   return {
-    leaveList, aidList, militaryOrders, campusCard,
-    rechargeRecords, aidPolicies, pendingTasks,
-    loading, error,
-    fetchPendingTasks, fetchLeaveApplications, submitLeave, cancelLeave,
-    fetchAidApplications, submitAid, fetchMilitaryOrders, submitMilitaryOrder,
-    fetchCampusCard, rechargeCard, reportLost, fetchRechargeRecords,
+    leaveList,
+    aidList,
+    militaryOrders,
+    campusCard,
+    rechargeRecords,
+    aidPolicies,
+    pendingTasks,
+    loading,
+    error,
+    fetchPendingTasks,
+    fetchLeaveApplications,
+    submitLeave,
+    cancelLeave,
+    fetchAidApplications,
+    submitAid,
+    fetchMilitaryOrders,
+    submitMilitaryOrder,
+    fetchCampusCard,
+    rechargeCard,
+    reportLost,
+    fetchRechargeRecords,
     fetchAidPolicies
   }
 })

@@ -1,9 +1,9 @@
 /**
  * 黑科大商城 - Mock 数据管理器
- * 
+ *
  * 本文件提供完整的开发环境模拟数据，包含所有业务模块
  * 使用场景：前端开发、测试、演示
- * 
+ *
  * 注意：生产环境请移除此文件或禁用 mock 拦截器
  */
 
@@ -320,7 +320,7 @@ function paginate<T>(data: T[], page: number, pageSize: number): PageResult<T> {
   const totalPages = Math.ceil(total / pageSize)
   const startIndex = (page - 1) * pageSize
   const list = data.slice(startIndex, startIndex + pageSize)
-  
+
   return {
     list,
     total,
@@ -1891,7 +1891,7 @@ const activities: Activity[] = [
 
 export default [
   // ==================== 商品相关接口 ====================
-  
+
   /**
    * 获取商品分类列表
    * GET /api/categories
@@ -1950,22 +1950,6 @@ export default [
   },
 
   /**
-   * 获取商品详情
-   * GET /api/products/:id
-   */
-  {
-    url: '/api/products/:id',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const product = products.find(p => p.id === query.id)
-      if (!product) {
-        return { code: 404, message: '商品不存在', data: null, timestamp: Date.now() }
-      }
-      return successResponse(product)
-    }
-  },
-
-  /**
    * 获取推荐商品
    * GET /api/products/recommend?limit=10
    */
@@ -1994,6 +1978,48 @@ export default [
         .sort((a, b) => b.sales - a.sales)
         .slice(0, limit)
       return successResponse(hotProducts)
+    }
+  },
+
+  /**
+   * 获取商品搜索
+   * GET /api/products/search?keyword=xxx
+   */
+  {
+    url: '/api/products/search',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const keyword = query.keyword?.toLowerCase()
+      const page = parseInt(query.page || '1')
+      const pageSize = parseInt(query.pageSize || '10')
+      let filteredProducts = [...products]
+      if (keyword) {
+        filteredProducts = filteredProducts.filter(p =>
+          p.name.toLowerCase().includes(keyword) ||
+          p.description.toLowerCase().includes(keyword) ||
+          p.tags.some(t => t.toLowerCase().includes(keyword))
+        )
+      }
+      return successResponse(paginate(filteredProducts, page, pageSize))
+    }
+  },
+
+  /**
+   * 获取商品详情
+   * GET /api/products/:id
+   */
+  {
+    url: /\/api\/products\/(\w+)/,
+    method: 'get',
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/products\/(\w+)/)
+      const id = match ? match[1] : ''
+      const product = products.find(p => p.id === id)
+      if (!product) {
+        return { code: 404, message: '商品不存在', data: null, timestamp: Date.now() }
+      }
+      return successResponse(product)
     }
   },
 
@@ -2027,10 +2053,13 @@ export default [
    * GET /api/orders/:id
    */
   {
-    url: '/api/orders/:id',
+    url: /\/api\/orders\/(\w+)$/,
     method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const order = orders.find(o => o.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/orders\/(\w+)$/)
+      const id = match ? match[1] : ''
+      const order = orders.find(o => o.id === id)
       if (!order) {
         return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
       }
@@ -2073,10 +2102,13 @@ export default [
    * PUT /api/orders/:id/cancel
    */
   {
-    url: '/api/orders/:id/cancel',
+    url: /\/api\/orders\/(\w+)\/cancel$/,
     method: 'put',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const order = orders.find(o => o.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/orders\/(\w+)\/cancel$/)
+      const id = match ? match[1] : ''
+      const order = orders.find(o => o.id === id)
       if (!order) {
         return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
       }
@@ -2094,10 +2126,13 @@ export default [
    * PUT /api/orders/:id/confirm
    */
   {
-    url: '/api/orders/:id/confirm',
+    url: /\/api\/orders\/(\w+)\/confirm$/,
     method: 'put',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const order = orders.find(o => o.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/orders\/(\w+)\/confirm$/)
+      const id = match ? match[1] : ''
+      const order = orders.find(o => o.id === id)
       if (!order) {
         return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
       }
@@ -2191,10 +2226,12 @@ export default [
    * PUT /api/cart/:id
    */
   {
-    url: '/api/cart/:id',
+    url: /\/api\/cart\/(\w+)$/,
     method: 'put',
-    response: ({ query, body }: { query: Record<string, string>; body: any }) => {
-      const item = cartItems.find(i => i.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/cart\/(\w+)$/); const id = match ? match[1] : ''
+      const { body } = config
+      const item = cartItems.find(i => i.id === id)
       if (!item) {
         return { code: 404, message: '购物车项不存在', data: null, timestamp: Date.now() }
       }
@@ -2211,10 +2248,11 @@ export default [
    * DELETE /api/cart/:id
    */
   {
-    url: '/api/cart/:id',
+    url: /\/api\/cart\/(\w+)$/,
     method: 'delete',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const index = cartItems.findIndex(i => i.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/cart\/(\w+)$/); const id = match ? match[1] : ''
+      const index = cartItems.findIndex(i => i.id === id)
       if (index === -1) {
         return { code: 404, message: '购物车项不存在', data: null, timestamp: Date.now() }
       }
@@ -2308,20 +2346,22 @@ export default [
    * PUT /api/user/addresses/:id
    */
   {
-    url: '/api/user/addresses/:id',
+    url: /\/api\/user\/addresses\/(\w+)$/,
     method: 'put',
-    response: ({ query, body }: { query: Record<string, string>; body: any }) => {
-      const address = addresses.find(a => a.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/user\/addresses\/(\w+)$/); const id = match ? match[1] : ''
+      const { body } = config
+      const address = addresses.find(a => a.id === id)
       if (!address) {
         return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
       }
       Object.assign(address, body, {
         fullAddress: `${body.province || address.province}${body.city || address.city}${body.district || address.district}${body.detail || address.detail}`
       })
-      
+
       if (body.isDefault) {
         addresses.forEach(addr => {
-          if (addr.id !== query.id) addr.isDefault = false
+          if (addr.id !== id) addr.isDefault = false
         })
       }
 
@@ -2334,10 +2374,11 @@ export default [
    * DELETE /api/user/addresses/:id
    */
   {
-    url: '/api/user/addresses/:id',
+    url: /\/api\/user\/addresses\/(\w+)$/,
     method: 'delete',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const index = addresses.findIndex(a => a.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/user\/addresses\/(\w+)$/); const id = match ? match[1] : ''
+      const index = addresses.findIndex(a => a.id === id)
       if (index === -1) {
         return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
       }
@@ -2351,10 +2392,11 @@ export default [
    * PUT /api/user/addresses/:id/default
    */
   {
-    url: '/api/user/addresses/:id/default',
+    url: /\/api\/user\/addresses\/(\w+)\/default$/,
     method: 'put',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const address = addresses.find(a => a.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/user\/addresses\/(\w+)\/default$/); const id = match ? match[1] : ''
+      const address = addresses.find(a => a.id === id)
       if (!address) {
         return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
       }
@@ -2411,14 +2453,15 @@ export default [
    * GET /api/delivery/merchants/:id
    */
   {
-    url: '/api/delivery/merchants/:id',
+    url: /\/api\/delivery\/merchants\/(\w+)$/,
     method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const merchant = merchants.find(m => m.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/delivery\/merchants\/(\w+)$/); const id = match ? match[1] : ''
+      const merchant = merchants.find(m => m.id === id)
       if (!merchant) {
         return { code: 404, message: '商家不存在', data: null, timestamp: Date.now() }
       }
-      const dishes = dishesTemplate[query.id] || []
+      const dishes = dishesTemplate[id] || []
       return successResponse({ merchant, dishes })
     }
   },
@@ -2520,10 +2563,11 @@ export default [
    * GET /api/secondhand/items/:id
    */
   {
-    url: '/api/secondhand/items/:id',
+    url: /\/api\/secondhand\/items\/(\w+)$/,
     method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const item = secondHandItems.find(i => i.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/secondhand\/items\/(\w+)$/); const id = match ? match[1] : ''
+      const item = secondHandItems.find(i => i.id === id)
       if (!item) {
         return { code: 404, message: '物品不存在', data: null, timestamp: Date.now() }
       }
@@ -2628,10 +2672,11 @@ export default [
    * GET /api/forum/posts/:id
    */
   {
-    url: '/api/forum/posts/:id',
+    url: /\/api\/forum\/posts\/(\w+)$/,
     method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const post = forumPosts.find(p => p.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/forum\/posts\/(\w+)$/); const id = match ? match[1] : ''
+      const post = forumPosts.find(p => p.id === id)
       if (!post) {
         return { code: 404, message: '帖子不存在', data: null, timestamp: Date.now() }
       }
@@ -2670,7 +2715,7 @@ export default [
         updatedAt: new Date().toISOString()
       }
       forumPosts.unshift(newPost)
-      
+
       // 更新板块帖子数
       if (board) {
         board.postCount++
@@ -2686,10 +2731,11 @@ export default [
    * POST /api/forum/posts/:id/like
    */
   {
-    url: '/api/forum/posts/:id/like',
+    url: /\/api\/forum\/posts\/(\w+)\/like$/,
     method: 'post',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const post = forumPosts.find(p => p.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/forum\/posts\/(\w+)\/like$/); const id = match ? match[1] : ''
+      const post = forumPosts.find(p => p.id === id)
       if (!post) {
         return { code: 404, message: '帖子不存在', data: null, timestamp: Date.now() }
       }
@@ -2739,10 +2785,11 @@ export default [
    * GET /api/activities/:id
    */
   {
-    url: '/api/activities/:id',
+    url: /\/api\/activities\/(\w+)$/,
     method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const activity = activities.find(a => a.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/activities\/(\w+)$/); const id = match ? match[1] : ''
+      const activity = activities.find(a => a.id === id)
       if (!activity) {
         return { code: 404, message: '活动不存在', data: null, timestamp: Date.now() }
       }
@@ -2755,10 +2802,11 @@ export default [
    * POST /api/activities/:id/register
    */
   {
-    url: '/api/activities/:id/register',
+    url: /\/api\/activities\/(\w+)\/register$/,
     method: 'post',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const activity = activities.find(a => a.id === query.id)
+    response: (config: any) => {
+      const url = config.url as string; const match = url.match(/\/api\/activities\/(\w+)\/register$/); const id = match ? match[1] : ''
+      const activity = activities.find(a => a.id === id)
       if (!activity) {
         return { code: 404, message: '活动不存在', data: null, timestamp: Date.now() }
       }
@@ -2766,7 +2814,7 @@ export default [
         return { code: 400, message: '名额已满', data: null, timestamp: Date.now() }
       }
       activity.currentParticipants++
-      
+
       // 模拟添加报名者
       if (!activity.registrants) {
         activity.registrants = []
@@ -2819,16 +2867,16 @@ export default [
           { id: 2, image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop', title: '春季运动会报名中', link: '/activities/act1' },
           { id: 3, image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&h=400&fit=crop', title: '数码产品限时折扣', link: '/products?category=cat1' }
         ],
-        
+
         // 热门商品
         hotProducts: products.slice(0, 8),
-        
+
         // 推荐商家
         recommendMerchants: merchants.slice(0, 4),
-        
+
         // 最新帖子
         latestPosts: forumPosts.slice(0, 5),
-        
+
         // 即将开始的活动
         upcomingActivities: activities
           .filter(a => a.status === 'upcoming')
@@ -2859,7 +2907,7 @@ export default [
         return successResponse({ results: [], total: 0 })
       }
 
-      let results: any[] = []
+      const results: any[] = []
 
       // 搜索商品
       if (!type || type === 'product') {
@@ -2925,7 +2973,7 @@ export default [
           user: { ...currentUser, role: 'admin', nickname: '管理员' }
         })
       }
-      
+
       // 默认返回普通用户
       return successResponse({
         token: 'mock-user-token-' + Date.now(),
@@ -2989,9 +3037,9 @@ export default [
    * PUT /api/notifications/:id/read
    */
   {
-    url: '/api/notifications/:id/read',
+    url: /\/api\/notifications\/(\w+)\/read$/,
     method: 'put',
-    response: () => {
+    response: (config: any) => {
       return successResponse({ message: '已标记为已读' })
     }
   },

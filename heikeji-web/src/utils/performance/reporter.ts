@@ -6,6 +6,7 @@
 
 import { performanceBudget } from '@/config/performance.config'
 import type { PerformanceMetric } from './monitor'
+import { perfMonitor } from './monitor'
 
 /** 性能数据上报格式 */
 export interface PerformanceData {
@@ -392,8 +393,6 @@ export const perfReporter = new PerformanceReporter()
  * 当监控器收集到新指标时自动上报
  */
 export function connectMonitorToReporter(): void {
-  const { perfMonitor } = require('./monitor')
-
   perfMonitor.onMetric((metric: PerformanceMetric) => {
     perfReporter.addMetric(metric)
   })

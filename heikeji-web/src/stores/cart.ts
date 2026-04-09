@@ -348,7 +348,7 @@ export const useCartStore = defineStore('cart', () => {
     // 记录撤销信息
     pushUndoStack('add', [newItem])
 
-    let res: any = undefined
+    let res: any
 
     try {
       // 尝试立即同步

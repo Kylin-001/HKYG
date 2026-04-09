@@ -1,12 +1,13 @@
 <template>
   <!-- ============================================
        社区论坛布局 - Design System v3.0
-       品牌头部 + 功能标签导航 + 主内容区
+       品牌头部（蓝紫色调和）+ 功能标签导航 + 主内容区
+       UI优化: 统一使用科大蓝主色系，融入紫色体现社交创意属性
        ============================================ -->
   <div class="min-h-screen">
 
-    <!-- ====== 品牌头部区域（金色主题）====== -->
-    <header class="relative overflow-hidden bg-gradient-to-r from-gold via-gold-light to-gold-pale">
+    <!-- ====== 品牌头部区域（蓝紫调和）====== -->
+    <header class="relative overflow-hidden bg-gradient-to-r from-[#002D6B] via-[#4A3B9E] to-[#6B5BC7]">
       <!-- 装饰性背景 -->
       <div class="absolute top-0 right-0 w-56 h-56 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
 
@@ -34,18 +35,18 @@
               'relative flex items-center gap-1.5 px-4 py-3.5',
               'text-sm font-medium whitespace-nowrap rounded-t-lg',
               'transition-all duration-200 ease-out',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
               isTabActive(tab)
-                ? 'text-gold font-semibold bg-gold/5'
+                ? 'text-primary font-semibold bg-primary/5'
                 : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
             ]">
             <span class="text-base">{{ tab.icon }}</span>
             <span>{{ tab.label }}</span>
 
-            <!-- 选中态下划线（金色） -->
+            <!-- 选中态下划线（品牌蓝） -->
             <span
               v-if="isTabActive(tab)"
-              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-gold rounded-full"></span>
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"></span>
           </router-link>
         </div>
       </div>

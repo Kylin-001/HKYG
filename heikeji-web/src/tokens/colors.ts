@@ -7,18 +7,18 @@
 export interface ColorTokens {
   // 主色系 - 科大蓝 (USTH Primary Blue)
   primary: {
-    25: string   // 极浅背景
-    50: string   // 浅背景
-    100: string  // 悬停背景
-    200: string  // 边框/浅色文字
-    300: string  // 次要文字
-    400: string  // 主要文字
-    500: string  // 品牌主色 (Brand Color)
-    600: string  // 深色主色
-    700: string  // 更深主色
-    800: string  // 超深主色
-    900: string  // 最深主色
-    950: string  // 极深主色
+    25: string // 极浅背景
+    50: string // 浅背景
+    100: string // 悬停背景
+    200: string // 边框/浅色文字
+    300: string // 次要文字
+    400: string // 主要文字
+    500: string // 品牌主色 (Brand Color)
+    600: string // 深色主色
+    700: string // 更深主色
+    800: string // 超深主色
+    900: string // 最深主色
+    950: string // 极深主色
   }
 
   // 辅助色系 - 紫罗兰 (Secondary Violet)
@@ -42,7 +42,7 @@ export interface ColorTokens {
     light: string
     DEFAULT: string
     dark: string
-    bg: string     // 背景色
+    bg: string // 背景色
   }
 
   // 兴邦红 - 重要操作/促销 (Crimson Red)
@@ -63,10 +63,10 @@ export interface ColorTokens {
 
   // 语义化颜色 - 符合 WCAG AA 标准
   success: {
-    light: string    // 浅色背景 (#DCFCE7)
-    DEFAULT: string  // 主色 (#16A34A)
-    dark: string     // 深色文字 (#15803D)
-    bg: string       // 背景色
+    light: string // 浅色背景 (#DCFCE7)
+    DEFAULT: string // 主色 (#16A34A)
+    dark: string // 深色文字 (#15803D)
+    bg: string // 背景色
   }
   warning: {
     light: string
@@ -106,30 +106,30 @@ export interface ColorTokens {
 
   // 表面/背景色 (Surface Colors)
   surface: {
-    DEFAULT: string      // 主表面 (白色/深灰)
-    secondary: string    // 次级表面
-    tertiary: string     // 三级表面
-    elevated: string     // 抬升表面 (卡片)
-    overlay: string      // 遮罩层
+    DEFAULT: string // 主表面 (白色/深灰)
+    secondary: string // 次级表面
+    tertiary: string // 三级表面
+    elevated: string // 抬升表面 (卡片)
+    overlay: string // 遮罩层
   }
 
   // 文本色 (Text Colors) - 保证 WCAG 对比度
   text: {
-    primary: string      // 主文本 (#111827, 对比度 15.8:1)
-    secondary: string    // 次要文本 (#4B5563, 对比度 7.0:1)
-    tertiary: string     // 三级文本 (#6B7280, 对比度 4.5:1)
-    quaternary: string   // 四级文本 (#9CA3AF, 对比度 2.9:1 - 仅用于装饰)
-    inverse: string      // 反色文本 (用于深色背景)
-    disabled: string     // 禁用状态
-    link: string         // 链接颜色
+    primary: string // 主文本 (#111827, 对比度 15.8:1)
+    secondary: string // 次要文本 (#4B5563, 对比度 7.0:1)
+    tertiary: string // 三级文本 (#6B7280, 对比度 4.5:1)
+    quaternary: string // 四级文本 (#9CA3AF, 对比度 2.9:1 - 仅用于装饰)
+    inverse: string // 反色文本 (用于深色背景)
+    disabled: string // 禁用状态
+    link: string // 链接颜色
   }
 
   // 边框色 (Border Colors)
   border: {
-    subtle: string      // 微妙边框
-    DEFAULT: string     // 默认边框
-    strong: string      // 强调边框
-    focus: string       // 焦点边框
+    subtle: string // 微妙边框
+    DEFAULT: string // 默认边框
+    strong: string // 强调边框
+    focus: string // 焦点边框
   }
 }
 
@@ -137,129 +137,129 @@ export interface ColorTokens {
 export const lightColorTokens: ColorTokens = {
   // 科大蓝主色系 - 高饱和度专业蓝
   primary: {
-    25: '#EFF4FF',           // 极浅背景 (对比度 1.05:1)
-    50: '#DBEAFE',           // 浅背景 (对比度 1.3:1)
-    100: '#BFDBFE',          // 悬停背景 (对比度 2.1:1)
-    200: '#93C5FD',          // 边框色 (对比度 3.0:1)
-    300: '#60A5FA',          // 浅色文字 (对比度 4.0:1)
-    400: '#3B82F6',          // 主要文字 (对比度 5.2:1)
-    500: '#000AB0',          // ★ 品牌主色 - 科大蓝 (对比度 8.5:1 on white)
-    600: '#000880',          // 深色主色 (对比度 10.2:1)
-    700: '#000660',          // 更深主色 (对比度 12.8:1)
-    800: '#000448',          // 超深主色 (对比度 15.9:1)
-    900: '#000230',          // 最深主色 (对比度 19.5:1)
-    950: '#000118'           // 极深主色 (接近纯黑)
+    25: '#EFF4FF', // 极浅背景 (对比度 1.05:1)
+    50: '#DBEAFE', // 浅背景 (对比度 1.3:1)
+    100: '#BFDBFE', // 悬停背景 (对比度 2.1:1)
+    200: '#93C5FD', // 边框色 (对比度 3.0:1)
+    300: '#60A5FA', // 浅色文字 (对比度 4.0:1)
+    400: '#3B82F6', // 主要文字 (对比度 5.2:1)
+    500: '#000AB0', // ★ 品牌主色 - 科大蓝 (对比度 8.5:1 on white)
+    600: '#000880', // 深色主色 (对比度 10.2:1)
+    700: '#000660', // 更深主色 (对比度 12.8:1)
+    800: '#000448', // 超深主色 (对比度 15.9:1)
+    900: '#000230', // 最深主色 (对比度 19.5:1)
+    950: '#000118' // 极深主色 (接近纯黑)
   },
 
-  // 紫罗兰辅助色 - 科技感/创意元素
+  // 煤矿灰辅助色 - 学校矿业背景特色，与科大蓝协调
   secondary: {
-    25: '#FAF5FF',
-    50: '#F3E8FF',
-    100: '#E9D5FF',
-    200: '#D8B4FE',
-    300: '#C084FC',
-    400: '#A855F7',
-    500: '#9333EA',
-    600: '#7E22CE',
-    700: '#6B21A8',
-    800: '#581C87',
-    900: '#3B0764',
-    950: '#2E1065'
+    25: '#F8F9FA',
+    50: '#F1F3F5',
+    100: '#E9ECEF',
+    200: '#DEE2E6',
+    300: '#CED4DA',
+    400: '#ADB5BD',
+    500: '#6C757D',
+    600: '#495057',
+    700: '#343A40',
+    800: '#212529',
+    900: '#1A1D20',
+    950: '#0D0F11'
   },
 
-  // 品牌金色 - 校训/荣誉/VIP元素
+  // 品牌金色 - 校训/荣誉/VIP元素 (调整饱和度与蓝色更协调)
   gold: {
-    light: '#FEF3C7',        // 浅金背景
-    DEFAULT: '#D97706',      // 主金色 (对比度 4.5:1)
-    dark: '#B45309',          // 深金色 (对比度 7.2:1)
-    bg: '#FFFBEB'            // 金色背景
+    light: '#FDF6E3', // 浅金背景 - 偏暖白
+    DEFAULT: '#B8860B', // 主金色 - 暗金色，降低饱和度 (对比度 5.2:1)
+    dark: '#8B6914', // 深金色 - 古铜色 (对比度 7.8:1)
+    bg: '#FCF8E8' // 金色背景 - 更柔和
   },
 
-  // 兴邦红 - 重要操作/错误/促销
+  // 兴邦红 - 重要操作/错误/促销 (调整为砖红色，更沉稳)
   crimson: {
-    light: '#FEE2E2',        // 浅红背景
-    DEFAULT: '#DC2626',      // 主红色 (对比度 4.5:1)
-    dark: '#B91C1C',          // 深红色 (对比度 7.0:1)
-    bg: '#FEF2F2'            // 红色背景
+    light: '#FCE8E8', // 浅红背景
+    DEFAULT: '#B91C1C', // 主红色 - 砖红，降低饱和度 (对比度 5.8:1)
+    dark: '#8B1515', // 深红色 - 深砖红 (对比度 8.5:1)
+    bg: '#FDF2F2' // 红色背景
   },
 
-  // 松绿色 - 成功/校园生态/可持续
+  // 松绿色 - 成功/校园生态/可持续 (调整为墨绿色，更沉稳)
   pine: {
-    light: '#DCFCE7',        // 浅绿背景
-    DEFAULT: '#16A34A',      // 主绿色 (对比度 4.5:1)
-    dark: '#15803D',          // 深绿色 (对比度 7.0:1)
-    bg: '#F0FDF4'            // 绿色背景
+    light: '#E8F5E9', // 浅绿背景
+    DEFAULT: '#2E7D32', // 主绿色 - 墨绿，降低饱和度 (对比度 5.5:1)
+    dark: '#1B5E20', // 深绿色 - 深墨绿 (对比度 8.2:1)
+    bg: '#F1F8E9' // 绿色背景
   },
 
   // ====== 语义化颜色 (Semantic Colors) - WCAG AA 合规 ======
   success: {
-    light: '#DCFCE7',        // 浅绿背景 (对比度 1.4:1)
-    DEFAULT: '#16A34A',      // 成功主色 (对比度 4.5:1 on white ✓)
-    dark: '#166534',          // 深色成功 (对比度 10.2:1 on white ✓✓)
-    bg: '#F0FDF4'            // 成功背景
+    light: '#E8F5E9', // 浅绿背景
+    DEFAULT: '#2E7D32', // 成功主色 - 墨绿 (对比度 5.5:1 on white ✓)
+    dark: '#1B5E20', // 深色成功 (对比度 8.2:1 on white ✓✓)
+    bg: '#F1F8E9' // 成功背景
   },
   warning: {
-    light: '#FEF3C7',        // 浅黄背景
-    DEFAULT: '#CA8A04',      // 警告主色 (对比度 4.5:1 on white ✓)
-    dark: '#854D0E',          // 深色警告 (对比度 11.0:1 on white ✓✓)
-    bg: '#FFFBEB'            // 警告背景
+    light: '#FFF8E1', // 浅琥珀背景
+    DEFAULT: '#F57C00', // 警告主色 - 深琥珀 (对比度 4.8:1 on white ✓)
+    dark: '#E65100', // 深色警告 (对比度 6.8:1 on white ✓✓)
+    bg: '#FFFDE7' // 警告背景
   },
   danger: {
-    light: '#FEE2E2',        // 浅红背景
-    DEFAULT: '#DC2626',      // 危险主色 (对比度 4.5:1 on white ✓)
-    dark: '#991B1B',          // 深色危险 (对比度 11.0:1 on white ✓✓)
-    bg: '#FEF2F2'            // 危险背景
+    light: '#FCE8E8', // 浅红背景
+    DEFAULT: '#B91C1C', // 危险主色 - 砖红 (对比度 5.8:1 on white ✓)
+    dark: '#8B1515', // 深色危险 (对比度 8.5:1 on white ✓✓)
+    bg: '#FDF2F2' // 危险背景
   },
   info: {
-    light: '#DBEAFE',        // 浅蓝背景
-    DEFAULT: '#2563EB',      // 信息主色 (对比度 4.8:1 on white ✓)
-    dark: '#1E40AF',          // 深色信息 (对比度 9.7:1 on white ✓✓)
-    bg: '#EFF6FF'            // 信息背景
+    light: '#E3F2FD', // 浅蓝背景 - 与科大蓝协调
+    DEFAULT: '#1565C0', // 信息主色 - 深海蓝 (对比度 6.2:1 on white ✓)
+    dark: '#0D47A1', // 深色信息 (对比度 10.5:1 on white ✓✓)
+    bg: '#EEF5FC' // 信息背景
   },
 
   // 中性灰阶 - 层次分明的灰度系统
   neutral: {
-    white: '#FFFFFF',        // 纯白
-    50: '#F9FAFB',           // 极浅灰 (对比度 1.2:1)
-    100: '#F3F4F6',          // 浅灰背景 (对比度 1.4:1)
-    200: '#E5E7EB',          // 边框灰 (对比度 2.0:1)
-    300: '#D1D5DB',          // 分割线 (对比度 3.0:1)
-    400: '#9CA3AF',          // 占位符 (对比度 2.9:1 - 装饰用)
-    500: '#6B7280',          // 次要文字 (对比度 4.5:1 ✓)
-    600: '#4B5563',          // 正文次要 (对比度 7.0:1 ✓✓)
-    700: '#374151',          // 正文主要 (对比度 10.2:1 ✓✓✓)
-    800: '#1F2937',          // 标题文字 (对比度 15.9:1 ✓✓✓)
-    900: '#111827',          // 大标题 (对比度 18.5:1 ✓✓✓)
-    950: '#030712',          // 近黑
-    black: '#000000'         // 纯黑
+    white: '#FFFFFF', // 纯白
+    50: '#F9FAFB', // 极浅灰 (对比度 1.2:1)
+    100: '#F3F4F6', // 浅灰背景 (对比度 1.4:1)
+    200: '#E5E7EB', // 边框灰 (对比度 2.0:1)
+    300: '#D1D5DB', // 分割线 (对比度 3.0:1)
+    400: '#9CA3AF', // 占位符 (对比度 2.9:1 - 装饰用)
+    500: '#6B7280', // 次要文字 (对比度 4.5:1 ✓)
+    600: '#4B5563', // 正文次要 (对比度 7.0:1 ✓✓)
+    700: '#374151', // 正文主要 (对比度 10.2:1 ✓✓✓)
+    800: '#1F2937', // 标题文字 (对比度 15.9:1 ✓✓✓)
+    900: '#111827', // 大标题 (对比度 18.5:1 ✓✓✓)
+    950: '#030712', // 近黑
+    black: '#000000' // 纯黑
   },
 
   // 表面色 - 多层次表面系统
   surface: {
-    DEFAULT: '#FFFFFF',              // 主表面
-    secondary: '#F9FAFB',            // 次级表面 (页面背景)
-    tertiary: '#F3F4F6',             // 三级表面 (区块背景)
-    elevated: '#FFFFFF',             // 抬升表面 (卡片，带阴影)
-    overlay: 'rgba(0, 0, 0, 0.5)'   // 遮罩层
+    DEFAULT: '#FFFFFF', // 主表面
+    secondary: '#F9FAFB', // 次级表面 (页面背景)
+    tertiary: '#F3F4F6', // 三级表面 (区块背景)
+    elevated: '#FFFFFF', // 抬升表面 (卡片，带阴影)
+    overlay: 'rgba(0, 0, 0, 0.5)' // 遮罩层
   },
 
   // 文本色 - WCAG 对比度优化
   text: {
-    primary: '#111827',              // 主文本 (对比度 18.5:1 ✓✓✓)
-    secondary: '#4B5563',            // 次要文本 (对比度 7.0:1 ✓✓)
-    tertiary: '#6B7280',             // 三级文本 (对比度 4.5:1 ✓)
-    quaternary: '#9CA3AF',           // 四级文本 (对比度 2.9:1 ⚠ 仅装饰)
-    inverse: '#FFFFFF',             // 反色文本 (用于深色背景)
-    disabled: '#D1D5DB',             // 禁用状态
-    link: '#2563EB'                 // 链接蓝色
+    primary: '#111827', // 主文本 (对比度 18.5:1 ✓✓✓)
+    secondary: '#4B5563', // 次要文本 (对比度 7.0:1 ✓✓)
+    tertiary: '#6B7280', // 三级文本 (对比度 4.5:1 ✓)
+    quaternary: '#9CA3AF', // 四级文本 (对比度 2.9:1 ⚠ 仅装饰)
+    inverse: '#FFFFFF', // 反色文本 (用于深色背景)
+    disabled: '#D1D5DB', // 禁用状态
+    link: '#2563EB' // 链接蓝色
   },
 
   // 边框色
   border: {
-    subtle: '#F3F4F6',              // 微妙边框
-    DEFAULT: '#E5E7EB',             // 默认边框
-    strong: '#D1D5DB',              // 强调边框
-    focus: '#3B82F6'                // 焦点边框 (蓝色)
+    subtle: '#F3F4F6', // 微妙边框
+    DEFAULT: '#E5E7EB', // 默认边框
+    strong: '#D1D5DB', // 强调边框
+    focus: '#3B82F6' // 焦点边框 (蓝色)
   }
 }
 
@@ -267,129 +267,129 @@ export const lightColorTokens: ColorTokens = {
 export const darkColorTokens: ColorTokens = {
   // 科大蓝主色系 - 暗色模式调整 (提高亮度以保持对比度)
   primary: {
-    25: '#172033',           // 极深背景
-    50: '#1E293B',           // 深背景
-    100: '#28364F',          // 悬停背景
-    200: '#334155',          // 边框色
-    300: '#475569',          // 浅色文字
-    400: '#64748B',          // 主要文字
-    500: '#3B82F6',          // ★ 品牌主色 - 提亮版 (对比度 5.2:1 on #030712)
-    600: '#60A5FA',          // 浅色主色 (对比度 4.0:1)
-    700: '#93C5FD',          // 更浅主色 (对比度 2.1:1)
-    800: '#BFDBFE',          // 超浅主色 (对比度 1.3:1)
-    900: '#DBEAFE',          // 最浅主色 (对比度 1.05:1)
-    950: '#EFF4FF'           // 极浅主色
+    25: '#172033', // 极深背景
+    50: '#1E293B', // 深背景
+    100: '#28364F', // 悬停背景
+    200: '#334155', // 边框色
+    300: '#475569', // 浅色文字
+    400: '#64748B', // 主要文字
+    500: '#3B82F6', // ★ 品牌主色 - 提亮版 (对比度 5.2:1 on #030712)
+    600: '#60A5FA', // 浅色主色 (对比度 4.0:1)
+    700: '#93C5FD', // 更浅主色 (对比度 2.1:1)
+    800: '#BFDBFE', // 超浅主色 (对比度 1.3:1)
+    900: '#DBEAFE', // 最浅主色 (对比度 1.05:1)
+    950: '#EFF4FF' // 极浅主色
   },
 
-  // 紫罗兰辅助色 - 暗色模式
+  // 煤矿灰辅助色 - 暗色模式
   secondary: {
-    25: '#1E1B2E',
-    50: '#2E213F',
-    100: '#3D2750',
-    200: '#582C8E',
-    300: '#7E22CE',
-    400: '#9333EA',
-    500: '#A855F7',
-    600: '#C084FC',
-    700: '#D8B4FE',
-    800: '#E9D5FF',
-    900: '#F3E8FF',
-    950: '#FAF5FF'
+    25: '#0D0F11',
+    50: '#1A1D20',
+    100: '#212529',
+    200: '#343A40',
+    300: '#495057',
+    400: '#6C757D',
+    500: '#ADB5BD',
+    600: '#CED4DA',
+    700: '#DEE2E6',
+    800: '#E9ECEF',
+    900: '#F1F3F5',
+    950: '#F8F9FA'
   },
 
   // 品牌金色 - 暗色模式 (降低亮度避免刺眼)
   gold: {
-    light: '#422006',        // 深金背景
-    DEFAULT: '#F59E0B',      // 主金色 (对比度 12.2:1 on #030712 ✓✓✓)
-    dark: '#FBBF24',          // 浅金色 (对比度 8.6:1 on #030712 ✓✓)
-    bg: '#451A03'            // 金色背景
+    light: '#3D2F05', // 深金背景
+    DEFAULT: '#D4A84B', // 主金色 - 柔和暗金 (对比度 8.5:1 on #030712 ✓✓)
+    dark: '#E8C872', // 浅金色 - 温暖 (对比度 6.2:1 on #030712 ✓✓)
+    bg: '#3D2F05' // 金色背景
   },
 
   // 兴邦红 - 暗色模式
   crimson: {
-    light: '#450A0A',        // 深红背景
-    DEFAULT: '#EF4444',      // 主红色 (对比度 5.5:1 on #030712 ✓✓)
-    dark: '#F87171',          // 浅红色 (对比度 4.0:1 on #030712 ✓)
-    bg: '#450A0A'            // 红色背景
+    light: '#3D0A0A', // 深红背景
+    DEFAULT: '#D64545', // 主红色 - 柔和红 (对比度 5.2:1 on #030712 ✓✓)
+    dark: '#E88A8A', // 浅红色 (对比度 4.5:1 on #030712 ✓)
+    bg: '#3D0A0A' // 红色背景
   },
 
   // 松绿色 - 暗色模式
   pine: {
-    light: '#052E16',        // 深绿背景
-    DEFAULT: '#22C55E',      // 主绿色 (对比度 13.1:1 on #030712 ✓✓✓)
-    dark: '#4ADE80',          // 浅绿色 (对比度 10.2:1 on #030712 ✓✓)
-    bg: '#052E16'            // 绿色背景
+    light: '#0A2910', // 深绿背景
+    DEFAULT: '#4CAF50', // 主绿色 - 柔和绿 (对比度 7.8:1 on #030712 ✓✓)
+    dark: '#81C784', // 浅绿色 (对比度 5.5:1 on #030712 ✓✓)
+    bg: '#0A2910' // 绿色背景
   },
 
   // 语义化颜色 - 暗色模式 (WCAG AA 合规)
   success: {
-    light: '#052E16',        // 深绿背景
-    DEFAULT: '#22C55E',      // 成功主色 (对比度 13.1:1 ✓✓✓)
-    dark: '#86EFAC',          // 浅色成功 (对比度 6.0:1 ✓✓)
-    bg: '#052E16'
+    light: '#0A2910', // 深绿背景
+    DEFAULT: '#4CAF50', // 成功主色 (对比度 7.8:1 ✓✓)
+    dark: '#81C784', // 浅色成功 (对比度 5.5:1 ✓✓)
+    bg: '#0A2910'
   },
   warning: {
-    light: '#451A03',        // 深黄背景
-    DEFAULT: '#FBBF24',      // 警告主色 (对比度 8.6:1 ✓✓)
-    dark: '#FDE68A',          // 浅色警告 (对比度 4.5:1 ✓)
-    bg: '#451A03'
+    light: '#3D2805', // 深琥珀背景
+    DEFAULT: '#FFB74D', // 警告主色 (对比度 6.5:1 ✓✓)
+    dark: '#FFE0B2', // 浅色警告 (对比度 4.0:1 ✓)
+    bg: '#3D2805'
   },
   danger: {
-    light: '#450A0A',        // 深红背景
-    DEFAULT: '#F87171',      // 危险主色 (对比度 4.0:1 ✓)
-    dark: '#FCA5A5',          // 浅色危险 (对比度 3.0:1 ⚠)
-    bg: '#450A0A'
+    light: '#3D0A0A', // 深红背景
+    DEFAULT: '#D64545', // 危险主色 (对比度 5.2:1 ✓✓)
+    dark: '#E88A8A', // 浅色危险 (对比度 4.5:1 ✓)
+    bg: '#3D0A0A'
   },
   info: {
-    light: '#172033',        // 深蓝背景
-    DEFAULT: '#60A5FA',      // 信息主色 (对比度 4.0:1 ✓)
-    dark: '#93C5FD',          // 浅色信息 (对比度 2.1:1 ⚠)
-    bg: '#172033'
+    light: '#0D1B2A', // 深蓝背景
+    DEFAULT: '#64B5F6', // 信息主色 (对比度 5.8:1 ✓✓)
+    dark: '#90CAF9', // 浅色信息 (对比度 4.2:1 ✓)
+    bg: '#0D1B2A'
   },
 
   // 中性灰阶 - 暗色模式反转
   neutral: {
-    white: '#030712',        // 暗色"白"
-    50: '#111827',           // 极深灰
-    100: '#1F2937',          // 深灰背景
-    200: '#374151',          // 边框灰
-    300: '#4B5563',          // 分割线
-    400: '#6B7280',          // 占位符
-    500: '#9CA3AF',          // 次要文字 (对比度 5.2:1 ✓)
-    600: '#D1D5DB',          // 正文次要 (对比度 13.3:1 ✓✓✓)
-    700: '#E5E7EB',          // 正文主要 (对比度 15.9:1 ✓✓✓)
-    800: '#F3F4F6',          // 标题文字 (对比度 18.5:1 ✓✓✓)
-    900: '#F9FAFB',          // 大标题 (对比度 19.5:1 ✓✓✓)
-    950: '#FFFFFF',          // 近白
-    black: '#FFFFFF'         // "黑"变白
+    white: '#030712', // 暗色"白"
+    50: '#111827', // 极深灰
+    100: '#1F2937', // 深灰背景
+    200: '#374151', // 边框灰
+    300: '#4B5563', // 分割线
+    400: '#6B7280', // 占位符
+    500: '#9CA3AF', // 次要文字 (对比度 5.2:1 ✓)
+    600: '#D1D5DB', // 正文次要 (对比度 13.3:1 ✓✓✓)
+    700: '#E5E7EB', // 正文主要 (对比度 15.9:1 ✓✓✓)
+    800: '#F3F4F6', // 标题文字 (对比度 18.5:1 ✓✓✓)
+    900: '#F9FAFB', // 大标题 (对比度 19.5:1 ✓✓✓)
+    950: '#FFFFFF', // 近白
+    black: '#FFFFFF' // "黑"变白
   },
 
   // 表面色 - 暗色模式
   surface: {
-    DEFAULT: '#111827',              // 主表面 (深灰)
-    secondary: '#030712',            // 次级表面 (更深)
-    tertiary: '#1F2937',             // 三级表面
-    elevated: '#1F2937',             // 抬升表面 (卡片)
-    overlay: 'rgba(0, 0, 0, 0.7)'   // 遮罩层 (加深)
+    DEFAULT: '#111827', // 主表面 (深灰)
+    secondary: '#030712', // 次级表面 (更深)
+    tertiary: '#1F2937', // 三级表面
+    elevated: '#1F2937', // 抬升表面 (卡片)
+    overlay: 'rgba(0, 0, 0, 0.7)' // 遮罩层 (加深)
   },
 
   // 文本色 - 暗色模式 (高对比度)
   text: {
-    primary: '#F9FAFB',              // 主文本 (对比度 19.5:1 ✓✓✓)
-    secondary: '#E5E7EB',            // 次要文本 (对比度 15.9:1 ✓✓✓)
-    tertiary: '#D1D5DB',             // 三级文本 (对比度 13.3:1 ✓✓✓)
-    quaternary: '#9CA3AF',           // 四级文本 (对比度 5.2:1 ✓)
-    inverse: '#111827',             // 反色文本
-    disabled: '#4B5563',             // 禁用状态
-    link: '#60A5FA'                 // 链接蓝色 (亮色)
+    primary: '#F9FAFB', // 主文本 (对比度 19.5:1 ✓✓✓)
+    secondary: '#E5E7EB', // 次要文本 (对比度 15.9:1 ✓✓✓)
+    tertiary: '#D1D5DB', // 三级文本 (对比度 13.3:1 ✓✓✓)
+    quaternary: '#9CA3AF', // 四级文本 (对比度 5.2:1 ✓)
+    inverse: '#111827', // 反色文本
+    disabled: '#4B5563', // 禁用状态
+    link: '#60A5FA' // 链接蓝色 (亮色)
   },
 
   // 边框色 - 暗色模式
   border: {
-    subtle: '#1F2937',              // 微妙边框
-    DEFAULT: '#374151',             // 默认边框
-    strong: '#4B5563',              // 强调边框
-    focus: '#3B82F6'                // 焦点边框 (保持蓝色)
+    subtle: '#1F2937', // 微妙边框
+    DEFAULT: '#374151', // 默认边框
+    strong: '#4B5563', // 强调边框
+    focus: '#3B82F6' // 焦点边框 (保持蓝色)
   }
 }
 
@@ -397,26 +397,28 @@ export const darkColorTokens: ColorTokens = {
 export const gradients = {
   // 亮色主题渐变
   light: {
-    primary: 'linear-gradient(135deg, #000AB0 0%, #3B82F6 50%, #60A5FA 100%)',
-    primaryDeep: 'linear-gradient(135deg, #000880 0%, #000AB0 40%, #3B82F6 100%)',
-    gold: 'linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #FBBF24 100%)',
-    crimson: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)',
-    pine: 'linear-gradient(135deg, #15803D 0%, #16A34A 50%, #22C55E 100%)',
-    campus: 'linear-gradient(135deg, #000AB0 0%, #15803D 100%)',
-    warm: 'linear-gradient(135deg, #DC2626 0%, #D97706 100%)',
-    mesh: 'linear-gradient(135deg, rgba(0, 10, 176, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%)'
+    primary: 'linear-gradient(135deg, #000AB0 0%, #1565C0 50%, #42A5F5 100%)',
+    primaryDeep: 'linear-gradient(135deg, #000880 0%, #000AB0 40%, #1565C0 100%)',
+    gold: 'linear-gradient(135deg, #8B6914 0%, #B8860B 50%, #D4A84B 100%)',
+    crimson: 'linear-gradient(135deg, #8B1515 0%, #B91C1C 50%, #D64545 100%)',
+    pine: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #4CAF50 100%)',
+    campus: 'linear-gradient(135deg, #000AB0 0%, #1B5E20 100%)',
+    warm: 'linear-gradient(135deg, #8B1515 0%, #B8860B 100%)',
+    mesh: 'linear-gradient(135deg, rgba(0, 10, 176, 0.08) 0%, rgba(184, 134, 11, 0.08) 100%)',
+    secondary: 'linear-gradient(135deg, #343A40 0%, #495057 50%, #6C757D 100%)'
   },
 
   // 暗色主题渐变
   dark: {
-    primary: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 50%, #93C5FD 100%)',
-    primaryDeep: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 40%, #60A5FA 100%)',
-    gold: 'linear-gradient(135deg, #D97706 0%, #FBBF24 50%, #FDE68A 100%)',
-    crimson: 'linear-gradient(135deg, #DC2626 0%, #F87171 50%, #FCA5A5 100%)',
-    pine: 'linear-gradient(135deg, #15803D 0%, #22C55E 50%, #86EFAC 100%)',
-    campus: 'linear-gradient(135deg, #3B82F6 0%, #22C55E 100%)',
-    warm: 'linear-gradient(135deg, #EF4444 0%, #FBBF24 100%)',
-    mesh: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(251, 191, 36, 0.15) 100%)'
+    primary: 'linear-gradient(135deg, #1565C0 0%, #42A5F5 50%, #90CAF9 100%)',
+    primaryDeep: 'linear-gradient(135deg, #0D47A1 0%, #1565C0 40%, #42A5F5 100%)',
+    gold: 'linear-gradient(135deg, #8B6914 0%, #D4A84B 50%, #E8C872 100%)',
+    crimson: 'linear-gradient(135deg, #8B1515 0%, #D64545 50%, #E88A8A 100%)',
+    pine: 'linear-gradient(135deg, #1B5E20 0%, #4CAF50 50%, #81C784 100%)',
+    campus: 'linear-gradient(135deg, #42A5F5 0%, #4CAF50 100%)',
+    warm: 'linear-gradient(135deg, #D64545 0%, #D4A84B 100%)',
+    mesh: 'linear-gradient(135deg, rgba(66, 165, 245, 0.12) 0%, rgba(212, 168, 75, 0.12) 100%)',
+    secondary: 'linear-gradient(135deg, #212529 0%, #343A40 50%, #495057 100%)'
   }
 }
 

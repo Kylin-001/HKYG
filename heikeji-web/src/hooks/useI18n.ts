@@ -4,17 +4,17 @@ import type { Locale } from '@/locales'
 
 export function useI18n() {
   const { t, locale, availableLocales: locales } = useVueI18n()
-  
+
   const currentLocale = computed(() => locale.value as Locale)
-  
+
   const isZhCN = computed(() => locale.value === 'zh-CN')
   const isEnUS = computed(() => locale.value === 'en-US')
-  
+
   function switchLocale(newLocale: Locale) {
     if (newLocale !== locale.value) {
       locale.value = newLocale
       localStorage.setItem('heikeji-locale', newLocale)
-      
+
       document.documentElement.setAttribute('lang', newLocale)
     }
   }

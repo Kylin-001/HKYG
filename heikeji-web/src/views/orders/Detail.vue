@@ -106,7 +106,7 @@
               </div>
               <div class="price-line">
                 <span>运费</span>
-                <span>{{ shippingFee.value > 0 ? `¥${shippingFee.value.toFixed(2)}` : '免运费' }}</span>
+                <span>{{ shippingFee > 0 ? `¥${shippingFee.toFixed(2)}` : '免运费' }}</span>
               </div>
             </div>
             <div class="price-total">
@@ -193,10 +193,7 @@ const createTimeFormatted = computed(() => formatFullTime(order.value?.createdAt
 const payTimeFormatted = computed(() => order.value?.paymentTime || order.value?.payTime ? formatFullTime(order.value?.paymentTime || order.value?.payTime || '') : '未支付')
 
 // 运费字段映射
-const shippingFee = computed(() => orderValue?.shippingFee ?? orderValue?.shipping ?? 0)
-
-// 计算属性辅助函数
-function orderValue() { return order.value }
+const shippingFee = computed(() => order.value?.shippingAmount ?? 0)
 
 const statusIcon = computed(() => {
   if (!order.value) return Document
@@ -240,18 +237,18 @@ const logisticsSteps = ref([
 
 const totalAmount = computed(() => {
   if (!order.value) return 0
-  let total = order.value.price * order.value.quantity
-  if (order.value.originalPrice) {
-    total -= (order.value.originalPrice - order.value.price) * order.value.quantity
-  }
-  total += order.value.shipping
-  return Math.max(0, total)
+  const itemsTotal = (order.value.items || []).reduce((sum: number, item: any) => sum + (item.price ?? 0) * (item.quantity ?? 1), 0)
+  return Math.max(0, itemsTotal + (order.value.shippingAmount ?? 0))
 })
 
 function copyNo() {
   if (!order.value) return
-  navigator.clipboard.writeText(order.value.orderNo)
-  ElMessage.success('订单号已复制')
+  try {
+    navigator.clipboard.writeText(order.value.orderNo)
+    ElMessage.success('订单号已复制')
+  } catch {
+    ElMessage.error('复制失败，请手动复制')
+  }
 }
 
 function formatFullTime(timeStr: string): string {

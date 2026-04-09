@@ -12,10 +12,10 @@ import type { ApiResponse, ApiError } from '@/types/api'
 
 // ====== 类型定义 ======
 interface RetryConfig {
-  maxRetries: number        // 最大重试次数
-  initialDelay: number      // 初始延迟(ms)
-  maxDelay: number          // 最大延迟(ms)
-  retryCondition: (error: any) => boolean  // 重试条件
+  maxRetries: number // 最大重试次数
+  initialDelay: number // 初始延迟(ms)
+  maxDelay: number // 最大延迟(ms)
+  retryCondition: (error: any) => boolean // 重试条件
 }
 
 interface RequestMetrics {
@@ -37,8 +37,8 @@ interface PendingRequest {
 // ====== 配置项 ======
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
-  initialDelay: 1000,    // 1秒
-  maxDelay: 30000,       // 30秒
+  initialDelay: 1000, // 1秒
+  maxDelay: 30000, // 30秒
   retryCondition: (error) => {
     // 仅对网络错误和5xx服务器错误进行重试
     if (!error.response && error.code !== 'ERR_CANCELED') return true
@@ -47,10 +47,11 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
   }
 }
 
-const SLOW_REQUEST_THRESHOLD = 3000  // 慢请求阈值(3s)
+const SLOW_REQUEST_THRESHOLD = 3000 // 慢请求阈值(3s)
 
 // ====== 实例创建 ======
 const service: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -68,18 +69,18 @@ function generateReqKey(config: InternalAxiosRequestConfig): string {
 function addPendingRequest(config: InternalAxiosRequestConfig): AbortController {
   const key = generateReqKey(config)
   const abortController = new AbortController()
-  
+
   if (pendingRequests.has(key)) {
     pendingRequests.get(key)?.cancel('取消重复请求')
     pendingRequests.delete(key)
   }
-  
+
   config.cancelToken = new axios.CancelToken((cancel) => {
     pendingRequests.set(key, { key, cancel, abortController })
   })
-  
+
   config.signal = abortController.signal
-  
+
   return abortController
 }
 
@@ -132,22 +133,22 @@ async function retryWithBackoff<T>(
   if (attempt >= retryConfig.maxRetries || !retryConfig.retryCondition(error)) {
     throw error
   }
-  
+
   const delay = calculateRetryDelay(attempt, retryConfig)
   const maxAttempts = retryConfig.maxRetries
-  
+
   // 显示重试状态
   showRetryStatus(originalConfig.url!, attempt + 1, maxAttempts)
-  
+
   logRequest('warn', `准备第 ${attempt + 1}/${maxAttempts} 次重试`, {
     url: originalConfig.url,
     method: originalConfig.method,
     attempt: attempt + 1,
     delay: `${delay}ms`
   })
-  
+
   await sleep(delay)
-  
+
   try {
     return await service(originalConfig)
   } catch (retryError) {
@@ -171,12 +172,12 @@ const requestMetrics: RequestMetrics[] = []
 
 function logRequest(level: 'info' | 'warn' | 'error', message: string, data?: any) {
   const isDev = import.meta.env.DEV
-  
+
   if (isDev) {
     const timestamp = new Date().toLocaleTimeString()
     console[level](`[API ${timestamp}] ${message}`, data || '')
   }
-  
+
   // 生产环境可以发送到监控系统
   if (!isDev && level === 'error') {
     sendToMonitoring({ level, message, data })
@@ -189,14 +190,14 @@ function startMetricsTracking(url: string, method: string): RequestMetrics {
     method,
     startTime: Date.now(),
   }
-  
+
   requestMetrics.push(metrics)
-  
+
   // 保持最近100条记录
   if (requestMetrics.length > 100) {
     requestMetrics.shift()
   }
-  
+
   return metrics
 }
 
@@ -205,11 +206,11 @@ function finishMetricsTracking(metrics: RequestMetrics, status: number, success:
   metrics.status = status
   metrics.success = success
   metrics.retryCount = retryCount
-  
+
   // 慢请求告警
   if (metrics.duration > SLOW_REQUEST_THRESHOLD) {
     logRequest('warn', `慢请求告警: ${metrics.method} ${metrics.url} 耗时 ${metrics.duration}ms`, metrics)
-    
+
     if (import.meta.env.DEV) {
       ElNotification({
         title: '性能警告',
@@ -220,7 +221,7 @@ function finishMetricsTracking(metrics: RequestMetrics, status: number, success:
       })
     }
   }
-  
+
   logRequest('info', `${metrics.method} ${metrics.url} 完成 [${metrics.status}] ${(metrics.duration)}ms`)
 }
 
@@ -239,14 +240,14 @@ export function getRequestStats(): {
   successRate: number
   averageDuration: number
   slowRequests: number
-} {
+  } {
   const total = requestMetrics.length
   const successful = requestMetrics.filter(m => m.success).length
-  const avgDuration = total > 0 
+  const avgDuration = total > 0
     ? Math.round(requestMetrics.reduce((sum, m) => sum + (m.duration || 0), 0) / total)
     : 0
   const slowRequests = requestMetrics.filter(m => (m.duration || 0) > SLOW_REQUEST_THRESHOLD).length
-  
+
   return {
     totalRequests: total,
     successRate: total > 0 ? Math.round((successful / total) * 100) : 0,
@@ -266,7 +267,7 @@ if (typeof window !== 'undefined') {
     handleNetworkRecovery()
     ElMessage.success('网络已恢复连接')
   })
-  
+
   window.addEventListener('offline', () => {
     isOnline = false
     logRequest('warn', '网络已断开')
@@ -290,13 +291,13 @@ const cacheStorage = new Map<string, { data: any; timestamp: number; ttl: number
 function getFromCache(key: string): any | null {
   const cached = cacheStorage.get(key)
   if (!cached) return null
-  
+
   const now = Date.now()
   if (now - cached.timestamp > cached.ttl) {
     cacheStorage.delete(key)
     return null
   }
-  
+
   return cached.data
 }
 
@@ -342,7 +343,7 @@ service.interceptors.request.use(
       // 尝试从缓存获取数据
       const cacheKey = generateReqKey(config)
       const cachedData = getFromCache(cacheKey)
-      
+
       if (cachedData) {
         logRequest('info', '使用离线缓存数据', { url: config.url })
         return Promise.reject({
@@ -351,7 +352,7 @@ service.interceptors.request.use(
           config
         })
       }
-      
+
       ElMessage.warning('当前处于离线模式，请检查网络连接')
       return Promise.reject(new Error('网络不可用'))
     }
@@ -374,7 +375,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     removePendingRequest(response.config)
-    
+
     const metrics = (response.config as any)?._metrics as RequestMetrics
     if (metrics) {
       finishMetricsTracking(metrics, response.status, true)
@@ -389,7 +390,7 @@ service.interceptors.response.use(
     }
 
     if (res.code === 0 || res.code === 200 || res.success) {
-      return res
+      return res.data ?? res
     }
 
     ElMessage({
@@ -402,26 +403,26 @@ service.interceptors.response.use(
   },
   async (error) => {
     const { config, response } = error
-    
+
     if (config) {
       removePendingRequest(config)
-      
+
       const metrics = (config as any)?._metrics as RequestMetrics
       if (metrics) {
         finishMetricsTracking(metrics, response?.status || 0, false)
       }
-      
+
       // 处理离线缓存命中
       if (error.__offlineCache__) {
         return error.data
       }
-      
+
       // 自动重试机制
       const shouldRetry = config.retry !== false && (
         !response || // 网络错误
         response.status >= 500 // 服务器错误
       )
-      
+
       if (shouldRetry) {
         try {
           logRequest('info', '触发自动重试机制', { url: config.url })
@@ -530,13 +531,13 @@ function getCookie(name: string): string | null {
 // ====== 导出的请求方法 ======
 
 interface EnhancedRequestConfig extends AxiosRequestConfig {
-  deduplicate?: boolean       // 是否去重（默认GET请求去重）
-  retry?: boolean             // 是否允许重试（默认true）
-  allowOffline?: boolean      // 是否允许离线访问（默认false）
-  showLoading?: boolean       // 是否显示loading
-  showError?: boolean         // 是否显示错误消息（默认true）
-  cache?: boolean             // 是否使用缓存
-  cacheTTL?: number           // 缓存有效期(ms)
+  deduplicate?: boolean // 是否去重（默认GET请求去重）
+  retry?: boolean // 是否允许重试（默认true）
+  allowOffline?: boolean // 是否允许离线访问（默认false）
+  showLoading?: boolean // 是否显示loading
+  showError?: boolean // 是否显示错误消息（默认true）
+  cache?: boolean // 是否使用缓存
+  cacheTTL?: number // 缓存有效期(ms)
 }
 
 export function get<T = any>(url: string, config?: EnhancedRequestConfig): Promise<T> {

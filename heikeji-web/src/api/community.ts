@@ -44,7 +44,6 @@ export function collectPost(postId: string): Promise<void> {
 
 export function uncollectPost(postId: string): Promise<void> {
   return del(`/community/posts/${postId}/collect`)
-
 }
 
 export function addComment(postId: string, content: string, parentId?: string): Promise<Comment> {
@@ -124,8 +123,16 @@ export function markAllNotificationsRead(): Promise<void> {
   return put('/notifications/read-all')
 }
 
+export interface FavoriteItem {
+  id: string
+  type: string
+  title: string
+  image?: string
+  createdAt: string
+}
+
 export function getFavorites(type?: string, page?: number): Promise<{
-  list: any[]
+  list: FavoriteItem[]
   total: number
 }> {
   return get('/favorites', { params: { type, page } })
@@ -135,8 +142,20 @@ export function removeFavorite(id: string): Promise<void> {
   return del(`/favorites/${id}`)
 }
 
+export interface CouponItem {
+  id: string
+  code: string
+  name: string
+  type: 'amount' | 'percent'
+  value: number
+  minOrderAmount?: number
+  status: 'available' | 'used' | 'expired'
+  validFrom: string
+  validTo: string
+}
+
 export function getCoupons(params?: { status?: 'available' | 'used' | 'expired'; page?: number }): Promise<{
-  list: any[]
+  list: CouponItem[]
   total: number
 }> {
   return get('/coupons', { params })

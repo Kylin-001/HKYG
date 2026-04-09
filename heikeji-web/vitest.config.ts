@@ -4,7 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
-  
+
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -19,18 +19,18 @@ export default defineConfig({
       '@styles': resolve(__dirname, 'src/styles'),
     },
   },
-  
+
   test: {
     globals: true,
     environment: 'happy-dom',
-    
+
     include: [
       'tests/**/*.{test,spec}.{js,ts,jsx,tsx}',
       'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
     ],
-    
+
     exclude: ['node_modules', 'dist', '.output'],
-    
+
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
@@ -50,9 +50,9 @@ export default defineConfig({
         statements: 70,
       },
     },
-    
+
     setupFiles: ['./tests/setup.ts'],
-    
+
     css: {
       modules: {
         classNameStrategy: 'non-scoped',

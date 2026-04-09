@@ -27,7 +27,7 @@ export default i18n
 export function setLocale(locale: Locale) {
   i18n.global.locale.value = locale
   localStorage.setItem('heikeji-locale', locale)
-  
+
   document.documentElement.setAttribute('lang', locale)
 }
 

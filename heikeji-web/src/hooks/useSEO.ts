@@ -16,17 +16,17 @@ const defaultMeta: MetaInfo = {
 
 export function useSEO(meta?: MetaInfo) {
   const route = useRoute()
-  
+
   function updateMeta(info: MetaInfo) {
     const title = info.title || defaultMeta.title || ''
     const description = info.description || defaultMeta.description || ''
     const keywords = info.keywords || defaultMeta.keywords || ''
-    
+
     document.title = title
-    
+
     updateMetaTag('description', description)
     updateMetaTag('keywords', keywords)
-    
+
     if (info.ogImage) {
       updateOGTag('og:image', info.ogImage)
     }
@@ -34,7 +34,7 @@ export function useSEO(meta?: MetaInfo) {
     updateOGTag('og:description', description)
     updateOGTag('og:url', window.location.href)
   }
-  
+
   function updateMetaTag(name: string, content: string) {
     let element = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null
     if (!element) {
@@ -44,7 +44,7 @@ export function useSEO(meta?: MetaInfo) {
     }
     element.setAttribute('content', content)
   }
-  
+
   function updateOGTag(property: string, content: string) {
     let element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null
     if (!element) {
@@ -54,11 +54,11 @@ export function useSEO(meta?: MetaInfo) {
     }
     element.setAttribute('content', content)
   }
-  
+
   if (meta) {
     updateMeta(meta)
   }
-  
+
   const stopWatch = watch(
     () => route.path,
     () => {
@@ -67,10 +67,10 @@ export function useSEO(meta?: MetaInfo) {
       }
     }
   )
-  
+
   onUnmounted(() => {
     stopWatch()
   })
-  
+
   return { updateMeta }
 }

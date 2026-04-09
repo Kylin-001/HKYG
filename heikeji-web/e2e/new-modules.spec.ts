@@ -150,10 +150,10 @@ test.describe('新模块导航集成测试', () => {
     await page.goto('/')
     const studentAffairsLink = page.locator('a[href="/student-affairs"]')
     const paymentLink = page.locator('a[href="/payment"]')
-    
+
     const hasStudentAffairs = await studentAffairsLink.count() > 0
     const hasPayment = await paymentLink.count() > 0
-    
+
     expect(hasStudentAffairs || hasPayment).toBeTruthy()
   })
 
@@ -162,7 +162,7 @@ test.describe('新模块导航集成测试', () => {
     const studentAffairsLink = page.locator('a[href="/student-affairs"]')
     const paymentLink = page.locator('a[href="/payment"]')
     const announcementLink = page.locator('a[href="/announcements"]')
-    
+
     const linksFound = (await studentAffairsLink.count()) + (await paymentLink.count()) + (await announcementLink.count())
     expect(linksFound).toBeGreaterThanOrEqual(2)
   })

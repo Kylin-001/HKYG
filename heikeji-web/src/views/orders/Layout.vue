@@ -4,7 +4,6 @@
        品牌头部 + 状态标签导航 + 主内容区
        ============================================ -->
   <div class="min-h-screen">
-
     <!-- ====== 品牌头部区域 ====== -->
     <header class="relative overflow-hidden bg-gradient-to-r from-primary-dark via-primary to-primary-light">
       <div class="relative z-10 max-w-screen-xl mx-auto px-4 lg:px-8 py-6 flex items-center justify-between">
@@ -13,7 +12,9 @@
           <h1 class="text-xl font-bold text-white flex items-center gap-2">
             <span>&#x1F4E6;</span> 我的订单
           </h1>
-          <p class="text-white/70 text-sm mt-1">管理您的所有订单 · 跟踪物流状态</p>
+          <p class="text-white/70 text-sm mt-1">
+            管理您的所有订单 · 跟踪物流状态
+          </p>
         </div>
 
         <!-- 右侧：购物车入口 -->
@@ -25,7 +26,8 @@
             'backdrop-blur-sm border border-white/20',
             'transition-all duration-200 shadow-lg hover:shadow-xl',
             'focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary'
-          ]">
+          ]"
+        >
           <el-icon><ShoppingCart /></el-icon>
           <span>去购物车</span>
         </router-link>
@@ -36,7 +38,8 @@
     <nav
       class="sticky top-16 z-30 bg-white/95 backdrop-blur-xl border-b border-border-subtle shadow-sm"
       :style="{ willChange: 'box-shadow' }"
-      aria-label="订单状态导航">
+      aria-label="订单状态导航"
+    >
       <div class="max-w-screen-xl mx-auto px-4 lg:px-8">
         <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide -mb-px">
           <router-link
@@ -52,7 +55,8 @@
               $route.path === tab.path
                 ? 'text-primary font-semibold'
                 : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
-            ]">
+            ]"
+          >
             <span>{{ tab.label }}</span>
 
             <!-- 状态角标 -->
@@ -63,14 +67,16 @@
                 $route.path === tab.path
                   ? 'bg-primary-100 text-primary'
                   : 'bg-crimson/10 text-crimson'
-              ]">
+              ]"
+            >
               {{ tab.badge }}
             </span>
 
             <!-- 选中态下划线 -->
             <span
               v-if="$route.path === tab.path"
-              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"></span>
+              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"
+            />
           </router-link>
         </div>
       </div>
@@ -81,9 +87,13 @@
       id="orders-main-content"
       role="main"
       aria-label="订单列表主要内容"
-      class="max-w-screen-xl mx-auto px-4 lg:px-8 py-6">
+      class="max-w-screen-xl mx-auto px-4 lg:px-8 py-6"
+    >
       <RouterView v-slot="{ Component }">
-        <Transition name="page-fade" mode="out-in">
+        <Transition
+          name="page-fade"
+          mode="out-in"
+        >
           <component :is="Component" />
         </Transition>
       </RouterView>

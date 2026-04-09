@@ -240,9 +240,9 @@ watch(sortBy, () => {
               class="load-more-btn"
               :class="{ 'loading': productStore.loading }"
               @click="loadMore"
-              :disabled="loading"
+              :disabled="productStore.loading"
             >
-              <span v-if="!loading">{{ t('common.viewAll') || '加载更多商品' }}</span>
+              <span v-if="!productStore.loading">{{ t('common.viewAll') || '加载更多商品' }}</span>
               <span v-else>{{ t('common.loading') || '加载中...' }}</span>
             </button>
           </div>
@@ -261,7 +261,7 @@ watch(sortBy, () => {
 import { Filter, Grid, List, Search } from '@element-plus/icons-vue'
 
 export default {
-  components: { Filter, Grid, List },
+  components: { Filter, Grid, List, Search },
 }
 </script>
 

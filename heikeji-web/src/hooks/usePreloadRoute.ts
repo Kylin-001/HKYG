@@ -377,7 +377,7 @@ export function usePreloadRoute(options: UsePreloadRouteOptions = {}) {
     stats: typeof preloadStats.value
     activeTasks: PreloadTask[]
     isSlowNetwork: boolean
-  } {
+    } {
     cleanupCompletedTasks()
 
     return {

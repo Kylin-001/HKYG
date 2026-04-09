@@ -69,16 +69,16 @@
                 <div class="author-info">
                   <span class="author-name">{{ post.authorName }}</span>
                   <span class="post-meta">
-                    <span class="board-tag" :style="{ color: getBoardColor(post.board) }">{{ post.boardName }}</span>
+                    <span class="board-tag" :style="{ color: getBoardColor(post.board || post.boardId || '') }">{{ post.boardName }}</span>
                     ·
-                    <span>{{ formatTime(post.publishTime) }}</span>
+                    <span>{{ formatTime(post.publishTime || post.createdAt || '') }}</span>
                   </span>
                 </div>
                 <span v-if="post.isTop" class="top-badge">置顶</span>
               </div>
 
               <h3 class="pc-title">{{ post.title }}</h3>
-              <p class="pc-excerpt">{{ post.excerpt }}</p>
+              <p class="pc-excerpt">{{ post.excerpt || post.content?.slice(0, 120) || '' }}</p>
 
               <div v-if="post.images && post.images.length > 0" class="pc-images">
                 <img
@@ -92,18 +92,18 @@
                 <span v-if="post.images.length > 3" class="more-count">+{{ post.images.length - 3 }}</span>
               </div>
 
-              <div class="pc-tags" v-if="post.tags && post.tags.length">
+              <div class="pc-tags" v-if="(post.tags && post.tags.length)">
                 <span v-for="tag in post.tags.slice(0, 3)" :key="tag" class="tag">#{{ tag }}</span>
               </div>
 
               <div class="pc-footer">
                 <div class="stats-row">
                   <span class="stat-item"><el-icon><View /></el-icon> {{ formatCount(post.views) }}</span>
-                  <span class="stat-item"><el-icon><ChatDotRound /></el-icon> {{ post.comments }}</span>
-                  <span class="stat-item"><el-icon><Star /></el-icon> {{ post.likes }}</span>
+                  <span class="stat-item"><el-icon><ChatDotRound /></el-icon> {{ post.comments ?? post.commentCount ?? 0 }}</span>
+                  <span class="stat-item"><el-icon><Star /></el-icon> {{ post.likes ?? post.likeCount ?? 0 }}</span>
                 </div>
-                <span class="last-reply" v-if="post.lastReplyTime">
-                  最后回复 {{ formatTime(post.lastReplyTime) }}
+                <span class="last-reply" v-if="post.lastReplyTime || post.lastReplyAt">
+                  最后回复 {{ formatTime(post.lastReplyTime || post.lastReplyAt || '') }}
                 </span>
               </div>
             </router-link>
@@ -179,16 +179,22 @@ const communityStore = useCommunityStore()
 interface Post {
   id: number
   title: string
-  excerpt: string
+  excerpt?: string
+  content?: string
   authorName: string
   authorAvatar: string
-  board: string
+  board?: string
+  boardId?: string
   boardName: string
-  publishTime: string
+  publishTime?: string
+  createdAt?: string
   lastReplyTime?: string
+  lastReplyAt?: string
   views: number
-  comments: number
+  comments?: number
+  commentCount?: number
   likes: number
+  likeCount?: number
   isTop: boolean
   images?: string[]
   tags?: string[]
@@ -274,7 +280,7 @@ const filteredPosts = computed(() => {
     const kw = searchKeyword.value.toLowerCase()
     result = result.filter(p =>
       p.title.toLowerCase().includes(kw) ||
-      p.excerpt.toLowerCase().includes(kw) ||
+      (p.excerpt || p.content || '').toLowerCase().includes(kw) ||
       (p.tags && p.tags.some(t => t.toLowerCase().includes(kw)))
     )
   }
@@ -283,7 +289,7 @@ const filteredPosts = computed(() => {
     case 'hot': result.sort((a, b) => b.likes - a.likes); break
     case 'essence': result.filter(p => p.isTop || p.likes > 100).sort((a, b) => b.likes - a.likes); break
     case 'latest':
-    default: result.sort((a, b) => new Date(b.publishTime).getTime() - new Date(a.publishTime).getTime()); break
+    default: result.sort((a, b) => new Date(b.publishTime || b.createdAt).getTime() - new Date(a.publishTime || a.createdAt).getTime()); break
   }
 
   return result

@@ -179,11 +179,11 @@ const storeGroups = computed(() => {
   const items = cartStore.items.map(item => ({
     id: item.id,
     productId: item.productId || item.product?.id,
-    name: item.name || item.productName || '',
-    spec: item.spec || item.skuName || '',
-    image: item.image || item.productImage || '',
-    price: item.price,
-    originalPrice: item.originalPrice || item.marketPrice || 0,
+    name: item.product?.name || item.name || '',
+    spec: item.specifications ? Object.entries(item.specifications).map(([k, v]) => `${k}:${v}`).join(' ') : '',
+    image: item.product?.image || '',
+    price: item.product?.price ?? 0,
+    originalPrice: item.product?.originalPrice ?? 0,
     quantity: item.quantity,
     checked: item.selected ?? true,
     tag: (item as any).tag
@@ -227,18 +227,32 @@ const isIndeterminate = computed(() => {
   return some && !every
 })
 
-function toggleStore(store: any) {
+async function toggleStore(store: any) {
   const val = store.checked
-  store.items.forEach((i: CartItemExt) => {
-    i.checked = val
-  })
+  for (const i of store.items as CartItemExt[]) {
+    try {
+      await cartStore.updateItem(String(i.id), undefined, val)
+    } catch (err: any) {
+      ElMessage.error(err.message || '更新选中状态失败')
+    }
+  }
 }
 
-function updateCheckState(storeIdx: number) {
+async function updateCheckState(storeIdx: number) {
   const store = storeGroups.value[storeIdx]
   if (store) {
-    store.checked = store.items.every(i => i.checked)
-    store.indeterminate = store.items.some(i => i.checked) && !store.checked
+    const allChecked = store.items.every(i => i.checked)
+    const someChecked = store.items.some(i => i.checked)
+    store.checked = allChecked
+    store.indeterminate = someChecked && !allChecked
+    // 同步选中状态到 cartStore
+    for (const item of store.items) {
+      try {
+        await cartStore.updateItem(String(item.id), undefined, item.checked)
+      } catch (err: any) {
+        ElMessage.error(err.message || '更新选中状态失败')
+      }
+    }
   }
 }
 
@@ -278,7 +292,7 @@ async function removeItem(item: CartItemExt) {
 
 async function moveToFav(item: CartItemExt) {
   try {
-    await cartStore.moveToFavorite(String(item.id))
+    await cartStore.batchMoveToFavorites([String(item.id)])
     ElMessage.success(`已移入收藏夹`)
   } catch (err: any) {
     ElMessage.error(err.message || '操作失败')

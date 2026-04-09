@@ -649,7 +649,7 @@ watch(
         v-show="isDropdownOpen"
         class="theme-dropdown__panel"
         role="menu"
-        :aria-label="主题选项列表"
+        aria-label="主题选项列表"
       >
         <!-- 亮色模式选项 -->
         <button

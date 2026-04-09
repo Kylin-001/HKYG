@@ -219,7 +219,7 @@ async function checkButtonAccessibleNames(
         severity: 'error',
         category: 'Buttons',
         rule: 'button-name',
-        description: `Button/interactive element without accessible name`,
+        description: 'Button/interactive element without accessible name',
         element: btn,
         selector: generateSelector(btn),
         suggestion: 'Add text content, aria-label, or title attribute',
@@ -427,7 +427,7 @@ async function checkARIAAttributes(
         description: `Invalid ARIA role: "${role}"`,
         element: el,
         selector: generateSelector(el),
-        suggestion: `Use a valid ARIA role from the list of allowed roles`
+        suggestion: 'Use a valid ARIA role from the list of allowed roles'
       })
     }
   })
@@ -447,7 +447,7 @@ async function checkARIAAttributes(
         severity: 'error',
         category: 'ARIA',
         rule: 'aria-label-required',
-        description: `Interactive element has no visible content or aria-label`,
+        description: 'Interactive element has no visible content or aria-label',
         element: el,
         selector: generateSelector(el),
         suggestion: 'Add visible text, aria-label, or aria-labelledby to provide accessible name',
@@ -475,7 +475,7 @@ async function checkKeyboardAccessibility(
       severity: 'error',
       category: 'Keyboard',
       rule: 'keyboard-accessible',
-      description: `Element with onclick handler lacks keyboard accessibility`,
+      description: 'Element with onclick handler lacks keyboard accessibility',
       element: el,
       selector: generateSelector(el),
       suggestion: 'Make element focusable with tabindex and handle keyboard events (Enter/Space), or use semantic HTML',
@@ -494,7 +494,7 @@ async function checkKeyboardAccessibility(
         severity: 'warning',
         category: 'Keyboard',
         rule: 'tabindex-negative',
-        description: `Interactive element removed from tab order with tabindex="-1"`,
+        description: 'Interactive element removed from tab order with tabindex="-1"',
         element: el,
         selector: generateSelector(el),
         suggestion: 'Ensure there\'s an alternative way to access this element via keyboard'
@@ -564,7 +564,7 @@ async function checkFocusManagement(issues: AuditIssue[]): Promise<void> {
         severity: 'warning',
         category: 'Focus Management',
         rule: 'modal-focus',
-        description: `Modal/dialog contains no focusable elements`,
+        description: 'Modal/dialog contains no focusable elements',
         element: modal,
         selector: generateSelector(modal),
         suggestion: 'Ensure modal has at least one focusable element for initial focus'

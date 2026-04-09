@@ -73,7 +73,7 @@ export function isMockEnabled(): boolean {
 
   // 3. 根据环境判断：开发环境默认启用，生产环境默认禁用
   const isDev = import.meta.env?.DEV ?? true
-  return isDev ? true : false
+  return !!isDev
 }
 
 /**

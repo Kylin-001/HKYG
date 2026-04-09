@@ -1,4 +1,4 @@
-import { get, post, put } from '@/utils/request'
+import { get, post, put, del } from '@/utils/request'
 import type { Order, OrderListParams, OrderListResponse, CreateOrderRequest, ShippingAddress, OrderReview, CreateOrderReviewRequest, RefundRequest, CreateRefundRequest, InvoiceInfo, CreateInvoiceRequest, LogisticsTracking, ExportOrderParams } from '@/types/order'
 
 export function getOrderList(params?: OrderListParams): Promise<OrderListResponse> {
@@ -21,7 +21,24 @@ export function confirmReceive(orderId: string): Promise<void> {
   return post(`/orders/${orderId}/confirm`)
 }
 
-export function getOrderTracking(orderId: string): Promise<any> {
+export function deleteOrder(orderId: string | number): Promise<void> {
+  return del(`/orders/${orderId}`)
+}
+
+export interface OrderTrackingInfo {
+  orderId: string
+  status: string
+  steps: {
+    time: string
+    status: string
+    description: string
+    location?: string
+  }[]
+  currentLocation?: string
+  estimatedDelivery?: string
+}
+
+export function getOrderTracking(orderId: string): Promise<OrderTrackingInfo> {
   return get(`/orders/${orderId}/tracking`)
 }
 
@@ -169,23 +186,23 @@ export function subscribeLogisticsUpdates(orderId: string, callback: (tracking: 
   // 这里可以实现 WebSocket 订阅或定时轮询
   // 简化实现：使用轮询
   let polling = true
-  
+
   const poll = async () => {
     if (!polling) return
-    
+
     try {
       const tracking = await getOrderLogistics(orderId)
       callback(tracking)
     } catch (error) {
       console.error('获取物流信息失败:', error)
     }
-    
+
     // 每30秒刷新一次
     setTimeout(poll, 30000)
   }
-  
+
   poll()
-  
+
   // 返回取消订阅函数
   return () => { polling = false }
 }
