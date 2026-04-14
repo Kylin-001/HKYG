@@ -55,7 +55,7 @@
             </div>
 
             <div class="card-body" @click="$router.push(`/orders/${order.id}`)">
-              <img :src="order.items?.[0]?.productImage || ''" :alt="order.items?.[0]?.productName || ''" class="product-img" />
+              <img :src="order.items?.[0]?.productImage || ''" :alt="order.items?.[0]?.productName || ''" class="product-img" width="80" height="80" loading="lazy" />
               <div class="product-info">
                 <h4 class="product-name">{{ order.items?.[0]?.productName || '商品' }}</h4>
                 <p class="product-specs">{{ order.items?.map(i => i.productName).join(' / ') || '' }}</p>

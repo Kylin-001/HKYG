@@ -180,6 +180,13 @@ public class Result<T> implements Serializable {
         this.timestamp = timestamp;
     }
 
+    /**
+     * 判断是否成功
+     */
+    public boolean isSuccess() {
+        return this.code == SUCCESS;
+    }
+
     @Override
     public String toString() {
         return "Result{" +

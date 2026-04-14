@@ -36,6 +36,8 @@ public class GlobalGatewayFilter implements GlobalFilter, Ordered {
             "/api/user/login",
             "/api/user/register",
             "/api/user/sendCode",
+            "/api/user/captcha",
+            "/api/user/captcha/verify",
             "/api/product/public",
             "/api/product/page",
             "/api/product/list",

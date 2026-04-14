@@ -3,8 +3,8 @@ package com.heikeji.mall.api.controller.takeout;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.takeout.entity.TakeoutOrder;
 import com.heikeji.mall.takeout.service.TakeoutOrderService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/takeout/order-tracking")
-@Api(tags = "用户端订单追踪接口")
+@Tag(name = "用户端订单追踪接口")
 public class TakeoutOrderTrackingController {
     
     @Autowired
@@ -96,7 +96,7 @@ public class TakeoutOrderTrackingController {
         public void setCurrent(Boolean current) { this.current = current; }
     }
     
-    @ApiOperation("获取订单追踪信息")
+    @Operation(summary = "获取订单追踪信息")
     @GetMapping("/{orderId}/tracking")
     public R<OrderTrackingInfo> getOrderTracking(@PathVariable Long orderId) {
         TakeoutOrder order = takeoutOrderService.getOrderDetail(orderId);
@@ -123,7 +123,7 @@ public class TakeoutOrderTrackingController {
         return R.success(trackingInfo);
     }
     
-    @ApiOperation("获取实时订单状态")
+    @Operation(summary = "获取实时订单状态")
     @GetMapping("/{orderId}/status")
     public R<Map<String, Object>> getRealTimeStatus(@PathVariable Long orderId) {
         TakeoutOrder order = takeoutOrderService.getOrderDetail(orderId);
@@ -147,7 +147,7 @@ public class TakeoutOrderTrackingController {
         return R.success(statusMap);
     }
     
-    @ApiOperation("获取配送员信息")
+    @Operation(summary = "获取配送员信息")
     @GetMapping("/{orderId}/delivery-person")
     public R<Map<String, Object>> getDeliveryPersonInfo(@PathVariable Long orderId) {
         TakeoutOrder order = takeoutOrderService.getOrderDetail(orderId);
@@ -173,7 +173,7 @@ public class TakeoutOrderTrackingController {
         return R.success(deliveryInfo);
     }
     
-    @ApiOperation("获取订单历史记录")
+    @Operation(summary = "获取订单历史记录")
     @GetMapping("/{orderId}/history")
     public R<List<TrackingStep>> getOrderHistory(@PathVariable Long orderId) {
         TakeoutOrder order = takeoutOrderService.getOrderDetail(orderId);
@@ -293,7 +293,7 @@ public class TakeoutOrderTrackingController {
         return (int) (Math.random() * 40) + 60; // 60-100之间的随机数
     }
     
-    @ApiOperation("获取配送进度")
+    @Operation(summary = "获取配送进度")
     @GetMapping("/{orderId}/progress")
     public R<Map<String, Object>> getDeliveryProgress(@PathVariable Long orderId) {
         TakeoutOrder order = takeoutOrderService.getOrderDetail(orderId);
@@ -323,7 +323,7 @@ public class TakeoutOrderTrackingController {
         return R.success(progress);
     }
     
-    @ApiOperation("获取订单时间线")
+    @Operation(summary = "获取订单时间线")
     @GetMapping("/{orderId}/timeline")
     public R<Map<String, Object>> getOrderTimeline(@PathVariable Long orderId) {
         TakeoutOrder order = takeoutOrderService.getOrderDetail(orderId);

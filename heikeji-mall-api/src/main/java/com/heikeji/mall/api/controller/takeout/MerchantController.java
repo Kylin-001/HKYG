@@ -3,8 +3,8 @@ package com.heikeji.mall.api.controller.takeout;
 import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.takeout.entity.Merchant;
 import com.heikeji.mall.takeout.service.MerchantService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -14,27 +14,27 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/takeout/merchant")
-@Api(tags = "商家接口")
+@Tag(name = "商家接口")
 public class MerchantController {
     
     @Autowired
     private MerchantService merchantService;
     
-    @ApiOperation("获取营业中的商家列表")
+    @Operation(summary = "获取营业中的商家列表")
     @GetMapping("/operating")
     public R<List<Merchant>> getOperatingMerchants() {
         List<Merchant> merchants = merchantService.getActiveMerchants();
         return R.success(merchants);
     }
     
-    @ApiOperation("搜索商家")
+    @Operation(summary = "搜索商家")
     @GetMapping("/search")
     public R<List<Merchant>> searchMerchants(@RequestParam String keyword) {
         List<Merchant> merchants = merchantService.searchMerchants(keyword);
         return R.success(merchants);
     }
     
-    @ApiOperation("获取商家详情")
+    @Operation(summary = "获取商家详情")
     @GetMapping("/detail/{merchantId}")
     public R<Merchant> getMerchantDetail(@PathVariable Long merchantId) {
         Merchant merchant = merchantService.getById(merchantId);

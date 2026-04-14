@@ -1,8 +1,8 @@
 package com.heikeji.job.controller;
 
 import com.heikeji.job.scheduler.QuartzJobScheduler;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.quartz.SchedulerException;
@@ -21,7 +21,7 @@ import java.util.Date;
  */
 @RestController
 @RequestMapping("/job")
-@Api(tags = "任务管理")
+@Tag(name = "任务管理")
 @Slf4j
 public class JobController {
 
@@ -40,7 +40,7 @@ public class JobController {
      * @return 响应结果
      */
     @PostMapping("/add")
-    @ApiOperation("添加定时任务")
+    @Operation(summary = "添加定时任务")
     public ResponseEntity<String> addJob(@RequestParam String jobName,
                                         @RequestParam String jobGroup,
                                         @RequestParam String triggerName,
@@ -86,7 +86,7 @@ public class JobController {
      * @return 响应结果
      */
     @PostMapping("/update")
-    @ApiOperation("更新定时任务")
+    @Operation(summary = "更新定时任务")
     public ResponseEntity<String> updateJob(@RequestParam String jobName,
                                           @RequestParam String jobGroup,
                                           @RequestParam String triggerName,
@@ -123,7 +123,7 @@ public class JobController {
      * @return 响应结果
      */
     @PostMapping("/delete")
-    @ApiOperation("删除定时任务")
+    @Operation(summary = "删除定时任务")
     public ResponseEntity<String> deleteJob(@RequestParam String jobName,
                                           @RequestParam String jobGroup,
                                           @RequestParam String triggerName,
@@ -152,7 +152,7 @@ public class JobController {
      * @return 响应结果
      */
     @PostMapping("/pause")
-    @ApiOperation("暂停定时任务")
+    @Operation(summary = "暂停定时任务")
     public ResponseEntity<String> pauseJob(@RequestParam String jobName,
                                          @RequestParam String jobGroup) {
         try {
@@ -179,7 +179,7 @@ public class JobController {
      * @return 响应结果
      */
     @PostMapping("/resume")
-    @ApiOperation("恢复定时任务")
+    @Operation(summary = "恢复定时任务")
     public ResponseEntity<String> resumeJob(@RequestParam String jobName,
                                           @RequestParam String jobGroup) {
         try {
@@ -206,7 +206,7 @@ public class JobController {
      * @return 响应结果
      */
     @PostMapping("/trigger")
-    @ApiOperation("立即执行定时任务")
+    @Operation(summary = "立即执行定时任务")
     public ResponseEntity<String> triggerJob(@RequestParam String jobName,
                                            @RequestParam String jobGroup) {
         try {
@@ -233,7 +233,7 @@ public class JobController {
      * @return 响应结果
      */
     @GetMapping("/check")
-    @ApiOperation("检查任务是否存在")
+    @Operation(summary = "检查任务是否存在")
     public ResponseEntity<Boolean> checkJob(@RequestParam String jobName,
                                           @RequestParam String jobGroup) {
         try {
@@ -253,7 +253,7 @@ public class JobController {
      * @return 响应结果
      */
     @GetMapping("/next-fire-time")
-    @ApiOperation("获取任务下次执行时间")
+    @Operation(summary = "获取任务下次执行时间")
     public ResponseEntity<String> getNextFireTime(@RequestParam String triggerName,
                                                 @RequestParam String triggerGroup) {
         try {

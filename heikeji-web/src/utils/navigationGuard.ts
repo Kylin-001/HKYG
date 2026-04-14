@@ -23,7 +23,7 @@ class NavigationGuard {
     this.options = {
       enablePermissionCheck: options?.enablePermissionCheck ?? true,
       enableLogging: options?.enableLogging ?? import.meta.env.DEV,
-      whitelist: options?.whitelist ?? ['/auth/login', '/auth/register', '/auth/forgot-password', '/', '/products', '/search']
+      whitelist: options?.whitelist ?? ['/auth/login', '/auth/forgot-password', '/', '/products', '/search']
     }
     this.init()
   }

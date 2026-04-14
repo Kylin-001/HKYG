@@ -68,7 +68,7 @@
                 :key="item.id"
                 class="good-item"
               >
-                <img :src="item.image" :alt="item.name" class="good-img" />
+                <img :src="item.image" :alt="item.name" class="good-img" width="80" height="80" loading="lazy" />
                 <div class="good-info">
                   <h4 class="good-name">{{ item.name }}</h4>
                   <p class="good-specs">{{ item.specs }}</p>

@@ -55,9 +55,9 @@ public class User {
     private String phone;
 
     /**
-     * 性别：0-未知，1-男，2-女
+     * 性别：男、女、未知
      */
-    private Integer gender;
+    private String gender;
 
     /**
      * 生日
@@ -144,6 +144,26 @@ public class User {
      * 登录次数
      */
     private Integer loginCount;
+
+    /**
+     * 发布帖子数
+     */
+    private Integer postCount;
+
+    /**
+     * 收到点赞数
+     */
+    private Integer likeCount;
+
+    /**
+     * 收到评论数
+     */
+    private Integer commentCount;
+
+    /**
+     * 信用评分（0-5）
+     */
+    private BigDecimal creditScore;
 
     /**
      * 删除标记：0-未删除，1-已删除

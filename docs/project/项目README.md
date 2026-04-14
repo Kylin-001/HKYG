@@ -57,7 +57,6 @@ heikeji-mall/
 │   └── service-campus/         # 校园信息服务
 ├── heikeji-mall-job/           # 定时任务模块
 ├── heikeji-admin/              # 后台管理端API
-├── heikeji-app/                # 手机应用APP端API
 ├── heikeji-miniprogram/        # 微信小程序
 ├── heikeji-frontend/           # 前端模块（管理后台）
 ├── sql/                        # 数据库初始化脚本
@@ -113,9 +112,6 @@ heikeji-mall/
      
      # 启动管理端API
      java -jar heikeji-admin/target/heikeji-admin-1.0.0.jar
-     
-     # 启动应用APP端API
-     java -jar heikeji-app/target/heikeji-app-1.0.0.jar
      ```
 
 ### 4.3 前端部署

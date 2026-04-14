@@ -14,7 +14,7 @@ export function createOrder(data: CreateOrderRequest): Promise<Order> {
 }
 
 export function cancelOrder(orderId: string, reason?: string): Promise<void> {
-  return post(`/orders/${orderId}/cancel`, { reason })
+  return put(`/orders/${orderId}/cancel`, { reason })
 }
 
 export function confirmReceive(orderId: string): Promise<void> {

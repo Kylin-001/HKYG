@@ -47,6 +47,7 @@ jspm_packages/
 # Testing
 coverage/
 .nyc_output/
+test-results/
 
 # Temporary files
 *.tmp

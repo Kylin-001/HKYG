@@ -46,6 +46,28 @@ spring:
         login-username: admin
         login-password: admin
         allow: 127.0.0.1
+  # Nacos服务发现配置
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        server-addr: 192.168.186.128:8848
+        namespace: ""  # public命名空间使用空字符串
+        cluster-name: DEFAULT
+        group: DEFAULT_GROUP
+        register-enabled: true
+        # 心跳配置优化
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
+        ephemeral: true
+        metadata:
+          version: "1.0.0"
+          region: "dev"
+      config:
+        enabled: false
+        import-check:
+          enabled: false
   # Redis配置 - 临时禁用以避免RESP3协议兼容性问题
 #  redis:
 #    host: localhost
@@ -66,19 +88,6 @@ spring:
       # 如需认证，取消注释并配置用户名密码
       # username: elastic
       # password: changeme
-  # Nacos服务发现配置
-  cloud:
-    nacos:
-      config:
-        import-check:
-          enabled: false
-        enabled: false
-      discovery:
-        enabled: true
-        server-addr: localhost:8848
-        namespace: public
-        ip: 127.0.0.1
-        cluster-name: DEFAULT
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

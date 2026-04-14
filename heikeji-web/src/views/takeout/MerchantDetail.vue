@@ -223,7 +223,7 @@ onMounted(async () => {
       <div class="max-w-screen-lg mx-auto px-4 lg:px-8 py-6">
         <!-- Banner图片 -->
         <div class="banner-wrapper aspect-[21/9] rounded-2xl overflow-hidden mb-6 shadow-md">
-          <img :src="takeoutStore.merchantDetail?.bannerImage || takeoutStore.merchantDetail?.banner" :alt="takeoutStore.merchantDetail?.name" class="w-full h-full object-cover" />
+          <img :src="takeoutStore.merchantDetail?.bannerImage || takeoutStore.merchantDetail?.banner" :alt="takeoutStore.merchantDetail?.name" class="w-full h-full object-cover" width="800" height="340" />
           
           <!-- 商家名称浮层 -->
           <div class="merchant-info-overlay absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">

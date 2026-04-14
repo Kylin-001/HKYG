@@ -19,6 +19,13 @@ spring:
       discovery:
         enabled: true
         server-addr: 192.168.186.128:8848
+        namespace: ""  # public命名空间使用空字符串
+        cluster-name: DEFAULT
+        register-enabled: true
+        # 心跳配置优化
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
       config:
         enabled: false
         import-check:
@@ -34,6 +41,14 @@ spring:
           filters:
             - StripPrefix=0
         
+        # 管理后台Dashboard路由
+        - id: heikeji-admin-dashboard
+          uri: http://127.0.0.1:8090
+          predicates:
+            - Path=/api/dashboard/**
+          filters:
+            - RewritePath=/api/dashboard/(?<segment>.*), /admin/api/dashboard/$\{segment}
+        
         # 商品服务路由
         - id: heikeji-mall-product
           uri: http://127.0.0.1:8082
@@ -42,18 +57,49 @@ spring:
           filters:
             - StripPrefix=0
         
-        # 订单服务路由
-        - id: heikeji-mall-order
+        # 商品服务路由 (products复数形式，重写为单数)
+        - id: heikeji-mall-products
+          uri: http://127.0.0.1:8082
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - RewritePath=/api/products/(?<segment>.*), /api/product/$\{segment}
+        
+        # 商品分类服务路由
+        - id: heikeji-mall-category
+          uri: http://127.0.0.1:8082
+          predicates:
+            - Path=/api/category/**
+          filters:
+            - StripPrefix=0
+        
+        # 订单服务路由 - /api/order/**
+        - id: heikeji-mall-order-api
           uri: http://127.0.0.1:8083
           predicates:
             - Path=/api/order/**
+          filters:
+            - StripPrefix=0
+        
+        # 订单服务路由 - /order/**
+        - id: heikeji-mall-order
+          uri: http://127.0.0.1:8083
+          predicates:
             - Path=/order/**
+          filters:
+            - StripPrefix=0
+        
+        # 认证服务路由
+        - id: heikeji-mall-auth
+          uri: http://127.0.0.1:8085
+          predicates:
+            - Path=/api/auth/**
           filters:
             - StripPrefix=0
         
         # 用户服务路由
         - id: heikeji-mall-user
-          uri: http://127.0.0.1:8081
+          uri: http://127.0.0.1:8085
           predicates:
             - Path=/api/user/**
           filters:
@@ -99,6 +145,78 @@ spring:
           filters:
             - StripPrefix=0
 
+        # 校园服务路由 - campus
+        - id: heikeji-campus
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/campus/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - building
+        - id: heikeji-building
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/building/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - locker
+        - id: heikeji-locker
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/locker/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - site
+        - id: heikeji-site
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/site/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - takeout
+        - id: heikeji-takeout
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/takeout/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - delivery
+        - id: heikeji-delivery-request
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/delivery/request/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - classroom
+        - id: heikeji-classroom
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/classroom/**
+          filters:
+            - StripPrefix=0
+        
+        # 校园服务路由 - notice
+        - id: heikeji-notice
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/notice/**
+          filters:
+            - RewritePath=/notice/(?<segment>.*), /api/campus/notice/$\{segment}
+        
+        # 校园服务路由 - api/notice (前端baseURL为/api)
+        - id: heikeji-notice-api
+          uri: http://127.0.0.1:8003
+          predicates:
+            - Path=/api/notice/**
+          filters:
+            - RewritePath=/api/notice/(?<segment>.*), /api/campus/notice/$\{segment}
+
         # 通用服务路由（默认兜底）
         - id: fallback-service
           uri: http://localhost:9999
@@ -118,16 +236,26 @@ spring:
             name: Access-Control-Allow-Origin, Access-Control-Allow-Credentials
             strategy: RETAIN_UNIQUE
       
-      # 跨域配置
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOriginPatterns: ["*"]
-            allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-            allowedHeaders: "*"
-            exposedHeaders: ["Authorization"]
-            allowCredentials: true
-            maxAge: 3600
+      # 跨域配置 - 已移至 CorsConfig.java
+      # globalcors:
+      #   cors-configurations:
+      #     '[/**]':
+      #       allowedOrigins: 
+      #         - "http://localhost:5174"
+      #         - "http://localhost:5175"
+      #         - "http://localhost:5176"
+      #         - "http://localhost:5177"
+      #         - "http://localhost:3000"
+      #         - "http://127.0.0.1:5174"
+      #         - "http://127.0.0.1:5175"
+      #         - "http://127.0.0.1:5176"
+      #         - "http://127.0.0.1:5177"
+      #         - "http://127.0.0.1:3000"
+      #       allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      #       allowedHeaders: "*"
+      #       exposedHeaders: ["Authorization"]
+      #       allowCredentials: true
+      #       maxAge: 3600
       
       # 负载均衡配置
       loadbalancer:
@@ -195,6 +323,8 @@ gateway:
       - /admin/login
       - /api/user/login
       - /api/user/register
+      - /api/user/captcha
+      - /api/user/captcha/verify
       - /api/product/public/**
       - /fallback/**
     # JWT配置

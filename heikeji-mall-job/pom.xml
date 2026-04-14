@@ -75,9 +75,8 @@
 
         <!-- Swagger API文档 -->
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.6.0</version>
         </dependency>
     </dependencies>
 

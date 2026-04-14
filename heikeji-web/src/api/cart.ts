@@ -6,15 +6,15 @@ export function getCart(): Promise<CartResponse> {
 }
 
 export function addToCart(data: AddToCartRequest): Promise<CartItem> {
-  return post('/cart/add', data)
+  return post('/cart', data)
 }
 
 export function updateCartItem(data: UpdateCartRequest): Promise<CartItem> {
-  return put('/cart/item', data)
+  return put(`/cart/${data.itemId}`, { quantity: data.quantity, selected: data.selected })
 }
 
 export function removeCartItem(itemId: string): Promise<void> {
-  return del(`/cart/item/${itemId}`)
+  return del(`/cart/${itemId}`)
 }
 
 export function batchRemoveCart(itemIds: string[]): Promise<void> {

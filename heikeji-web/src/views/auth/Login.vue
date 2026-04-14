@@ -4,7 +4,7 @@
  * 设计系统：Brand Design System v3.0
  * 特性：分屏布局、现代化表单、完整A11y、响应式设计
  */
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
@@ -16,9 +16,18 @@ import {
   gradients,
   shadows
 } from '@/tokens/colors'
+
+// 获取亮色主题的渐变和阴影
+const lightGradients = gradients.light
+const lightShadows = shadows.light
 import { typographyTokens } from '@/tokens/typography'
 import { borderRadiusTokens } from '@/tokens/spacing'
 import { animationTokens, transitionPresets } from '@/tokens/animation'
+import {
+  User,
+  Lock,
+  Phone,
+} from '@element-plus/icons-vue'
 
 // ====== 路由和状态管理 ======
 const router = useRouter()
@@ -44,10 +53,22 @@ const loginForm = reactive({
 const registerForm = reactive({
   username: '',
   email: '',
+  phone: '',
   password: '',
   confirmPassword: '',
+  captcha: '',
   agreeToTerms: false,
 })
+
+// 验证码倒计时
+const countdown = ref(0)
+let timer: ReturnType<typeof setInterval> | null = null
+
+// 手机号验证
+const isPhoneValid = computed(() => /^1[3-9]\d{9}$/.test(registerForm.phone))
+
+// 是否可以发送验证码
+const canSendCaptcha = computed(() => countdown.value === 0 && isPhoneValid.value)
 
 // ====== 计算属性 ======
 const accountEmail = computed({
@@ -72,10 +93,22 @@ const passwordField = computed({
   }
 })
 
+// 账号/邮箱字段的动态绑定
+const identifierField = computed({
+  get: () => isLoginMode.value ? loginForm.account : registerForm.email,
+  set: (val: string) => {
+    if (isLoginMode.value) {
+      loginForm.account = val
+    } else {
+      registerForm.email = val
+    }
+  }
+})
+
 // ====== 表单验证规则 ======
 const loginRules = {
   account: [
-    { required: true, message: '请输入手机号或邮箱', trigger: 'blur' },
+    { required: true, message: '请输入账号', trigger: 'blur' },
     { min: 3, max: 50, message: '账号长度为3-50位', trigger: 'blur' },
   ],
   password: [
@@ -88,14 +121,38 @@ const registerRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 2, max: 20, message: '用户名长度为2-20位', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: Function) => {
+        if (value && !/^[\u4e00-\u9fa5a-zA-Z0-9_]+$/.test(value)) {
+          callback(new Error('用户名只能包含中文、字母、数字和下划线'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
   ],
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
+  ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度为6-20位', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: Function) => {
+        if (value && !/(?=.*[a-zA-Z])(?=.*\d)/.test(value)) {
+          callback(new Error('密码需同时包含字母和数字'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
   ],
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
@@ -109,6 +166,10 @@ const registerRules = {
       },
       trigger: 'blur',
     },
+  ],
+  captcha: [
+    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { len: 6, message: '验证码为6位数字', trigger: 'blur' },
   ],
   agreeToTerms: [
     {
@@ -201,8 +262,9 @@ async function handleSubmit() {
 
       if (isLoginMode.value) {
         await userStore.login({
-          account: loginForm.account,
+          username: loginForm.account,
           password: loginForm.password,
+          rememberMe: loginForm.remember
         })
         ElMessage.success('登录成功！')
 
@@ -216,14 +278,26 @@ async function handleSubmit() {
         await userStore.register({
           username: registerForm.username,
           email: registerForm.email,
+          phone: registerForm.phone,
           password: registerForm.password,
+          confirmPassword: registerForm.confirmPassword,
+          captcha: registerForm.captcha,
+          agreeTerms: registerForm.agreeToTerms,
         })
         ElMessage.success('注册成功！请登录')
+        // 切换到登录模式并清空注册表单
         isLoginMode.value = true
+        clearCaptchaTimer()
+        // 将注册信息填充到登录表单
+        loginForm.account = registerForm.email
       }
     } catch (error: any) {
       console.error(isLoginMode.value ? '登录失败:' : '注册失败:', error)
-      ElMessage.error(error?.message || (isLoginMode.value ? '登录失败，请重试' : '注册失败，请重试'))
+      // 错误消息已在 request.ts 中显示，这里不再重复显示
+      // 只有在没有错误消息时才显示默认提示
+      if (!error?.message) {
+        ElMessage.error(isLoginMode.value ? '登录失败，请重试' : '注册失败，请重试')
+      }
     } finally {
       loading.value = false
     }
@@ -247,6 +321,8 @@ function toggleMode() {
   isLoginMode.value = !isLoginMode.value
   // 重置表单验证状态
   formRef.value?.clearValidate()
+  // 清除验证码定时器
+  clearCaptchaTimer()
 }
 
 /**
@@ -263,12 +339,58 @@ function togglePasswordVisibility() {
   showPassword.value = !showPassword.value
 }
 
+/**
+ * 发送验证码
+ */
+async function sendCaptcha() {
+  if (!isPhoneValid.value) {
+    ElMessage.warning('请输入正确的手机号')
+    return
+  }
+  if (countdown.value > 0) return
+
+  try {
+    // TODO: 调用发送验证码 API
+    // await userApi.sendCaptcha(registerForm.phone)
+
+    countdown.value = 60
+    timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer!)
+        timer = null
+      }
+    }, 1000)
+
+    ElMessage.success(`验证码已发送至 ${registerForm.phone}`)
+  } catch (error) {
+    console.error('发送验证码失败:', error)
+    ElMessage.error('发送失败，请稍后重试')
+  }
+}
+
+/**
+ * 清除验证码定时器
+ */
+function clearCaptchaTimer() {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+    countdown.value = 0
+  }
+}
+
 // ====== 生命周期钩子 ======
 onMounted(() => {
   // 模拟页面加载，用于骨架屏展示
   setTimeout(() => {
     pageLoaded.value = true
   }, 300)
+})
+
+onUnmounted(() => {
+  // 清除验证码定时器
+  clearCaptchaTimer()
 })
 </script>
 
@@ -432,7 +554,7 @@ onMounted(() => {
               />
             </el-form-item>
 
-            <!-- 账号字段（登录模式）/ 邮箱字段（注册模式） -->
+            <!-- 账号/学号/邮箱字段（登录模式通用输入框） -->
             <el-form-item
               :prop="isLoginMode ? 'account' : 'email'"
               class="form-item-custom"
@@ -443,8 +565,10 @@ onMounted(() => {
               </label>
               <el-input
                 :id="isLoginMode ? 'account' : 'email'"
-                v-model="accountEmail"
-                :placeholder="isLoginMode ? '手机号 / 邮箱' : 'example@usth.edu.cn'"
+                v-model="identifierField"
+                :placeholder="isLoginMode 
+                  ? '手机号 / 邮箱 / 学号' 
+                  : 'example@usth.edu.cn'"
                 prefix-icon="User"
                 clearable
                 aria-required="true"
@@ -507,6 +631,59 @@ onMounted(() => {
                 >
                   密码强度：{{ passwordStrength.label }}
                 </span>
+              </div>
+            </el-form-item>
+
+            <!-- 手机号字段（仅注册模式） -->
+            <el-form-item
+              v-if="!isLoginMode"
+              prop="phone"
+              class="form-item-custom"
+            >
+              <label for="phone" class="form-label">
+                手机号
+                <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <el-input
+                id="phone"
+                v-model="registerForm.phone"
+                placeholder="请输入11位手机号"
+                prefix-icon="Phone"
+                maxlength="11"
+                clearable
+                aria-required="true"
+                autocomplete="tel"
+              />
+            </el-form-item>
+
+            <!-- 验证码字段（仅注册模式） -->
+            <el-form-item
+              v-if="!isLoginMode"
+              prop="captcha"
+              class="form-item-custom"
+            >
+              <label for="captcha" class="form-label">
+                验证码
+                <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="captcha-input-wrapper">
+                <el-input
+                  id="captcha"
+                  v-model="registerForm.captcha"
+                  placeholder="请输入6位验证码"
+                  maxlength="6"
+                  aria-required="true"
+                  autocomplete="off"
+                  class="captcha-input"
+                />
+                <button
+                  type="button"
+                  class="captcha-btn"
+                  :disabled="!canSendCaptcha"
+                  @click="sendCaptcha"
+                >
+                  {{ countdown > 0 ? `${countdown}s后重试` : '获取验证码' }}
+                </button>
               </div>
             </el-form-item>
 
@@ -1087,7 +1264,7 @@ onMounted(() => {
 }
 
 /* ========================================
-   模式切换器
+   模式切换器（登录/注册）
    ======================================== */
 .mode-switcher {
   position: relative;
@@ -1223,6 +1400,48 @@ onMounted(() => {
   position: relative;
 }
 
+/* 验证码输入包装器 */
+.captcha-input-wrapper {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.captcha-input {
+  flex: 1;
+}
+
+.captcha-input :deep(.el-input__wrapper) {
+  border-radius: 8px !important;
+  height: 44px;
+}
+
+.captcha-btn {
+  padding: 0 1rem;
+  height: 44px;
+  background: #000AB0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  white-space: nowrap;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.captcha-btn:hover:not(:disabled) {
+  background: #3B82F6;
+}
+
+.captcha-btn:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
 .password-toggle {
   position: absolute;
   right: 12px;
@@ -1304,28 +1523,39 @@ onMounted(() => {
 }
 
 .checkbox-checkmark {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-default);
-  border-radius: 6px;
-  display: flex;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--duration-fast) ease-out;
+  transition: all 0.15s ease-out;
   flex-shrink: 0;
-  background: var(--color-white);
+  background: #ffffff;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .checkbox-input:checked + .checkbox-checkmark {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: #000AB0;
+  border-color: #000AB0;
 }
 
 .checkbox-input:checked + .checkbox-checkmark::after {
-  content: '✓';
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
+  content: '';
+  display: block;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+/* 未选中状态悬停效果 */
+.custom-checkbox:hover .checkbox-checkmark {
+  border-color: #3B82F6;
 }
 
 .checkbox-input:focus-visible + .checkbox-checkmark {

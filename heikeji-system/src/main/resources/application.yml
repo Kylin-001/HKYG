@@ -1,5 +1,5 @@
 server:
-  port: 8001
+  port: 8002
 
 spring:
   application:
@@ -48,15 +48,23 @@ spring:
     password: guest
     virtual-host: /
     connection-timeout: 30000
-  # 禁用Nacos配置
+  # Nacos配置
   cloud:
     nacos:
       config:
         enabled: false
       discovery:
-        enabled: false
+        enabled: true
+        server-addr: 192.168.186.128:8848
+        namespace: ""  # public命名空间使用空字符串
+        cluster-name: DEFAULT
+        register-enabled: true
+        # 心跳配置优化
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
 
-# JWT配置
+# JWT配置:JWT配置
 jwt:
   secret: heikeji_mall_jwt_secret_key_2023
   expiration: 7200  # 过期时间（秒）

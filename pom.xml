@@ -15,14 +15,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.8</version>
         <relativePath/>
     </parent>
 
     <!-- 模块定义 -->
     <modules>
         <module>heikeji-admin</module>
-        <module>heikeji-app</module>
         <module>heikeji-common</module>
         <module>heikeji-mall-api</module>
         <module>heikeji-mall-job</module>
@@ -37,9 +36,9 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <spring.boot.version>3.2.2</spring.boot.version>
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
-        <spring-cloud-alibaba.version>2023.0.3.4</spring-cloud-alibaba.version>
+        <spring.boot.version>3.2.8</spring.boot.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>

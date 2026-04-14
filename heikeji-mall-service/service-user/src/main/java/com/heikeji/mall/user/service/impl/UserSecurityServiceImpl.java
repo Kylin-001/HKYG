@@ -277,7 +277,11 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 
         // 保存验证码到Redis（如果Redis可用）
         if (redisTemplate != null) {
-            redisTemplate.opsForValue().set(SMS_CODE_PREFIX + phone, code, 10, TimeUnit.MINUTES);
+            try {
+                redisTemplate.opsForValue().set(SMS_CODE_PREFIX + phone, code, 10, TimeUnit.MINUTES);
+            } catch (Exception e) {
+                log.warn("保存验证码到Redis失败: {}", e.getMessage());
+            }
         }
 
         // 输出验证码到控制台（开发测试用）

@@ -1,5 +1,6 @@
 package com.heikeji.job.feign;
 
+import com.heikeji.job.feign.fallback.OrderFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;

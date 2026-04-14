@@ -1,85 +1,121 @@
 <template>
   <!-- ============================================
-       缴费中心布局 - Design System v3.0
-       品牌头部（品牌蓝+金色调和）+ 功能标签导航 + 主内容区
-       UI优化: 统一使用科大蓝主色系，保留金色点缀体现财务属性
+       缴费中心布局 - Modern Financial Design v5.0
+       深蓝+金色财务专业风格，体现权威与信任
        ============================================ -->
-  <div class="min-h-screen">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
 
-    <!-- ====== 品牌头部区域（蓝色+金色调和）====== -->
-    <header class="relative overflow-hidden bg-gradient-to-r from-[#001D5C] via-[#003380] to-[#0055AA]">
-      <!-- 装饰性背景 -->
-      <div class="absolute top-0 right-0 w-56 h-56 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-      <div class="absolute bottom-0 left-1/4 w-32 h-32 bg-white/5 rounded-full translate-y-1/2"></div>
+    <!-- ====== 品牌头部区域 - 深蓝金渐变体现财务属性 ====== -->
+    <header class="relative overflow-hidden">
+      <!-- 主渐变背景 - 深蓝到金色渐变 -->
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-amber-600"></div>
+      
+      <!-- 动态光晕效果 -->
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-400/15 rounded-full blur-[100px] -translate-y-1/3 translate-x-1/4 animate-pulse-soft"></div>
+      <div class="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-blue-400/20 rounded-full blur-[80px] translate-y-1/3"></div>
+      <div class="absolute top-1/2 left-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[60px] -translate-x-1/4"></div>
+      
+      <!-- 装饰性金币图案 -->
+      <div class="absolute inset-0 opacity-[0.03]">
+        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <pattern id="coin-pattern" width="15" height="15" patternUnits="userSpaceOnUse">
+              <circle cx="7.5" cy="7.5" r="2.5" fill="white"/>
+              <text x="7.5" y="8.5" text-anchor="middle" font-size="3" fill="white" opacity="0.5">¥</text>
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#coin-pattern)"/>
+        </svg>
+      </div>
 
-      <div class="relative z-10 max-w-screen-xl mx-auto px-4 lg:px-8 py-6 flex items-center justify-between">
-        <!-- 左侧：标题和描述 -->
-        <div>
-          <h1 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>&#x1F4B0;</span> 缴费中心
-          </h1>
-          <p class="text-white/70 text-sm mt-1">学费 · 住宿费 · 缴费记录 · 绿色通道</p>
-        </div>
+      <!-- 顶部装饰线 -->
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent"></div>
 
-        <!-- 右侧：缴费统计 -->
-        <div class="hidden sm:flex items-center gap-3 text-white/80 text-xs">
-          <span class="flex items-center gap-1">
-            <el-icon :size="14"><Wallet /></el-icon>
-            待缴费: 2项
-          </span>
-          <span class="w-px h-4 bg-white/20"></span>
-          <span class="flex items-center gap-1">
-            <el-icon :size="14"><Document /></el-icon>
-            已缴清: 3项
-          </span>
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-14">
+        <!-- 顶部导航栏 -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <!-- 左侧：品牌标识 -->
+          <div class="flex items-center gap-5">
+            <div class="relative">
+              <div class="absolute inset-0 bg-amber-400/30 rounded-2xl blur-lg animate-pulse-soft"></div>
+              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl flex items-center justify-center shadow-2xl border border-white/20">
+                <IconSet name="currency-dollar" size="2xl" color="#fbbf24" />
+              </div>
+            </div>
+            <div>
+              <h1 class="text-2xl lg:text-4xl font-bold text-white tracking-tight drop-shadow-lg">
+                缴费中心
+              </h1>
+              <p class="text-blue-200/80 text-sm mt-2 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                学费 · 住宿费 · 缴费记录 · 绿色通道
+              </p>
+            </div>
+          </div>
+
+          <!-- 右侧：缴费统计卡片 -->
+          <div class="flex items-center gap-4">
+            <!-- 待缴费卡片 -->
+            <div class="group relative overflow-hidden flex items-center gap-4 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 cursor-pointer transition-all duration-500 hover:bg-white/20 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/20">
+              <div class="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/30 to-amber-600/20 flex items-center justify-center border border-amber-400/30">
+                <IconSet name="bell" size="lg" color="#fbbf24" />
+                <div class="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full border-2 border-slate-900 animate-bounce"></div>
+              </div>
+              <div class="relative">
+                <p class="text-blue-200/70 text-xs font-medium uppercase tracking-wider">待缴费</p>
+                <p class="text-white font-bold text-xl">2 <span class="text-sm font-normal text-blue-200/60">项</span></p>
+              </div>
+            </div>
+            
+            <!-- 已缴清卡片 -->
+            <div class="group relative overflow-hidden flex items-center gap-4 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 cursor-pointer transition-all duration-500 hover:bg-white/20 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/20">
+              <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/10 to-emerald-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 flex items-center justify-center border border-emerald-400/30">
+                <IconSet name="check-circle" size="lg" color="#34d399" />
+              </div>
+              <div class="relative">
+                <p class="text-blue-200/70 text-xs font-medium uppercase tracking-wider">已缴清</p>
+                <p class="text-white font-bold text-xl">3 <span class="text-sm font-normal text-blue-200/60">项</span></p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- ====== 功能标签导航栏 ====== -->
+    <!-- ====== 功能标签导航栏 - 现代化胶囊式设计 ====== -->
     <nav
-      class="sticky top-16 z-30 bg-white/95 backdrop-blur-xl border-b border-border-subtle shadow-sm"
-      :style="{ willChange: 'box-shadow' }"
-      aria-label="缴费中心导航">
-      <div class="max-w-screen-xl mx-auto px-4 lg:px-8">
-        <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide -mb-px">
+      class="sticky top-0 z-40 bg-white/80 backdrop-blur-2xl border-b border-slate-200/50 shadow-sm shadow-slate-200/50"
+      aria-label="缴费中心导航"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 py-4 overflow-x-auto scrollbar-hide">
           <router-link
-            v-for="tab in tabs"
+            v-for="(tab, index) in tabs"
             :key="tab.path"
             :to="tab.path"
             :aria-current="isTabActive(tab) ? 'page' : undefined"
             :class="[
-              'relative flex items-center gap-1.5 px-4 py-3.5',
-              'text-sm font-medium whitespace-nowrap rounded-t-lg',
-              'transition-all duration-200 ease-out',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+              'relative flex items-center gap-2.5 px-5 py-3 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300',
               isTabActive(tab)
-                ? 'text-primary font-semibold bg-primary/5'
-                : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
-            ]">
-
-            <!-- 图标 -->
-            <span class="text-base">{{ tab.icon }}</span>
+                ? 'bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg shadow-blue-600/30 scale-[1.02]'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+            ]"
+          >
+            <span :class="['transition-transform duration-300', isTabActive(tab) ? 'scale-110' : 'group-hover:scale-105']">
+              <IconSet :name="tab.icon" size="sm" :color="isTabActive(tab) ? 'white' : 'currentColor'" />
+            </span>
             <span>{{ tab.label }}</span>
-
-            <!-- 未读角标 -->
             <span
               v-if="tab.badge"
               :class="[
-                'ml-1 min-w-[18px] h-[18px] px-1.5',
-                'text-[10px] font-bold rounded-full',
-                'flex items-center justify-center leading-none',
-                isTabActive(tab)
-                  ? 'bg-primary text-white'
-                  : 'bg-crimson text-white ring-2 ring-white'
-              ]">
+                'ml-1 min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center animate-bounce-in',
+                isTabActive(tab) ? 'bg-amber-400 text-blue-900' : 'bg-rose-500 text-white'
+              ]"
+            >
               {{ tab.badge }}
             </span>
-
-            <!-- 选中态下划线（品牌蓝） -->
-            <span
-              v-if="isTabActive(tab)"
-              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"></span>
           </router-link>
         </div>
       </div>
@@ -90,7 +126,8 @@
       id="payment-main-content"
       role="main"
       aria-label="缴费中心主要内容"
-      class="max-w-screen-xl mx-auto px-4 lg:px-8 py-6">
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    >
       <RouterView v-slot="{ Component }">
         <Transition name="page-fade" mode="out-in">
           <component :is="Component" />
@@ -101,28 +138,34 @@
 </template>
 
 <script setup lang="ts">
-import { Wallet, Document } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
+import IconSet from '@/components/icons/IconSet.vue'
 
 // ============================================
-// 导航配置
+// 路由
+// ============================================
+const route = useRoute()
+
+// ============================================
+// 导航配置 - 使用SVG图标
 // ============================================
 const tabs = [
-  { label: '缴费首页', path: '/payment', base: '/payment', icon: '\u{1F3E0}', exact: true },
-  { label: '学费缴纳', path: '/payment/tuition', base: '/payment/tuition', icon: '\u{1F4D3}', badge: '1' },
-  { label: '住宿费', path: '/payment/dormitory-fee', base: '/payment/dormitory-fee', icon: '\u{1F3E0}' },
-  { label: '缴费记录', path: '/payment/records', base: '/payment/records', icon: '\u{1F4CB}' },
-  { label: '绿色通道', path: '/payment/green-channel', base: '/payment/green-channel', icon: '\u{1F33F}' },
+  { label: '缴费首页', path: '/payment', base: '/payment', icon: 'building-library', exact: true },
+  { label: '学费缴纳', path: '/payment/tuition', base: '/payment/tuition', icon: 'academic-cap', badge: '1' },
+  { label: '住宿费', path: '/payment/dormitory-fee', base: '/payment/dormitory-fee', icon: 'home' },
+  { label: '缴费记录', path: '/payment/records', base: '/payment/records', icon: 'clipboard-document' },
+  { label: '绿色通道', path: '/payment/green-channel', base: '/payment/green-channel', icon: 'shield-check' },
 ]
 
 // 判断标签是否激活
 function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boolean {
   if (tab.exact) {
-    return window.location.pathname === tab.path
+    return route.path === tab.path
   }
   if (tab.base) {
-    return window.location.pathname.startsWith(tab.base)
+    return route.path.startsWith(tab.base)
   }
-  return window.location.pathname === tab.path
+  return route.path === tab.path
 }
 </script>
 
@@ -136,20 +179,20 @@ function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boo
   scrollbar-width: none;
 }
 
-/* 页面切换过渡 */
+/* 页面切换过渡 - 更流畅的动画 */
 .page-fade-enter-active {
-  transition: all 0.25s ease-out;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-fade-leave-active {
-  transition: all 0.2s ease-in;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-fade-enter-from {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(20px) scale(0.98);
 }
 .page-fade-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-10px) scale(0.98);
 }
 
 /* 响应式优化 */
@@ -161,15 +204,15 @@ function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boo
   }
 }
 
-/* 触摸设备 */
+/* 触摸设备优化 */
 @media (hover: none) and (pointer: coarse) {
   a[role="link"] {
     -webkit-tap-highlight-color: transparent;
-
-    &:active {
-      transform: scale(0.98);
-      transition: transform 0.1s ease-out;
-    }
+  }
+  
+  a[role="link"]:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
   }
 }
 
@@ -180,15 +223,6 @@ function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boo
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-  }
-
-  .page-fade-enter-active,
-  .page-fade-leave-active {
-    transition-duration: 0.01ms !important;
-  }
-
-  nav[aria-label="缴费中心导航"] {
-    will-change: auto;
   }
 }
 </style>

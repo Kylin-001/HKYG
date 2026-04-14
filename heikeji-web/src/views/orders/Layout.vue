@@ -46,13 +46,13 @@
             v-for="tab in tabs"
             :key="tab.path"
             :to="tab.path"
-            :aria-current="$route.path === tab.path ? 'page' : undefined"
+            :aria-current="route.path === tab.path ? 'page' : undefined"
             :class="[
               'relative flex items-center gap-1.5 px-4 py-3.5',
               'text-sm font-medium whitespace-nowrap rounded-t-lg',
               'transition-all duration-200 ease-out',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-              $route.path === tab.path
+              route.path === tab.path
                 ? 'text-primary font-semibold'
                 : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
             ]"
@@ -64,7 +64,7 @@
               v-if="tab.badge !== null && tab.badge > 0"
               :class="[
                 'ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none',
-                $route.path === tab.path
+                route.path === tab.path
                   ? 'bg-primary-100 text-primary'
                   : 'bg-crimson/10 text-crimson'
               ]"
@@ -74,7 +74,7 @@
 
             <!-- 选中态下划线 -->
             <span
-              v-if="$route.path === tab.path"
+              v-if="route.path === tab.path"
               class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"
             />
           </router-link>
@@ -103,6 +103,12 @@
 
 <script setup lang="ts">
 import { ShoppingCart } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
+
+// ============================================
+// 路由
+// ============================================
+const route = useRoute()
 
 // ============================================
 // 导航配置（订单状态）

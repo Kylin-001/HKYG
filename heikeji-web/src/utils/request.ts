@@ -393,11 +393,12 @@ service.interceptors.response.use(
       return res.data ?? res
     }
 
-    ElMessage({
-      message: res.message || '请求失败',
-      type: 'error',
-      duration: 3000,
-    })
+    // 根据配置决定是否显示错误消息（默认显示）
+    const config = response.config as any
+    const showError = config?.showError !== false
+    if (showError) {
+      ElMessage.error(res.message || '请求失败')
+    }
 
     return Promise.reject(new Error(res.message || 'Error'))
   },

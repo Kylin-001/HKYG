@@ -1,97 +1,113 @@
 <template>
-  <!-- ============================================
-       信息公告布局 - Design System v3.0
-       品牌头部（科大蓝主题）+ 功能标签导航 + 主内容区
-       ============================================ -->
-  <div class="min-h-screen">
+  <div class="announcement-layout min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <!-- Hero Header Section -->
+    <header class="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500">
+      <!-- Animated Background Elements -->
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 left-1/4 w-64 h-64 bg-cyan-400/10 rounded-full blur-2xl"></div>
+        <!-- Grid Pattern Overlay -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+      </div>
 
-    <!-- ====== 品牌头部区域（科大蓝主题）====== -->
-    <header class="relative overflow-hidden bg-gradient-to-r from-primary-dark via-primary to-primary-light">
-      <!-- 装饰性背景 -->
-      <div class="absolute top-0 right-0 w-56 h-56 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-      <div class="absolute bottom-0 left-1/3 w-28 h-28 bg-white/5 rounded-full translate-y-1/2"></div>
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <!-- Title Section -->
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">信息公告</h1>
+              <p class="text-blue-100 text-sm mt-1">教学通知 · 学工公告 · 校园活动 · 招聘信息</p>
+            </div>
+          </div>
 
-      <div class="relative z-10 max-w-screen-xl mx-auto px-4 lg:px-8 py-6 flex items-center justify-between">
-        <!-- 左侧：标题和描述 -->
-        <div>
-          <h1 class="text-xl font-bold text-white flex items-center gap-2">
-            <span>&#x1F4E2;</span> 信息公告
-          </h1>
-          <p class="text-white/70 text-sm mt-1">教学通知 · 学工公告 · 校园活动 · 招聘信息</p>
+          <!-- Stats Cards -->
+          <div class="flex items-center gap-3">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-white/20">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <el-icon class="text-white" :size="16"><Bell /></el-icon>
+                </div>
+                <div>
+                  <p class="text-white/70 text-xs">未读公告</p>
+                  <p class="text-white font-bold text-lg leading-none">5</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-white/20">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <el-icon class="text-white" :size="16"><Document /></el-icon>
+                </div>
+                <div>
+                  <p class="text-white/70 text-xs">今日新增</p>
+                  <p class="text-white font-bold text-lg leading-none">3</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- 右侧：未读统计 -->
-        <div class="hidden sm:flex items-center gap-3 text-white/80 text-xs">
-          <span class="flex items-center gap-1">
-            <el-icon :size="14"><Bell /></el-icon>
-            未读: 5条
-          </span>
-          <span class="w-px h-4 bg-white/20"></span>
-          <span class="flex items-center gap-1">
-            <el-icon :size="14"><Document /></el-icon>
-            今日新增: 3条
-          </span>
-        </div>
+      <!-- Bottom Wave -->
+      <div class="absolute bottom-0 left-0 right-0">
+        <svg class="w-full h-8 sm:h-12" viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0 48h1440V24c-240 16-480 24-720 24S240 40 0 24v24z" fill="rgb(248 250 252)"/>
+        </svg>
       </div>
     </header>
 
-    <!-- ====== 功能标签导航栏 ====== -->
-    <nav
-      class="sticky top-16 z-30 bg-white/95 backdrop-blur-xl border-b border-border-subtle shadow-sm"
-      :style="{ willChange: 'box-shadow' }"
-      aria-label="信息公告导航">
-      <div class="max-w-screen-xl mx-auto px-4 lg:px-8">
-        <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide -mb-px">
+    <!-- Navigation Tabs -->
+    <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-1 -mb-px overflow-x-auto scrollbar-hide">
           <router-link
             v-for="tab in tabs"
             :key="tab.path"
             :to="tab.path"
-            :aria-current="isTabActive(tab) ? 'page' : undefined"
             :class="[
-              'relative flex items-center gap-1.5 px-4 py-3.5',
-              'text-sm font-medium whitespace-nowrap rounded-t-lg',
-              'transition-all duration-200 ease-out',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+              'group relative flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap transition-all duration-300',
               isTabActive(tab)
-                ? 'text-primary font-semibold bg-primary-50/40'
-                : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
-            ]">
-
-            <!-- 图标 -->
-            <span class="text-base">{{ tab.icon }}</span>
+                ? 'text-blue-600'
+                : 'text-slate-500 hover:text-slate-700'
+            ]"
+          >
+            <!-- Icon -->
+            <span class="text-lg transition-transform duration-300 group-hover:scale-110">{{ tab.icon }}</span>
             <span>{{ tab.label }}</span>
 
-            <!-- 未读角标 -->
+            <!-- Badge -->
             <span
               v-if="tab.badge"
               :class="[
-                'ml-1 min-w-[18px] h-[18px] px-1.5',
-                'text-[10px] font-bold rounded-full',
-                'flex items-center justify-center leading-none',
+                'ml-1 min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full flex items-center justify-center',
                 isTabActive(tab)
-                  ? 'bg-primary text-white'
-                  : 'bg-crimson text-white ring-2 ring-white'
-              ]">
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-red-500 text-white ring-2 ring-white'
+              ]"
+            >
               {{ tab.badge }}
             </span>
 
-            <!-- 选中态下划线（科大蓝） -->
+            <!-- Active Indicator -->
             <span
               v-if="isTabActive(tab)"
-              class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"></span>
+              class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full"
+            ></span>
           </router-link>
         </div>
       </div>
     </nav>
 
-    <!-- ====== 主内容区 ====== -->
-    <main
-      id="announcements-main-content"
-      role="main"
-      aria-label="信息公告主要内容"
-      class="max-w-screen-xl mx-auto px-4 lg:px-8 py-6">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <RouterView v-slot="{ Component }">
-        <Transition name="page-fade" mode="out-in">
+        <Transition name="page-slide" mode="out-in">
           <component :is="Component" />
         </Transition>
       </RouterView>
@@ -102,15 +118,11 @@
 <script setup lang="ts">
 import { Bell, Document } from '@element-plus/icons-vue'
 
-// ============================================
-// 导航配置
-// ============================================
 const tabs = [
   { label: '公告列表', path: '/announcements', base: '/announcements', icon: '\u{1F4CB}', exact: true, badge: '5' },
   { label: '通知中心', path: '/announcements/notifications', base: '/announcements/notifications', icon: '\u{1F514}' },
 ]
 
-// 判断标签是否激活
 function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boolean {
   if (tab.exact) {
     return window.location.pathname === tab.path
@@ -123,7 +135,7 @@ function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boo
 </script>
 
 <style scoped>
-/* 自定义滚动条隐藏 */
+/* Scrollbar Hide */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -132,59 +144,27 @@ function isTabActive(tab: { base?: string; path: string; exact?: boolean }): boo
   scrollbar-width: none;
 }
 
-/* 页面切换过渡 */
-.page-fade-enter-active {
-  transition: all 0.25s ease-out;
+/* Page Transition */
+.page-slide-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.page-fade-leave-active {
-  transition: all 0.2s ease-in;
+.page-slide-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.page-fade-enter-from {
+.page-slide-enter-from {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateX(20px);
 }
-.page-fade-leave-to {
+.page-slide-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateX(-20px);
 }
 
-/* 响应式优化 */
-@media (max-width: 639px) {
-  header .flex.items-center.justify-between {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-}
-
-/* 触摸设备 */
-@media (hover: none) and (pointer: coarse) {
-  a[role="link"] {
-    -webkit-tap-highlight-color: transparent;
-
-    &:active {
-      transform: scale(0.98);
-      transition: transform 0.1s ease-out;
-    }
-  }
-}
-
-/* 减少动画偏好 */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
+  .page-slide-enter-active,
+  .page-slide-leave-active {
     transition-duration: 0.01ms !important;
-  }
-
-  .page-fade-enter-active,
-  .page-fade-leave-active {
-    transition-duration: 0.01ms !important;
-  }
-
-  nav[aria-label="信息公告导航"] {
-    will-change: auto;
   }
 }
 </style>

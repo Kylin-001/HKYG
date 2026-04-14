@@ -1,9 +1,9 @@
 server:
-  port: 8081
+  port: 8085
 
 spring:
   application:
-    name: heikeji-mall-user
+    name: service-user
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
@@ -14,15 +14,10 @@ spring:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
-      - org.springframework.boot.actuate.autoconfigure.health.RedisHealthContributorAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisCacheAutoConfiguration
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=60000&socketTimeout=60000&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.186.128:3306/heikeji_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=60000&socketTimeout=60000&allowPublicKeyRetrieval=true
     username: hkyg
     password: Mysql@8Root!2025
     druid:
@@ -50,14 +45,15 @@ spring:
   # Redis配置
   data:
     redis:
-      enabled: false
-      host: localhost
+      enabled: true
+      host: 192.168.186.128
       port: 6379
-      password: 
+      password: Redis@hkyg
       database: 0
       timeout: 3000
   # RabbitMQ配置
   rabbitmq:
+    enabled: false
     host: localhost
     port: 5672
     username: guest
@@ -69,14 +65,22 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: localhost:8848
-        namespace: public
-        ip: 127.0.0.1
+        server-addr: 192.168.186.128:8848
+        namespace: ""
         cluster-name: DEFAULT
+        group: DEFAULT_GROUP
+        register-enabled: true
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
+        ephemeral: true
+        metadata:
+          version: "1.0.0"
+          region: "dev"
       config:
+        enabled: false
         import-check:
           enabled: false
-        enabled: false
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

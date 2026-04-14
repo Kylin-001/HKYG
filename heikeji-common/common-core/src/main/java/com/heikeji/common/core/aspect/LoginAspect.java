@@ -1,7 +1,6 @@
 package com.heikeji.common.core.aspect;
 
 import com.heikeji.common.core.annotation.RequiresLogin;
-import com.heikeji.common.core.security.UserContext;
 import com.heikeji.common.core.security.UserContextHolderAdapter;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -52,7 +51,9 @@ public class LoginAspect {
             if (!isLoggedIn()) {
                 log.warn("未登录用户尝试访问需要登录的接口: {}.{}", 
                         method.getDeclaringClass().getName(), method.getName());
-                throw new RuntimeException(annotation.message());
+                // 抛出认证异常，会被全局异常处理器捕获并返回401
+                throw new com.heikeji.common.core.exception.AuthenticationException(
+                    annotation.message(), "401");
             }
             
             log.debug("用户已登录，允许访问接口: {}.{}", 

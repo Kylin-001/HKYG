@@ -125,19 +125,14 @@ public class QuartzConfig {
     /**
      * 配置SchedulerFactoryBean
      * 
-     * @param dataSource 数据源（可选，内置模式下不需要）
+     * @param jobListeners 任务监听器列表
+     * @param triggerListeners 触发器监听器列表
      * @return SchedulerFactoryBean
      */
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource, 
-                                                    List<JobListener> jobListeners, 
+    public SchedulerFactoryBean schedulerFactoryBean(List<JobListener> jobListeners, 
                                                     List<TriggerListener> triggerListeners) {
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        
-        // 任务存储方式为数据库时设置数据源
-        if (dataSource != null) {
-            factory.setDataSource(dataSource);
-        }
         
         // 延时启动，应用启动3秒后初始化
         factory.setStartupDelay(3);
@@ -186,10 +181,11 @@ public class QuartzConfig {
      * 每小时执行一次释放超时占用的外卖柜
      * 
      * @param scheduler 调度器
+     * @return JobDetail 任务详情
      * @throws SchedulerException 调度器异常
      */
     @Bean
-    public void configureDeliveryLockerTimeoutJob(Scheduler scheduler) throws SchedulerException {
+    public JobDetail configureDeliveryLockerTimeoutJob(Scheduler scheduler) throws SchedulerException {
         JobDetail jobDetail = JobBuilder.newJob(DeliveryLockerTimeoutJob.class)
                 .withIdentity("deliveryLockerTimeoutJob", "takeoutJobs")
                 .storeDurably()
@@ -206,6 +202,7 @@ public class QuartzConfig {
         scheduler.scheduleJob(jobDetail, trigger);
         
         System.out.println("外卖柜超时释放定时任务配置完成：每00分执行一次");
+        return jobDetail;
     }
 
     /**

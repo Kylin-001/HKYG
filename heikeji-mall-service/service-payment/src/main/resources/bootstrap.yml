@@ -1,0 +1,42 @@
+# 应用基础配置
+spring:
+  application:
+    name: service-payment
+  # 环境配置
+  profiles:
+    active: dev
+  # Nacos配置中心 - 统一配置
+  cloud:
+    nacos:
+      # 共享配置
+      server-addr: 192.168.186.128:8848
+      namespace: ""  # public命名空间使用空字符串
+      # 服务发现配置
+      discovery:
+        enabled: true
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: ${spring.cloud.nacos.namespace}
+        group: DEFAULT_GROUP
+        cluster-name: DEFAULT
+        register-enabled: true
+        # 心跳配置 - 优化稳定性
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
+        # 实例配置
+        ephemeral: true
+        # 元数据
+        metadata:
+          version: "1.0.0"
+          region: "dev"
+      # 配置中心 - 禁用避免冲突
+      config:
+        enabled: false
+        import-check:
+          enabled: false
+
+# 日志配置
+logging:
+  level:
+    com.heikeji.mall.payment: debug
+    com.alibaba.nacos: warn

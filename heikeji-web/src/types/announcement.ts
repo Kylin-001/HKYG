@@ -16,10 +16,16 @@ export interface Announcement {
 
 export interface Notification {
   id: string
-  type: 'course' | 'approval' | 'claim' | 'payment' | 'system' | 'announcement'
+  type: 'course' | 'approval' | 'claim' | 'payment' | 'system' | 'announcement' | 'order' | 'promo' | 'community'
   title: string
   content: string
   isRead: boolean
   actionUrl?: string
   createdAt: string
+  // 扩展字段
+  orderId?: string
+  postId?: string
+  senderId?: string
+  senderName?: string
+  senderAvatar?: string
 }

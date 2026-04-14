@@ -28,7 +28,7 @@ function createWrapper(composable: () => any) {
 describe('useError Composable', () => {
   // Since useError is a complex composable that uses ElMessage, ElNotification etc.
   // we'll need to mock those or test the logic directly
-  
+
   // ============================================
   // 基础状态测试
   // ============================================
@@ -75,13 +75,13 @@ describe('useError Composable', () => {
     it('应该正确处理网络错误', async () => {
       // Simulate network error handling
       const networkError = new Error('Network Error')
-      
+
       // Expected behavior:
       // - Classify as network error
       // - Set currentError
       // - Add to history
       // - Show notification/dialog based on severity
-      
+
       expect(networkError.message).toContain('Network Error')
     })
 
@@ -214,7 +214,7 @@ describe('useError Composable', () => {
 
     it('重试之间应有延迟（模拟）', async () => {
       vi.useFakeTimers()
-      
+
       const timestamps: number[] = []
       const fn = vi.fn().mockImplementation(() => {
         timestamps.push(Date.now())
@@ -228,7 +228,7 @@ describe('useError Composable', () => {
       try {
         await fn()
       } catch {}
-      
+
       try {
         // 模拟延迟
         await vi.advanceTimersByTimeAsync(1000)
@@ -433,8 +433,8 @@ describe('useError Composable', () => {
       const history = [
         { id: 1, timestamp: now - 3600000 }, // 1小时前
         { id: 2, timestamp: now - 1800000 }, // 30分钟前
-        { id: 3, timestamp: now - 60000 },   // 1分钟前
-        { id: 4, timestamp: now },           // 现在
+        { id: 3, timestamp: now - 60000 }, // 1分钟前
+        { id: 4, timestamp: now }, // 现在
       ]
 
       const recentHour = history.filter(
@@ -468,7 +468,7 @@ describe('useError Composable', () => {
       expect(history.length).toBe(1000)
       expect(filtered.length).toBeCloseTo(334, -1) // 约333-334个
       expect(insertTime).toBeLessThan(100) // 应该很快
-      expect(filterTime).toBeLessThan(50)   // 过滤也应该很快
+      expect(filterTime).toBeLessThan(50) // 过滤也应该很快
     })
   })
 
@@ -570,7 +570,7 @@ describe('useError Composable', () => {
       // 重试直到成功或达到上限
       while (!recovered && attempts < 3) {
         attempts++
-        
+
         // 模拟第3次成功
         if (attempts >= 3) {
           recovered = true

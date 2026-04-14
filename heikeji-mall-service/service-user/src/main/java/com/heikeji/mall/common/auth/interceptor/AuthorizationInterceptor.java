@@ -71,6 +71,9 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             request.setAttribute("userId", userId);
             request.setAttribute("username", username);
             request.setAttribute("roles", roles);
+            
+            // 同时设置到 UserContextHolderAdapter，供 LoginAspect 使用
+            com.heikeji.common.core.security.UserContextHolderAdapter.setCurrentUserId(userId);
 
         } catch (Exception e) {
             throw new AuthorizationException("令牌验证失败：" + e.getMessage());

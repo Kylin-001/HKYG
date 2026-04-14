@@ -6,6 +6,7 @@ import com.heikeji.common.core.security.UserContextHolderAdapter;
 import com.heikeji.mall.common.auth.PublicApi;
 import com.heikeji.mall.common.response.R;
 import com.heikeji.mall.user.dto.LoginDTO;
+import com.heikeji.mall.user.dto.PersonalStatisticsDTO;
 import com.heikeji.mall.user.dto.RegisterDTO;
 import com.heikeji.mall.user.dto.ResetPasswordDTO;
 import com.heikeji.mall.user.dto.UserDTO;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.heikeji.common.core.validation.annotation.StudentNo;
 import com.heikeji.common.core.security.JwtUtils;
+import com.heikeji.mall.user.component.CaptchaComponent;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,6 +52,9 @@ public class UserController {
     
     @Autowired
     private JwtUtils jwtUtils;
+    
+    @Autowired
+    private CaptchaComponent captchaComponent;
 
     /**
      * 微信登录
@@ -72,12 +78,43 @@ public class UserController {
     @PublicApi
     @Operation(summary = "用户名/密码登录")
     public R<Map<String, Object>> login(@Valid @RequestBody LoginDTO loginDTO) {
-        log.info("用户进行用户名/密码登录");
-        Map<String, Object> result = userService.login(loginDTO);
-        if (result != null && !result.isEmpty()) {
-            return R.success("登录成功", result);
+        log.info("========== 登录请求开始 ==========");
+        log.info("登录账号: {}", loginDTO.getAccount());
+        log.info("验证码ID: {}", loginDTO.getCodeId());
+        log.info("验证码: {}", loginDTO.getCode());
+        
+        try {
+            // 验证验证码
+            if (loginDTO.getCodeId() != null && loginDTO.getCode() != null) {
+                log.info("开始验证验证码...");
+                boolean captchaValid = captchaComponent.validateCaptcha(loginDTO.getCodeId(), loginDTO.getCode());
+                log.info("验证码验证结果: {}", captchaValid);
+                if (!captchaValid) {
+                    log.info("验证码验证失败");
+                    return R.error("验证码错误或已过期");
+                }
+            }
+            
+            log.info("开始调用 userService.login...");
+            Map<String, Object> result = userService.login(loginDTO);
+            log.info("userService.login 返回结果: {}", result);
+            
+            if (result != null && !result.isEmpty()) {
+                log.info("登录成功");
+                log.info("========== 登录请求结束 ==========");
+                return R.success("登录成功", result);
+            }
+            log.info("用户名或密码错误");
+            log.info("========== 登录请求结束 ==========");
+            return R.error("用户名或密码错误");
+        } catch (Exception e) {
+            log.error("登录过程发生异常", e);
+            log.error("异常类型: {}", e.getClass().getName());
+            log.error("异常信息: {}", e.getMessage());
+            e.printStackTrace();
+            log.info("========== 登录请求异常结束 ==========");
+            throw e;
         }
-        return R.error("用户名或密码错误");
     }
     
     /**
@@ -143,9 +180,22 @@ public class UserController {
         if (user != null) {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
+            // 设置默认角色和权限
+            userVO.setRoles(java.util.Arrays.asList("user"));
+            userVO.setPermissions(java.util.Arrays.asList("read"));
             return R.success("查询成功", userVO);
         }
         return R.success("查询成功", null);
+    }
+
+    /**
+     * 获取当前用户信息 - 兼容前端路径
+     */
+    @GetMapping("/info")
+    @RequiresLogin
+    @Operation(summary = "获取当前用户信息")
+    public R<UserVO> getCurrentUserInfoForFrontend() {
+        return getCurrentUserInfo();
     }
 
     /**
@@ -416,5 +466,51 @@ public class UserController {
             log.error("登出失败: {}", e.getMessage());
             return R.error("登出失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 获取个人统计数据
+     */
+    @GetMapping("/statistics")
+    @RequiresLogin
+    @Operation(summary = "获取个人统计数据")
+    public R<PersonalStatisticsDTO> getPersonalStatistics() {
+        Long userId = UserContextHolderAdapter.getCurrentUserId();
+        if (userId == null) {
+            return R.error(400, "用户未登录");
+        }
+
+        log.info("获取用户{}的个人统计数据", userId);
+
+        User user = userService.getById(userId);
+        if (user == null) {
+            return R.error(R.USER_NOT_FOUND, "用户不存在");
+        }
+
+        PersonalStatisticsDTO statistics = new PersonalStatisticsDTO();
+
+        // 基础统计数据（从用户实体获取）
+        statistics.setOrderCount(0); // TODO: 从订单服务获取
+        statistics.setReviewCount(0); // TODO: 从评价服务获取
+        statistics.setFavoriteCount(0); // TODO: 从收藏服务获取
+        statistics.setFollowerCount(0); // TODO: 从关注服务获取
+        statistics.setFollowingCount(0); // TODO: 从关注服务获取
+        statistics.setPoints(user.getPoints() != null ? user.getPoints() : 0);
+        statistics.setLevel(1); // TODO: 根据积分计算等级
+        statistics.setJoinDays(0); // TODO: 计算加入天数
+
+        // 社区相关统计（从用户实体获取）
+        statistics.setPostCount(user.getPostCount() != null ? user.getPostCount() : 0);
+        statistics.setLikeCount(user.getLikeCount() != null ? user.getLikeCount() : 0);
+        statistics.setCommentCount(user.getCommentCount() != null ? user.getCommentCount() : 0);
+        statistics.setCreditScore(user.getCreditScore() != null ? user.getCreditScore() : new BigDecimal("5.0"));
+
+        // 消费统计（默认值）
+        statistics.setTotalSpent(BigDecimal.ZERO);
+        statistics.setAverageOrderValue(BigDecimal.ZERO);
+        statistics.setFavoriteCategories(new java.util.ArrayList<>());
+        statistics.setRecentActivity(new java.util.ArrayList<>());
+
+        return R.success("查询成功", statistics);
     }
 }

@@ -1,9 +1,10 @@
 package com.heikeji.mall.common.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heikeji.common.core.security.JwtUtils;
+import com.heikeji.common.core.security.UserContextHolderAdapter;
 import com.heikeji.mall.common.exception.AuthenticationException;
 import com.heikeji.mall.common.response.R;
-import com.heikeji.common.security.utils.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -43,6 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private ObjectMapper objectMapper;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
 
     /**
      * 从请求头中提取JWT令牌
@@ -78,15 +82,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = extractToken(request);
             if (token != null) {
                 // 验证令牌有效性
-                if (JwtUtils.validateToken(token)) {
-                    // 从令牌中获取用户ID
-                    Long userId = JwtUtils.getUserIdFromToken(token);
+                if (jwtUtils.validateToken(token)) {
+                    // 从令牌中获取用户ID和用户名
+                    String userId = jwtUtils.getUserIdFromToken(token);
+                    String username = jwtUtils.getUsernameFromToken(token);
                     
-                    // 如果用户ID不为空且当前上下文没有认证信息
-                    if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    // 如果用户名不为空且当前上下文没有认证信息
+                    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                         // 加载用户详情
-                        // 注意：这里需要修改为通过用户ID加载，而不是用户名
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                         
                         // 创建认证令牌
                         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -98,8 +102,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         // 设置认证信息到上下文
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                         
-                        // 设置用户上下文
-                        com.heikeji.mall.common.auth.UserContext.setUserContext(userId, userDetails.getUsername(), null, null, null, null);
+                        // 设置用户上下文到 UserContextHolderAdapter
+                        if (userId != null) {
+                            try {
+                                UserContextHolderAdapter.setCurrentUserId(Long.valueOf(userId));
+                            } catch (NumberFormatException e) {
+                                log.warn("无法将userId转换为Long: {}", userId);
+                            }
+                        }
                     }
                 }
             }
@@ -123,10 +133,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (AuthenticationException e) {
             log.error("认证失败: {}", e.getMessage());
             handleAuthenticationException(response, e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } finally {
-            // 清理用户上下文
-            com.heikeji.mall.common.auth.UserContext.clear();
         }
+        // 注意：不在finally中清理上下文，让控制器可以获取用户信息
+        // 上下文会在请求处理完成后由拦截器清理
     }
 
     /**

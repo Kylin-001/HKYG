@@ -1,289 +1,206 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import * as userApi from '@/api/user'
+import type { PersonalStatistics } from '@/types/user'
 import {
   Setting, ArrowRight, Document, Clock, Van, CircleCheck, RefreshRight,
-  Location, Star, Timer, Ticket, Present, UserFilled, Lock, Bell,
-  QuestionFilled, InfoFilled, Camera, Upload, Close, Check,
-  CirclePlusFilled, CircleCloseFilled, Box, Money, ShoppingCart, EditPen
+  Location, Star, Ticket, Present, UserFilled, Lock, Bell,
+  QuestionFilled, InfoFilled, Camera, RefreshRight as RefreshIcon, Check,
+  CirclePlusFilled, CircleCloseFilled, Box, Money, ShoppingCart, EditPen,
+  Wallet, Timer, View, Grid, School, CreditCard, Notification, Close,
+  ChatDotRound, StarFilled, Coin
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 
+// ====== 个人统计数据 ======
+const personalStats = ref<PersonalStatistics | null>(null)
+const isLoadingStats = ref(false)
+
+// 获取个人统计数据
+async function fetchPersonalStats() {
+  if (!userStore.isAuthenticated) return
+  try {
+    isLoadingStats.value = true
+    const stats = await userApi.getPersonalStatistics()
+    personalStats.value = stats
+  } catch (err) {
+    console.error('获取个人统计数据失败:', err)
+  } finally {
+    isLoadingStats.value = false
+  }
+}
+
 // ====== 用户信息 ======
 const userInfo = computed(() => ({
   id: userStore.user?.id || '1',
   username: userStore.user?.username || 'student_2024001',
-  nickname: userStore.user?.nickname || '科小易',
-  avatar: userStore.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=33&size=200',
+  nickname: userStore.user?.nickname || '张同学',
+  avatar: userStore.userAvatar,
   email: userStore.user?.email || 'zhangsan@usth.edu.cn',
   phone: userStore.user?.phone || '138****8888',
   department: (userStore.user as any)?.department || '计算机学院',
   major: (userStore.user as any)?.major || '软件工程',
-  grade: (userStore.user as any)?.grade || '2024级',
-  studentId: (userStore.user as any)?.studentId || '2023010****',
+  grade: (userStore.user as any)?.grade || '2022级',
+  studentId: (userStore.user as any)?.studentId || '2022010001',
 }))
 
 // ====== 个人数据统计面板 ======
-const userStats = computed(() => ({
-  posts: userStore.user?.postCount ?? 128,
-  likes: userStore.user?.likeCount ?? 56,
-  orders: (userStore.user as any)?.statistics?.orderCount ?? 23,
-  credit: userStore.user?.creditScore ?? 4.9
-}))
+const userStats = computed(() => [
+  {
+    label: '发布帖子',
+    value: personalStats.value?.postCount ?? (userStore.user as any)?.postCount ?? 0,
+    color: 'blue',
+    icon: ChatDotRound,
+    path: '/community/forum'
+  },
+  {
+    label: '收到点赞',
+    value: personalStats.value?.likeCount ?? (userStore.user as any)?.likeCount ?? 0,
+    color: 'pink',
+    icon: StarFilled,
+    path: '/community/forum'
+  },
+  {
+    label: '完成订单',
+    value: personalStats.value?.orderCount ?? (userStore.user as any)?.statistics?.orderCount ?? 0,
+    color: 'green',
+    icon: Box,
+    path: '/user/orders'
+  },
+  {
+    label: '信用评分',
+    value: personalStats.value?.creditScore ?? (userStore.user as any)?.creditScore ?? 5.0,
+    color: 'purple',
+    icon: CircleCheck,
+    path: null
+  },
+])
 
-// ====== 头像上传相关状态 ======
-const showAvatarDialog = ref(false)
-const selectedFile = ref<File | null>(null)
-const previewUrl = ref<string>('')
-const isUploading = ref(false)
-const fileInputRef = ref<HTMLInputElement | null>(null)
+// ====== 头像查看相关状态 ======
+const showAvatarModal = ref(false)
 
-// 裁剪相关
-const cropCanvasRef = ref<HTMLCanvasElement | null>(null)
-const cropSize = ref(200) // 裁剪输出尺寸
-
-// 点击头像触发文件选择
 function handleAvatarClick() {
-  fileInputRef.value?.click()
+  showAvatarModal.value = true
 }
 
-// 文件选择处理
-function handleFileChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  
-  if (!file) return
+// ====== 信用评分详情弹窗 ======
+const showCreditModal = ref(false)
 
-  // 验证文件类型
-  if (!file.type.startsWith('image/')) {
-    ElMessage.warning('请选择图片文件')
-    return
-  }
-
-  // 验证文件大小（最大5MB）
-  if (file.size > 5 * 1024 * 1024) {
-    ElMessage.warning('图片大小不能超过5MB')
-    return
-  }
-
-  selectedFile.value = file
-  
-  // 创建预览URL
-  previewUrl.value = URL.createObjectURL(file)
-  showAvatarDialog.value = true
-  
-  // 重置input以便可以重复选择同一文件
-  target.value = ''
+function handleCreditClick() {
+  showCreditModal.value = true
 }
 
-// Canvas裁剪 - 中心裁剪为正方形
-function cropAvatar(): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Canvas context not available'))
-        return
-      }
-
-      const size = cropSize.value
-      canvas.width = size
-      canvas.height = size
-
-      // 计算裁剪区域（中心裁剪）
-      const minDim = Math.min(img.width, img.height)
-      const sx = (img.width - minDim) / 2
-      const sy = (img.height - minDim) / 2
-
-      // 绘制裁剪后的图像
-      ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size)
-
-      // 转换为Blob
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob)
-        } else {
-          reject(new Error('Failed to create blob'))
-        }
-      }, 'image/jpeg', 0.9)
-    }
-
-    img.onerror = () => {
-      reject(new Error('Failed to load image'))
-    }
-
-    img.src = previewUrl.value
-  })
-}
-
-// 确认上传头像
-async function confirmUpload() {
-  if (!selectedFile.value) return
-
-  try {
-    isUploading.value = true
-    
-    // 执行裁剪
-    const croppedBlob = await cropAvatar()
-    
-    // 创建新的File对象
-    const croppedFile = new File([croppedBlob], 'avatar.jpg', { type: 'image/jpeg' })
-    
-    // 调用store上传方法
-    await userStore.uploadAvatar(croppedFile)
-    
-    ElMessage.success('头像更新成功')
-    closeAvatarDialog()
-  } catch (error) {
-    console.error('上传头像失败:', error)
-    ElMessage.error('上传头像失败，请重试')
-  } finally {
-    isUploading.value = false
-  }
-}
-
-// 关闭弹窗并清理资源
-function closeAvatarDialog() {
-  showAvatarDialog.value = false
-  if (previewUrl.value) {
-    URL.revokeObjectURL(previewUrl.value)
-    previewUrl.value = ''
-  }
-  selectedFile.value = null
-}
-
-// 重新选择图片
-function reselectImage() {
-  closeAvatarDialog()
-  nextTick(() => {
-    fileInputRef.value?.click()
-  })
-}
-
-// ====== Tab 相关 ======
-const activeTab = ref('profile')
-
-const tabs = [
-  { name: 'profile', label: '个人资料', icon: UserFilled },
-  { name: 'points', label: '我的积分', icon: Present },
-  { name: 'orders', label: '我的订单', icon: Document },
-  { name: 'favorites', label: '我的收藏', icon: Star },
-  { name: 'addresses', label: '地址管理', icon: Location },
+// ====== 快捷服务配置 ======
+const quickServices = [
+  { label: '待付款', icon: Wallet, path: '/user/orders?status=pending_payment', badge: 1, bgColor: 'bg-orange-100', textColor: 'text-orange-600' },
+  { label: '待收货', icon: Van, path: '/user/orders?status=shipped', badge: 1, bgColor: 'bg-blue-100', textColor: 'text-blue-600' },
+  { label: '收藏夹', icon: Star, path: '/user/favorites', badge: 15, bgColor: 'bg-pink-100', textColor: 'text-pink-600' },
+  { label: '浏览历史', icon: Clock, path: '/user/browse-history', badge: null, bgColor: 'bg-indigo-100', textColor: 'text-indigo-600' },
+  { label: '积分商城', icon: Coin, path: '/user/points-mall', badge: null, bgColor: 'bg-amber-100', textColor: 'text-amber-600' },
+  { label: '优惠券', icon: Ticket, path: '/user/coupons', badge: 3, bgColor: 'bg-red-100', textColor: 'text-red-600' },
 ]
 
-// ====== 积分系统数据 ======
-const pointsData = ref({
-  balance: 2580,
-  totalEarned: 5680,
-  totalSpent: 3100,
-  level: '黄金会员',
-  nextLevelPoints: 5000, // 距离下一等级还需积分
-})
-
-const pointsRules = [
-  { icon: ShoppingCart, title: '下单得积分', desc: '实付金额 × 1%（每单最低1积分，最高100积分）' },
-  { icon: CircleCheck, title: '每日签到', desc: '每日签到 +5 积分，连续7天额外 +50 积分' },
-  { icon: Star, title: '评价订单', desc: '评价订单可获得 +10 积分' },
-  { icon: EditPen, title: '发布帖子', desc: '在社区发布帖子 +5 积分' },
-  { icon: Present, title: '发布活动', desc: '发布校园活动 +10 积分' },
-  { icon: Money, title: '积分使用', desc: '100 积分 = 1 元（下单时可抵扣，最多抵扣30%）' },
+// ====== 校园服务配置（现代化卡片设计） ======
+const campusServices = [
+  {
+    label: '学工办理',
+    desc: '请假、奖助学金',
+    icon: Document,
+    path: '/student-affairs',
+    badge: null,
+    gradient: 'from-blue-500 to-cyan-400',
+    shadowColor: 'rgba(59, 130, 246, 0.3)'
+  },
+  {
+    label: '缴费中心',
+    desc: '学费、住宿费',
+    icon: CreditCard,
+    path: '/payment',
+    badge: null,
+    gradient: 'from-emerald-500 to-teal-400',
+    shadowColor: 'rgba(16, 185, 129, 0.3)'
+  },
+  {
+    label: '校园卡服务',
+    desc: '充值、挂失、查询',
+    icon: Ticket,
+    path: '/student-affairs/campus-card',
+    badge: null,
+    gradient: 'from-violet-500 to-purple-400',
+    shadowColor: 'rgba(139, 92, 246, 0.3)'
+  },
+  {
+    label: '信息公告',
+    desc: '学校重要通知',
+    icon: Bell,
+    path: '/announcements',
+    badge: 2,
+    gradient: 'from-amber-500 to-orange-400',
+    shadowColor: 'rgba(245, 158, 11, 0.3)'
+  },
+  {
+    label: '通知中心',
+    desc: '个人消息提醒',
+    icon: Notification,
+    path: '/announcements/notifications',
+    badge: 5,
+    gradient: 'from-rose-500 to-pink-400',
+    shadowColor: 'rgba(244, 63, 94, 0.3)'
+  },
 ]
 
-const pointsHistory = ref([
-  { id: 1, type: 'earn', amount: +25, desc: '下单获得积分', time: '2026-04-01 14:30', orderNo: 'HK20260401001' },
-  { id: 2, type: 'earn', amount: +5, desc: '每日签到', time: '2026-04-01 08:00' },
-  { id: 3, type: 'spend', amount: -100, desc: '下单抵扣1元', time: '2026-03-28 16:20', orderNo: 'HK20260328005' },
-  { id: 4, type: 'earn', amount: +50, desc: '连续签到7天奖励', time: '2026-03-25 08:00' },
-  { id: 5, type: 'earn', amount: +10, desc: '评价订单', time: '2026-03-22 11:15', orderNo: 'HK20260322004' },
-  { id: 6, type: 'earn', amount: +5, desc: '发布帖子《学习APP推荐》', time: '2026-04-01 10:00' },
-  { id: 7, type: 'spend', amount: -200, desc: '下单抵扣2元', time: '2026-03-18 20:30', orderNo: 'HK20260318005' },
-  { id: 8, type: 'earn', amount: +88, desc: '下单获得积分', time: '2026-03-18 10:05', orderNo: 'HK20260318005' },
-  { id: 9, type: 'earn', amount: +10, desc: '发布活动《编程马拉松》', time: '2026-03-15 14:20' },
-  { id: 10, type: 'earn', amount: +5, desc: '每日签到', time: '2026-03-15 08:00' },
-])
-
-// ====== 原有数据 ======
-const stats = ref([
-  { label: '订单', value: 28, icon: Box, path: '/user/orders' },
-  { label: '收藏', value: 15, icon: Star, path: '/user/favorites' },
-  { label: '优惠券', value: 8, icon: Ticket, path: '/user/coupons' },
-  { label: '积分', value: 2680, icon: Money, path: '#' },
-])
-
-const menuItems = ref([
-  {
-    title: '我的订单',
-    items: [
-      { label: '全部订单', icon: Document, path: '/user/orders', badge: null },
-      { label: '待付款', icon: Clock, path: '/user/orders?status=pending_payment', badge: 1 },
-      { label: '待收货', icon: Van, path: '/user/orders?status=shipped', badge: 1 },
-      { label: '已完成', icon: CircleCheck, path: '/user/orders?status=completed', badge: null },
-      { label: '售后/退款', icon: RefreshRight, path: '#', badge: null },
-    ],
-  },
-  {
-    title: '校园服务',
-    items: [
-      { label: '学工办理', icon: Setting, path: '/student-affairs', badge: null },
-      { label: '缴费中心', icon: Present, path: '/payment', badge: null },
-      { label: '校园卡服务', icon: Ticket, path: '/student-affairs/campus-card', badge: null },
-      { label: '信息公告', icon: Bell, path: '/announcements', badge: 2 },
-      { label: '通知中心', icon: Bell, path: '/announcements/notifications', badge: 5 },
-    ],
-  },
+// ====== 菜单分组配置 ======
+const menuGroups = [
   {
     title: '工具与服务',
+    icon: Grid,
     items: [
-      { label: '地址管理', icon: Location, path: '/user/addresses', badge: null },
-      { label: '收藏夹', icon: Star, path: '/user/favorites', badge: null },
-      { label: '浏览历史', icon: Timer, path: '#', badge: null },
-      { label: '优惠券包', icon: Ticket, path: '/user/coupons', badge: 3 },
-      { label: '积分商城', icon: Present, path: '#', badge: null },
+      { label: '帮助中心', icon: QuestionFilled, path: '/help', badge: null },
     ],
   },
   {
     title: '账户设置',
+    icon: Setting,
     items: [
       { label: '个人资料', icon: UserFilled, path: '/user/settings', badge: null },
-      { label: '账号安全', icon: Lock, path: '/user/settings', badge: null },
-      { label: '消息通知', icon: Bell, path: '#', badge: 5 },
-      { label: '帮助中心', icon: QuestionFilled, path: '/help', badge: null },
-      { label: '关于我们', icon: InfoFilled, path: '#', badge: null },
+      { label: '账号安全', icon: Lock, path: '/user/settings/security', badge: null },
+      { label: '消息通知', icon: Bell, path: '/user/notifications', badge: 5 },
     ],
   },
-])
+]
 
-function navigateTo(path: string) { 
-  router.push(path) 
+function navigateTo(path: string) {
+  if (path === '#') {
+    ElMessage.info('功能开发中，敬请期待')
+    return
+  }
+  router.push(path)
 }
 
 function handleLogout() {
-  ElMessageBox.confirm('确定要退出登录吗？', '退出登录', { confirmButtonText: '确认退出', cancelButtonText: '取消', type: 'warning' })
-    .then(() => { userStore.logout(); ElMessage.success('已退出登录'); router.push('/') })
+  ElMessageBox.confirm('确定要退出登录吗？', '退出登录', {
+    confirmButtonText: '确认退出',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      userStore.logout()
+      ElMessage.success('已退出登录')
+      router.push('/')
+    })
     .catch(() => {})
-}
-
-// 积分相关
-const pointsHistoryRef = ref<HTMLElement | null>(null)
-
-function scrollToHistory() {
-  if (pointsHistoryRef.value) {
-    pointsHistoryRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 }
 
 onMounted(async () => {
   if (userStore.token) {
     try {
       await userStore.fetchUserInfo()
+      await fetchPersonalStats()
     } catch (err: any) {
       console.error('获取用户信息失败:', err)
     }
@@ -292,467 +209,494 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="profile-page min-h-screen bg-surface-secondary">
-    <div class="max-w-screen-lg mx-auto px-4 lg:px-8 py-6 pb-24 md:pb-8">
+  <div class="profile-page" style="min-height: 100vh; background-color: #f5f7fa;">
+    <div class="profile-container">
       
       <!-- 未登录提示 -->
-      <div v-if="!userStore.isAuthenticated" class="text-center py-20">
-        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-          <el-icon :size="48" class="text-primary/40"><UserFilled /></el-icon>
+      <div v-if="!userStore.isAuthenticated" style="text-align: center; padding: 80px 0;">
+        <div style="width: 96px; height: 96px; margin: 0 auto 24px; border-radius: 50%; background: linear-gradient(135deg, rgba(0,86,179,0.1), rgba(0,86,179,0.05)); display: flex; align-items: center; justify-content: center;">
+          <el-icon :size="48" style="color: rgba(0,86,179,0.4);"><UserFilled /></el-icon>
         </div>
-        <h3 class="text-xl font-bold text-text-primary mb-2">您还未登录</h3>
-        <p class="text-text-tertiary mb-6">登录后查看个人信息、订单、收藏等内容</p>
+        <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">您还未登录</h3>
+        <p style="color: #9ca3af; margin-bottom: 24px;">登录后查看个人信息、订单、收藏等内容</p>
         <button @click="navigateTo('/login')"
-          class="px-8 py-3 rounded-full bg-gradient-to-r from-primary to-primary-light text-white font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all">
+          style="padding: 12px 32px; border-radius: 9999px; background: linear-gradient(135deg, #0056b3, #0078d4); color: white; font-weight: 600; border: none; cursor: pointer;">
           立即登录
         </button>
       </div>
 
       <template v-else>
-        <!-- 用户信息卡片 - 科大蓝品牌风格 -->
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light shadow-brand mb-6">
-          <!-- 背景装饰 -->
-          <div class="absolute top-0 right-0 w-64 h-64 bg-white/8 rounded-full -translate-y-1/2 translate-x-1/3"></div>
-          <div class="absolute bottom-0 left-16 w-32 h-32 bg-white/5 rounded-full translate-y-1/2"></div>
-          <div class="absolute top-1/2 right-1/4 w-20 h-20 bg-gold/8 rounded-full"></div>
+        <!-- ====== 用户信息卡片 - 全新设计 ====== -->
+        <div style="position: relative; overflow: hidden; border-radius: 24px; background: linear-gradient(135deg, #003b80, #0056b3, #0078d4); box-shadow: 0 8px 32px rgba(0,86,179,0.25); margin-bottom: 20px;">
+          <!-- 装饰性背景元素 -->
+          <div style="position: absolute; top: 0; right: 0; width: 192px; height: 192px; background: rgba(255,255,255,0.05); border-radius: 50%; transform: translate(25%, -33%);"></div>
+          <div style="position: absolute; bottom: 0; left: 0; width: 128px; height: 128px; background: rgba(255,255,255,0.03); border-radius: 50%; transform: translate(-25%, 50%);"></div>
 
-          <div class="relative z-10 p-6 sm:p-8">
+          <div style="position: relative; z-index: 10; padding: 24px;">
             <!-- 设置按钮 -->
             <button @click="navigateTo('/user/settings')"
-              class="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/25 transition-colors">
+              style="position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; color: white; border: none; cursor: pointer; transition: all 0.2s;">
               <el-icon :size="18"><Setting /></el-icon>
             </button>
 
-            <div class="flex items-center gap-5">
-              <!-- 头像区域（可点击上传） -->
-              <div class="relative group cursor-pointer" @click="handleAvatarClick">
-                <img :src="userInfo.avatar" alt="用户头像"
-                  class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white/30 shadow-lg ring-2 ring-white/15" />
-                <span class="absolute bottom-1 right-1 w-4 h-4 bg-pine rounded-full border-2 border-white"></span>
-                
-                <!-- Hover遮罩层 -->
-                <div class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <el-icon :size="24" class="text-white"><Camera /></el-icon>
-                </div>
-                
-                <!-- 隐藏的文件输入框 -->
-                <input
-                  ref="fileInputRef"
-                  type="file"
-                  accept="image/*"
-                  class="hidden"
-                  @change="handleFileChange"
+            <!-- 用户信息 -->
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+              <!-- 头像区域（可点击查看大图） -->
+              <div style="position: relative; cursor: pointer; flex-shrink: 0;" @click="handleAvatarClick" class="avatar-wrapper">
+                <img :src="userInfo.avatar" alt=""
+                  style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+                  @error="$event.target.src='https://api.dicebear.com/7.x/avataaars/svg?seed=fallback&size=200'"
                 />
+                <div style="position: absolute; bottom: 2px; right: 2px; width: 16px; height: 16px; background: #10b981; border-radius: 50%; border: 2px solid white;"></div>
               </div>
 
-              <div class="text-white flex-1 min-w-0">
-                <h2 class="text-xl sm:text-2xl font-bold mb-1">{{ userInfo.nickname }}</h2>
-                <p class="text-white/65 text-sm mb-3">{{ userInfo.department }} · {{ userInfo.major }} · {{ userInfo.grade }}</p>
+              <div style="color: white; flex: 1; min-width: 0;">
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">{{ userInfo.nickname }}</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 8px;">{{ userInfo.department }} · {{ userInfo.major }} · {{ userInfo.grade }}</p>
 
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/90 backdrop-blur-sm text-xs font-medium text-white">
+                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(255,193,7,0.9); font-size: 12px; font-weight: 500; color: #92400e;">
                   <span>🎓</span>
                   <span>黑科大在校生</span>
-                  <span class="opacity-70">·</span>
-                  <span>成长值 {{ stats[3].value }}</span>
+                  <span style="opacity: 0.6;">·</span>
+                  <span>成长值 2680</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- ========== 新增：个人数据统计面板 ========== -->
-          <div class="grid grid-cols-4 gap-3 px-6 pb-6 mt-2">
-            <!-- 发布帖子 -->
-            <div class="stat-card stat-card-blue rounded-2xl p-4 text-center cursor-pointer hover:scale-105 transition-transform"
-              @click="navigateTo('#')">
-              <div class="stat-value text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-sky-300 to-cyan-200 bg-clip-text text-transparent">
-                {{ userStats.posts }}
+            <!-- 统计面板 - 四宫格 -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+              <div v-for="(stat, index) in userStats" :key="index"
+                style="background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.3s;"
+                class="stat-card"
+                @click="stat.path ? navigateTo(stat.path) : stat.label === '信用评分' ? handleCreditClick() : null">
+                <div :style="{ fontSize: '24px', fontWeight: 700, marginBottom: '4px', color: stat.color === 'blue' ? '#7dd3fc' : stat.color === 'pink' ? '#f9a8d4' : stat.color === 'green' ? '#6ee7b7' : '#c4b5fd' }">
+                  {{ stat.value }}
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.7);">{{ stat.label }}</div>
               </div>
-              <div class="stat-label text-xs text-white/80">发布帖子</div>
-            </div>
-            
-            <!-- 收到点赞 -->
-            <div class="stat-card stat-card-pink rounded-2xl p-4 text-center cursor-pointer hover:scale-105 transition-transform"
-              @click="navigateTo('#')">
-              <div class="stat-value text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-pink-300 to-rose-200 bg-clip-text text-transparent">
-                {{ userStats.likes }}
-              </div>
-              <div class="stat-label text-xs text-white/80">收到点赞</div>
-            </div>
-            
-            <!-- 完成订单 -->
-            <div class="stat-card stat-card-green rounded-2xl p-4 text-center cursor-pointer hover:scale-105 transition-transform"
-              @click="navigateTo('/user/orders')">
-              <div class="stat-value text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-emerald-300 to-green-200 bg-clip-text text-transparent">
-                {{ userStats.orders }}
-              </div>
-              <div class="stat-label text-xs text-white/80">完成订单</div>
-            </div>
-            
-            <!-- 信用评分 -->
-            <div class="stat-card stat-card-purple rounded-2xl p-4 text-center cursor-pointer hover:scale-105 transition-transform"
-              @click="navigateTo('#')">
-              <div class="stat-value text-2xl sm:text-3xl font-bold mb-1 bg-gradient-to-r from-violet-300 to-purple-200 bg-clip-text text-transparent">
-                {{ userStats.credit }}
-              </div>
-              <div class="stat-label text-xs text-white/80">信用评分</div>
             </div>
           </div>
         </div>
 
-        <!-- ========== 新增：Tab 导航 ========== -->
-        <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-primary-50/50 p-2 mb-5">
-          <div class="flex gap-1">
+        <!-- ====== 快捷服务网格 ====== -->
+        <div style="background: white; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 20px; margin-bottom: 16px;">
+          <h3 style="font-weight: 600; color: #1f2937; margin-bottom: 16px; font-size: 14px;">快捷服务</h3>
+          <div class="quick-services-grid">
+            <button v-for="item in quickServices" :key="item.label" @click="navigateTo(item.path)"
+              style="display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; padding: 4px;"
+              class="quick-service-btn">
+              <div :class="[item.bgColor, item.textColor]" style="position: relative; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                <el-icon :size="22">
+                  <component :is="item.icon" />
+                </el-icon>
+                <span v-if="item.badge" style="position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; background: #ef4444; color: white; font-size: 10px; font-weight: 600; border-radius: 9px; display: flex; align-items: center; justify-content: center; border: 2px solid white;">
+                  {{ item.badge }}
+                </span>
+              </div>
+              <span style="font-size: 11px; color: #4b5563;">{{ item.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ====== 校园服务 - 现代化卡片网格 ====== -->
+        <div style="background: white; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 20px; margin-bottom: 16px;">
+          <!-- 标题栏 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, #0056b3, #0078d4); display: flex; align-items: center; justify-content: center;">
+                <el-icon :size="16" style="color: white;"><School /></el-icon>
+              </div>
+              <span style="font-weight: 600; font-size: 15px; color: #1f2937;">校园服务</span>
+            </div>
+            <button @click="navigateTo('/student-affairs')" style="display: flex; align-items: center; gap: 4px; background: none; border: none; color: #6b7280; font-size: 13px; cursor: pointer; transition: color 0.2s;" class="view-all-btn">
+              <span>全部</span>
+              <el-icon :size="14"><ArrowRight /></el-icon>
+            </button>
+          </div>
+
+          <!-- 服务卡片网格 -->
+          <div class="campus-services-grid">
             <button
-              v-for="tab in tabs"
-              :key="tab.name"
-              @click="activeTab = tab.name"
-              :class="[
-                'flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all',
-                activeTab === tab.name
-                  ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-md'
-                  : 'text-text-secondary hover:bg-primary-50/60 hover:text-primary'
-              ]"
+              v-for="(service, index) in campusServices"
+              :key="index"
+              @click="navigateTo(service.path)"
+              class="campus-service-card"
+              :style="{ '--shadow-color': service.shadowColor }"
             >
-              <el-icon :size="16"><component :is="tab.icon" /></el-icon>
-              <span>{{ tab.label }}</span>
+              <!-- 图标区域 -->
+              <div :class="['service-icon-wrapper', service.gradient]" style="position: relative;">
+                <el-icon :size="22" style="color: white;">
+                  <component :is="service.icon" />
+                </el-icon>
+                <!-- 徽章 -->
+                <span
+                  v-if="service.badge"
+                  style="position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 6px; background: linear-gradient(135deg, #ef4444, #f87171); color: white; font-size: 11px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);"
+                >
+                  {{ service.badge }}
+                </span>
+              </div>
+              <!-- 文字区域 -->
+              <div style="text-align: center;">
+                <div style="font-size: 14px; font-weight: 600; color: #1f2937; margin-bottom: 2px;">{{ service.label }}</div>
+                <div style="font-size: 11px; color: #9ca3af;">{{ service.desc }}</div>
+              </div>
             </button>
           </div>
         </div>
 
-        <!-- Tab 内容区域 -->
-        <div v-show="activeTab === 'profile'" class="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-primary-50/50 p-6 mb-5">
-          <h3 class="font-bold text-text-primary mb-4 flex items-center gap-2">
-            <el-icon :size="18" class="text-primary"><UserFilled /></el-icon>
-            个人资料
-          </h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">用户名</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.username }}</p>
+        <!-- ====== 功能菜单分组 ====== -->
+        <div class="menu-groups-wrapper">
+          <div v-for="(group, gIndex) in menuGroups" :key="gIndex" class="menu-group-card" style="background: white; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; overflow: hidden; margin-bottom: 16px;">
+          <!-- 分组标题 -->
+          <div style="padding: 14px 20px; background: #f9fafb; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <el-icon :size="16" style="color: #6b7280;">
+                <component :is="group.icon" />
+              </el-icon>
+              <span style="font-weight: 600; font-size: 14px; color: #1f2937;">{{ group.title }}</span>
             </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">昵称</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.nickname }}</p>
-            </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">邮箱</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.email }}</p>
-            </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">手机号</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.phone }}</p>
-            </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">学院</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.department }}</p>
-            </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">专业</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.major }}</p>
-            </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">年级</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.grade }}</p>
-            </div>
-            <div class="info-item">
-              <label class="text-text-tertiary text-sm">学号</label>
-              <p class="font-medium text-text-primary mt-1">{{ userInfo.studentId }}</p>
-            </div>
+            <el-icon :size="14" style="color: #9ca3af;"><ArrowRight /></el-icon>
           </div>
 
-          <button @click="navigateTo('/user/settings')"
-            class="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary-light text-white font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all">
-            编辑资料
-          </button>
-        </div>
-
-        <!-- ========== 积分面板 ========== -->
-        <div v-show="activeTab === 'points'" class="space-y-5">
-          <!-- 积分余额卡片 -->
-          <div class="bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500 rounded-2xl p-6 text-white shadow-lg shadow-orange-200/50 relative overflow-hidden">
-            <!-- 背景装饰 -->
-            <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-            <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
-
-            <div class="relative z-10">
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <p class="text-sm opacity-90 mb-1">当前积分</p>
-                  <div class="flex items-baseline gap-1">
-                    <span class="text-4xl font-bold points-value-animate">{{ pointsData.balance.toLocaleString() }}</span>
-                    <span class="text-lg opacity-80">分</span>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <el-tag effect="dark" :color="'rgba(255,255,255,0.25)'" round class="!border-white/30 !text-white mb-2">
-                    {{ pointsData.level }}
-                  </el-tag>
-                  <p class="text-xs opacity-80">距下一等级还需 {{ pointsData.nextLevelPoints }} 积分</p>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
-                <div class="text-center">
-                  <p class="text-2xl font-bold">{{ pointsData.totalEarned.toLocaleString() }}</p>
-                  <p class="text-xs opacity-80 mt-1">累计获得</p>
-                </div>
-                <div class="text-center border-x border-white/20">
-                  <p class="text-2xl font-bold">{{ pointsData.totalSpent.toLocaleString() }}</p>
-                  <p class="text-xs opacity-80 mt-1">已使用</p>
-                </div>
-                <div class="text-center">
-                  <p class="text-2xl font-bold">{{ ((pointsData.totalSpent / pointsData.totalEarned) * 100).toFixed(1) }}%</p>
-                  <p class="text-xs opacity-80 mt-1">使用率</p>
-                </div>
-              </div>
-
-              <div class="mt-4 flex gap-3">
-                <button @click="navigateTo('#')"
-                  class="flex-1 py-2.5 rounded-xl bg-white/20 backdrop-blur-sm text-white font-medium hover:bg-white/30 transition-all text-sm flex items-center justify-center gap-2">
-                  <el-icon><Present /></el-icon>
-                  积分商城
-                </button>
-                <button @click="scrollToHistory"
-                  class="flex-1 py-2.5 rounded-xl bg-white/20 backdrop-blur-sm text-white font-medium hover:bg-white/30 transition-all text-sm flex items-center justify-center gap-2">
-                  <el-icon><Document /></el-icon>
-                  积分明细
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 积分规则说明 -->
-          <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-primary-50/50 p-6">
-            <h3 class="font-bold text-text-primary mb-4 flex items-center gap-2">
-              <el-icon :size="18" class="text-orange-500"><InfoFilled /></el-icon>
-              积分获取与使用规则
-            </h3>
-            <div class="space-y-3">
-              <div v-for="(rule, index) in pointsRules" :key="index"
-                class="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-orange-50/50 transition-colors">
-                <span class="text-2xl">{{ rule.icon }}</span>
-                <div class="flex-1">
-                  <h4 class="font-semibold text-text-primary text-sm">{{ rule.title }}</h4>
-                  <p class="text-xs text-text-tertiary mt-0.5">{{ rule.desc }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 积分明细列表 -->
-          <div ref="pointsHistoryRef" class="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-primary-50/50 p-6">
-            <h3 class="font-bold text-text-primary mb-4 flex items-center justify-between">
-              <span class="flex items-center gap-2">
-                <el-icon :size="18" class="text-orange-500"><Clock /></el-icon>
-                积分明细
-              </span>
-              <span class="text-xs font-normal text-text-tertiary">最近 10 条记录</span>
-            </h3>
-
-            <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              <div v-for="record in pointsHistory" :key="record.id"
-                class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100/80 transition-colors group">
-                <div :class="[
-                  'w-10 h-10 rounded-full flex items-center justify-center shrink-0',
-                  record.type === 'earn' ? 'bg-green-100' : 'bg-red-100'
-                ]">
-                  <el-icon :class="record.type === 'earn' ? 'text-green-500' : 'text-red-500'" :size="18">
-                    <component :is="record.type === 'earn' ? 'CirclePlusFilled' : 'CircleCloseFilled'" />
-                  </el-icon>
-                </div>
-
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between mb-1">
-                    <h4 class="font-medium text-text-primary text-sm truncate pr-2">{{ record.desc }}</h4>
-                    <span :class="[
-                      'font-bold text-base shrink-0',
-                      record.type === 'earn' ? 'text-green-500' : 'text-red-500'
-                    ]">
-                      {{ record.amount > 0 ? '+' : '' }}{{ record.amount }}
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-2 text-[11px] text-text-quaternary">
-                    <span>{{ record.time }}</span>
-                    <span v-if="record.orderNo" class="px-1.5 py-0.5 rounded bg-gray-200 text-text-tertiary">
-                      {{ record.orderNo }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-4 text-center">
-              <button class="text-sm text-orange-500 hover:text-orange-600 font-medium transition-colors">
-                查看全部明细 →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 订单快捷入口 -->
-        <div v-show="activeTab === 'orders' || activeTab === 'profile'"
-          class="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-primary-50/50 p-5 mb-5">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-text-primary">我的订单</h3>
-            <button @click="navigateTo('/user/orders')" class="text-sm text-text-tertiary hover:text-primary transition-colors flex items-center gap-1">
-              全部订单<el-icon><ArrowRight /></el-icon>
-            </button>
-          </div>
-          <div class="grid grid-cols-5 gap-2">
-            <button v-for="item in menuItems[0].items" :key="item.label" @click="navigateTo(item.path)"
-              class="flex flex-col items-center gap-2 py-3 rounded-xl hover:bg-primary-50/60 transition-all group cursor-pointer">
-              <div class="relative w-11 h-11 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100/50 flex items-center justify-center group-hover:from-primary-100 group-hover:to-primary-200/50 transition-all">
-                <el-icon :size="20" class="text-primary"><component :is="item.icon" /></el-icon>
-                <span v-if="item.badge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-crimson text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">{{ item.badge }}</span>
-              </div>
-              <span class="text-xs text-text-secondary group-hover:text-primary transition-colors">{{ item.label }}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 功能菜单 -->
-        <div v-for="(section, sIndex) in menuItems.slice(1)" :key="sIndex"
-          class="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-primary-50/50 overflow-hidden mb-4">
-          <div class="px-5 py-3.5 border-b border-primary-50/50">
-            <h3 class="font-semibold text-sm text-text-tertiary">{{ section.title }}</h3>
-          </div>
+          <!-- 菜单项 -->
           <div>
-            <button v-for="(item, iIndex) in section.items" :key="iIndex" @click="navigateTo(item.path)"
-              class="w-full flex items-center gap-3.5 px-5 py-4 hover:bg-primary-50/30 transition-colors border-b border-primary-50/30 last:border-b-0">
-              <div class="w-9 h-9 rounded-xl bg-primary-50/50 flex items-center justify-center shrink-0 group-hover:bg-primary-100/60">
-                <el-icon :size="17" class="text-text-tertiary"><component :is="item.icon" /></el-icon>
+            <button v-for="(item, iIndex) in group.items" :key="iIndex" @click="navigateTo(item.path)"
+              style="width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: none; border: none; border-bottom: 1px solid #f9fafb; cursor: pointer; text-align: left; transition: all 0.15s; position: relative; overflow: hidden;"
+              class="menu-item">
+              <!-- 左侧蓝色指示条 -->
+              <div class="menu-indicator" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: #0056b3; border-radius: 0 2px 2px 0; transition: height 0.2s;"></div>
+
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <el-icon :size="17" style="color: #6b7280;">
+                  <component :is="item.icon" />
+                </el-icon>
               </div>
-              <span class="flex-1 text-left text-sm font-medium text-text-primary">{{ item.label }}</span>
-              <div class="flex items-center gap-2">
-                <span v-if="item.badge" class="min-w-[18px] h-[18px] px-1.5 bg-crimson text-white text-[10px] font-bold rounded-full flex items-center justify-center">{{ item.badge }}</span>
-                <el-icon class="text-text-quaternary"><ArrowRight /></el-icon>
+              <span style="flex: 1; font-size: 14px; font-weight: 500; color: #374151;">{{ item.label }}</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span v-if="item.badge" style="min-width: 20px; height: 20px; padding: 0 6px; background: #ef4444; color: white; font-size: 11px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                  {{ item.badge }}
+                </span>
+                <el-icon :size="16" style="color: #d1d5db;"><ArrowRight /></el-icon>
               </div>
             </button>
           </div>
+          </div>
         </div>
 
-        <!-- 退出登录 -->
-        <button @click="handleLogout"
-          class="w-full py-4 rounded-2xl bg-white/90 backdrop-blur-md shadow-sm border border-crimson/15 text-crimson font-semibold hover:bg-crimson/5 transition-colors">
-          退出登录
-        </button>
+        <!-- 底部版权 -->
+        <div style="text-align: center; margin-top: 24px;">
+          <p style="color: #9ca3af; font-size: 12px;">黑科易购 v2.0 · Made with <span style="color: #f87171;">❤</span> for HLJUST</p>
+          <p style="font-size: 10px; color: #d1d5db; margin-top: 4px;">黑龙江科技大学 · 厚德博学 强吾兴邦</p>
+        </div>
       </template>
 
-      <!-- 底部品牌信息 -->
-      <div class="text-center mt-6 pb-2 space-y-1">
-        <p class="text-text-quaternary text-xs">黑科易购 v2.0 · Made with <Star :size="11" class="inline text-crimson" /> for HLJUST Students</p>
-        <p class="text-[10px] text-text-quaternary/50 tracking-widest">黑龙江科技大学 · 厚德博学 强吾兴邦 · Since 1947</p>
-      </div>
-    </div>
-
-    <!-- ========== 头像上传预览弹窗 ========== -->
-    <Teleport to="body">
-      <Transition name="dialog-fade">
-        <div v-if="showAvatarDialog" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click.self="closeAvatarDialog">
-          <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
-            <!-- 弹窗头部 -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 class="text-lg font-bold text-text-primary">更换头像</h3>
-              <button @click="closeAvatarDialog" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-                <el-icon :size="18" class="text-text-tertiary"><Close /></el-icon>
-              </button>
-            </div>
-
-            <!-- 预览区域 -->
-            <div class="p-6">
-              <div class="relative mx-auto w-64 h-64 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                <!-- 图片预览（object-fit: cover模拟裁剪效果） -->
-                <img
-                  v-if="previewUrl"
-                  :src="previewUrl"
-                  alt="头像预览"
-                  class="w-full h-full object-cover"
-                  style="object-position: center;"
-                />
-              </div>
-              
-              <p class="text-center text-sm text-text-tertiary mt-4">
-                预览效果：将自动居中裁剪为正方形头像
-              </p>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="flex gap-3 px-6 pb-6">
-              <button
-                @click="reselectImage"
-                :disabled="isUploading"
-                class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-text-secondary font-semibold hover:border-primary hover:text-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                <el-icon :size="18"><RefreshRight /></el-icon>
-                重新选择
-              </button>
-              
-              <button
-                @click="confirmUpload"
-                :disabled="isUploading"
-                class="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-light text-white font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                <el-icon v-if="isUploading" class="animate-spin" :size="18"><RefreshRight /></el-icon>
-                <el-icon v-else :size="18"><Check /></el-icon>
-                {{ isUploading ? '上传中...' : '确认上传' }}
+      <!-- 头像查看弹窗 -->
+      <Teleport to="body">
+        <Transition name="dialog-fade">
+          <div v-if="showAvatarModal" style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 16px;" @click.self="showAvatarModal = false">
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+              <img :src="userInfo.avatar" alt="用户头像" style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);" />
+              <p style="color: white; font-size: 16px; font-weight: 500;">{{ userInfo.nickname }}</p>
+              <button @click="showAvatarModal = false" style="position: absolute; top: -40px; right: -40px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: background 0.2s;">
+                <el-icon :size="24"><Close /></el-icon>
               </button>
             </div>
           </div>
-        </div>
-      </Transition>
-    </Teleport>
+        </Transition>
+      </Teleport>
+
+      <!-- 信用评分详情弹窗 -->
+      <Teleport to="body">
+        <Transition name="dialog-fade">
+          <div v-if="showCreditModal" style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 16px;" @click.self="showCreditModal = false">
+            <div style="background: white; border-radius: 20px; padding: 32px; max-width: 400px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+              <!-- 标题 -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">信用评分</h3>
+                <p style="font-size: 14px; color: #6b7280;">您的信用等级详情</p>
+              </div>
+
+              <!-- 评分显示 -->
+              <div style="text-align: center; margin-bottom: 24px; padding: 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px;">
+                <div style="font-size: 48px; font-weight: 700; color: white; margin-bottom: 8px;">
+                  {{ userStats.find(s => s.label === '信用评分')?.value || 5.0 }}
+                </div>
+                <div style="font-size: 14px; color: rgba(255,255,255,0.9);">
+                  {{ (userStats.find(s => s.label === '信用评分')?.value || 5.0) >= 4.5 ? '信用优秀' : (userStats.find(s => s.label === '信用评分')?.value || 5.0) >= 3.5 ? '信用良好' : '信用一般' }}
+                </div>
+              </div>
+
+              <!-- 评分说明 -->
+              <div style="margin-bottom: 24px;">
+                <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px;">评分说明</h4>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+                    <span>4.5-5.0分：信用优秀</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+                    <span>3.5-4.4分：信用良好</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
+                    <span>2.5-3.4分：信用一般</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+                    <span>低于2.5分：信用较差</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 提升信用建议 -->
+              <div style="margin-bottom: 24px;">
+                <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px;">如何提升信用</h4>
+                <ul style="font-size: 13px; color: #4b5563; padding-left: 16px; line-height: 1.8;">
+                  <li>按时完成订单交易</li>
+                  <li>积极参与社区互动</li>
+                  <li>遵守平台规则，不发布违规内容</li>
+                  <li>及时回复消息和评价</li>
+                </ul>
+              </div>
+
+              <!-- 关闭按钮 -->
+              <button @click="showCreditModal = false" style="width: 100%; padding: 12px; background: #f3f4f6; border: none; border-radius: 10px; font-size: 14px; font-weight: 500; color: #374151; cursor: pointer; transition: background 0.2s;">
+                我知道了
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* ========== 数据统计卡片样式 ========== */
-.stat-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+/* CSS Reset - 确保跨浏览器一致性 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+/* 响应式容器 */
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  padding-bottom: 96px;
+}
+
+/* 桌面端布局优化 */
+@media (min-width: 1024px) {
+  .profile-container {
+    padding: 32px;
+  }
+}
+
+/* 平板端 */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .profile-container {
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+
+/* 移动端 */
+@media (max-width: 767px) {
+  .profile-container {
+    max-width: 768px;
+    padding: 16px;
+  }
+}
+
+/* 头像悬停效果 */
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1 !important;
+}
+
+/* 防止图片溢出 */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 统计卡片悬停效果 */
 .stat-card:hover {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 24px rgba(0, 59, 128, 0.2);
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.05);
 }
 
-/* 不同颜色倾向 */
-.stat-card-blue {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.15));
-  border-color: rgba(56, 189, 248, 0.3);
+/* 快捷服务网格响应式 */
+.quick-services-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
 }
 
-.stat-card-pink {
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(236, 72, 153, 0.15));
-  border-color: rgba(244, 114, 182, 0.3);
+@media (min-width: 1024px) {
+  .quick-services-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
 }
 
-.stat-card-green {
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.15));
-  border-color: rgba(52, 211, 153, 0.3);
+@media (max-width: 767px) {
+  .quick-services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
 }
 
-.stat-card-purple {
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(139, 92, 246, 0.15));
-  border-color: rgba(167, 139, 250, 0.3);
+@media (max-width: 480px) {
+  .quick-services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
 }
 
-/* 统计数字渐变文字 */
-.stat-value {
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+/* 菜单分组响应式布局 */
+.menu-groups-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
 }
 
-/* ========== 信息项样式 ========== */
-.info-item {
-  padding: 12px 16px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+@media (min-width: 1024px) {
+  .menu-groups-wrapper {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  
+  .menu-group-card {
+    margin-bottom: 0 !important;
+  }
 }
 
-/* ========== 弹窗动画 ========== */
+/* 快捷服务按钮悬停效果 */
+.quick-service-btn:hover > div:first-child {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.quick-service-btn:hover span {
+  color: #0056b3;
+}
+
+/* ====== 校园服务卡片网格样式 ====== */
+.campus-services-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1023px) {
+  .campus-services-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 767px) {
+  .campus-services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .campus-services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+}
+
+/* 校园服务卡片 */
+.campus-service-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 8px;
+  background: white;
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.campus-service-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.campus-service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px var(--shadow-color, rgba(0,0,0,0.15));
+  border-color: transparent;
+}
+
+.campus-service-card:hover::before {
+  opacity: 1;
+}
+
+/* 服务图标包装器 */
+.service-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.campus-service-card:hover .service-icon-wrapper {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* 渐变背景类 */
+.from-blue-500 { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+.from-emerald-500 { background: linear-gradient(135deg, #10b981, #14b8a6); }
+.from-violet-500 { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+.from-amber-500 { background: linear-gradient(135deg, #f59e0b, #fb923c); }
+.from-rose-500 { background: linear-gradient(135deg, #f43f5e, #fb7185); }
+
+/* 查看全部按钮悬停 */
+.view-all-btn:hover {
+  color: #0056b3 !important;
+}
+
+/* 菜单项悬停效果 */
+.menu-item:hover {
+  background: #f9fafb !important;
+}
+
+.menu-item:hover .menu-indicator {
+  height: 24px !important;
+}
+
+.menu-item:hover > div:nth-child(2) {
+  background: rgba(0,86,179,0.1);
+}
+
+.menu-item:hover > div:nth-child(2) > .el-icon {
+  color: #0056b3;
+}
+
+
+
+/* 弹窗动画 */
 .dialog-fade-enter-active,
 .dialog-fade-leave-active {
   transition: opacity 0.3s ease;
@@ -763,57 +707,23 @@ onMounted(async () => {
   opacity: 0;
 }
 
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-scale-in {
-  animation: scale-in 0.3s ease-out;
-}
-
-/* ========== 加载旋转动画 ========== */
+/* 加载旋转动画 */
 .animate-spin {
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ========== 积分数字动画 ========== */
-.points-value-animate {
-  display: inline-block;
-  transition: all 0.3s ease;
-}
-
-/* ========== 自定义滚动条 ========== */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 2px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 2px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
 </style>

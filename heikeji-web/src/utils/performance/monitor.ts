@@ -612,13 +612,19 @@ class PerformanceMonitor {
 
     // 开发环境输出日志
     if (import.meta.env.DEV && performanceBudget.alerts.enableConsoleWarning) {
+      // CLS 是无单位的小数值，其他指标使用 ms
+      const isCLS = name === 'CLS' || name === 'cls'
+      const unit = isCLS ? '' : 'ms'
+      const goodThreshold = thresholds?.good
+      const poorThreshold = thresholds?.poor
+
       if (rating === 'poor') {
         console.warn(
-          `[PerformanceMonitor] ⚠️ ${name} 较差: ${value}ms (阈值: ≤${thresholds?.good}ms良好, ≤${thresholds?.poor}ms需改进)`
+          `[PerformanceMonitor] ⚠️ ${name} 较差: ${value}${unit} (阈值: ≤${goodThreshold}${unit}良好, ≤${poorThreshold}${unit}需改进)`
         )
       } else if (rating === 'needs-improvement') {
         console.info(
-          `[PerformanceMonitor] 💡 ${name} 待改进: ${value}ms (阈值: ≤${thresholds?.good}ms良好)`
+          `[PerformanceMonitor] 💡 ${name} 待改进: ${value}${unit} (阈值: ≤${goodThreshold}${unit}良好)`
         )
       }
     }

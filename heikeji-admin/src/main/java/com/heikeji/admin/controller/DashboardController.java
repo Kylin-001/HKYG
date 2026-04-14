@@ -4,8 +4,8 @@ import com.heikeji.admin.common.R;
 import com.heikeji.admin.feign.OrderAnalysisFeignClient;
 import com.heikeji.admin.feign.SalesAnalysisFeignClient;
 import com.heikeji.admin.feign.UserAnalysisFeignClient;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * 数据看板控制器
  */
-@Api(tags = "数据看板")
+@Tag(name = "数据看板")
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
@@ -37,7 +37,7 @@ public class DashboardController {
     /**
      * 获取系统概览数据
      */
-    @ApiOperation("获取系统概览数据")
+    @Operation(summary = "获取系统概览数据")
     @GetMapping("/overview")
     public R getOverview() {
         // 获取今天和7天前的日期
@@ -83,7 +83,7 @@ public class DashboardController {
     /**
      * 获取销售统计数据
      */
-    @ApiOperation("获取销售统计数据")
+    @Operation(summary = "获取销售统计数据")
     @GetMapping("/sales")
     public R getSalesData() {
         // 获取30天前的日期
@@ -102,7 +102,7 @@ public class DashboardController {
     /**
      * 获取用户增长数据
      */
-    @ApiOperation("获取用户增长数据")
+    @Operation(summary = "获取用户增长数据")
     @GetMapping("/userGrowth")
     public R getUserGrowth() {
         // 获取10天前的日期
@@ -125,7 +125,7 @@ public class DashboardController {
     /**
      * 获取销售趋势数据
      */
-    @ApiOperation("获取销售趋势数据")
+    @Operation(summary = "获取销售趋势数据")
     @GetMapping("/salesTrend")
     public R getSalesTrend(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -138,7 +138,7 @@ public class DashboardController {
     /**
      * 获取商品销售排行榜
      */
-    @ApiOperation("获取商品销售排行榜")
+    @Operation(summary = "获取商品销售排行榜")
     @GetMapping("/productRanking")
     public R getProductRanking(@RequestParam(defaultValue = "30") Integer days, @RequestParam(defaultValue = "10") Integer limit) {
         // 计算开始日期和结束日期

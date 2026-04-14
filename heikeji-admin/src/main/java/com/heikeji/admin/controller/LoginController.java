@@ -2,8 +2,8 @@ package com.heikeji.admin.controller;
 
 import com.heikeji.admin.common.R;
 import com.heikeji.admin.service.AdminUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 @RequestMapping("/api/auth")
-@Api(tags = "登录认证")
+@Tag(name = "登录认证")
 public class LoginController {
 
     @Autowired
@@ -37,7 +37,7 @@ public class LoginController {
      * 管理员登录
      */
     @PostMapping("/login")
-    @ApiOperation("管理员登录")
+    @Operation(summary = "管理员登录")
     public R login(@RequestBody Map<String, String> params) {
         try {
             String username = params.get("username");
@@ -65,7 +65,7 @@ public class LoginController {
      * 管理员登出
      */
     @PostMapping("/logout")
-    @ApiOperation("管理员登出")
+    @Operation(summary = "管理员登出")
     public R logout(HttpServletRequest request) {
         try {
             // 从请求头获取token
@@ -87,7 +87,7 @@ public class LoginController {
      * 获取当前登录用户信息
      */
     @GetMapping("/info")
-    @ApiOperation("获取当前登录用户信息")
+    @Operation(summary = "获取当前登录用户信息")
     public R getInfo(@RequestParam("userId") Long userId) {
         try {
             // 获取用户信息
@@ -106,7 +106,7 @@ public class LoginController {
      * 获取验证码
      */
     @GetMapping("/captcha")
-    @ApiOperation("获取验证码")
+    @Operation(summary = "获取验证码")
     public R getCaptcha() {
         try {
             // 生成简单的数字验证码

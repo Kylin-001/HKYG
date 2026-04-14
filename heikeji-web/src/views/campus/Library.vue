@@ -84,7 +84,7 @@
               @click="showBookDetail(book)"
             >
               <div class="book-cover">
-                <img :src="book.cover" :alt="book.title" />
+                <img :src="book.cover" :alt="book.title" width="140" height="200" loading="lazy" />
                 <span class="availability-badge" :class="book.available ? 'available' : 'unavailable'">
                   {{ book.available ? '可借' : '已借出' }}
                 </span>

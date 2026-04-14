@@ -185,7 +185,7 @@
               @click="$router.push(`/secondhand/${item.id}`)"
             >
               <div class="item-image-wrapper">
-                <img :src="item.images[0]" :alt="item.title" class="item-image" loading="lazy" />
+                <img :src="item.images[0]" :alt="item.title" class="item-image" width="240" height="180" loading="lazy" />
                 <span v-if="item.condition !== 'brand_new'" class="condition-badge" :class="item.condition">
                   {{ getConditionLabel(item.condition) }}
                 </span>

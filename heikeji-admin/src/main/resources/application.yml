@@ -18,8 +18,14 @@ spring:
       discovery:
         enabled: true
         server-addr: 192.168.186.128:8848
-        namespace: public
+        namespace: ""  # public命名空间使用空字符串
         ip: 127.0.0.1
+        cluster-name: DEFAULT
+        register-enabled: true
+        # 心跳配置优化
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
       config:
         import-check:
           enabled: false
@@ -52,3 +58,13 @@ admin:
       header: Authorization
       # 令牌前缀
       tokenStartWith: Bearer
+
+# 健康检查端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

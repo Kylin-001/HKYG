@@ -1,5 +1,3 @@
-/// <reference lib="webworker" />
-
 const CACHE_NAME = 'heikeji-v3'
 const STATIC_CACHE = 'heikeji-static-v2'
 const DYNAMIC_CACHE = 'heikeji-dynamic-v2'
@@ -33,7 +31,7 @@ const API_PATTERNS = [
 
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg']
 
-self.addEventListener('install', (event: ExtendableEvent) => {
+self.addEventListener('install', (event) => {
   console.log('[SW] Installing Service Worker v3...')
 
   event.waitUntil(
@@ -48,7 +46,7 @@ self.addEventListener('install', (event: ExtendableEvent) => {
   )
 })
 
-self.addEventListener('activate', (event: ExtendableEvent) => {
+self.addEventListener('activate', (event) => {
   console.log('[SW] Activating Service Worker v3...')
 
   event.waitUntil(
@@ -71,7 +69,7 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
   )
 })
 
-self.addEventListener('fetch', (event: FetchEvent) => {
+self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
@@ -101,7 +99,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE))
 })
 
-function isStaticResource(pathname: string): boolean {
+function isStaticResource(pathname) {
   const isStatic = STATIC_EXTENSIONS.some((ext) => pathname.endsWith(ext))
   if (isStatic && !IMAGE_EXTENSIONS.some((ext) => pathname.endsWith(ext))) {
     return true
@@ -109,15 +107,15 @@ function isStaticResource(pathname: string): boolean {
   return false
 }
 
-function isImageResource(pathname: string): boolean {
+function isImageResource(pathname) {
   return IMAGE_EXTENSIONS.some((ext) => pathname.endsWith(ext))
 }
 
-function isAPIRequest(pathname: string): boolean {
+function isAPIRequest(pathname) {
   return API_PATTERNS.some((pattern) => pattern.test(pathname))
 }
 
-async function cacheFirst(request: Request, cacheName: string): Promise<Response> {
+async function cacheFirst(request, cacheName) {
   const cachedResponse = await caches.match(request)
 
   if (cachedResponse) {
@@ -144,7 +142,7 @@ async function cacheFirst(request: Request, cacheName: string): Promise<Response
   }
 }
 
-async function networkFirstWithSWR(request: Request, cacheName: string): Promise<Response> {
+async function networkFirstWithSWR(request, cacheName) {
   const cachedResponse = await caches.match(request)
 
   try {
@@ -186,7 +184,7 @@ async function networkFirstWithSWR(request: Request, cacheName: string): Promise
   }
 }
 
-async function networkFirstWithFallback(request: Request): Promise<Response> {
+async function networkFirstWithFallback(request) {
   try {
     const networkResponse = await fetch(request)
 
@@ -212,7 +210,7 @@ async function networkFirstWithFallback(request: Request): Promise<Response> {
   }
 }
 
-async function staleWhileRevalidate(request: Request, cacheName: string): Promise<Response> {
+async function staleWhileRevalidate(request, cacheName) {
   const cachedResponse = await caches.match(request)
 
   const fetchPromise = fetch(request)
@@ -230,7 +228,7 @@ async function staleWhileRevalidate(request: Request, cacheName: string): Promis
 }
 
 // ====== 后台同步 ======
-self.addEventListener('sync', (event: SyncEvent) => {
+self.addEventListener('sync', (event) => {
   console.log('[SW] Background sync:', event.tag)
 
   if (event.tag === 'sync-pending-requests') {
@@ -238,7 +236,7 @@ self.addEventListener('sync', (event: SyncEvent) => {
   }
 })
 
-async function syncPendingRequests(): Promise<void> {
+async function syncPendingRequests() {
   try {
     const pendingData = await getPendingRequestsFromDB()
     if (!pendingData || pendingData.length === 0) return
@@ -262,14 +260,14 @@ async function syncPendingRequests(): Promise<void> {
   }
 }
 
-async function getPendingRequestsFromDB(): Promise<any[]> {
+async function getPendingRequestsFromDB() {
   return []
 }
 
-async function removePendingRequestFromDB(_id: string): Promise<void> {}
+async function removePendingRequestFromDB(_id) {}
 
 // ====== 消息通信 ======
-self.addEventListener('message', (event: ExtendableMessageEvent) => {
+self.addEventListener('message', (event) => {
   const data = event.data
 
   switch (data.type) {
@@ -302,7 +300,7 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
   }
 })
 
-async function precacheUrls(urls: string[]): Promise<void> {
+async function precacheUrls(urls) {
   const cache = await caches.open(STATIC_CACHE)
   const results = await Promise.allSettled(
     urls.map((url) =>
@@ -317,13 +315,13 @@ async function precacheUrls(urls: string[]): Promise<void> {
   console.log(`[SW] Precache completed: ${urls.length - failed}/${urls.length} succeeded`)
 }
 
-async function clearAllCaches(): Promise<void> {
+async function clearAllCaches() {
   const names = await caches.keys()
   await Promise.all(names.map((name) => caches.delete(name)))
   console.log('[SW] All caches cleared')
 }
 
-async function getCacheSize(): Promise<number> {
+async function getCacheSize() {
   let totalSize = 0
   const names = await caches.keys()
 

@@ -14,10 +14,14 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: localhost:8848
-        namespace: public
-        ip: 127.0.0.1
+        server-addr: 192.168.186.128:8848
+        namespace: ""  # public命名空间使用空字符串
         cluster-name: DEFAULT
+        register-enabled: true
+        # 心跳配置优化
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
       config:
         import-check:
           enabled: false

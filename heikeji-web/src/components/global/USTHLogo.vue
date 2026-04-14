@@ -20,9 +20,9 @@ const router = useRouter()
 
 const logoSizeClasses = computed(() => {
   const sizes = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12'
+    sm: 'w-4 h-4',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6'
   }
   return sizes[props.size]
 })
@@ -52,9 +52,10 @@ function handleClick() {
     <!-- 官方校徽版本 -->
     <template v-if="useOfficialLogo">
       <img 
-        src="/logo.svg" 
+        src="/logo-new.png" 
         alt="黑龙江科技大学校徽"
-        :class="['usth-logo rounded-xl shadow-brand group-hover:shadow-lg group-hover:scale-105 transition-all duration-300 object-contain bg-white', logoSizeClasses]"
+        :class="['usth-logo group-hover:scale-105 transition-all duration-300 object-contain']"
+        style="width: 48px; height: 48px;"
       />
     </template>
     

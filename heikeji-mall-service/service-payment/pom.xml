@@ -20,6 +20,12 @@
             <artifactId>common-core</artifactId>
             <version>1.0.0</version>
         </dependency>
+        
+        <!-- Nacos服务发现 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -49,16 +55,11 @@
             <artifactId>alipay-sdk-java</artifactId>
             <version>4.38.0.ALL</version>
         </dependency>
-        <!-- Redisson -->
+        <!-- Redisson 核心库（不含Spring Boot自动配置，由自定义RedissonConfig控制） -->
         <dependency>
             <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>3.16.8</version>
-        </dependency>
-        <!-- Spring Data Redis -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>redisson</artifactId>
+            <version>3.27.0</version>
         </dependency>
         <!-- Lombok -->
         <dependency>
@@ -81,14 +82,13 @@
         <dependency>
             <groupId>jakarta.annotation</groupId> 
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>2.1.0</version>
         </dependency>
         
         <!-- jakarta.servlet-api for HttpServletResponse -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>5.0.0</version>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- SpringDoc OpenAPI UI -->

@@ -1062,7 +1062,7 @@ onUnmounted(() => {
               <div class="reviews-list">
                 <article v-for="review in reviews" :key="review.id" class="review-card">
                   <header class="review-header">
-                    <img :src="review.avatar" :alt="`${review.user}的头像`" class="reviewer-avatar" />
+                    <img :src="review.avatar" :alt="`${review.user}的头像`" class="reviewer-avatar" width="40" height="40" />
                     <div class="reviewer-info">
                       <div class="reviewer-name">{{ review.user }}</div>
                       <div class="review-date">{{ review.date }}</div>

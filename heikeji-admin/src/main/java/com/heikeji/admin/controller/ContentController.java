@@ -2,8 +2,8 @@ package com.heikeji.admin.controller;
 
 import com.heikeji.admin.common.R;
 import com.heikeji.admin.feign.CampusInfoFeignClient;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +15,7 @@ import java.util.Map;
  * 内容管理控制器
  * 管理校园公告、空教室等内容
  */
-@Api(tags = "内容管理")
+@Tag(name = "内容管理")
 @RestController
 @RequestMapping("/api/content")
 public class ContentController {
@@ -26,7 +26,7 @@ public class ContentController {
     /**
      * 获取校园公告列表
      */
-    @ApiOperation("获取校园公告列表")
+    @Operation(summary = "获取校园公告列表")
     @GetMapping("/notice/list")
     public R getNoticeList(@RequestParam(required = false) Integer page, 
                            @RequestParam(required = false) Integer limit, 
@@ -38,7 +38,7 @@ public class ContentController {
     /**
      * 获取空教室列表
      */
-    @ApiOperation("获取空教室列表")
+    @Operation(summary = "获取空教室列表")
     @GetMapping("/empty-classroom/list")
     public R getEmptyClassroomList(@RequestParam(required = false) Integer campusId, 
                                    @RequestParam(required = false) Integer buildingId, 
@@ -51,7 +51,7 @@ public class ContentController {
     /**
      * 发布校园公告
      */
-    @ApiOperation("发布校园公告")
+    @Operation(summary = "发布校园公告")
     @PostMapping("/notice/publish")
     public R publishNotice(@RequestBody Map<String, Object> notice) {
         // 调用校园信息服务发布公告
@@ -61,7 +61,7 @@ public class ContentController {
     /**
      * 更新校园公告
      */
-    @ApiOperation("更新校园公告")
+    @Operation(summary = "更新校园公告")
     @PutMapping("/notice/{id}")
     public R updateNotice(@PathVariable Long id, @RequestBody Map<String, Object> notice) {
         // 调用校园信息服务更新公告
@@ -71,7 +71,7 @@ public class ContentController {
     /**
      * 删除校园公告
      */
-    @ApiOperation("删除校园公告")
+    @Operation(summary = "删除校园公告")
     @DeleteMapping("/notice/{id}")
     public R deleteNotice(@PathVariable Long id) {
         // 调用校园信息服务删除公告
@@ -81,7 +81,7 @@ public class ContentController {
     /**
      * 更新公告状态
      */
-    @ApiOperation("更新公告状态")
+    @Operation(summary = "更新公告状态")
     @PutMapping("/notice/{id}/status")
     public R updateNoticeStatus(@PathVariable Long id, @RequestParam Integer status) {
         // 调用校园信息服务更新公告状态
@@ -91,7 +91,7 @@ public class ContentController {
     /**
      * 更新公告置顶状态
      */
-    @ApiOperation("更新公告置顶状态")
+    @Operation(summary = "更新公告置顶状态")
     @PutMapping("/notice/{id}/top")
     public R updateNoticeTopStatus(@PathVariable Long id, @RequestParam Integer isTop) {
         // 调用校园信息服务更新公告置顶状态

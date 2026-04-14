@@ -65,7 +65,7 @@
               class="post-card glass-effect rounded-2xl overflow-hidden"
             >
               <div class="pc-header">
-                <img :src="post.authorAvatar" :alt="post.authorName" class="author-avatar" />
+                <img :src="post.authorAvatar" :alt="post.authorName" class="author-avatar" width="40" height="40" />
                 <div class="author-info">
                   <span class="author-name">{{ post.authorName }}</span>
                   <span class="post-meta">

@@ -86,19 +86,23 @@ interface Order {
   updatedAt: string
 }
 
-/** 购物车项 */
+/** 购物车项 - 符合 CartResponse 类型 */
 interface CartItem {
   id: string
-  userId: string
   productId: string
-  productName: string
-  productImage: string
-  price: number
+  product: {
+    id: string
+    name: string
+    image: string
+    price: number
+    originalPrice?: number
+    stock: number
+    status: string
+  }
   quantity: number
   selected: boolean
-  stock: number
   addedAt: string
-  updatedAt: string
+  updatedAt?: string
 }
 
 /** 用户信息 */
@@ -919,66 +923,86 @@ const orders: Order[] = [
 const cartItems: CartItem[] = [
   {
     id: 'cart001',
-    userId: 'user001',
     productId: 'prod014',
-    productName: '元气森林 白桃气泡水 480ml*15瓶整箱',
-    productImage: 'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=200',
-    price: 52,
+    product: {
+      id: 'prod014',
+      name: '元气森林 白桃气泡水 480ml*15瓶整箱',
+      image: 'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=200',
+      price: 52,
+      originalPrice: 58,
+      stock: 180,
+      status: 'active'
+    },
     quantity: 2,
     selected: true,
-    stock: 180,
     addedAt: '2026-04-05T15:00:00Z',
     updatedAt: '2026-04-05T15:00:00Z'
   },
   {
     id: 'cart002',
-    userId: 'user001',
     productId: 'prod013',
-    productName: '三只松鼠 坚果礼盒 1kg装',
-    productImage: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=200',
-    price: 69,
+    product: {
+      id: 'prod013',
+      name: '三只松鼠 坚果礼盒 1kg装',
+      image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=200',
+      price: 69,
+      originalPrice: 89,
+      stock: 95,
+      status: 'active'
+    },
     quantity: 1,
     selected: true,
-    stock: 95,
     addedAt: '2026-04-05T15:05:00Z',
     updatedAt: '2026-04-05T15:05:00Z'
   },
   {
     id: 'cart003',
-    userId: 'user001',
     productId: 'prod007',
-    productName: '三菱 Uni-ball One 中性笔套装（10支装）',
-    productImage: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=200',
-    price: 35,
+    product: {
+      id: 'prod007',
+      name: '三菱 Uni-ball One 中性笔套装（10支装）',
+      image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=200',
+      price: 35,
+      originalPrice: 45,
+      stock: 200,
+      status: 'active'
+    },
     quantity: 3,
     selected: false,
-    stock: 200,
     addedAt: '2026-04-04T20:00:00Z',
     updatedAt: '2026-04-04T20:00:00Z'
   },
   {
     id: 'cart004',
-    userId: 'user001',
     productId: 'prod010',
-    productName: '公牛 插排 GN-B304U 4位USB插座',
-    productImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
-    price: 39,
+    product: {
+      id: 'prod010',
+      name: '公牛 插排 GN-B304U 4位USB插座',
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
+      price: 39,
+      originalPrice: 49,
+      stock: 150,
+      status: 'active'
+    },
     quantity: 1,
     selected: true,
-    stock: 150,
     addedAt: '2026-04-03T10:30:00Z',
     updatedAt: '2026-04-03T10:30:00Z'
   },
   {
     id: 'cart005',
-    userId: 'user001',
     productId: 'prod015',
-    productName: '哈尔滨红肠 正宗哈肉联 500g*2袋',
-    productImage: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=200',
-    price: 58,
+    product: {
+      id: 'prod015',
+      name: '哈尔滨红肠 正宗哈肉联 500g*2袋',
+      image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=200',
+      price: 58,
+      originalPrice: 68,
+      stock: 60,
+      status: 'active'
+    },
     quantity: 1,
     selected: false,
-    stock: 60,
     addedAt: '2026-04-02T16:00:00Z',
     updatedAt: '2026-04-02T16:00:00Z'
   }
@@ -2123,11 +2147,11 @@ export default [
 
   /**
    * 确认收货
-   * PUT /api/orders/:id/confirm
+   * POST /api/orders/:id/confirm
    */
   {
     url: /\/api\/orders\/(\w+)\/confirm$/,
-    method: 'put',
+    method: 'post',
     response: (config: any) => {
       const url = config.url as string
       const match = url.match(/\/api\/orders\/(\w+)\/confirm$/)
@@ -2136,7 +2160,8 @@ export default [
       if (!order) {
         return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
       }
-      if (order.status !== 'delivered') {
+      // 支持 'shipped' (前端状态) 和 'delivered' (后端状态)
+      if (order.status !== 'shipped' && order.status !== 'delivered') {
         return { code: 400, message: '当前状态无法确认收货', data: null, timestamp: Date.now() }
       }
       order.status = 'completed'
@@ -2178,7 +2203,20 @@ export default [
     url: '/api/cart',
     method: 'get',
     response: () => {
-      return successResponse(cartItems)
+      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+      const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      const selectedItems = cartItems.filter(item => item.selected)
+      const selectedCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0)
+      const selectedAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+      return successResponse({
+        items: cartItems,
+        totalItems,
+        totalAmount,
+        selectedCount,
+        selectedAmount,
+        savedAmount: 0
+      })
     }
   },
 
@@ -2205,14 +2243,18 @@ export default [
 
       const newItem: CartItem = {
         id: `cart${String(cartItems.length + 1).padStart(3, '0')}`,
-        userId: 'user001',
         productId: product.id,
-        productName: product.name,
-        productImage: product.image,
-        price: product.price,
+        product: {
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          stock: product.stock,
+          status: product.status
+        },
         quantity: body.quantity || 1,
         selected: true,
-        stock: product.stock,
         addedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -2304,10 +2346,10 @@ export default [
 
   /**
    * 获取收货地址列表
-   * GET /api/user/addresses
+   * GET /api/addresses
    */
   {
-    url: '/api/user/addresses',
+    url: '/api/addresses',
     method: 'get',
     response: () => {
       return successResponse(addresses)
@@ -2316,17 +2358,22 @@ export default [
 
   /**
    * 添加收货地址
-   * POST /api/user/addresses
+   * POST /api/addresses
    */
   {
-    url: '/api/user/addresses',
+    url: '/api/addresses',
     method: 'post',
     response: ({ body }: { body: any }) => {
       const newAddress: Address = {
         id: `addr${String(addresses.length + 1).padStart(3, '0')}`,
         userId: 'user001',
-        ...body,
-        fullAddress: `${body.province}${body.city}${body.district}${body.detail}`,
+        receiverName: body.name || body.receiverName || '',
+        receiverPhone: body.phone || body.receiverPhone || '',
+        province: body.province || '',
+        city: body.city || '',
+        district: body.district || '',
+        detail: body.detail || body.detailAddress || '',
+        fullAddress: `${body.province || ''}${body.city || ''}${body.district || ''}${body.detail || body.detailAddress || ''}`,
         isDefault: body.isDefault || false,
         createdAt: new Date().toISOString()
       }
@@ -2343,21 +2390,32 @@ export default [
 
   /**
    * 更新收货地址
-   * PUT /api/user/addresses/:id
+   * PUT /api/addresses/:id
    */
   {
-    url: /\/api\/user\/addresses\/(\w+)$/,
+    url: /\/api\/addresses\/(\w+)$/,
     method: 'put',
     response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/user\/addresses\/(\w+)$/); const id = match ? match[1] : ''
+      const url = config.url as string; const match = url.match(/\/api\/addresses\/(\w+)$/); const id = match ? match[1] : ''
       const { body } = config
       const address = addresses.find(a => a.id === id)
       if (!address) {
         return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
       }
-      Object.assign(address, body, {
-        fullAddress: `${body.province || address.province}${body.city || address.city}${body.district || address.district}${body.detail || address.detail}`
-      })
+      
+      // 兼容不同字段名
+      if (body.name) address.receiverName = body.name
+      if (body.receiverName) address.receiverName = body.receiverName
+      if (body.phone) address.receiverPhone = body.phone
+      if (body.receiverPhone) address.receiverPhone = body.receiverPhone
+      if (body.province) address.province = body.province
+      if (body.city) address.city = body.city
+      if (body.district) address.district = body.district
+      if (body.detail) address.detail = body.detail
+      if (body.detailAddress) address.detail = body.detailAddress
+      if (body.isDefault !== undefined) address.isDefault = body.isDefault
+      
+      address.fullAddress = `${address.province}${address.city}${address.district}${address.detail}`
 
       if (body.isDefault) {
         addresses.forEach(addr => {
@@ -2371,13 +2429,13 @@ export default [
 
   /**
    * 删除收货地址
-   * DELETE /api/user/addresses/:id
+   * POST /api/addresses/:id/delete
    */
   {
-    url: /\/api\/user\/addresses\/(\w+)$/,
-    method: 'delete',
+    url: /\/api\/addresses\/(\w+)\/delete$/,
+    method: 'post',
     response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/user\/addresses\/(\w+)$/); const id = match ? match[1] : ''
+      const url = config.url as string; const match = url.match(/\/api\/addresses\/(\w+)\/delete$/); const id = match ? match[1] : ''
       const index = addresses.findIndex(a => a.id === id)
       if (index === -1) {
         return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
@@ -2389,13 +2447,13 @@ export default [
 
   /**
    * 设置默认地址
-   * PUT /api/user/addresses/:id/default
+   * POST /api/addresses/:id/default
    */
   {
-    url: /\/api\/user\/addresses\/(\w+)\/default$/,
-    method: 'put',
+    url: /\/api\/addresses\/(\w+)\/default$/,
+    method: 'post',
     response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/user\/addresses\/(\w+)\/default$/); const id = match ? match[1] : ''
+      const url = config.url as string; const match = url.match(/\/api\/addresses\/(\w+)\/default$/); const id = match ? match[1] : ''
       const address = addresses.find(a => a.id === id)
       if (!address) {
         return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
@@ -2966,11 +3024,27 @@ export default [
     url: '/api/auth/login',
     method: 'post',
     response: ({ body }: { body: any }) => {
-      // 模拟登录验证
-      if (body.username === 'admin' && body.password === 'admin123') {
+      // 支持多种登录字段: account(账号), studentId(学号), username(用户名)
+      const identifier = body.account || body.studentId || body.username || ''
+      const password = body.password || ''
+
+      // 模拟登录验证 - 管理员账号
+      if ((identifier === 'admin' || identifier === 'admin@usth.edu.cn') && password === 'admin123') {
         return successResponse({
           token: 'mock-admin-token-' + Date.now(),
           user: { ...currentUser, role: 'admin', nickname: '管理员' }
+        })
+      }
+
+      // 模拟学号登录
+      if (body.studentId && /^\d{10,15}$/.test(body.studentId)) {
+        return successResponse({
+          token: 'mock-student-token-' + Date.now(),
+          user: {
+            ...currentUser,
+            studentId: body.studentId,
+            nickname: '学生' + body.studentId.slice(-4)
+          }
         })
       }
 
@@ -3020,27 +3094,105 @@ export default [
       const pageSize = parseInt(query.pageSize || '10')
 
       const notifications = [
-        { id: 'noti1', type: 'order', title: '订单发货提醒', content: '您的订单 HK202604030001 已发货，预计4月5日送达', isRead: false, createdAt: '2026-04-03T14:00:00Z' },
-        { id: 'noti2', type: 'system', title: '系统公告', content: '春季运动会报名通道已开启，快来参与吧！', isRead: false, createdAt: '2026-04-02T09:00:00Z' },
-        { id: 'noti3', type: 'activity', title: '活动提醒', content: '您报名的"AI与未来科技讲座"将于明天下午2点开始', isRead: true, createdAt: '2026-04-01T16:00:00Z' },
-        { id: 'noti4', type: 'secondhand', title: '二手交易', content: '您发布的"iPad Air 5"有人咨询，快去看看吧', isRead: true, createdAt: '2026-03-30T11:00:00Z' },
-        { id: 'noti5', type: 'order', title: '订单完成', content: '您的订单 HK202603150001 已完成，感谢您的购买', isRead: true, createdAt: '2026-03-18T09:00:00Z' }
+        {
+          id: 'noti1',
+          type: 'order',
+          title: '订单已发货',
+          content: '您的订单 HK20260413001 已发货，预计4月15日送达。物流单号：SF1234567890，请留意查收。',
+          isRead: false,
+          createdAt: new Date(Date.now() - 10 * 60000).toISOString(),
+          orderId: 'order001'
+        },
+        {
+          id: 'noti2',
+          type: 'promo',
+          title: '新用户专享福利',
+          content: '恭喜！您的新人优惠券已到账，满99减20、满299减50，快去使用吧~优惠券有效期至4月30日。',
+          isRead: false,
+          createdAt: new Date(Date.now() - 30 * 60000).toISOString()
+        },
+        {
+          id: 'noti3',
+          type: 'system',
+          title: '账户安全提醒',
+          content: '检测到您的账号在新设备上登录，如非本人操作请及时修改密码。登录时间：2026-04-13 10:30，IP：192.168.1.1',
+          isRead: false,
+          createdAt: new Date(Date.now() - 2 * 3600000).toISOString()
+        },
+        {
+          id: 'noti4',
+          type: 'community',
+          title: '有人回复了你的帖子',
+          content: '在「分享一个超好用的学习APP」下，用户@代码侠 回复了你的评论："谢谢分享，确实很好用！"',
+          isRead: true,
+          createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
+          postId: 'post001',
+          senderId: 'user002',
+          senderName: '代码侠'
+        },
+        {
+          id: 'noti5',
+          type: 'order',
+          title: '订单已完成',
+          content: '您的订单 HK20260410003 已完成，感谢您的购买！欢迎评价商品，分享您的使用体验。',
+          isRead: true,
+          createdAt: new Date(Date.now() - 3 * 24 * 3600000).toISOString(),
+          orderId: 'order003'
+        },
+        {
+          id: 'noti6',
+          type: 'promo',
+          title: '限时秒杀活动开始',
+          content: '您关注的商品「蓝牙耳机」正在参与限时秒杀，原价199元，秒杀价仅需99元，限量100件！',
+          isRead: true,
+          createdAt: new Date(Date.now() - 5 * 24 * 3600000).toISOString()
+        },
+        {
+          id: 'noti7',
+          type: 'system',
+          title: '系统维护通知',
+          content: '系统将于今晚凌晨2:00-4:00进行例行维护，期间部分功能可能无法使用，请提前做好准备。',
+          isRead: true,
+          createdAt: new Date(Date.now() - 7 * 24 * 3600000).toISOString()
+        },
+        {
+          id: 'noti8',
+          type: 'community',
+          title: '您的帖子被点赞',
+          content: '用户@学霸小王 点赞了您的帖子「期末复习资料分享」，目前已有128人点赞。',
+          isRead: true,
+          createdAt: new Date(Date.now() - 10 * 24 * 3600000).toISOString(),
+          postId: 'post002',
+          senderId: 'user003',
+          senderName: '学霸小王'
+        }
       ]
 
-      const result = paginate(notifications, page, pageSize)
-      return successResponse(result)
+      return successResponse(notifications)
     }
   },
 
   /**
    * 标记消息已读
-   * PUT /api/notifications/:id/read
+   * POST /api/notifications/:id/read
    */
   {
     url: /\/api\/notifications\/(\w+)\/read$/,
-    method: 'put',
+    method: 'post',
     response: (config: any) => {
       return successResponse({ message: '已标记为已读' })
+    }
+  },
+
+  /**
+   * 标记全部已读
+   * POST /api/notifications/read-all
+   */
+  {
+    url: '/api/notifications/read-all',
+    method: 'post',
+    response: () => {
+      return successResponse({ message: '已全部标记为已读' })
     }
   },
 
@@ -3052,23 +3204,709 @@ export default [
     url: '/api/notifications/unread-count',
     method: 'get',
     response: () => {
-      return successResponse({ count: 2 })
+      return successResponse(3)
+    }
+  },
+
+  // ==================== 收藏相关接口 ====================
+
+  /**
+   * 获取收藏列表
+   * GET /api/favorites?type=&page=1
+   */
+  {
+    url: '/api/favorites',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const page = parseInt(query.page || '1')
+      const pageSize = 10
+
+      // 模拟收藏数据 - 基于商品数据生成
+      const promotions = ['买1送1件礼', '满100减20', '限时特惠', '', '', '']
+      const shopNames = ['华为官方旗舰店', '小米之家', '美妆专营店', '运动户外店', '图书文具店', '食品生鲜店']
+
+      const favorites = products.slice(0, 6).map((product, index) => ({
+        id: `fav${String(index + 1).padStart(3, '0')}`,
+        type: 'product',
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        soldCount: product.sales,
+        createdAt: new Date(Date.now() - index * 86400000).toISOString(),
+        promotion: promotions[index] || '',
+        shopName: shopNames[index] || '官方店铺',
+        shopId: `shop${index + 1}`,
+        status: index === 2 ? 'low_stock' : (index === 4 ? 'invalid' : 'normal')
+      }))
+
+      return successResponse({
+        list: favorites,
+        total: favorites.length
+      })
+    }
+  },
+
+  /**
+   * 删除收藏
+   * DELETE /api/favorites/:id
+   */
+  {
+    url: /\/api\/favorites\/(\w+)$/,
+    method: 'delete',
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/favorites\/(\w+)$/)
+      const id = match ? match[1] : ''
+
+      return successResponse({ message: '取消收藏成功', id })
+    }
+  },
+
+  /**
+   * 添加收藏
+   * POST /api/favorites
+   */
+  {
+    url: '/api/favorites',
+    method: 'post',
+    response: ({ body }: { body: any }) => {
+      return successResponse({
+        id: 'fav' + Date.now(),
+        type: body.type || 'product',
+        itemId: body.itemId,
+        createdAt: new Date().toISOString(),
+        message: '收藏成功'
+      })
+    }
+  },
+
+  // ==================== 购物车相关接口 ====================
+
+  /**
+   * 获取购物车列表
+   * GET /api/cart
+   */
+  {
+    url: '/api/cart',
+    method: 'get',
+    response: () => {
+      const cartItems = products.slice(0, 3).map((product, index) => ({
+        id: `cart${String(index + 1).padStart(3, '0')}`,
+        productId: product.id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        quantity: Math.floor(Math.random() * 3) + 1,
+        selected: index < 2,
+        stock: product.stock,
+        status: 'valid'
+      }))
+
+      return successResponse({
+        items: cartItems,
+        totalAmount: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        totalCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
+        selectedCount: cartItems.filter(i => i.selected).reduce((sum, item) => sum + item.quantity, 0),
+        selectedAmount: cartItems.filter(i => i.selected).reduce((sum, item) => sum + item.price * item.quantity, 0)
+      })
+    }
+  },
+
+  /**
+   * 添加商品到购物车
+   * POST /api/cart
+   */
+  {
+    url: '/api/cart',
+    method: 'post',
+    response: ({ body }: { body: any }) => {
+      return successResponse({
+        id: 'cart' + Date.now(),
+        productId: body.productId,
+        quantity: body.quantity || 1,
+        selected: true,
+        message: '添加成功'
+      })
+    }
+  },
+
+  /**
+   * 更新购物车商品
+   * PUT /api/cart/:itemId
+   */
+  {
+    url: /\/api\/cart\/(\w+)$/,
+    method: 'put',
+    response: (config: any, { body }: { body: any }) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/cart\/(\w+)$/)
+      const itemId = match ? match[1] : ''
+
+      return successResponse({
+        id: itemId,
+        quantity: body.quantity,
+        selected: body.selected,
+        message: '更新成功'
+      })
+    }
+  },
+
+  /**
+   * 删除购物车商品
+   * DELETE /api/cart/:itemId
+   */
+  {
+    url: /\/api\/cart\/(\w+)$/,
+    method: 'delete',
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/cart\/(\w+)$/)
+      const itemId = match ? match[1] : ''
+
+      return successResponse({ message: '删除成功', id: itemId })
+    }
+  },
+
+  /**
+   * 批量删除购物车商品
+   * POST /api/cart/batch-remove
+   */
+  {
+    url: '/api/cart/batch-remove',
+    method: 'post',
+    response: ({ body }: { body: any }) => {
+      return successResponse({
+        message: '批量删除成功',
+        deletedCount: body.itemIds?.length || 0
+      })
+    }
+  },
+
+  /**
+   * 全选/取消全选购物车商品
+   * POST /api/cart/select-all
+   */
+  {
+    url: '/api/cart/select-all',
+    method: 'post',
+    response: ({ body }: { body: any }) => {
+      return successResponse({
+        message: body.selected ? '全选成功' : '取消全选成功',
+        selected: body.selected
+      })
+    }
+  },
+
+  /**
+   * 将购物车商品移入收藏夹
+   * POST /api/cart/:itemId/move-favorite
+   */
+  {
+    url: /\/api\/cart\/(\w+)\/move-favorite$/,
+    method: 'post',
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/cart\/(\w+)\/move-favorite$/)
+      const itemId = match ? match[1] : ''
+
+      return successResponse({
+        message: '已移入收藏夹',
+        itemId,
+        favoriteId: 'fav' + Date.now()
+      })
+    }
+  },
+
+  /**
+   * 清空购物车
+   * DELETE /api/cart/clear
+   */
+  {
+    url: '/api/cart/clear',
+    method: 'delete',
+    response: () => {
+      return successResponse({ message: '购物车已清空' })
+    }
+  },
+
+  // ==================== 优惠券相关接口 ====================
+
+  /**
+   * 获取优惠券列表
+   * GET /api/coupons?status=&page=
+   */
+  {
+    url: '/api/coupons',
+    method: 'get',
+    response: ({ query }: { query: Record<string, string> }) => {
+      const status = query.status || 'available'
+      const page = parseInt(query.page || '1')
+      const pageSize = parseInt(query.pageSize || '10')
+
+      // 模拟优惠券数据
+      const coupons = [
+        {
+          id: 'coupon001',
+          code: 'NEWUSER2026',
+          name: '新用户专享券',
+          type: 'cash',
+          value: 20,
+          minOrder: 100,
+          status: 'available',
+          validFrom: '2026-01-01T00:00:00Z',
+          validTo: '2026-12-31T23:59:59Z',
+          description: '新用户注册即可领取',
+          scope: '全场通用'
+        },
+        {
+          id: 'coupon002',
+          code: 'FOOD50',
+          name: '食品生鲜券',
+          type: 'cash',
+          value: 10,
+          minOrder: 50,
+          status: 'available',
+          validFrom: '2026-04-01T00:00:00Z',
+          validTo: '2026-04-30T23:59:59Z',
+          description: '限食品生鲜类商品使用',
+          scope: '食品生鲜'
+        },
+        {
+          id: 'coupon003',
+          code: 'DIGITAL200',
+          name: '数码家电券',
+          type: 'cash',
+          value: 100,
+          minOrder: 1000,
+          status: 'available',
+          validFrom: '2026-04-01T00:00:00Z',
+          validTo: '2026-05-15T23:59:59Z',
+          description: '限数码家电类商品使用',
+          scope: '数码家电'
+        },
+        {
+          id: 'coupon004',
+          code: 'FREESHIP',
+          name: '免运费券',
+          type: 'free_shipping',
+          value: 0,
+          minOrder: 0,
+          status: 'available',
+          validFrom: '2026-04-01T00:00:00Z',
+          validTo: '2026-04-20T23:59:59Z',
+          description: '全场免运费',
+          scope: '全场通用'
+        },
+        {
+          id: 'coupon005',
+          code: 'DISCOUNT85',
+          name: '85折折扣券',
+          type: 'discount',
+          value: 8.5,
+          minOrder: 200,
+          status: 'used',
+          validFrom: '2026-03-01T00:00:00Z',
+          validTo: '2026-03-31T23:59:59Z',
+          description: '全场商品85折',
+          scope: '全场通用',
+          usedAt: '2026-03-15T10:30:00Z'
+        },
+        {
+          id: 'coupon006',
+          code: 'SPRING30',
+          name: '春季特惠券',
+          type: 'cash',
+          value: 30,
+          minOrder: 150,
+          status: 'expired',
+          validFrom: '2026-03-01T00:00:00Z',
+          validTo: '2026-03-31T23:59:59Z',
+          description: '春季限时特惠',
+          scope: '全场通用'
+        }
+      ]
+
+      // 根据状态筛选
+      let filteredCoupons = coupons
+      if (status && status !== 'all') {
+        filteredCoupons = coupons.filter(c => c.status === status)
+      }
+
+      return successResponse(paginate(filteredCoupons, page, pageSize))
+    }
+  },
+
+  /**
+   * 领取优惠券
+   * POST /api/coupons/:id/claim
+   */
+  {
+    url: /\/api\/coupons\/(\w+)\/claim$/,
+    method: 'post',
+    response: (config: any) => {
+      const url = config.url as string
+      const match = url.match(/\/api\/coupons\/(\w+)\/claim$/)
+      const id = match ? match[1] : ''
+
+      return successResponse({
+        message: '领取成功',
+        couponId: id,
+        claimedAt: new Date().toISOString()
+      })
+    }
+  },
+
+  // ==================== 用户头像上传接口 ====================
+
+  /**
+   * 上传用户头像
+   * POST /api/user/avatar
+   */
+  {
+    url: '/api/user/avatar',
+    method: 'post',
+    response: (req: any) => {
+      // 模拟头像上传成功，返回一个基于时间戳的唯一头像URL
+      // 使用 dicebear 的初始头像 API，基于时间戳生成不同头像
+      const timestamp = Date.now()
+      const seed = `user_${timestamp}`
+      return successResponse({
+        url: `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&size=200&backgroundColor=b6e3f4`,
+        message: '头像上传成功'
+      })
+    }
+  },
+
+  // ==================== 用户统计接口 ====================
+
+  /**
+   * 获取用户个人统计数据
+   * GET /api/user/statistics
+   */
+  {
+    url: '/api/user/statistics',
+    method: 'get',
+    response: () => {
+      return successResponse({
+        postsCount: Math.floor(Math.random() * 50),
+        likesReceived: Math.floor(Math.random() * 200),
+        ordersCompleted: Math.floor(Math.random() * 30),
+        creditScore: 5.0,
+        growthValue: 2680,
+        level: '黑科大在校生'
+      })
+    }
+  },
+
+  // ==================== 缴费相关接口 ====================
+
+  /**
+   * 获取缴费项目列表
+   * GET /api/payment/items
+   */
+  {
+    url: '/api/payment/items',
+    method: 'get',
+    response: () => {
+      return successResponse([
+        {
+          id: 'item001',
+          name: '2024年春季学费',
+          amount: 5500,
+          deadline: '2024-03-01',
+          type: 'tuition',
+          status: 'unpaid',
+          description: '2024年春季学期学费'
+        },
+        {
+          id: 'item002',
+          name: '住宿费',
+          amount: 1200,
+          deadline: '2024-03-01',
+          type: 'accommodation',
+          status: 'paid',
+          paidAt: '2024-02-15',
+          description: '2024年春季学期住宿费'
+        },
+        {
+          id: 'item003',
+          name: '教材费',
+          amount: 350,
+          deadline: '2024-03-10',
+          type: 'material',
+          status: 'unpaid',
+          description: '2024年春季学期教材费'
+        },
+        {
+          id: 'item004',
+          name: '保险费',
+          amount: 100,
+          deadline: '2024-03-15',
+          type: 'insurance',
+          status: 'unpaid',
+          description: '2024年度学生保险'
+        }
+      ])
+    }
+  },
+
+  /**
+   * 获取单个缴费项目
+   * GET /api/payment/items/:id
+   */
+  {
+    url: '/api/payment/items/:id',
+    method: 'get',
+    response: (req: any) => {
+      const { id } = req.params
+      return successResponse({
+        id,
+        name: '缴费项目 ' + id,
+        amount: Math.floor(Math.random() * 5000) + 500,
+        deadline: '2024-03-01',
+        type: 'tuition',
+        status: 'unpaid',
+        description: '缴费项目详情'
+      })
+    }
+  },
+
+  /**
+   * 创建缴费订单
+   * POST /api/payment/create
+   */
+  {
+    url: '/api/payment/create',
+    method: 'post',
+    response: () => {
+      return successResponse({
+        paymentUrl: 'https://mock-payment.example.com/pay/' + Date.now(),
+        orderId: 'ORD' + Date.now()
+      })
+    }
+  },
+
+  /**
+   * 查询缴费状态
+   * GET /api/payment/status/:orderId
+   */
+  {
+    url: '/api/payment/status/:orderId',
+    method: 'get',
+    response: () => {
+      return successResponse({
+        status: 'pending',
+        paidAt: null
+      })
+    }
+  },
+
+  /**
+   * 获取缴费记录
+   * GET /api/payment/records
+   */
+  {
+    url: '/api/payment/records',
+    method: 'get',
+    response: () => {
+      return successResponse([
+        {
+          id: 'rec001',
+          itemName: '2023年秋季学费',
+          amount: 5500,
+          paidAt: '2023-09-01',
+          method: 'alipay',
+          status: 'success'
+        },
+        {
+          id: 'rec002',
+          itemName: '2023年秋季住宿费',
+          amount: 1200,
+          paidAt: '2023-09-01',
+          method: 'wechat',
+          status: 'success'
+        },
+        {
+          id: 'rec003',
+          itemName: '教材费',
+          amount: 280,
+          paidAt: '2023-09-05',
+          method: 'alipay',
+          status: 'success'
+        }
+      ])
+    }
+  },
+
+  /**
+   * 获取缴费汇总
+   * GET /api/payment/summary
+   */
+  {
+    url: '/api/payment/summary',
+    method: 'get',
+    response: () => {
+      return successResponse({
+        totalAmount: 7150,
+        paidAmount: 1200,
+        unpaidAmount: 5950,
+        overdueAmount: 0,
+        itemCount: 4,
+        paidCount: 1,
+        unpaidCount: 3
+      })
+    }
+  },
+
+  /**
+   * 提交绿色通道申请
+   * POST /api/payment/green-channel
+   */
+  {
+    url: '/api/payment/green-channel',
+    method: 'post',
+    response: (req: any) => {
+      const data = req.body
+      return successResponse({
+        id: 'GC' + Date.now(),
+        ...data,
+        status: 'pending',
+        submittedAt: new Date().toISOString()
+      })
+    }
+  },
+
+  /**
+   * 获取绿色通道申请记录
+   * GET /api/payment/green-channel
+   */
+  {
+    url: '/api/payment/green-channel',
+    method: 'get',
+    response: () => {
+      return successResponse([
+        {
+          id: 'GC001',
+          reason: '家庭经济困难',
+          amount: 5500,
+          status: 'approved',
+          submittedAt: '2024-02-20',
+          reviewedAt: '2024-02-22',
+          reviewerComment: '审核通过，请按时缴费'
+        }
+      ])
+    }
+  },
+
+  // ==================== 用户资料更新接口 ====================
+
+  /**
+   * 更新用户资料
+   * PUT /api/user/profile
+   */
+  {
+    url: '/api/user/profile',
+    method: 'put',
+    response: (req: any) => {
+      const data = req.body
+      console.log('[Mock] Update profile:', data)
+      return successResponse({
+        id: 1,
+        username: 'student_2022020001',
+        email: data.email || 'zhangsan@usth.edu.cn',
+        phone: data.phone || '138****8888',
+        nickname: data.nickname || '张同学',
+        avatar: data.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=33&size=200',
+        gender: data.gender || 'male',
+        birthday: data.birthday || '2000-01-01',
+        studentId: '2022020001',
+        school: data.school || '计算机科学与技术学院',
+        major: data.major || '软件工程',
+        grade: data.grade || '2022级',
+        role: 'user',
+        status: 'active',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: new Date().toISOString()
+      })
+    }
+  },
+
+  // ==================== 验证码相关接口 ====================
+
+  /**
+   * 发送验证码
+   * POST /api/auth/send-code
+   */
+  {
+    url: '/api/auth/send-code',
+    method: 'post',
+    response: (req: any) => {
+      const { target, type } = req.body
+      console.log(`[Mock] 发送验证码到 ${target}, 类型: ${type}`)
+      // 模拟发送验证码成功
+      return successResponse({
+        message: '验证码已发送',
+        target,
+        type
+      })
+    }
+  },
+
+  /**
+   * 验证验证码
+   * POST /api/auth/verify-code
+   */
+  {
+    url: '/api/auth/verify-code',
+    method: 'post',
+    response: (req: any) => {
+      const { target, code } = req.body
+      console.log(`[Mock] 验证验证码: ${target}, 码: ${code}`)
+      // 模拟验证成功（任何6位数字都通过）
+      const isValid = code && code.length === 6 && /^\d{6}$/.test(code)
+      return successResponse({
+        verified: isValid,
+        message: isValid ? '验证成功' : '验证码错误'
+      })
+    }
+  },
+
+  // ==================== 安全设置相关接口 ====================
+
+  /**
+   * 绑定手机号
+   * POST /api/user/security/bind-phone
+   */
+  {
+    url: '/api/user/security/bind-phone',
+    method: 'post',
+    response: (req: any) => {
+      const { phone, code } = req.body
+      console.log(`[Mock] 绑定手机号: ${phone}, 验证码: ${code}`)
+      // 模拟绑定成功
+      return successResponse({
+        message: '手机号绑定成功',
+        phone
+      })
+    }
+  },
+
+  /**
+   * 绑定邮箱
+   * POST /api/user/security/bind-email
+   */
+  {
+    url: '/api/user/security/bind-email',
+    method: 'post',
+    response: (req: any) => {
+      const { email, code } = req.body
+      console.log(`[Mock] 绑定邮箱: ${email}, 验证码: ${code}`)
+      return successResponse({
+        message: '邮箱绑定成功',
+        email
+      })
     }
   }
 ] as MockMethod[]
-
-/**
- * mockServerPlugin - Vite 插件
- * 用于在开发环境中启用 Mock 数据拦截
- * 注意：此功能已禁用，保留接口以避免 vite.config.ts 报错
- */
-export function mockServerPlugin(): any {
-  // 已禁用：vite-plugin-mock 未安装
-  // 返回空插件以避免构建错误
-  return {
-    name: 'mock-server-disabled',
-    configResolved() {
-      console.warn('[Mock] Mock server is disabled. Install vite-plugin-mock to enable.')
-    }
-  }
-}

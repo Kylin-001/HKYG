@@ -2,6 +2,7 @@ package com.heikeji.mall.takeout.config;
 
 import com.heikeji.common.core.cache.CacheManager;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,6 +14,7 @@ import jakarta.annotation.Resource;
  * 初始化CacheManager单例实例
  */
 @Configuration
+@ConditionalOnBean(RedisTemplate.class)
 public class CacheConfig implements InitializingBean {
 
     @Resource

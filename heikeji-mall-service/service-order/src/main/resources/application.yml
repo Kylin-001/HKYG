@@ -1,7 +1,7 @@
 server:
   port: 8083
   servlet:
-    context-path: /api
+    context-path: /
   # Tomcat线程池配置
   tomcat:
     # 最大线程数
@@ -27,14 +27,22 @@ spring:
     nacos:
       discovery:
         enabled: true
-        server-addr: localhost:8848
-        namespace: public
-        ip: 127.0.0.1
+        server-addr: 192.168.186.128:8848
+        namespace: ""
         cluster-name: DEFAULT
+        group: DEFAULT_GROUP
+        register-enabled: true
+        heart-beat-interval: 5000
+        heart-beat-timeout: 15000
+        ip-delete-timeout: 30000
+        ephemeral: true
+        metadata:
+          version: "1.0.0"
+          region: "dev"
       config:
+        enabled: false
         import-check:
           enabled: false
-        enabled: false
     compatibility-verifier:
       enabled: false
   datasource:
@@ -96,6 +104,19 @@ mybatis-plus:
       logic-not-delete-value: 0
       logic-delete-value: 1
 
+# 健康检查端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
+
 logging:
   level:
     com.heikeji.mall.order: debug
@@ -124,19 +145,3 @@ springdoc:
   server:
     url: http://localhost:8083/api
 
-# Spring Boot Actuator配置
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: always
-  health:
-    elasticsearch:
-      enabled: false
-    rabbit:
-      enabled: false
-    redis:
-      enabled: false

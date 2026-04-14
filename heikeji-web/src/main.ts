@@ -6,7 +6,18 @@ import App from './App.vue'
 import router from './router'
 import { useUserStore } from './stores/user'
 
+// Tailwind CSS 必须在 Element Plus 之前导入，以确保优先级
 import './styles/global.css'
+
+// Element Plus 基础样式（函数式组件需要）
+import 'element-plus/dist/index.css'
+
+// 引入 Mock 数据（开发环境）
+if (import.meta.env.DEV) {
+  import('./mock').then((mock) => {
+    console.log('[Mock] Mock data loaded')
+  })
+}
 
 import i18n from './locales'
 import { setupLazyLoadDirective } from './directives/lazyLoad'

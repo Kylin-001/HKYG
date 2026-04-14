@@ -2,10 +2,11 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Java](https://img.shields.io/badge/Java-17-orange.svg)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-green.svg)
-![Vue](https://img.shields.io/badge/Vue-3.5-brightgreen.svg)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.8-green.svg)
+![Vue](https://img.shields.io/badge/Vue-3.5.30-brightgreen.svg)
+![Vite](https://img.shields.io/badge/Vite-8.x-646CFF.svg)
 ![License](https://img.shields.io/badge/license-MIT-yellow.svg)
 
 一个为黑龙江科技大学师生提供便捷服务的校园服务平台
@@ -209,7 +210,7 @@ open http://localhost:8089/swagger-ui.html
 ### 后端技术栈
 | 技术 | 版本 | 说明 |
 |------|------|------|
-| Spring Boot | 3.2.2 | 基础框架 |
+| Spring Boot | 3.2.8 | 基础框架 |
 | Spring Cloud | 2023.0.0 | 微服务框架 |
 | Spring Cloud Alibaba | 2022.0.0-RC2 | 阿里云组件 |
 | Spring Cloud Gateway | 4.1.1 | API网关 |
@@ -225,15 +226,18 @@ open http://localhost:8089/swagger-ui.html
 ### 前端技术栈
 | 技术 | 版本 | 说明 |
 |------|------|------|
-| Vue | 3.5.1 | 前端框架 |
-| Vite | 5.0.0 | 构建工具 |
-| Element Plus | 2.4.4 | UI组件库 |
-| Pinia | 2.1.7 | 状态管理 |
-| Vue Router | 4.2.5 | 路由管理 |
-| Axios | 1.6.0 | HTTP客户端 |
-| ECharts | 5.4.0 | 图表库 |
+| Vue | 3.5.30 | 前端框架 |
+| Vite | 8.0.1 | 构建工具 |
+| Element Plus | 2.13.6 | UI组件库 |
+| Pinia | 3.0.4 | 状态管理 |
+| Vue Router | 4.6.4 | 路由管理 |
+| Axios | 1.14.0 | HTTP客户端 |
+| ECharts | 6.0.0 | 图表库 |
 | Vue I18n | 12.0.0 | 国际化 |
-| TypeScript | 5.2.2 | 类型检查 |
+| TypeScript | 5.9.3 | 类型检查 |
+| Tailwind CSS | 4.2.2 | 原子化CSS框架 |
+| Vitest | 4.1.2 | 单元测试框架 |
+| Playwright | 1.59.1 | E2E测试框架 |
 
 ### 微服务架构
 ```
@@ -270,7 +274,6 @@ open http://localhost:8089/swagger-ui.html
 ```
 heikeji-mall/
 ├── heikeji-admin/              # 管理后台
-├── heikeji-app/               # 移动端应用
 ├── heikeji-common/            # 公共模块
 │   ├── common-api/            # API接口定义
 │   ├── common-core/           # 核心工具模块
@@ -293,18 +296,6 @@ heikeji-mall/
 ├── service-api-docs/          # API文档聚合服务
 ├── heikeji-system/            # 系统模块
 ├── heikeji-gateway/           # API网关
-├── heikeji-frontend/          # 前端项目
-│   ├── src/
-│   │   ├── api/              # API接口
-│   │   ├── assets/           # 静态资源
-│   │   ├── components/       # 公共组件
-│   │   ├── layout/           # 布局组件
-│   │   ├── router/           # 路由配置
-│   │   ├── store/            # 状态管理
-│   │   ├── utils/            # 工具函数
-│   │   └── views/            # 页面组件
-│   ├── public/              # 公共资源
-│   └── package.json
 ├── heikeji-miniprogram/       # 小程序项目
 ├── sql/                     # 数据库脚本
 │   ├── root_scripts/        # 根脚本
@@ -505,52 +496,59 @@ docker-compose up -d
 
 ### 代码统计
 - **后端代码行数**：约50,000行
-- **前端代码行数**：约30,000行
-- **总文件数**：约500个
+- **前端代码行数**：约35,000行
+- **总文件数**：约600个
 - **Java类数**：约300个
-- **Vue组件数**：约200个
+- **Vue组件数**：约70个
+- **TypeScript文件数**：约100个
 
 ### 功能统计
 - **后端服务数**：11个
 - **API接口数**：约200个
-- **前端页面数**：约50个
+- **前端页面数**：约60个（含Layout组件）
 - **数据库表数**：约30个
+- **国际化语言**：5种（中文/英文/日文/韩文/俄文）
 
 ### 测试统计
-- **测试文件数**：约30个
-- **测试用例数**：约250个
-- **测试覆盖率**：约77%
+- **单元测试文件数**：18个
+- **单元测试用例数**：约200个
+- **E2E测试文件数**：12个
+- **测试覆盖率**：约70%+
+- **CI/CD流水线**：GitHub Actions 6阶段Pipeline
 
 ---
 
 ## 🎯 项目路线图
 
-### 已完成 ✅
-- [x] Vue 3迁移
-- [x] 测试体系完善
-- [x] 性能优化
-- [x] 安全加固
-- [x] 用户认证优化
-- [x] 权限控制优化
-- [x] 商品推荐系统
+### ✅ Phase 1: 基础架构完成
+- [x] Vue 3迁移 (3.5.30 + Composition API)
+- [x] TypeScript严格模式升级 (5.9.3)
+- [x] Vite构建工具升级 (8.x)
+- [x] 测试体系完善 (Vitest + Playwright)
+- [x] 性能优化 (代码分割、懒加载、缓存策略)
+- [x] 安全加固 (XSS/CSRF/CSP)
+- [x] 用户认证优化 (JWT + RBAC)
+- [x] 商品推荐系统 (User-CF/Item-CF)
 - [x] 支付安全增强
 - [x] 营销系统开发
 - [x] 数据分析系统
-- [x] 协同过滤算法
-- [x] 系统监控功能
-- [x] 营销系统后端服务
-- [x] 营销系统前端页面
-- [x] 项目文档整理
+- [x] 国际化支持 (5种语言)
 
-### 已完成 ✅
-- [x] 前端页面开发
-- [x] 后端服务完善
-- [x] 架构优化
-- [x] 功能完善
-- [x] AI和机器学习
-- [x] 大数据分析
-- [x] 国际化支持
-- [x] 微前端架构完善
+### 🔄 Phase 2: 前端交互优化 (进行中 60%)
+- [x] 首页Banner轮播系统 (useCarousel Composable)
+- [x] 图片懒加载指令增强 (WebP/重试/骨架屏/性能监控)
+- [x] 智能搜索Composable (useSmartSearch)
+- [x] 无障碍访问增强 (useA11y Composable)
+- [x] 键盘快捷键支持 (useKeyboardShortcuts Composable)
+- [ ] 虚拟滚动组件优化
+- [ ] API缓存策略增强
+- [ ] 全局骨架屏系统
+
+### ⏳ Phase 3-6: 后续规划
+- [ ] 性能极致优化
+- [ ] 安全加固深化
+- [ ] 测试覆盖提升
+- [ ] AI智能化功能
 
 ---
 

@@ -54,12 +54,15 @@ test.describe('用户认证流程', () => {
     console.log(`登录后URL: ${currentUrl}`)
   })
 
-  test('注册链接可点击', async ({ page }) => {
-    const registerLink = page.locator('a[href*="register"], a:has-text("注册")').first()
+  test('注册模式可切换', async ({ page }) => {
+    // 查找注册模式切换按钮
+    const registerTab = page.locator('button:has-text("注册"), .mode-tab:has-text("注册")').first()
 
-    if (await registerLink.isVisible()) {
-      await registerLink.click()
-      await expect(page).toHaveURL(/.*register/)
+    if (await registerTab.isVisible()) {
+      await registerTab.click()
+      // 验证切换到注册模式后显示注册表单字段
+      const emailInput = page.locator('input[id="email"]').first()
+      await expect(emailInput).toBeVisible()
     }
   })
 

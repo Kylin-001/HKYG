@@ -2,6 +2,7 @@ package com.heikeji.mall.takeout;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.FilterType;
  * 外卖服务启动类
  */
 @SpringBootApplication
+@EnableDiscoveryClient
 @ComponentScan(basePackages = {"com.heikeji.mall.takeout", "com.heikeji.common"}, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
     com.heikeji.common.core.security.JwtAuthenticationFilter.class,
     com.heikeji.common.security.filter.JwtAuthenticationFilter.class,

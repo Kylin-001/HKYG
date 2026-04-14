@@ -333,7 +333,7 @@ export const useCartStore = defineStore('cart', () => {
     // 先添加到本地（乐观更新）
     const newItem: LocalCartItem = {
       id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      productId: productId as number,
+      productId: String(productId),
       product: {} as any, // 产品详情会在同步后填充
       quantity,
       selected: true,

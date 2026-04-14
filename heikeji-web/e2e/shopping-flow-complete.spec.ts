@@ -143,17 +143,22 @@ test.describe('用户认证流程测试', () => {
   })
 
   test('注册流程完整性', async ({ page }) => {
-    await page.goto('/auth/register')
+    // 进入登录页面并切换到注册模式
+    await page.goto('/auth/login')
 
-    // 1. 验证注册页面
-    await expect(page).toHaveURL(/.*register/)
+    // 1. 点击切换到注册模式
+    const registerTab = page.locator('button:has-text("注册"), .mode-tab:has-text("注册")').first()
+    if (await registerTab.count() > 0) {
+      await registerTab.click()
+    }
 
     // 2. 查找注册表单字段
     const formFields = [
-      'input[name="username"]',
-      'input[name="email"], input[type="email"]',
-      'input[name="password"], input[type="password"]',
-      'input[placeholder*="确认密码"], input[placeholder*="confirm"]',
+      'input[name="username"], input[id="username"]',
+      'input[name="email"], input[type="email"], input[id="email"]',
+      'input[name="phone"], input[id="phone"]',
+      'input[name="password"], input[type="password"], input[id="password"]',
+      'input[name="captcha"], input[id="captcha"]',
     ]
 
     for (const field of formFields) {

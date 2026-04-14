@@ -215,6 +215,11 @@ export interface PersonalStatistics extends UserStatistics {
   averageOrderValue: number // 平均订单金额
   favoriteCategories: Array<{ category: string; count: number }> // 喜欢的商品分类
   recentActivity: ActivityRecord[] // 最近动态
+  // 社区相关统计
+  postCount: number // 发布帖子数
+  likeCount: number // 收到点赞数
+  commentCount: number // 收到评论数
+  creditScore: number // 信用评分（0-5）
 }
 
 export interface ActivityRecord {
@@ -224,4 +229,19 @@ export interface ActivityRecord {
   targetId?: number
   targetType?: string
   createdAt: string
+}
+
+// 更新用户资料请求
+export interface UpdateProfileRequest {
+  nickname?: string
+  email?: string
+  phone?: string
+  gender?: 'male' | 'female' | 'unknown'
+  birthday?: string
+  avatar?: string
+  bio?: string
+  location?: string
+  school?: string
+  major?: string
+  grade?: string
 }

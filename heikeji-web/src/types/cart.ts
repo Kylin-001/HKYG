@@ -1,8 +1,8 @@
 export interface CartItem {
-  id: number
-  productId: number
-  product: {
-    id: number
+  id: string
+  productId: string
+  product?: {
+    id: string
     name: string
     image: string
     price: number
@@ -26,13 +26,13 @@ export interface Cart {
 }
 
 export interface AddToCartRequest {
-  productId: number
+  productId: string | number
   quantity: number
   specifications?: Record<string, string>
 }
 
 export interface UpdateCartRequest {
-  itemId: number
+  itemId: string
   quantity?: number
   selected?: boolean
 }

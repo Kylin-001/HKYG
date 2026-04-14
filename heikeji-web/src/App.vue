@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<script setup lang="ts">
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -81,7 +81,7 @@ const notificationCount = ref(0)
 
 // 是否显示布局（排除登录、注册等页面）
 const showLayout = computed(() => {
-  const noLayoutRoutes = ['Login', 'Register', 'ForgotPassword', 'NotFound']
+  const noLayoutRoutes = ['Login', 'ForgotPassword', 'NotFound']
   return !noLayoutRoutes.includes(route.name as string)
 })
 
@@ -276,7 +276,9 @@ onUnmounted(() => {
 
             <!-- ====== 左侧区域：品牌 Logo ====== -->
             <div class="flex items-center gap-2 shrink-0">
-              <USTHLogo size="sm" :show-text="false" class="hover:scale-105 transition-transform duration-200" />
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-primary-50 hover:bg-primary-100 transition-all duration-200">
+                <USTHLogo size="sm" :show-text="false" class="hover:scale-105 transition-transform duration-200" />
+              </div>
               <span class="hidden sm:block font-bold text-base text-text-primary">黑科易购</span>
             </div>
 
@@ -392,9 +394,11 @@ onUnmounted(() => {
                 <router-link to="/user/profile"
                              :aria-label="`${userStore.user?.nickname || '用户'}的个人中心`"
                              class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-primary-50/80 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-                  <img :src="userStore.userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=33&size=80'"
-                       alt="用户头像"
-                       class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-100 transition-transform hover:scale-105" />
+                  <img :src="userStore.userAvatar"
+                       alt=""
+                       class="w-8 h-8 rounded-full object-cover ring-2 ring-primary-100 transition-transform hover:scale-105"
+                       style="width: 32px; height: 32px; max-width: 32px; max-height: 32px;"
+                       @error="$event.target.src='https://api.dicebear.com/7.x/avataaars/svg?seed=fallback&size=80'" />
                   <span class="text-sm font-medium text-text-primary hidden xl:block">{{ userStore.user?.nickname || '用户' }}</span>
                 </router-link>
               </template>
@@ -461,11 +465,10 @@ onUnmounted(() => {
       <main id="main-content" :class="['min-h-screen bg-surface-secondary', 'pb-20 md:pb-8']" :style="{ paddingTop: headerHeight + 'px' }" role="main" aria-label="主要内容">
         <ErrorLayout>
           <RouterView v-slot="{ Component, route: currentRoute }">
-            <keep-alive :include="['Home', 'ProductList', 'CommunityForum']">
-              <Transition :name="currentRoute.meta.transition || 'page-fade'" mode="out-in">
-                <component :is="Component" :key="currentRoute.meta.keepAlive ? currentRoute.path : currentRoute.fullPath" />
-              </Transition>
+            <keep-alive :include="['Home', 'ProductList', 'CommunityForum']" v-if="currentRoute.meta.keepAlive">
+              <component :is="Component" :key="currentRoute.fullPath" />
             </keep-alive>
+            <component :is="Component" :key="currentRoute.fullPath" v-else />
           </RouterView>
         </ErrorLayout>
       </main>
@@ -507,7 +510,9 @@ onUnmounted(() => {
               <!-- 用户信息（未登录显示登录入口）-->
               <div v-if="userStore.isAuthenticated" class="p-5 border-b border-primary-50">
                 <div class="flex items-center gap-3">
-                  <img :src="userStore.userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=33&size=80'" class="w-12 h-12 rounded-full object-cover ring-2 ring-primary-100" />
+                  <img :src="userStore.userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=33&size=80'"
+                       class="w-12 h-12 rounded-full object-cover ring-2 ring-primary-100"
+                       style="width: 48px; height: 48px; max-width: 48px; max-height: 48px;" />
                   <div>
                     <p class="font-semibold text-text-primary">{{ userStore.user?.nickname || '用户' }}</p>
                     <p class="text-xs text-text-tertiary">{{ t('common.welcome') || '欢迎来到黑科大~' }}</p>

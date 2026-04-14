@@ -16,7 +16,7 @@
           <article class="post-article glass-effect rounded-2xl overflow-hidden">
             <header class="post-header">
               <div class="author-info">
-                <img :src="post.authorAvatar" :alt="post.authorName" class="author-avatar" />
+                <img :src="post.authorAvatar" :alt="post.authorName" class="author-avatar" width="48" height="48" />
                 <div class="author-meta">
                   <h4 class="author-name">{{ post.authorName }}</h4>
                   <div class="post-meta-row">

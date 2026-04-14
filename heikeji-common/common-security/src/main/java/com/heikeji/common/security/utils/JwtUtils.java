@@ -129,7 +129,19 @@ public class JwtUtils {
      */
     public static Long getUserIdFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
-        return claims.get("userId", Long.class);
+        Object userId = claims.get("userId");
+        if (userId == null) {
+            return null;
+        }
+        // 处理userId可能是String或Long的情况
+        if (userId instanceof Long) {
+            return (Long) userId;
+        } else if (userId instanceof String) {
+            return Long.valueOf((String) userId);
+        } else if (userId instanceof Integer) {
+            return ((Integer) userId).longValue();
+        }
+        return null;
     }
 
     /**
@@ -138,6 +150,14 @@ public class JwtUtils {
     public static String getOpenIdFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.get("openId", String.class);
+    }
+
+    /**
+     * 从Token中获取Username
+     */
+    public static String getUsernameFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        return claims.get("username", String.class);
     }
 
     /**

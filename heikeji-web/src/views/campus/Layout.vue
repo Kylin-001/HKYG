@@ -88,6 +88,12 @@
 
 <script setup lang="ts">
 import { Calendar, Reading } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
+
+// ============================================
+// 路由
+// ============================================
+const route = useRoute()
 
 // ============================================
 // 导航配置

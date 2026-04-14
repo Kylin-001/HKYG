@@ -17,10 +17,12 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import org.springframework.context.annotation.Import;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * 订单服务启动类 */
 @SpringBootApplication
+@EnableDiscoveryClient
 @ComponentScan(basePackages = {
     "com.heikeji.mall.order"
     // 暂时移除common.core.cache包的扫描，避免缓存相关的启动问题
@@ -64,10 +66,10 @@ public class OrderApplication {
     public static void main(String[] args) {
         // 设置开发环境
         System.setProperty("spring.profiles.active", "dev");
-        System.setProperty("spring.main.lazy-initialization", "true");
-        
-        System.out.println("Starting OrderApplication with BeanFactoryPostProcessor to remove problematic bean...");
-        
+        // 注意：不要设置 lazy-initialization，这会导致Nacos注册时机不确定
+
+        System.out.println("Starting OrderApplication...");
+
         // 使用标准方式启动应用
         SpringApplication.run(OrderApplication.class, args);
     }

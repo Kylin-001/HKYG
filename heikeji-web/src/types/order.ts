@@ -40,7 +40,7 @@ export type PaymentMethod = 'alipay' | 'wechat' | 'balance' | 'campus_card'
 
 export interface OrderItem {
   id: number
-  productId: number
+  productId: string
   productName: string
   productImage: string
   price: number

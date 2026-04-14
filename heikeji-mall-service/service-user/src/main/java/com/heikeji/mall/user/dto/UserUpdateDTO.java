@@ -20,8 +20,8 @@ public class UserUpdateDTO {
     @Schema(description = "邮箱")
     private String email;
 
-    @Schema(description = "性别：0-未知，1-男，2-女")
-    private Integer gender;
+    @Schema(description = "性别：男、女、未知")
+    private String gender;
 
     @Schema(description = "生日")
     private LocalDateTime birthday;

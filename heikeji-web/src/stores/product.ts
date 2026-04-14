@@ -92,10 +92,22 @@ export const useProductStore = defineStore('product', () => {
   async function fetchHotProducts() {
     try {
       const res = await productApi.getHotProducts()
-      hotProducts.value = res || []
+      // 处理后端返回的数据格式，确保是数组
+      if (Array.isArray(res)) {
+        hotProducts.value = res
+      } else if (res && Array.isArray(res.data)) {
+        hotProducts.value = res.data
+      } else if (res && typeof res === 'object') {
+        // 如果是对象，尝试提取数组字段
+        const possibleArrays = Object.values(res).filter(v => Array.isArray(v))
+        hotProducts.value = possibleArrays.length > 0 ? possibleArrays[0] : []
+      } else {
+        hotProducts.value = []
+      }
       return hotProducts.value
     } catch (err) {
       console.error('获取热门商品失败:', err)
+      hotProducts.value = []
       return []
     }
   }

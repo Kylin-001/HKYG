@@ -15,8 +15,10 @@ import jakarta.validation.constraints.NotBlank;
 public class LoginDTO {
 
     @Schema(description = "登录账号(用户名/手机号/邮箱)")
-    @NotBlank(message = "登录账号不能为空")
     private String account;
+
+    @Schema(description = "用户名（兼容前端）")
+    private String username;
 
     @Schema(description = "密码")
     @NotBlank(message = "密码不能为空")

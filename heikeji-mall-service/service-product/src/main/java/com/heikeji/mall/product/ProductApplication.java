@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "com.heikeji.mall.product")
 @MapperScan("com.heikeji.mall.product.mapper")
 @EnableFeignClients // 启用Feign客户端，自动扫描当前包及其子包
+@EnableDiscoveryClient
 public class ProductApplication {
 
     public static void main(String[] args) {

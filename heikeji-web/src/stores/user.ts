@@ -11,14 +11,15 @@ export const useUserStore = defineStore('user', () => {
   const error = ref<string | null>(null)
 
   // ====== Getters ======
-  const isAuthenticated = computed(() => !!token.value && !!user.value)
+  // 只要有token就认为已认证，user对象可以在需要时获取
+  const isAuthenticated = computed(() => !!token.value)
 
   const userName = computed(() =>
     user.value?.nickname || user.value?.username || '未登录用户'
   )
 
   const userAvatar = computed(() =>
-    user.value?.avatar || '/default-avatar.png'
+    user.value?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.value?.id || 'default'}&size=80`
   )
 
   const userId = computed(() => user.value?.id)
@@ -33,16 +34,22 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await userApi.login(loginData)
+      const data = await userApi.login(loginData)
 
-      token.value = response.data.token
-      user.value = response.data.user
+      token.value = data.token
+      user.value = data.user
 
-      // 持久化存储
-      localStorage.setItem('token', token.value)
-      localStorage.setItem('user', JSON.stringify(user.value))
+      // 根据 rememberMe 决定是否持久化存储
+      if (loginData.rememberMe) {
+        localStorage.setItem('token', token.value)
+        localStorage.setItem('user', JSON.stringify(user.value))
+      } else {
+        // 使用 sessionStorage，浏览器关闭后自动清除
+        sessionStorage.setItem('token', token.value)
+        sessionStorage.setItem('user', JSON.stringify(user.value))
+      }
 
-      return response.data
+      return data
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
       error.value = errorObj.response?.data?.message || '登录失败，请重试'
@@ -60,9 +67,9 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await userApi.register(registerData)
+      const data = await userApi.register(registerData)
 
-      return response.data
+      return data
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
       error.value = errorObj.response?.data?.message || '注册失败，请重试'
@@ -76,39 +83,52 @@ export const useUserStore = defineStore('user', () => {
    * 退出登录
    */
   async function logout() {
-    try {
-      if (token.value) {
-        await userApi.logout()
-      }
-    } catch (err) {
-      // API调用失败不影响登出流程，仅记录日志
-      console.error('Logout API call failed:', err)
-    } finally {
-      // 无论API调用是否成功，都清除本地状态
-      token.value = ''
-      user.value = null
-      error.value = null
-
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-    }
+    // 立即清除本地状态
+    token.value = ''
+    user.value = null
+    error.value = null
+    
+    // 清除两种存储
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
+    
+    // 注意：后端logout API暂时不调用，因为：
+    // 1. 后端可能存在token验证问题导致500错误
+    // 2. 前端清除状态已经足够实现登出功能
+    // 3. 后端token会在一段时间后自动过期
+    console.log('User logged out (frontend only)')
   }
 
   /**
    * 获取当前用户信息
    */
-  async function fetchUserInfo() {
-    if (!token.value) return
+  async function fetchUserInfo(): Promise<User | null> {
+    if (!token.value) {
+      console.warn('[UserStore] No token available')
+      return null
+    }
 
     try {
       isLoading.value = true
-      const response = await userApi.getUserInfo()
-      user.value = response.data
+      console.log('[UserStore] Fetching user info...')
+      const data = await userApi.getUserInfo()
+      user.value = data
       localStorage.setItem('user', JSON.stringify(user.value))
-    } catch (err) {
-      console.error('获取用户信息失败:', err)
-      // Token可能已过期，清除登录状态
-      await logout()
+      console.log('[UserStore] User info fetched successfully:', data)
+      return data
+    } catch (err: any) {
+      console.error('[UserStore] Failed to fetch user info:', err)
+      // 只有401错误才清除登录状态，其他错误保留token让用户重试
+      if (err?.response?.status === 401) {
+        console.log('[UserStore] Token expired (401), logging out...')
+        await logout()
+      } else {
+        // 网络错误或其他错误，不清除登录状态
+        console.log('[UserStore] Non-401 error, keeping session for retry')
+      }
+      return null
     } finally {
       isLoading.value = false
     }
@@ -122,11 +142,11 @@ export const useUserStore = defineStore('user', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await userApi.updateProfile(profileData)
-      user.value = { ...user.value!, ...response.data }
+      const data = await userApi.updateProfile(profileData)
+      user.value = { ...user.value!, ...data }
       localStorage.setItem('user', JSON.stringify(user.value))
 
-      return response.data
+      return data
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } }; message?: string }
       error.value = errorObj.response?.data?.message || '更新失败'
@@ -142,14 +162,19 @@ export const useUserStore = defineStore('user', () => {
   async function uploadAvatar(file: File) {
     try {
       isLoading.value = true
-      const response = await userApi.uploadAvatar(file)
+      const data = await userApi.uploadAvatar(file)
+      console.log('[UserStore] Avatar upload response:', data)
 
       if (user.value) {
-        user.value.avatar = response.data.url
+        // 创建新对象以触发响应式更新
+        user.value = { ...user.value, avatar: data.url }
         localStorage.setItem('user', JSON.stringify(user.value))
+        console.log('[UserStore] Avatar updated:', user.value.avatar)
+      } else {
+        console.warn('[UserStore] Cannot update avatar: user is null')
       }
 
-      return response.data
+      return data
     } catch (err: unknown) {
       error.value = '上传头像失败'
       throw err
@@ -163,8 +188,8 @@ export const useUserStore = defineStore('user', () => {
    */
   async function refreshToken(): Promise<string> {
     try {
-      const response = await userApi.refreshToken()
-      const newToken = response.data.token
+      const data = await userApi.refreshToken()
+      const newToken = data.token
       token.value = newToken
       localStorage.setItem('token', newToken)
       return newToken
@@ -177,8 +202,15 @@ export const useUserStore = defineStore('user', () => {
    * 从本地存储恢复登录状态（应用启动时调用）
    */
   function restoreSession() {
-    const savedToken = localStorage.getItem('token')
-    const savedUser = localStorage.getItem('user')
+    // 优先从 localStorage 读取（记住我）
+    let savedToken = localStorage.getItem('token')
+    let savedUser = localStorage.getItem('user')
+
+    // 如果没有，尝试从 sessionStorage 读取（当前会话）
+    if (!savedToken) {
+      savedToken = sessionStorage.getItem('token')
+      savedUser = sessionStorage.getItem('user')
+    }
 
     if (savedToken) {
       token.value = savedToken

@@ -62,9 +62,9 @@ public class UserVO {
     private String grade;
     
     /**
-     * 性别 0:未知 1:男 2:女
+     * 性别：男、女、未知
      */
-    private Integer gender;
+    private String gender;
     
     /**
      * 余额
@@ -85,4 +85,14 @@ public class UserVO {
      * 更新时间
      */
     private LocalDateTime updateTime;
+    
+    /**
+     * 角色列表
+     */
+    private java.util.List<String> roles;
+    
+    /**
+     * 权限列表
+     */
+    private java.util.List<String> permissions;
 }

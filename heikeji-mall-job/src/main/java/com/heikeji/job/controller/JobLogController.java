@@ -2,8 +2,8 @@ package com.heikeji.job.controller;
 
 import com.heikeji.job.entity.JobLog;
 import com.heikeji.job.service.JobLogService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/job-log")
-@Api(tags = "任务日志管理")
+@Tag(name = "任务日志管理")
 public class JobLogController {
 
     @Autowired
@@ -37,7 +37,7 @@ public class JobLogController {
      * @return 任务日志
      */
     @GetMapping("/{id}")
-    @ApiOperation("根据ID查询任务日志")
+    @Operation(summary = "根据ID查询任务日志")
     public ResponseEntity<JobLog> getJobLogById(@PathVariable Long id) {
         JobLog jobLog = jobLogService.getJobLogById(id);
         if (jobLog != null) {
@@ -60,7 +60,7 @@ public class JobLogController {
      * @return 分页结果
      */
     @GetMapping("/page")
-    @ApiOperation("分页查询任务日志")
+    @Operation(summary = "分页查询任务日志")
     public ResponseEntity<Map<String, Object>> pageJobLogs(
             @RequestParam(required = false) String jobName,
             @RequestParam(required = false) String jobGroup,
@@ -122,7 +122,7 @@ public class JobLogController {
      * @return 响应结果
      */
     @DeleteMapping("/batch")
-    @ApiOperation("批量删除任务日志")
+    @Operation(summary = "批量删除任务日志")
     public ResponseEntity<String> deleteJobLogs(@RequestBody List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return ResponseEntity.badRequest().body("请选择要删除的日志");
@@ -139,7 +139,7 @@ public class JobLogController {
      * @return 响应结果
      */
     @PostMapping("/clean")
-    @ApiOperation("清理过期任务日志")
+    @Operation(summary = "清理过期任务日志")
     public ResponseEntity<String> cleanJobLogs(@RequestParam(defaultValue = "30") int days) {
         if (days < 1) {
             return ResponseEntity.badRequest().body("保留天数不能小于1");
@@ -155,7 +155,7 @@ public class JobLogController {
      * @return 统计信息
      */
     @GetMapping("/statistics")
-    @ApiOperation("获取任务执行统计信息")
+    @Operation(summary = "获取任务执行统计信息")
     public ResponseEntity<Map<String, Object>> getJobLogStatistics() {
         try {
             Map<String, Object> statistics = jobLogService.getJobLogStatistics();

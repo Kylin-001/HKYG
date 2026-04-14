@@ -48,13 +48,13 @@
             v-for="tab in tabs"
             :key="tab.path"
             :to="tab.path"
-            :aria-current="$route.path === tab.path ? 'page' : undefined"
+            :aria-current="route.path === tab.path ? 'page' : undefined"
             :class="[
               'relative flex items-center gap-1.5 px-4 py-3.5',
               'text-sm font-medium whitespace-nowrap rounded-t-lg',
               'transition-all duration-200 ease-out',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-              $route.path === tab.path
+              route.path === tab.path
                 ? 'text-primary font-semibold bg-primary/5'
                 : 'text-text-secondary hover:text-text-primary hover:bg-gray-50/50'
             ]"
@@ -65,7 +65,7 @@
 
             <!-- 选中态下划线（品牌蓝） -->
             <span
-              v-if="$route.path === tab.path"
+              v-if="route.path === tab.path"
               class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary rounded-full"
             />
           </router-link>
@@ -94,6 +94,12 @@
 
 <script setup lang="ts">
 import { Clock, Shop } from '@element-plus/icons-vue'
+import { useRoute } from 'vue-router'
+
+// ============================================
+// 路由
+// ============================================
+const route = useRoute()
 
 // ============================================
 // 导航配置

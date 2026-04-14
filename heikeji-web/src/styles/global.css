@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ============================================
    黑龙江科技大学 - 现代化品牌设计系统 v3.0
@@ -1473,6 +1471,119 @@ img.img-error {
   }
 }
 
+/* ====== 按钮涟漪效果 (Ripple Effect) ====== */
+
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, currentColor 10%, transparent 10%);
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: scale(10);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.ripple-effect:active::after {
+  transform: scale(0);
+  opacity: 0.15;
+  transition: 0s;
+}
+
+/* 暗色模式涟漪效果适配 */
+[data-theme="dark"] .ripple-effect::after,
+.dark .ripple-effect::after {
+  opacity: 0;
+}
+
+[data-theme="dark"] .ripple-effect:active::after,
+.dark .ripple-effect:active::after {
+  opacity: 0.1;
+}
+
+/* 减少动画偏好 - 禁用涟漪 */
+@media (prefers-reduced-motion: reduce) {
+  .ripple-effect::after {
+    display: none;
+  }
+}
+
+/* ====== 滚动触发动画 (Scroll Animation) ====== */
+
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-animate.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 从左侧滑入 */
+.scroll-animate-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-animate-left.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 从右侧滑入 */
+.scroll-animate-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-animate-right.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 缩放进入 */
+.scroll-animate-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.scroll-animate-scale.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 交错动画延迟 */
+.scroll-animate-delay-1 { transition-delay: 0.1s; }
+.scroll-animate-delay-2 { transition-delay: 0.2s; }
+.scroll-animate-delay-3 { transition-delay: 0.3s; }
+.scroll-animate-delay-4 { transition-delay: 0.4s; }
+.scroll-animate-delay-5 { transition-delay: 0.5s; }
+
+/* 减少动画偏好 - 禁用滚动动画 */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-animate,
+  .scroll-animate-left,
+  .scroll-animate-right,
+  .scroll-animate-scale {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ====== 强制色彩模式增强 (Forced Colors Enhancement) ====== */
 
 @media (forced-colors: active) {
@@ -1933,5 +2044,206 @@ img.img-error {
   .el-dialog__footer {
     border-top-color: var(--color-border-subtle, #1F2937) !important;
     background: var(--color-surface, #111827);
+  }
+}
+
+/* ---------- ElMessageBox 消息确认框 - 品牌化 ---------- */
+.el-message-box {
+  border-radius: var(--radius-md, 12px) !important;
+  box-shadow: var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.16)) !important;
+  border: none !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--color-surface, #FFFFFF) !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  max-width: 90vw !important;
+  width: 420px !important;
+}
+
+/* 遮罩层 */
+.el-overlay {
+  background-color: var(--color-overlay, rgba(0, 0, 0, 0.5)) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+/* MessageBox 容器定位 */
+.el-overlay-message-box {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: auto !important;
+}
+
+/* Header 区域 */
+.el-message-box__header {
+  padding: 20px 24px 16px !important;
+  border-bottom: 1px solid var(--color-border-subtle, #F3F4F6) !important;
+  background: var(--color-surface, #FFFFFF) !important;
+}
+
+.el-message-box__title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--color-text-primary, #111827) !important;
+  line-height: 1.4 !important;
+}
+
+.el-message-box__headerbtn {
+  top: 18px !important;
+  right: 18px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  transition: all var(--duration-fast, 150ms) var(--ease-out, ease-out) !important;
+
+  &:hover {
+    background-color: var(--color-surface-tertiary, #F3F4F6) !important;
+  }
+
+  .el-message-box__close {
+    font-size: 16px !important;
+    color: var(--color-text-quaternary, #9CA3AF) !important;
+
+    &:hover {
+      color: var(--color-text-primary, #111827) !important;
+    }
+  }
+}
+
+/* Content 区域 */
+.el-message-box__content {
+  padding: 24px !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: var(--color-text-secondary, #4B5563) !important;
+  background: var(--color-surface, #FFFFFF) !important;
+}
+
+.el-message-box__container {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+}
+
+.el-message-box__status {
+  font-size: 24px !important;
+  margin-right: 0 !important;
+
+  &.el-icon {
+    color: var(--color-warning, #F57C00) !important;
+  }
+}
+
+.el-message-box__message {
+  padding: 0 !important;
+  margin: 0 !important;
+
+  p {
+    margin: 0 !important;
+    line-height: 1.6 !important;
+  }
+}
+
+/* Footer 按钮区域 */
+.el-message-box__btns {
+  padding: 16px 24px 20px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  background: var(--color-surface, #FFFFFF) !important;
+  border-top: 1px solid var(--color-border-subtle, #F3F4F6) !important;
+
+  .el-button {
+    border-radius: var(--radius-md, 12px) !important;
+    padding: 10px 24px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    min-width: 80px !important;
+    transition: all var(--duration-normal, 250ms) var(--ease-out, ease-out) !important;
+
+    /* 取消按钮 */
+    &:not(.el-button--primary) {
+      background: var(--color-surface-tertiary, #F3F4F6) !important;
+      border: 1px solid var(--color-border, #E5E7EB) !important;
+      color: var(--color-text-primary, #111827) !important;
+
+      &:hover {
+        border-color: var(--color-primary-300, #60A5FA) !important;
+        color: var(--color-primary, #000AB0) !important;
+      }
+    }
+
+    /* 确定按钮 */
+    &--primary {
+      background: var(--gradient-primary, linear-gradient(135deg, #000AB0 0%, #3B82F6 50%, #60A5FA 100%)) !important;
+      border: none !important;
+      box-shadow: var(--shadow-brand, 0 4px 14px rgba(0, 10, 176, 0.20)) !important;
+      color: white !important;
+
+      &:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: var(--shadow-lg, 0 8px 16px rgba(17, 24, 39, 0.12)) !important;
+      }
+
+      &:active {
+        transform: translateY(0) !important;
+      }
+    }
+  }
+}
+
+/* 暗色模式 ElMessageBox */
+[data-theme="dark"] .el-message-box,
+.dark .el-message-box {
+  background: var(--color-surface, #111827) !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7) !important;
+
+  .el-message-box__header {
+    background: var(--color-surface, #111827) !important;
+    border-bottom-color: var(--color-border-subtle, #1F2937) !important;
+  }
+
+  .el-message-box__title {
+    color: var(--color-text-primary, #F9FAFB) !important;
+  }
+
+  .el-message-box__headerbtn:hover {
+    background-color: var(--color-surface-tertiary, #1F2937) !important;
+  }
+
+  .el-message-box__content {
+    background: var(--color-surface, #111827) !important;
+    color: var(--color-text-secondary, #E5E7EB) !important;
+  }
+
+  .el-message-box__btns {
+    background: var(--color-surface, #111827) !important;
+    border-top-color: var(--color-border-subtle, #1F2937) !important;
+
+    .el-button:not(.el-button--primary) {
+      background: var(--color-surface-tertiary, #1F2937) !important;
+      border-color: var(--color-border, #374151) !important;
+      color: var(--color-text-primary, #F9FAFB) !important;
+
+      &:hover {
+        border-color: var(--color-primary-400, #60A5FA) !important;
+        color: var(--color-primary, #3B82F6) !important;
+      }
+    }
   }
 }

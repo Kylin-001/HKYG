@@ -51,18 +51,30 @@ public class UserContextHolderAdapter {
         }
     }
 
+    // 使用ThreadLocal存储当前请求的用户ID
+    private static final ThreadLocal<Long> currentUserId = new ThreadLocal<>();
+    
+    /**
+     * 设置当前用户ID
+     * @param userId 用户ID
+     */
+    public static void setCurrentUserId(Long userId) {
+        currentUserId.set(userId);
+    }
+    
     /**
      * 获取当前用户ID（兼容方法）
      * @return 用户ID
      */
     public static Long getCurrentUserId() {
-        try {
-            log.debug("返回默认用户ID");
-            return null;
-        } catch (Exception e) {
-            log.error("获取用户ID失败: {}", e.getMessage());
-            return null;
-        }
+        return currentUserId.get();
+    }
+    
+    /**
+     * 清除当前用户ID
+     */
+    public static void clearCurrentUserId() {
+        currentUserId.remove();
     }
 
     /**
@@ -71,8 +83,10 @@ public class UserContextHolderAdapter {
      */
     public static boolean isLoggedIn() {
         try {
-            log.debug("返回默认未登录状态");
-            return false;
+            Long userId = currentUserId.get();
+            boolean loggedIn = userId != null;
+            log.debug("检查登录状态: {}", loggedIn);
+            return loggedIn;
         } catch (Exception e) {
             log.error("检查登录状态失败: {}", e.getMessage());
             return false;

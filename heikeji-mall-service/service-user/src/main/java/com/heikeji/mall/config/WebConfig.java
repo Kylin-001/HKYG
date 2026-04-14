@@ -1,5 +1,7 @@
 package com.heikeji.mall.config;
 
+import com.heikeji.mall.common.auth.UserContextCleanupInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -18,6 +20,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private UserContextCleanupInterceptor userContextCleanupInterceptor;
 
     /**
      * 跨域配置
@@ -49,10 +54,9 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 在这里添加拦截器
-        // registry.addInterceptor(authInterceptor())
-        //         .addPathPatterns("/**")
-        //         .excludePathPatterns("/user/login", "/user/register", "/error");
+        // 注册用户上下文清理拦截器
+        registry.addInterceptor(userContextCleanupInterceptor)
+                .addPathPatterns("/**");
     }
 
     /**

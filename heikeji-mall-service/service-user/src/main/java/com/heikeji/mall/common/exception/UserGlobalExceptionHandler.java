@@ -35,7 +35,7 @@ public class UserGlobalExceptionHandler {
     }
 
     /**
-     * 处理认证异常
+     * 处理认证异常 (service-user模块)
      *
      * @param ex 认证异常
      * @return 响应实体
@@ -43,6 +43,22 @@ public class UserGlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> handleAuthException(AuthenticationException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", ex.getErrorCode() != null ? ex.getErrorCode() : "401");
+        response.put("message", ex.getMessage());
+        response.put("data", null);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    /**
+     * 处理认证异常 (common-core模块)
+     *
+     * @param ex 认证异常
+     * @return 响应实体
+     */
+    @ExceptionHandler(com.heikeji.common.core.exception.AuthenticationException.class)
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> handleCoreAuthException(com.heikeji.common.core.exception.AuthenticationException ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("code", ex.getErrorCode() != null ? ex.getErrorCode() : "401");
         response.put("message", ex.getMessage());
@@ -111,7 +127,12 @@ public class UserGlobalExceptionHandler {
         response.put("code", "500");
         response.put("message", "系统内部错误：" + ex.getMessage());
         response.put("data", null);
+        // 输出详细错误信息到日志
+        System.err.println("========== 系统内部错误 ==========");
+        System.err.println("错误类型: " + ex.getClass().getName());
+        System.err.println("错误信息: " + ex.getMessage());
         ex.printStackTrace();
+        System.err.println("==================================");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

@@ -1,149 +1,184 @@
 <template>
-  <div class="page min-h-screen">
-    <div class="max-w-screen-xl mx-auto px-4 lg:px-8 py-8">
-      <h1 class="text-2xl font-bold text-text-primary mb-6">我的优惠券</h1>
+  <div class="coupons-page">
+    <div class="container">
+      <!-- 页面标题 -->
+      <div class="page-header">
+        <div class="header-title">
+          <div class="header-icon">
+            <el-icon :size="28" color="#fff"><Ticket /></el-icon>
+          </div>
+          <div class="header-text">
+            <h1>我的优惠券</h1>
+            <p>共 <span class="highlight">{{ coupons.length }}</span> 张优惠券</p>
+          </div>
+        </div>
+      </div>
 
-      <!-- 优惠券分类 Tab -->
-      <div class="flex gap-3 mb-6 overflow-x-auto pb-1 scrollbar-hide">
-        <button v-for="tab in tabs" :key="tab.value" @click="activeTab = tab.value"
-          :class="['px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 relative',
-            activeTab === tab.value
-              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-200'
-              : 'bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-500']">
-          {{ tab.label }}
-          <span v-if="tab.count > 0" class="ml-1 opacity-80">({{ tab.count }})</span>
+      <!-- Tab 分类 -->
+      <div class="tab-bar">
+        <button
+          v-for="tab in tabs"
+          :key="tab.value"
+          @click="activeTab = tab.value"
+          class="tab-btn"
+          :class="{ active: activeTab === tab.value }"
+        >
+          <span>{{ tab.label }}</span>
+          <span v-if="tab.count > 0" class="tab-badge">{{ tab.count }}</span>
         </button>
       </div>
 
       <!-- 优惠券列表 -->
-      <div v-if="filteredCoupons.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div v-for="coupon in filteredCoupons" :key="coupon.id"
-          :class="['relative rounded-2xl overflow-hidden transition-all duration-300 group coupon-card', couponClass(coupon)]">
-
-          <!-- 即将过期标签 -->
-          <div v-if="isExpiringSoon(coupon)" class="absolute top-0 right-0 z-20 expiring-badge">
-            <span class="expiring-text">即将过期</span>
-          </div>
-
-          <!-- 已使用/已过期戳记 -->
-          <div v-if="coupon.status === 'expired' || coupon.status === 'used'" class="absolute inset-0 z-10 flex items-center justify-center">
-            <span class="stamp-mark">{{ coupon.status === 'expired' ? '已过期' : '已使用' }}</span>
-          </div>
-
-          <div class="flex">
-            <!-- 左侧金额区域 - 根据类型显示不同颜色 -->
-            <div :class="['w-36 shrink-0 flex flex-col items-center justify-center p-4 text-white relative coupon-left-side']"
-              :style="{ background: getTypeGradient(coupon) }">
-
-              <div class="type-icon mb-1">
-                <el-icon v-if="coupon.type === 'cash'" :size="20"><Money /></el-icon>
-                <el-icon v-else-if="coupon.type === 'discount'" :size="20"><Percentage /></el-icon>
-                <el-icon v-else :size="20"><Van /></el-icon>
+      <div v-if="filteredCoupons.length > 0" class="coupons-list">
+        <div
+          v-for="coupon in filteredCoupons"
+          :key="coupon.id"
+          class="coupon-card"
+          :class="{ expired: coupon.status === 'expired' || coupon.status === 'used' }"
+        >
+          <div class="coupon-content">
+            <!-- 左侧金额区 -->
+            <div class="coupon-amount">
+              <div class="amount-bg"></div>
+              <div class="amount-content">
+                <template v-if="coupon.type === 'cash'">
+                  <div class="amount-value">
+                    <span class="currency">¥</span>
+                    <span class="number">{{ coupon.value }}</span>
+                  </div>
+                </template>
+                <template v-else-if="coupon.type === 'discount'">
+                  <div class="amount-value">
+                    <span class="number">{{ coupon.value }}</span>
+                    <span class="unit">折</span>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="amount-value">
+                    <span class="text">免运费</span>
+                  </div>
+                </template>
+                <div class="amount-condition">
+                  {{ coupon.minOrder > 0 ? `满${coupon.minOrder}元可用` : '无门槛' }}
+                </div>
               </div>
-
-              <template v-if="coupon.type === 'cash'">
-                <span class="text-xs opacity-90 mb-[-4px]">¥</span>
-                <span class="text-4xl font-bold tracking-tight">{{ coupon.value }}</span>
-              </template>
-              <template v-else-if="coupon.type === 'discount'">
-                <span class="text-4xl font-bold tracking-tight">{{ coupon.value }}</span>
-                <span class="text-lg font-medium">折</span>
-              </template>
-              <template v-else>
-                <span class="text-xl font-bold">免运费</span>
-              </template>
-
-              <p class="text-[10px] opacity-80 mt-1 text-center leading-tight">
-                {{ coupon.minOrder > 0 ? `满${coupon.minOrder}可用` : '无门槛' }}
-              </p>
+              <!-- 缺口装饰 -->
+              <div class="notch notch-top"></div>
+              <div class="notch notch-bottom"></div>
             </div>
 
-            <!-- 右侧信息区域 -->
-            <div class="flex-1 p-4 bg-white min-w-0 relative">
-              <div class="flex items-start justify-between mb-2">
-                <div class="flex items-center gap-2">
-                  <el-tag :type="getTypeTagType(coupon)" size="small" effect="light" round>
-                    {{ getTypeLabel(coupon) }}
-                  </el-tag>
-                  <h3 class="font-semibold text-text-primary text-sm line-clamp-1 pr-2">{{ coupon.name }}</h3>
-                </div>
+            <!-- 右侧信息区 -->
+            <div class="coupon-info">
+              <div class="info-header">
+                <span class="type-tag">{{ getTypeLabel(coupon) }}</span>
+                <h3 class="coupon-name">{{ coupon.name }}</h3>
               </div>
-
-              <p class="text-xs text-gray-400 leading-relaxed mb-3 line-clamp-2">{{ coupon.desc || coupon.description }}</p>
-
-              <div class="space-y-1 text-[11px] text-gray-400">
-                <div class="flex items-center gap-1">
+              <p class="coupon-desc">{{ coupon.description || '全场通用' }}</p>
+              <div class="coupon-meta">
+                <div class="meta-item">
                   <el-icon :size="12"><Clock /></el-icon>
-                  <span>有效期: {{ formatDateRange(coupon) }}</span>
+                  <span>{{ formatDate(coupon.validTo) }} 到期</span>
                 </div>
-                <div v-if="coupon.status === 'used' && coupon.usedAt" class="flex items-center gap-1 text-blue-500">
-                  <el-icon :size="12"><CircleCheck /></el-icon>
-                  <span>使用时间: {{ coupon.usedAt }}</span>
-                </div>
-                <div v-if="isExpiringSoon(coupon)" class="flex items-center gap-1 text-orange-500 font-medium">
-                  <el-icon :size="12"><WarningFilled /></el-icon>
-                  <span>{{ daysLeft(coupon) }}天后过期</span>
-                </div>
+                <span v-if="isExpiringSoon(coupon)" class="expiring-tag">
+                  剩{{ daysLeft(coupon) }}天
+                </span>
               </div>
-
-              <div class="mt-3 pt-2 border-t border-dashed border-gray-100">
-                <p class="text-[11px] text-gray-300">{{ coupon.scope || coupon.desc || '全场通用' }}</p>
-              </div>
-
-              <!-- 操作按钮 -->
-              <div v-if="coupon.status === 'available'" class="mt-3 flex gap-2">
-                <button @click.stop="useCoupon(coupon)"
-                  class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:shadow-md transition-shadow">
+              <div class="coupon-action">
+                <button
+                  v-if="coupon.status === 'available'"
+                  @click="useCoupon(coupon)"
+                  class="use-btn"
+                >
                   立即使用
                 </button>
-                <button @click.stop="shareCoupon(coupon)"
-                  class="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-500 transition-colors">
-                  分享给好友
+                <button v-else class="disabled-btn" disabled>
+                  {{ coupon.status === 'expired' ? '已过期' : '已使用' }}
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- 锯齿边缘装饰 -->
-          <div class="absolute left-36 top-0 bottom-0 w-3 overflow-hidden pointer-events-none">
-            <div class="absolute top-[-12px] left-0 w-6 h-6 bg-gray-50 rounded-full"></div>
-            <div class="absolute bottom-[-12px] left-0 w-6 h-6 bg-gray-50 rounded-full"></div>
+          <!-- 过期/已使用水印 -->
+          <div v-if="coupon.status === 'expired' || coupon.status === 'used'" class="watermark">
+            <div class="watermark-text">
+              {{ coupon.status === 'expired' ? '已过期' : '已使用' }}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 py-20 text-center">
-        <div class="w-28 h-28 mx-auto mb-5 bg-gradient-to-br from-orange-50 to-amber-50 rounded-full flex items-center justify-center">
-          <el-icon :size="48" class="text-orange-300"><Ticket /></el-icon>
+      <div v-else class="empty-state">
+        <div class="empty-icon">
+          <el-icon :size="48" color="#d1d5db"><Ticket /></el-icon>
         </div>
-        <h3 class="text-lg font-medium text-text-primary mb-2">
-          {{ emptyText }}
-        </h3>
-        <p class="text-sm text-gray-400 mb-6" v-if="activeTab !== 'available'">快去领取新券吧~</p>
-        <el-button type="warning" round class="!rounded-full !px-8" @click="$router.push('/')" v-if="activeTab === 'available'">去购物</el-button>
+        <h3>{{ emptyText }}</h3>
+        <p>快去领券中心看看有什么优惠吧~</p>
+        <button @click="scrollToClaimCenter" class="claim-btn">
+          <el-icon :size="18"><Present /></el-icon>
+          去领券
+        </button>
       </div>
 
-      <!-- 领取中心 -->
-      <div class="mt-8 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl border border-orange-100 p-6">
-        <h3 class="font-bold text-orange-700 mb-3 flex items-center gap-2">
-          <el-icon><Present /></el-icon>
-          领取中心
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div v-for="item in claimableCoupons" :key="item.id"
-            class="bg-white rounded-xl p-4 border border-orange-100 hover:border-orange-300 hover:shadow-md transition-all group cursor-pointer"
-            @click="claimCoupon(item)">
-            <div class="flex items-baseline gap-1 mb-1">
-              <span class="text-2xl font-bold" :class="item.type === 'cash' ? 'text-red-500' : item.type === 'discount' ? 'text-green-500' : 'text-blue-500'">
-                {{ item.type === 'cash' ? `¥${item.value}` : item.type === 'discount' ? `${item.value}折` : '免运费' }}
-              </span>
-              <span class="text-xs text-gray-400">{{ item.condition >= 0 ? `满${item.condition}` : '无门槛' }}</span>
+      <!-- 领券中心 -->
+      <div id="claimCenter" class="claim-section">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon">
+              <el-icon :size="22" color="#fff"><Present /></el-icon>
             </div>
-            <p class="text-xs text-gray-500 line-clamp-1">{{ item.name }}</p>
-            <div class="mt-2 flex items-center justify-between">
-              <span class="text-[10px] text-gray-400">剩余 {{ item.remaining }} 张</span>
-              <span class="text-xs text-orange-500 font-medium group-hover:text-orange-600 transition-colors">领取 →</span>
+            <div class="title-text">
+              <h3>领券中心</h3>
+              <p>限时好券，先到先得</p>
+            </div>
+          </div>
+          <button class="view-more">
+            查看更多
+            <el-icon :size="14"><ArrowRight /></el-icon>
+          </button>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="category-tabs">
+          <button
+            v-for="cat in categories"
+            :key="cat.value"
+            @click="activeCategory = cat.value"
+            class="category-btn"
+            :class="{ active: activeCategory === cat.value }"
+          >
+            {{ cat.label }}
+          </button>
+        </div>
+
+        <!-- 可领取优惠券 -->
+        <div class="claim-grid">
+          <div
+            v-for="item in filteredClaimableCoupons"
+            :key="item.id"
+            class="claim-card"
+          >
+            <div class="claim-image">
+              <img :src="item.image" :alt="item.name" width="120" height="120" loading="lazy" />
+              <div class="claim-tag">{{ item.tag }}</div>
+            </div>
+            <div class="claim-content">
+              <div class="claim-info">
+                <h4>{{ item.name }}</h4>
+                <p>{{ item.scope }}</p>
+              </div>
+              <div class="claim-footer">
+                <div class="claim-price">
+                  <span class="currency">¥</span>
+                  <span class="number">{{ item.value }}</span>
+                </div>
+                <div class="claim-meta">
+                  满{{ item.condition }}可用 · 剩{{ item.remaining }}张
+                </div>
+                <button @click="claimCoupon(item)" class="claim-btn-small">
+                  立即抢
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -156,10 +191,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import {
-  Ticket, Money, DataLine, Van, Clock, CircleCheck,
-  WarningFilled, Present
-} from '@element-plus/icons-vue'
+import { Ticket, Clock, Present, ArrowRight } from '@element-plus/icons-vue'
 import { useCommunityStore } from '@/stores/community'
 
 const router = useRouter()
@@ -167,8 +199,9 @@ const route = useRoute()
 const communityStore = useCommunityStore()
 
 const activeTab = ref('available')
+const activeCategory = ref('all')
 
-// Tab 配置，包含即将过期
+// Tab 配置
 const tabs = computed(() => {
   const coupons = communityStore.coupons
   const now = new Date()
@@ -180,7 +213,7 @@ const tabs = computed(() => {
       value: 'expiring_soon',
       count: coupons.filter(c => {
         if (c.status !== 'available') return false
-        const expDate = new Date(c.expireDate || c.validTo)
+        const expDate = new Date(c.validTo)
         const diffDays = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         return diffDays <= 3 && diffDays > 0
       }).length
@@ -190,16 +223,98 @@ const tabs = computed(() => {
   ]
 })
 
+// 分类
+const categories = [
+  { label: '全部', value: 'all' },
+  { label: '食品生鲜', value: 'food' },
+  { label: '运动户外', value: 'outdoor' },
+  { label: '数码家电', value: 'digital' },
+  { label: '服饰美妆', value: 'fashion' }
+]
+
 const coupons = computed(() => communityStore.coupons)
 
 // 可领取的优惠券
 const claimableCoupons = [
-  { id: 101, name: '限时抢购 ¥50券', type: 'cash', value: 50, condition: 299, remaining: 128 },
-  { id: 102, name: '周末特惠 8.5折券', type: 'discount', value: 8.5, condition: 99, remaining: 56 },
-  { id: 103, name: '新用户礼包 ¥10券', type: 'cash', value: 10, condition: 49, remaining: 342 },
-  { id: 104, name: '免运费专享券', type: 'free_shipping', value: 0, condition: 0, remaining: 89 },
-  { id: 105, name: '数码品类 ¥100券', type: 'cash', value: 100, condition: 599, remaining: 45 }
+  {
+    id: 101,
+    name: '食品加补券',
+    type: 'cash',
+    value: 4,
+    condition: 40,
+    remaining: 128,
+    scope: '限食品生鲜部分商品可用',
+    category: 'food',
+    tag: '热卖',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=200&fit=crop'
+  },
+  {
+    id: 102,
+    name: '食品加补券',
+    type: 'cash',
+    value: 5,
+    condition: 50,
+    remaining: 56,
+    scope: '限食品生鲜部分商品可用',
+    category: 'food',
+    tag: '限时',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop'
+  },
+  {
+    id: 103,
+    name: '户外加补券',
+    type: 'cash',
+    value: 110,
+    condition: 900,
+    remaining: 342,
+    scope: '限运动户外指定商品可用',
+    category: 'outdoor',
+    tag: '大额',
+    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=200&h=200&fit=crop'
+  },
+  {
+    id: 104,
+    name: '户外加补券',
+    type: 'cash',
+    value: 70,
+    condition: 600,
+    remaining: 89,
+    scope: '限运动户外指定商品可用',
+    category: 'outdoor',
+    tag: '推荐',
+    image: 'https://images.unsplash.com/photo-1522163182402-834f871fd851?w=200&h=200&fit=crop'
+  },
+  {
+    id: 105,
+    name: '数码加补券',
+    type: 'cash',
+    value: 240,
+    condition: 2000,
+    remaining: 45,
+    scope: '限数码家电指定商品可用',
+    category: 'digital',
+    tag: '大额',
+    image: 'https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?w=200&h=200&fit=crop'
+  },
+  {
+    id: 106,
+    name: '数码加补券',
+    type: 'cash',
+    value: 160,
+    condition: 1300,
+    remaining: 78,
+    scope: '限数码家电指定商品可用',
+    category: 'digital',
+    tag: '热卖',
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&h=200&fit=crop'
+  }
 ]
+
+// 过滤可领取优惠券
+const filteredClaimableCoupons = computed(() => {
+  if (activeCategory.value === 'all') return claimableCoupons
+  return claimableCoupons.filter(c => c.category === activeCategory.value)
+})
 
 // 过滤后的优惠券列表
 const filteredCoupons = computed(() => {
@@ -207,10 +322,9 @@ const filteredCoupons = computed(() => {
   let result = coupons.value
 
   if (activeTab.value === 'expiring_soon') {
-    // 即将过期：可用且剩余天数 <= 3天
     result = result.filter(c => {
       if (c.status !== 'available') return false
-      const expDate = new Date(c.expireDate || c.validTo)
+      const expDate = new Date(c.validTo)
       const diffDays = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
       return diffDays <= 3 && diffDays > 0
     })
@@ -235,7 +349,7 @@ const emptyText = computed(() => {
 // 判断是否即将过期（<= 3天）
 function isExpiringSoon(coupon: any): boolean {
   if (coupon.status !== 'available') return false
-  const expDate = new Date(coupon.expireDate || coupon.validTo)
+  const expDate = new Date(coupon.validTo)
   const now = new Date()
   const diffDays = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
   return diffDays <= 3 && diffDays > 0
@@ -244,29 +358,9 @@ function isExpiringSoon(coupon: any): boolean {
 // 获取剩余天数
 function daysLeft(coupon: any): number {
   const now = new Date()
-  const exp = new Date(coupon.expireDate || coupon.validTo)
+  const exp = new Date(coupon.validTo)
   const diff = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
   return Math.max(0, diff)
-}
-
-// 优惠券卡片样式类
-function couponClass(coupon: any): string {
-  if (coupon.status === 'expired') return 'opacity-60 grayscale-[30%]'
-  if (coupon.status === 'used') return 'opacity-70 grayscale-[20%]'
-  if (isExpiringSoon(coupon)) return 'hover:shadow-xl hover:-translate-y-0.5 cursor-pointer expiring-pulse'
-  return 'hover:shadow-xl hover:-translate-y-0.5 cursor-pointer'
-}
-
-// 根据类型获取渐变背景
-function getTypeGradient(coupon: any): string {
-  if (coupon.type === 'cash') {
-    return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' // 红色主题
-  } else if (coupon.type === 'discount') {
-    return 'linear-gradient(135deg, #10b981 0%, #059669 100%)' // 绿色主题
-  } else if (coupon.type === 'free_shipping') {
-    return 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' // 蓝色主题
-  }
-  return 'linear-gradient(135deg, #f97316, #ea580c)' // 默认橙色
 }
 
 // 获取类型标签文本
@@ -277,53 +371,39 @@ function getTypeLabel(coupon: any): string {
   return '通用券'
 }
 
-// 获取标签类型
-function getTypeTagType(coupon: any): 'danger' | 'success' | 'primary' | 'info' {
-  if (coupon.type === 'cash') return 'danger'
-  if (coupon.type === 'discount') return 'success'
-  if (coupon.type === 'free_shipping') return 'primary'
-  return 'info'
-}
-
-// 格式化日期范围
-function formatDateRange(coupon: any): string {
+// 格式化日期
+function formatDate(dateStr: string): string {
   try {
-    const from = new Date(coupon.validFrom)
-    const to = new Date(coupon.expireDate || coupon.validTo)
-    const format = (d: Date) => `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
-    return `${format(from)}-${format(to)}`
+    const d = new Date(dateStr)
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
   } catch {
-    return coupon.expireDate || coupon.validTo || ''
+    return dateStr
   }
 }
 
 // 使用优惠券
 function useCoupon(coupon: any) {
-  const orderId = route.query.orderId
-  if (orderId) {
-    // 如果有订单ID参数，直接核销
-    ElMessage.success(`正在使用「${coupon.name}」核销订单 ${orderId}...`)
-  } else {
-    // 否则跳转到商品页带上couponId
-    ElMessage.success(`正在跳转使用「${coupon.name}」...`)
-    router.push({ path: '/products', query: { couponId: coupon.id } })
-  }
-}
-
-// 分享优惠券
-function shareCoupon(coupon: any) {
-  ElMessage.success(`分享功能开发中：「${coupon.name}」`)
+  // 存储选中的优惠券到本地存储
+  localStorage.setItem('selectedCoupon', JSON.stringify(coupon))
+  ElMessage.success(`已选择「${coupon.name}」，正在跳转到购物车...`)
+  // 跳转到购物车页面
+  router.push('/cart')
 }
 
 // 领取优惠券
 async function claimCoupon(item: any) {
   try {
-    await communityStore.claimCoupon(item.id)
+    await communityStore.claimCoupon(String(item.id))
     ElMessage.success(`成功领取「${item.name}」！`)
     await communityStore.fetchCoupons()
   } catch (err: any) {
     ElMessage.error(err.message || '领取失败')
   }
+}
+
+// 滚动到领券中心
+function scrollToClaimCenter() {
+  document.getElementById('claimCenter')?.scrollIntoView({ behavior: 'smooth' })
 }
 
 onMounted(async () => {
@@ -336,91 +416,636 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.coupons-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  padding: 32px 0;
 }
 
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* 页面标题 */
+.page-header {
+  margin-bottom: 24px;
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* ========== 即将过期脉冲动画 ========== */
-.expiring-pulse {
-  animation: pulse-border 2s ease-in-out infinite;
+.header-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #f97316 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.3);
 }
 
-@keyframes pulse-border {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0);
-  }
+.header-text h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
 }
 
-/* ========== 即将过期标签 ========== */
-.expiring-badge {
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  padding: 8px 32px;
-  transform: rotate(45deg) translate(30%, -150%);
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+.header-text p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
 }
 
-.expiring-text {
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
+.header-text .highlight {
+  color: #f43f5e;
+  font-weight: 600;
+}
+
+/* Tab 栏 */
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
   white-space: nowrap;
 }
 
-/* ========== 戳记效果 ========== */
-.stamp-mark {
-  font-size: 24px;
-  font-weight: bold;
-  color: rgba(156, 163, 175, 0.9);
-  background: rgba(229, 231, 235, 0.7);
-  padding: 12px 28px;
-  border-radius: 8px;
-  transform: rotate(-12deg);
-  border: 3px solid rgba(156, 163, 175, 0.5);
-  letter-spacing: 4px;
-  backdrop-filter: blur(4px);
+.tab-btn:hover {
+  border-color: #f43f5e;
+  color: #f43f5e;
 }
 
-/* ========== 类型图标 ========== */
-.type-icon {
-  opacity: 0.9;
+.tab-btn.active {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.2);
 }
 
-/* ========== 左侧样式 ========== */
-.coupon-left-side {
+.tab-badge {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+/* 优惠券列表 */
+.coupons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.coupon-card {
   position: relative;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.coupon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.coupon-card.expired {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.coupon-content {
+  display: flex;
+  min-height: 140px;
+}
+
+/* 左侧金额区 */
+.coupon-amount {
+  position: relative;
+  width: 140px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
   overflow: hidden;
 }
 
-.coupon-left-side::before {
+.amount-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+}
+
+.amount-bg::before {
   content: '';
   position: absolute;
   top: -50%;
   right: -50%;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  background: #fff;
+  border-radius: 50%;
+}
+
+.amount-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 80%;
+  height: 80%;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.amount-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.amount-value {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.amount-value .currency {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.amount-value .number {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.amount-value .unit {
+  font-size: 16px;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.amount-value .text {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.amount-condition {
+  margin-top: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+.notch {
+  position: absolute;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  background: #f9fafb;
+  border-radius: 50%;
+}
+
+.notch-top {
+  top: -8px;
+}
+
+.notch-bottom {
+  bottom: -8px;
+}
+
+/* 右侧信息区 */
+.coupon-info {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.info-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.type-tag {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f43f5e;
+  background: #ffe4e6;
+  border-radius: 9999px;
+}
+
+.coupon-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.coupon-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+}
+
+.coupon-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.expiring-tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #f97316;
+  background: #ffedd5;
+  border-radius: 9999px;
+}
+
+.coupon-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.use-btn {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.2);
+  transition: box-shadow 0.2s;
+}
+
+.use-btn:hover {
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
+}
+
+.disabled-btn {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 9999px;
+  cursor: not-allowed;
+}
+
+/* 水印 */
+.watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.3);
   pointer-events: none;
+}
+
+.watermark-text {
+  width: 80px;
+  height: 80px;
+  border: 3px solid #9ca3af;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #9ca3af;
+  transform: rotate(-15deg);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: #fff;
+  border-radius: 16px;
+  margin-bottom: 48px;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ffe4e6 0%, #fce7f3 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+.claim-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.2);
+  transition: box-shadow 0.2s;
+}
+
+.claim-btn:hover {
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
+}
+
+/* 领券中心 */
+.claim-section {
+  margin-top: 48px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f97316 0%, #f43f5e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+}
+
+.title-text h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px 0;
+}
+
+.title-text p {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.view-more {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #6b7280;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.view-more:hover {
+  color: #f43f5e;
+}
+
+/* 分类标签 */
+.category-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  border-color: #f43f5e;
+  color: #f43f5e;
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* 领券网格 */
+.claim-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .claim-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .claim-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.claim-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.claim-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.claim-image {
+  position: relative;
+  width: 100%;
+  padding-bottom: 60%;
+  overflow: hidden;
+}
+
+.claim-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.claim-card:hover .claim-image img {
+  transform: scale(1.05);
+}
+
+.claim-tag {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  border-radius: 0 9999px 9999px 0;
+  box-shadow: 0 2px 4px rgba(244, 63, 94, 0.2);
+}
+
+.claim-content {
+  padding: 16px;
+}
+
+.claim-info h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.claim-info p {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0 0 12px 0;
+}
+
+.claim-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claim-price {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.claim-price .currency {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f43f5e;
+}
+
+.claim-price .number {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f43f5e;
+}
+
+.claim-meta {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.claim-btn-small {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(244, 63, 94, 0.2);
+  transition: box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+.claim-btn-small:hover {
+  box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
 }
 </style>

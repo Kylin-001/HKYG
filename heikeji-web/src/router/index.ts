@@ -23,12 +23,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/auth/Login.vue'),
         meta: { title: '登录', requiresAuth: false },
       },
-      {
-        path: 'register',
-        name: 'Register',
-        component: () => import('@/views/auth/Register.vue'),
-        meta: { title: '注册', requiresAuth: false },
-      },
+
       {
         path: 'forgot-password',
         name: 'ForgotPassword',
@@ -416,6 +411,36 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/user/Settings.vue'),
         meta: { title: '设置' },
       },
+      {
+        path: 'settings/security',
+        name: 'Security',
+        component: () => import('@/views/user/Security.vue'),
+        meta: { title: '账号安全' },
+      },
+      {
+        path: 'settings/notifications',
+        name: 'NotificationSettings',
+        component: () => import('@/views/user/NotificationSettings.vue'),
+        meta: { title: '通知设置', requiresAuth: true },
+      },
+      {
+        path: 'notifications',
+        name: 'UserNotifications',
+        component: () => import('@/views/user/Notifications.vue'),
+        meta: { title: '消息中心', requiresAuth: true },
+      },
+      {
+        path: 'browse-history',
+        name: 'BrowseHistory',
+        component: () => import('@/views/user/BrowseHistory.vue'),
+        meta: { title: '浏览历史', requiresAuth: true },
+      },
+      {
+        path: 'points-mall',
+        name: 'PointsMall',
+        component: () => import('@/views/user/PointsMall.vue'),
+        meta: { title: '积分商城', requiresAuth: true },
+      },
     ],
   },
 
@@ -452,6 +477,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '用户管理' },
       },
       {
+        path: 'student-batch',
+        name: 'StudentBatchInsert',
+        component: () => import('@/views/admin/StudentBatchInsert.vue'),
+        meta: { title: '批量添加学生' },
+      },
+      {
         path: 'orders',
         name: 'AdminOrders',
         component: () => import('@/views/admin/Placeholder.vue'),
@@ -472,6 +503,22 @@ const routes: RouteRecordRaw[] = [
     name: 'Help',
     component: () => import('@/views/Help.vue'),
     meta: { title: '帮助中心' },
+  },
+
+  // ====== 关于我们 ======
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('@/views/About.vue'),
+    meta: { title: '关于我们' },
+  },
+
+  // ====== 隐私政策 ======
+  {
+    path: '/privacy',
+    name: 'Privacy',
+    component: () => import('@/views/Privacy.vue'),
+    meta: { title: '隐私政策' },
   },
 
   // ====== 404 页面 ======
@@ -498,7 +545,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   NProgress.start()
 
   if (to.meta.title) {
@@ -506,21 +553,35 @@ router.beforeEach((to, from, next) => {
   }
 
   const userStore = useUserStore()
-  const isAuthenticated = userStore.isAuthenticated
+  let isAuthenticated = userStore.isAuthenticated
+
+  console.log('[Router] Navigating from', from.path, 'to', to.path)
+  console.log('[Router] Initial auth state:', { isAuthenticated, hasToken: !!userStore.token, hasUser: !!userStore.user, requiresAuth: to.meta.requiresAuth })
+
+  // 如果有token但未认证（有token但没有user对象），尝试获取用户信息
+  if (!isAuthenticated && userStore.token) {
+    console.log('[Router] Token exists but not fully authenticated, fetching user info...')
+    try {
+      const userData = await userStore.fetchUserInfo()
+      // 重新获取认证状态
+      isAuthenticated = userStore.isAuthenticated
+      console.log('[Router] After fetchUserInfo:', { userData: !!userData, isAuthenticated })
+    } catch (err) {
+      console.error('[Router] Failed to fetch user info:', err)
+      // 获取失败，继续检查认证状态（可能token仍然有效）
+    }
+  }
+
+  console.log('[Router] Final auth state:', { isAuthenticated, hasToken: !!userStore.token, requiresAuth: to.meta.requiresAuth })
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    if (userStore.token) {
-      userStore.fetchUserInfo().then(() => {
-        next()
-      }).catch(() => {
-        next({ name: 'Login', query: { redirect: to.fullPath } })
-      })
-    } else {
-      next({ name: 'Login', query: { redirect: to.fullPath } })
-    }
+    console.log('[Router] Auth required but not authenticated, redirecting to login')
+    next({ name: 'Login', query: { redirect: to.fullPath } })
   } else if (to.name === 'Login' && isAuthenticated) {
+    console.log('[Router] Already authenticated, redirecting to home')
     next({ path: '/' })
   } else {
+    console.log('[Router] Navigation allowed')
     next()
   }
 })

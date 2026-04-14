@@ -47,9 +47,9 @@ public class UserDTO {
     private String email;
 
     /**
-     * 性别 0:未知 1:男 2:女
+     * 性别：男、女、未知
      */
-    private Integer gender;
+    private String gender;
 
     /**
      * 头像URL
