@@ -3,17 +3,18 @@
 <mapper namespace="com.heikeji.mall.takeout.mapper.MerchantMapper">
 
     <select id="selectOperatingMerchants" resultType="com.heikeji.mall.takeout.entity.Merchant">
-        SELECT * FROM merchant 
+        SELECT * FROM takeout_merchant 
         WHERE status = 1 
-        AND is_open = 1 
-        ORDER BY sort ASC, sales DESC
+        AND is_deleted = 0 
+        ORDER BY sort_order ASC, monthly_sales DESC
     </select>
 
     <select id="searchMerchants" resultType="com.heikeji.mall.takeout.entity.Merchant">
-        SELECT * FROM merchant 
+        SELECT * FROM takeout_merchant 
         WHERE status = 1 
+        AND is_deleted = 0
         AND name LIKE CONCAT('%', #{keyword}, '%') 
-        ORDER BY sales DESC
+        ORDER BY monthly_sales DESC
     </select>
 
 </mapper>

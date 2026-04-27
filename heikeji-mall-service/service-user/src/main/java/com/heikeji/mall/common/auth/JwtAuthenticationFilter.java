@@ -52,17 +52,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * 从请求头中提取JWT令牌
      *
      * @param request 请求对象
-     * @return JWT令牌，如果不存在则返回null
+     * @return JWT令牌，如果不存在或格式无效则返回null
      */
     private String extractToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
-            return header.substring(7);
+            String token = header.substring(7).trim();
+            // 验证token是否为空或格式明显不正确
+            if (token.isEmpty() || !token.contains(".")) {
+                log.warn("提取到的JWT令牌格式无效: 令牌为空或不包含分隔符");
+                return null;
+            }
+            return token;
         }
         // 也可以从请求参数中提取令牌
         String tokenParam = request.getParameter("token");
-        if (tokenParam != null) {
-            return tokenParam;
+        if (tokenParam != null && !tokenParam.trim().isEmpty() && tokenParam.contains(".")) {
+            return tokenParam.trim();
         }
         return null;
     }
@@ -81,55 +87,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = extractToken(request);
             if (token != null) {
-                // 验证令牌有效性
-                if (jwtUtils.validateToken(token)) {
-                    // 从令牌中获取用户ID和用户名
-                    String userId = jwtUtils.getUserIdFromToken(token);
-                    String username = jwtUtils.getUsernameFromToken(token);
-                    
-                    // 如果用户名不为空且当前上下文没有认证信息
-                    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                        // 加载用户详情
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                try {
+                    // 验证令牌有效性
+                    if (jwtUtils.validateToken(token)) {
+                        // 从令牌中获取用户ID和用户名
+                        String userId = jwtUtils.getUserIdFromToken(token);
+                        String username = jwtUtils.getUsernameFromToken(token);
                         
-                        // 创建认证令牌
-                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                        
-                        // 设置认证详情
-                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        
-                        // 设置认证信息到上下文
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                        
-                        // 设置用户上下文到 UserContextHolderAdapter
-                        if (userId != null) {
-                            try {
-                                UserContextHolderAdapter.setCurrentUserId(Long.valueOf(userId));
-                            } catch (NumberFormatException e) {
-                                log.warn("无法将userId转换为Long: {}", userId);
+                        // 如果用户名不为空且当前上下文没有认证信息
+                        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                            // 加载用户详情
+                            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                            
+                            // 创建认证令牌
+                            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                            
+                            // 设置认证详情
+                            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            
+                            // 设置认证信息到上下文
+                            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                            
+                            // 设置用户上下文到 UserContextHolderAdapter
+                            if (userId != null) {
+                                try {
+                                    UserContextHolderAdapter.setCurrentUserId(Long.valueOf(userId));
+                                } catch (NumberFormatException e) {
+                                    log.warn("无法将userId转换为Long: {}", userId);
+                                }
                             }
                         }
                     }
+                } catch (ExpiredJwtException e) {
+                    log.warn("JWT令牌已过期: {}", e.getMessage());
+                    // 令牌过期不影响未登录用户的请求，继续处理
+                } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+                    log.warn("JWT令牌无效: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+                    // 无效令牌不影响未登录用户的请求，继续处理
                 }
             }
             // 继续处理请求
             filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException e) {
-            log.error("JWT令牌已过期: {}", e.getMessage());
-            handleAuthenticationException(response, "JWT令牌已过期", HttpStatus.UNAUTHORIZED);
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT令牌格式不支持: {}", e.getMessage());
-            handleAuthenticationException(response, "JWT令牌格式不支持", HttpStatus.UNAUTHORIZED);
-        } catch (MalformedJwtException e) {
-            log.error("JWT令牌格式错误: {}", e.getMessage());
-            handleAuthenticationException(response, "JWT令牌格式错误", HttpStatus.UNAUTHORIZED);
-        } catch (SignatureException e) {
-            log.error("JWT令牌签名错误: {}", e.getMessage());
-            handleAuthenticationException(response, "JWT令牌签名错误", HttpStatus.UNAUTHORIZED);
-        } catch (IllegalArgumentException e) {
-            log.error("JWT令牌参数错误: {}", e.getMessage());
-            handleAuthenticationException(response, "JWT令牌参数错误", HttpStatus.UNAUTHORIZED);
         } catch (AuthenticationException e) {
             log.error("认证失败: {}", e.getMessage());
             handleAuthenticationException(response, e.getMessage(), HttpStatus.UNAUTHORIZED);

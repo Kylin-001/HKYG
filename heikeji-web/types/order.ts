@@ -57,10 +57,24 @@ export interface ShippingAddress {
 }
 
 export interface CreateOrderRequest {
-  itemIds: string[]
   addressId: string
+  items: {
+    productId: string
+    name?: string
+    image?: string
+    price?: number
+    quantity: number
+  }[]
   remark?: string
   paymentMethod: PaymentMethod
+  couponId?: string
+  // 金额信息
+  totalAmount?: number
+  discountAmount?: number
+  couponDiscount?: number
+  pointsDiscount?: number
+  shippingFee?: number
+  payAmount?: number
 }
 
 export interface OrderListParams {

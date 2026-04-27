@@ -1,7 +1,7 @@
 package com.heikeji.mall.common.controller;
 
 import com.heikeji.common.core.annotation.RequiresAdmin;
-import com.heikeji.mall.common.response.R;
+import com.heikeji.common.core.domain.R;
 import com.heikeji.mall.common.service.DataInsertAuditService;
 import com.heikeji.mall.common.service.DataInsertMetricsService;
 import io.swagger.v3.oas.annotations.Operation;

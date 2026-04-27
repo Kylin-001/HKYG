@@ -1,3912 +1,1783 @@
-/**
- * 黑科大商城 - Mock 数据管理器
- *
- * 本文件提供完整的开发环境模拟数据，包含所有业务模块
- * 使用场景：前端开发、测试、演示
- *
- * 注意：生产环境请移除此文件或禁用 mock 拦截器
- */
+import Mock from 'mockjs'
+import { generateAnnouncements, generateCampusActivities, generateLeaveApplications, generateScholarships } from './generators/studentAffairs'
 
-// import { MockMethod } from 'vite-plugin-mock' // 已禁用：模块未安装
-
-// ==================== 本地类型定义 ====================
-
-/** Mock 方法配置（简化版，兼容 vite-plugin-mock） */
-interface MockMethod {
-  url: string
-  method?: 'get' | 'post' | 'put' | 'delete' | 'patch'
-  response: ((...args: any[]) => any)
-}
-
-// ==================== 类型定义 ====================
-
-/** 商品分类 */
-interface Category {
-  id: string
-  name: string
-  icon: string
-  description?: string
-}
-
-/** 商品信息 */
-interface Product {
-  id: string
-  name: string
-  categoryId: string
-  price: number
-  originalPrice: number
-  image: string
-  images: string[]
-  description: string
-  detail: string
-  stock: number
-  sales: number
-  rating: number
-  reviewCount: number
-  status: 'on_sale' | 'off_sale' | 'out_of_stock'
-  tags: string[]
-  createdAt: string
-  updatedAt: string
-}
-
-/** 订单状态 */
-type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'refunding'
-
-/** 订单项 */
-interface OrderItem {
-  productId: string
-  productName: string
-  productImage: string
-  price: number
-  quantity: number
-  subtotal: number
-}
-
-/** 订单信息 */
-interface Order {
-  id: string
-  orderNo: string
-  userId: string
-  items: OrderItem[]
-  totalAmount: number
-  discountAmount: number
-  freightAmount: number
-  payAmount: number
-  status: OrderStatus
-  paymentMethod?: string
-  paymentTime?: string
-  shipTime?: string
-  deliverTime?: string
-  completeTime?: string
-  receiverName: string
-  receiverPhone: string
-  receiverAddress: string
-  remark?: string
-  createdAt: string
-  updatedAt: string
-}
-
-/** 购物车项 - 符合 CartResponse 类型 */
-interface CartItem {
-  id: string
-  productId: string
-  product: {
-    id: string
-    name: string
-    image: string
-    price: number
-    originalPrice?: number
-    stock: number
-    status: string
-  }
-  quantity: number
-  selected: boolean
-  addedAt: string
-  updatedAt?: string
-}
-
-/** 用户信息 */
-interface User {
-  id: string
-  username: string
-  nickname: string
-  avatar: string
-  email: string
-  phone: string
-  gender: 'male' | 'female'
-  birthday?: string
-  studentId: string
-  college: string
-  major: string
-  grade: string
-  role: 'user' | 'admin' | 'merchant'
-  status: 'active' | 'inactive' | 'banned'
-  balance: number
-  points: number
-  level: number
-  createdAt: string
-  updatedAt: string
-}
-
-/** 收货地址 */
-interface Address {
-  id: string
-  userId: string
-  receiverName: string
-  receiverPhone: string
-  province: string
-  city: string
-  district: string
-  detail: string
-  fullAddress: string
-  isDefault: boolean
-  tag?: string
-  createdAt: string
-}
-
-/** 外卖商家 */
-interface Merchant {
-  id: string
-  name: string
-  logo: string
-  coverImage: string
-  category: string
-  rating: number
-  reviewCount: number
-  monthlySales: number
-  deliveryTime: string
-  deliveryFee: number
-  minOrderAmount: number
-  address: string
-  phone: string
-  openTime: string
-  closeTime: string
-  status: 'open' | 'closed' | 'busy'
-  tags: string[]
-  announcement?: string
-  latitude: number
-  longitude: number
-  distance: number
-}
-
-/** 菜品 */
-interface Dish {
-  id: string
-  merchantId: string
-  name: string
-  image: string
-  price: number
-  originalPrice?: number
-  description: string
-  category: string
-  sales: number
-  rating: number
-  status: 'available' | 'sold_out' | 'unavailable'
-  tags: string[]
-}
-
-/** 二手物品分类 */
-interface SecondHandCategory {
-  id: string
-  name: string
-  icon: string
-  count: number
-}
-
-/** 二手物品 */
-interface SecondHandItem {
-  id: string
-  sellerId: string
-  sellerName: string
-  sellerAvatar: string
-  title: string
-  description: string
-  images: string[]
-  categoryId: string
-  categoryName: string
-  originalPrice: number
-  currentPrice: number
-  condition: 'brand_new' | 'almost_new' | 'lightly_used' | 'moderately_used' | 'heavily_used'
-  conditionText: string
-  negotiable: boolean
-  location: string
-  viewCount: number
-  likeCount: number
-  chatCount: number
-  status: 'on_sale' | 'reserved' | 'sold' | 'removed'
-  createdAt: string
-  updatedAt: string
-}
-
-/** 论坛板块 */
-interface ForumBoard {
-  id: string
-  name: string
-  description: string
-  icon: string
-  postCount: number
-  todayPostCount: number
-  sortOrder: number
-}
-
-/** 帖子 */
-interface ForumPost {
-  id: string
-  authorId: string
-  authorName: string
-  authorAvatar: string
-  boardId: string
-  boardName: string
-  title: string
-  content: string
-  images: string[]
-  viewCount: number
-  likeCount: number
-  commentCount: number
-  isTop: boolean
-  isEssence: boolean
-  status: 'published' | 'draft' | 'deleted' | 'hidden'
-  createdAt: string
-  updatedAt: string
-  lastReplyAt?: string
-}
-
-/** 社区活动 */
-interface Activity {
-  id: string
-  title: string
-  coverImage: string
-  description: string
-  category: 'sports' | 'culture' | 'academic' | 'volunteer' | 'entertainment' | 'career'
-  organizer: string
-  location: string
-  startTime: string
-  endTime: string
-  maxParticipants: number
-  currentParticipants: number
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
-  fee: number
-  tags: string[]
-  registrants?: Array<{
-    userId: string
-    userName: string
-    userAvatar: string
-    registeredAt: string
-  }>
-  createdAt: string
-  updatedAt: string
-}
-
-/** 分页请求参数 */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface _PageParams {
-  page: number
-  pageSize: number
-}
-
-/** 通用分页响应 */
-interface PageResult<T> {
-  list: T[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
-
-/** API 统一响应格式 */
-interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data: T
-  timestamp: number
-}
-
-// ==================== 工具函数 ====================
-
-/**
- * 生成延迟，模拟网络请求耗时
- * @param ms 延迟毫秒数，默认 200-500ms 随机
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function _delay(ms?: number): Promise<void> {
-  const time = ms ?? Math.floor(Math.random() * 300) + 200
-  return new Promise(resolve => setTimeout(resolve, time))
-}
-
-/**
- * 生成分页结果
- * @param data 完整数据数组
- * @param page 当前页码
- * @param pageSize 每页数量
- */
-function paginate<T>(data: T[], page: number, pageSize: number): PageResult<T> {
-  const total = data.length
-  const totalPages = Math.ceil(total / pageSize)
-  const startIndex = (page - 1) * pageSize
-  const list = data.slice(startIndex, startIndex + pageSize)
-
-  return {
-    list,
-    total,
-    page,
-    pageSize,
-    totalPages
+// 配置 Mock.js 不拦截高德地图的请求
+// 注意：Mock.setup 由 vite-plugin-mock 自动调用，这里不需要重复设置
+if (Mock.XHR.prototype.__send === undefined) {
+  Mock.XHR.prototype.__send = Mock.XHR.prototype.send
+  Mock.XHR.prototype.send = function () {
+    const url = this.url
+    // 不拦截高德地图相关的请求（包括瓦片服务器）
+    if (url && (
+      url.includes('amap.com') ||
+      url.includes('jsapi.amap.com') ||
+      url.includes('webapi.amap.com') ||
+      url.includes('restapi.amap.com') ||
+      url.includes('custyle.amap.com') ||
+      url.includes('mapplugin.amap.com') ||
+      url.includes('o4.amap.com') ||
+      url.includes('is.autonavi.com') ||
+      url.includes('webrd0') ||
+      url.includes('webst0') ||
+      url.includes('vector.amap.com')
+    )) {
+      // 使用原始 XHR 发送请求，不经过 Mock
+      return this.__send.apply(this, arguments)
+    }
+    // 其他请求正常走 Mock
+    return this.__send.apply(this, arguments)
   }
 }
 
-/**
- * 生成统一成功响应
- */
-function successResponse<T>(data: T): ApiResponse<T> {
-  return {
-    code: 200,
-    message: 'success',
-    data,
-    timestamp: Date.now()
+// 登录相关Mock
+Mock.mock('/api/auth/login', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    token: '@guid',
+    user: {
+      id: '@id',
+      username: '@cname',
+      avatar: '@image("100x100", "#4A90E2", "#FFF", "Avatar")',
+      role: 'student',
+      studentId: '2021@string("number", 8)',
+      class: '计算机科学与技术2021级1班',
+      college: '计算机科学与技术学院'
+    }
   }
-}
+})
 
-/**
- * 生成订单编号
- */
-function generateOrderNo(): string {
-  const now = new Date()
-  const dateStr = now.getFullYear().toString() +
-    (now.getMonth() + 1).toString().padStart(2, '0') +
-    now.getDate().toString().padStart(2, '0')
-  const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0')
-  return `HK${dateStr}${random}`
-}
-
-// ==================== 商品模块数据 ====================
-
-/** 商品分类数据 */
-const categories: Category[] = [
-  { id: 'cat1', name: '数码电子', icon: 'laptop', description: '手机、电脑、平板等电子设备' },
-  { id: 'cat2', name: '图书文具', icon: 'book', description: '教材、参考书、文具用品' },
-  { id: 'cat3', name: '生活日用', icon: 'home', description: '日用品、收纳、清洁用品' },
-  { id: 'cat4', name: '运动户外', icon: 'basketball', description: '运动装备、户外用品' },
-  { id: 'cat5', name: '食品饮料', icon: 'coffee', description: '零食、饮料、特产' }
-]
-
-/** 商品数据 - 符合黑科大校园场景 */
-const products: Product[] = [
-  // 数码电子类 (5个)
-  {
-    id: 'prod001',
-    name: '华为 MateBook D14 笔记本电脑',
-    categoryId: 'cat1',
-    price: 4299,
-    originalPrice: 4999,
-    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&h=800&fit=crop'
-    ],
-    description: '2024款 华为MateBook D14 14英寸轻薄本，适合学习和办公使用',
-    detail: '<p><strong>产品特点：</strong></p><ul><li>处理器：AMD R5-7530U</li><li>内存：16GB DDR4</li><li>硬盘：512GB SSD</li><li>屏幕：14英寸 1080P IPS</li><li>续航：约8小时</li></ul>',
-    stock: 15,
-    sales: 128,
-    rating: 4.8,
-    reviewCount: 56,
-    status: 'on_sale',
-    tags: ['笔记本', '华为', '学生优惠'],
-    createdAt: '2026-01-15T10:00:00Z',
-    updatedAt: '2026-03-20T08:30:00Z'
-  },
-  {
-    id: 'prod002',
-    name: '小米 Redmi Note 13 Pro 手机',
-    categoryId: 'cat1',
-    price: 1599,
-    originalPrice: 1899,
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&h=800&fit=crop'
-    ],
-    description: 'Redmi Note 13 Pro 5G手机，1亿像素主摄，性价比之选',
-    detail: '<p>搭载骁龙7s Gen2处理器，6.67英寸OLED屏幕，5100mAh大电池，67W快充</p>',
-    stock: 32,
-    sales: 256,
-    rating: 4.6,
-    reviewCount: 128,
-    status: 'on_sale',
-    tags: ['手机', '小米', '5G'],
-    createdAt: '2026-02-01T09:00:00Z',
-    updatedAt: '2026-04-01T12:00:00Z'
-  },
-  {
-    id: 'prod003',
-    name: 'iPad 第10代 64GB WiFi版',
-    categoryId: 'cat1',
-    price: 2799,
-    originalPrice: 2999,
-    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&h=800&fit=crop'
-    ],
-    description: 'Apple iPad 第10代，10.9英寸 Liquid Retina显示屏',
-    detail: '<p>A14仿生芯片，支持Apple Pencil（第一代），全天候电池续航</p>',
-    stock: 8,
-    sales: 89,
-    rating: 4.9,
-    reviewCount: 45,
-    status: 'on_sale',
-    tags: ['平板', '苹果', '学习神器'],
-    createdAt: '2026-01-20T11:00:00Z',
-    updatedAt: '2026-03-25T14:20:00Z'
-  },
-  {
-    id: 'prod004',
-    name: '罗技 MX Master 3S 无线鼠标',
-    categoryId: 'cat1',
-    price: 599,
-    originalPrice: 749,
-    image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&h=800&fit=crop'
-    ],
-    description: '专业级无线鼠标，MagSpeed电磁滚轮，7000 DPI传感器',
-    detail: '<p>静音点击，多设备连接，USB-C快充，70天超长续航</p>',
-    stock: 45,
-    sales: 167,
-    rating: 4.7,
-    reviewCount: 92,
-    status: 'on_sale',
-    tags: ['鼠标', '罗技', '办公外设'],
-    createdAt: '2026-02-10T15:00:00Z',
-    updatedAt: '2026-04-02T09:15:00Z'
-  },
-  {
-    id: 'prod005',
-    name: '漫步者 W820NB 头戴式降噪耳机',
-    categoryId: 'cat1',
-    price: 269,
-    originalPrice: 349,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop'
-    ],
-    description: '主动降噪蓝牙耳机，Hi-Res认证音质，50小时长续航',
-    detail: '<p>支持LDAC高清音频传输，舒适佩戴设计，适合长时间学习使用</p>',
-    stock: 28,
-    sales: 203,
-    rating: 4.5,
-    reviewCount: 78,
-    status: 'on_sale',
-    tags: ['耳机', '降噪', '蓝牙'],
-    createdAt: '2026-02-05T13:30:00Z',
-    updatedAt: '2026-03-28T16:45:00Z'
-  },
-
-  // 图书文具类 (3个)
-  {
-    id: 'prod006',
-    name: '高等数学（第七版）同济大学',
-    categoryId: 'cat2',
-    price: 42,
-    originalPrice: 49.8,
-    image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800&h=800&fit=crop'
-    ],
-    description: '经典高数教材，理工科学生必备',
-    detail: '<p>高等教育出版社权威出版，内容全面系统，例题丰富详尽</p>',
-    stock: 120,
-    sales: 567,
-    rating: 4.9,
-    reviewCount: 234,
-    status: 'on_sale',
-    tags: ['教材', '数学', '考研必备'],
-    createdAt: '2026-01-01T08:00:00Z',
-    updatedAt: '2026-04-05T10:00:00Z'
-  },
-  {
-    id: 'prod007',
-    name: '三菱 Uni-ball One 中性笔套装（10支装）',
-    categoryId: 'cat2',
-    price: 35,
-    originalPrice: 45,
-    image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800&h=800&fit=crop'
-    ],
-    description: '日本进口中性笔，墨水不洇纸，书写顺滑',
-    detail: '<p>0.5mm子弹头，黑色墨水，适合考试和日常笔记使用</p>',
-    stock: 200,
-    sales: 890,
-    rating: 4.8,
-    reviewCount: 356,
-    status: 'on_sale',
-    tags: ['笔', '文具', '考试用笔'],
-    createdAt: '2026-01-10T09:30:00Z',
-    updatedAt: '2026-04-03T11:20:00Z'
-  },
-  {
-    id: 'prod008',
-    name: '国誉 Kokuyo 活页本 B5（5本装）',
-    categoryId: 'cat2',
-    price: 58,
-    originalPrice: 72,
-    image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=800&h=800&fit=crop'
-    ],
-    description: '日本国誉活页本，可换芯设计，耐用实用',
-    detail: '<p>B5尺寸，26孔活页夹，含80张横线内页，可自由增减纸张</p>',
-    stock: 85,
-    sales: 423,
-    rating: 4.7,
-    reviewCount: 178,
-    status: 'on_sale',
-    tags: ['笔记本', '活页本', '国誉'],
-    createdAt: '2026-01-18T10:15:00Z',
-    updatedAt: '2026-03-30T14:00:00Z'
-  },
-
-  // 生活日用工 (2个)
-  {
-    id: 'prod009',
-    name: '南极人 四件套床上用品（被套+床单+枕套x2）',
-    categoryId: 'cat3',
-    price: 168,
-    originalPrice: 258,
-    image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&h=800&fit=crop'
-    ],
-    description: '宿舍必备四件套，纯棉材质，亲肤透气',
-    detail: '<p>适用1.2m/1.5m床，全棉斜纹面料，活性印染不易褪色</p>',
-    stock: 36,
-    sales: 289,
-    rating: 4.6,
-    reviewCount: 145,
-    status: 'on_sale',
-    tags: ['床品', '宿舍', '纯棉'],
-    createdAt: '2026-01-25T11:00:00Z',
-    updatedAt: '2026-03-22T09:30:00Z'
-  },
-  {
-    id: 'prod010',
-    name: '公牛 插排 GN-B304U 4位USB插座',
-    categoryId: 'cat3',
-    price: 39,
-    originalPrice: 59,
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=800&fit=crop'
-    ],
-    description: '安全插座，带USB充电口，宿舍神器',
-    detail: '<p>4位插孔+3USB接口，1.8米线长，过载保护，阻燃材料</p>',
-    stock: 150,
-    sales: 678,
-    rating: 4.8,
-    reviewCount: 289,
-    status: 'on_sale',
-    tags: ['插排', 'USB充电', '宿舍必备'],
-    createdAt: '2026-01-08T08:30:00Z',
-    updatedAt: '2026-04-04T15:00:00Z'
-  },
-
-  // 运动户外类 (2个)
-  {
-    id: 'prod011',
-    name: '李宁 羽毛球拍 单拍（已穿线）',
-    categoryId: 'cat4',
-    price: 129,
-    originalPrice: 199,
-    image: 'https://images.unsplash.com/photo-1622290291468-28e9ecdcade1?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1622290291468-28e9ecdcade1?w=800&h=800&fit=crop'
-    ],
-    description: '全碳素羽毛球拍，轻量化设计，攻守兼备',
-    detail: '<p>重量约85g，已穿24磅线，送拍套和手胶，适合初学者到进阶玩家</p>',
-    stock: 42,
-    sales: 156,
-    rating: 4.5,
-    reviewCount: 67,
-    status: 'on_sale',
-    tags: ['羽毛球', '运动器材', '健身'],
-    createdAt: '2026-02-08T14:00:00Z',
-    updatedAt: '2026-03-27T10:30:00Z'
-  },
-  {
-    id: 'prod012',
-    name: '迪卡侬 双肩背包 20L 运动休闲',
-    categoryId: 'cat4',
-    price: 79,
-    originalPrice: 99,
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&h=800&fit=crop'
-    ],
-    description: '轻便双肩包，多功能隔层，防水面料',
-    detail: '<p>20L容量，电脑仓可放14寸笔记本，反光条设计，夜跑安全</p>',
-    stock: 68,
-    sales: 234,
-    rating: 4.4,
-    reviewCount: 98,
-    status: 'on_sale',
-    tags: ['背包', '运动', '通勤'],
-    createdAt: '2026-02-12T09:45:00Z',
-    updatedAt: '2026-03-29T16:00:00Z'
-  },
-
-  // 食品饮料类 (3个)
-  {
-    id: 'prod013',
-    name: '三只松鼠 坚果礼盒 1kg装',
-    categoryId: 'cat5',
-    price: 69,
-    originalPrice: 99,
-    image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=800&h=800&fit=crop'
-    ],
-    description: '混合坚果礼盒，每日坚果营养均衡',
-    detail: '<p>含腰果、巴旦木、核桃、榛子等8种坚果，独立小包装，方便携带</p>',
-    stock: 95,
-    sales: 445,
-    rating: 4.7,
-    reviewCount: 198,
-    status: 'on_sale',
-    tags: ['零食', '坚果', '健康食品'],
-    createdAt: '2026-01-22T10:00:00Z',
-    updatedAt: '2026-04-01T08:45:00Z'
-  },
-  {
-    id: 'prod014',
-    name: '元气森林 白桃气泡水 480ml*15瓶整箱',
-    categoryId: 'cat5',
-    price: 52,
-    originalPrice: 65,
-    image: 'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=800&h=800&fit=crop'
-    ],
-    description: '0糖0脂0卡气泡水，白桃味清爽解腻',
-    detail: '<p>赤藓糖醇代糖，真实果汁添加，气泡口感，夏日必备饮品</p>',
-    stock: 180,
-    sales: 789,
-    rating: 4.6,
-    reviewCount: 345,
-    status: 'on_sale',
-    tags: ['饮料', '气泡水', '0糖'],
-    createdAt: '2026-01-05T09:00:00Z',
-    updatedAt: '2026-04-05T12:30:00Z'
-  },
-  {
-    id: 'prod015',
-    name: '哈尔滨红肠 正宗哈肉联 500g*2袋',
-    categoryId: 'cat5',
-    price: 58,
-    originalPrice: 78,
-    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&h=400&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&h=800&fit=crop'
-    ],
-    description: '黑龙江特产哈尔滨红肠，正宗俄式风味',
-    detail: '<p>百年老字号哈肉联出品，果木熏烤工艺，肥瘦相间，蒜香浓郁</p>',
-    stock: 60,
-    sales: 334,
-    rating: 4.8,
-    reviewCount: 167,
-    status: 'on_sale',
-    tags: ['特产', '红肠', '东北美食'],
-    createdAt: '2026-01-28T11:30:00Z',
-    updatedAt: '2026-03-31T14:15:00Z'
+Mock.mock('/api/auth/register', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    token: '@guid',
+    user: {
+      id: '@id',
+      username: '@cname',
+      role: 'student'
+    }
   }
-]
+})
 
-// ==================== 订单模块数据 ====================
-
-const orders: Order[] = [
-  {
-    id: 'order001',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod002', productName: '小米 Redmi Note 13 Pro 手机', productImage: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200', price: 1599, quantity: 1, subtotal: 1599 }
-    ],
-    totalAmount: 1648,
-    discountAmount: 0,
-    freightAmount: 49,
-    payAmount: 1648,
-    status: 'completed',
-    paymentMethod: 'wechat',
-    paymentTime: '2026-03-15T10:30:00Z',
-    shipTime: '2026-03-15T14:00:00Z',
-    deliverTime: '2026-03-17T10:00:00Z',
-    completeTime: '2026-03-18T09:00:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    remark: '请在工作时间配送',
-    createdAt: '2026-03-15T10:25:00Z',
-    updatedAt: '2026-03-18T09:00:00Z'
-  },
-  {
-    id: 'order002',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod007', productName: '三菱 Uni-ball One 中性笔套装', productImage: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=200', price: 35, quantity: 2, subtotal: 70 },
-      { productId: 'prod008', productName: '国誉 Kokuyo 活页本 B5', productImage: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=200', price: 58, quantity: 3, subtotal: 174 }
-    ],
-    totalAmount: 244,
-    discountAmount: 10,
-    freightAmount: 0,
-    payAmount: 234,
-    status: 'shipped',
-    paymentMethod: 'alipay',
-    paymentTime: '2026-04-02T14:20:00Z',
-    shipTime: '2026-04-03T09:00:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    createdAt: '2026-04-02T14:15:00Z',
-    updatedAt: '2026-04-03T09:00:00Z'
-  },
-  {
-    id: 'order003',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod006', productName: '高等数学（第七版）同济大学', productImage: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=200', price: 42, quantity: 1, subtotal: 42 }
-    ],
-    totalAmount: 42,
-    discountAmount: 0,
-    freightAmount: 0,
-    payAmount: 42,
-    status: 'paid',
-    paymentMethod: 'balance',
-    paymentTime: '2026-04-05T16:45:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 图书馆自提点',
-    remark: '图书馆自提',
-    createdAt: '2026-04-05T16:40:00Z',
-    updatedAt: '2026-04-05T16:45:00Z'
-  },
-  {
-    id: 'order004',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod013', productName: '三只松鼠 坚果礼盒 1kg装', productImage: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=200', price: 69, quantity: 2, subtotal: 138 },
-      { productId: 'prod014', productName: '元气森林 白桃气泡水 整箱', productImage: 'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=200', price: 52, quantity: 1, subtotal: 52 }
-    ],
-    totalAmount: 190,
-    discountAmount: 15,
-    freightAmount: 0,
-    payAmount: 175,
-    status: 'pending',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    createdAt: '2026-04-06T20:30:00Z',
-    updatedAt: '2026-04-06T20:30:00Z'
-  },
-  {
-    id: 'order005',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod001', productName: '华为 MateBook D14 笔记本电脑', productImage: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=200', price: 4299, quantity: 1, subtotal: 4299 }
-    ],
-    totalAmount: 4348,
-    discountAmount: 200,
-    freightAmount: 49,
-    payAmount: 4197,
-    status: 'delivered',
-    paymentMethod: 'wechat',
-    paymentTime: '2026-03-20T11:00:00Z',
-    shipTime: '2026-03-20T15:00:00Z',
-    deliverTime: '2026-03-22T11:30:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    createdAt: '2026-03-20T10:50:00Z',
-    updatedAt: '2026-03-22T11:30:00Z'
-  },
-  {
-    id: 'order006',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod009', productName: '南极人 四件套床上用品', productImage: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200', price: 168, quantity: 1, subtotal: 168 }
-    ],
-    totalAmount: 217,
-    discountAmount: 0,
-    freightAmount: 49,
-    payAmount: 217,
-    status: 'cancelled',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    remark: '不需要了',
-    createdAt: '2026-03-10T09:00:00Z',
-    updatedAt: '2026-03-10T18:00:00Z'
-  },
-  {
-    id: 'order007',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod004', productName: '罗技 MX Master 3S 无线鼠标', productImage: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200', price: 599, quantity: 1, subtotal: 599 }
-    ],
-    totalAmount: 648,
-    discountAmount: 50,
-    freightAmount: 49,
-    payAmount: 598,
-    status: 'refunding',
-    paymentMethod: 'alipay',
-    paymentTime: '2026-04-01T15:00:00Z',
-    shipTime: '2026-04-02T10:00:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    remark: '鼠标滚轮有问题，申请退货',
-    createdAt: '2026-04-01T14:50:00Z',
-    updatedAt: '2026-04-04T10:00:00Z'
-  },
-  {
-    id: 'order008',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod011', productName: '李宁 羽毛球拍 单拍', productImage: 'https://images.unsplash.com/photo-1622290291468-28e9ecdcade1?w=200', price: 129, quantity: 2, subtotal: 258 },
-      { productId: 'prod012', productName: '迪卡侬 双肩背包 20L', productImage: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200', price: 79, quantity: 1, subtotal: 79 }
-    ],
-    totalAmount: 337,
-    discountAmount: 20,
-    freightAmount: 0,
-    payAmount: 317,
-    status: 'completed',
-    paymentMethod: 'wechat',
-    paymentTime: '2026-03-25T13:00:00Z',
-    shipTime: '2026-03-25T16:00:00Z',
-    deliverTime: '2026-03-27T14:00:00Z',
-    completeTime: '2026-03-28T10:00:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    createdAt: '2026-03-25T12:50:00Z',
-    updatedAt: '2026-03-28T10:00:00Z'
-  },
-  {
-    id: 'order009',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod003', productName: 'iPad 第10代 64GB WiFi版', productImage: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=200', price: 2799, quantity: 1, subtotal: 2799 }
-    ],
-    totalAmount: 2848,
-    discountAmount: 100,
-    freightAmount: 49,
-    payAmount: 2798,
-    status: 'shipped',
-    paymentMethod: 'alipay',
-    paymentTime: '2026-04-04T09:30:00Z',
-    shipTime: '2026-04-04T14:00:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    createdAt: '2026-04-04T09:20:00Z',
-    updatedAt: '2026-04-04T14:00:00Z'
-  },
-  {
-    id: 'order010',
-    orderNo: generateOrderNo(),
-    userId: 'user001',
-    items: [
-      { productId: 'prod005', productName: '漫步者 W820NB 头戴式降噪耳机', productImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200', price: 269, quantity: 1, subtotal: 269 },
-      { productId: 'prod015', productName: '哈尔滨红肠 哈肉联 500g*2袋', productImage: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=200', price: 58, quantity: 2, subtotal: 116 }
-    ],
-    totalAmount: 385,
-    discountAmount: 0,
-    freightAmount: 0,
-    payAmount: 385,
-    status: 'paid',
-    paymentMethod: 'wechat',
-    paymentTime: '2026-04-06T11:00:00Z',
-    receiverName: '张三',
-    receiverPhone: '138****8888',
-    receiverAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    createdAt: '2026-04-06T10:55:00Z',
-    updatedAt: '2026-04-06T11:00:00Z'
+// 用户相关Mock - 同时支持 /api/user/info 和 /user/info
+Mock.mock(/\/api\/user\/info|user\/info/, 'get', {
+  code: 200,
+  message: 'success',
+  data: {
+    id: '@id',
+    username: '@cname',
+    avatar: '@image("100x100", "#4A90E2", "#FFF", "Avatar")',
+    role: 'student',
+    studentId: '2021@string("number", 8)',
+    class: '计算机科学与技术2021级1班',
+    college: '计算机科学与技术学院',
+    phone: '@string("number", 11)',
+    email: '@email'
   }
-]
+})
 
-// ==================== 购物车模块数据 ====================
-
-const cartItems: CartItem[] = [
-  {
-    id: 'cart001',
-    productId: 'prod014',
-    product: {
-      id: 'prod014',
-      name: '元气森林 白桃气泡水 480ml*15瓶整箱',
-      image: 'https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?w=200',
-      price: 52,
-      originalPrice: 58,
-      stock: 180,
-      status: 'active'
+// 商品相关Mock - 同时支持 /api/products/hot 和 /products/hot
+Mock.mock(/\/api\/products\/hot|products\/hot/, 'get', {
+  code: 200,
+  message: 'success',
+  'data|8': [{
+    id: '@id',
+    name: '@ctitle(5, 15)',
+    description: '@cparagraph(2, 4)',
+    price: '@float(10, 500, 2, 2)',
+    originalPrice: '@float(20, 800, 2, 2)',
+    cover: '@image("300x300", "#667eea", "#FFF", "Product")',
+    'images|3-5': ['@image("300x300", "#667eea", "#FFF", "Product")'],
+    category: '@pick(["数码产品", "图书教材", "运动户外", "生活用品", "服饰鞋包", "食品零食"])',
+    'stock|10-100': 50,
+    'sales|0-1000': 100,
+    'rating|1-5': 4.5,
+    'reviews|0-100': 20,
+    merchant: {
+      id: '@id',
+      name: '@ctitle(3, 8)店',
+      logo: '@image("100x100", "#10b981", "#FFF", "Shop")'
     },
-    quantity: 2,
-    selected: true,
-    addedAt: '2026-04-05T15:00:00Z',
-    updatedAt: '2026-04-05T15:00:00Z'
-  },
-  {
-    id: 'cart002',
-    productId: 'prod013',
-    product: {
-      id: 'prod013',
-      name: '三只松鼠 坚果礼盒 1kg装',
-      image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=200',
-      price: 69,
-      originalPrice: 89,
-      stock: 95,
-      status: 'active'
-    },
-    quantity: 1,
-    selected: true,
-    addedAt: '2026-04-05T15:05:00Z',
-    updatedAt: '2026-04-05T15:05:00Z'
-  },
-  {
-    id: 'cart003',
-    productId: 'prod007',
-    product: {
-      id: 'prod007',
-      name: '三菱 Uni-ball One 中性笔套装（10支装）',
-      image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=200',
-      price: 35,
-      originalPrice: 45,
-      stock: 200,
-      status: 'active'
-    },
-    quantity: 3,
-    selected: false,
-    addedAt: '2026-04-04T20:00:00Z',
-    updatedAt: '2026-04-04T20:00:00Z'
-  },
-  {
-    id: 'cart004',
-    productId: 'prod010',
-    product: {
-      id: 'prod010',
-      name: '公牛 插排 GN-B304U 4位USB插座',
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
-      price: 39,
-      originalPrice: 49,
-      stock: 150,
-      status: 'active'
-    },
-    quantity: 1,
-    selected: true,
-    addedAt: '2026-04-03T10:30:00Z',
-    updatedAt: '2026-04-03T10:30:00Z'
-  },
-  {
-    id: 'cart005',
-    productId: 'prod015',
-    product: {
-      id: 'prod015',
-      name: '哈尔滨红肠 正宗哈肉联 500g*2袋',
-      image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=200',
-      price: 58,
-      originalPrice: 68,
-      stock: 60,
-      status: 'active'
-    },
-    quantity: 1,
-    selected: false,
-    addedAt: '2026-04-02T16:00:00Z',
-    updatedAt: '2026-04-02T16:00:00Z'
+    tags: ['@pick(["热销", "新品", "特价", "包邮"])'],
+    createTime: '@datetime'
+  }]
+})
+
+// 课程表相关Mock
+Mock.mock('/api/schedule', 'get', {
+  code: 200,
+  message: 'success',
+  'data|5': [{
+    'day|+1': 1,
+    'courses|3-5': [{
+      id: '@id',
+      name: '@ctitle(3, 5)',
+      teacher: '@cname',
+      location: '@pick(["教学楼A", "教学楼B", "实验楼"])@integer(101, 405)',
+      'startWeek|1-16': 1,
+      'endWeek|1-16': 16,
+      'day|1-7': 1,
+      'startSection|1-8': 1,
+      'endSection|1-8': 2
+    }]
+  }]
+})
+
+// 成绩相关Mock
+Mock.mock('/api/grades', 'get', {
+  code: 200,
+  message: 'success',
+  'data|8-12': [{
+    id: '@id',
+    courseName: '@ctitle(3, 6)',
+    credit: '@float(1, 4, 1, 1)',
+    grade: '@integer(60, 100)',
+    gpa: '@float(1, 4, 2, 2)',
+    semester: '@pick(["2023-2024-1", "2023-2024-2"])',
+    type: '@pick(["必修", "选修"])'
+  }]
+})
+
+// GPA相关Mock - 同时支持 /api/campus/gpa 和 /campus/gpa
+Mock.mock(/\/api\/campus\/gpa|campus\/gpa/, 'get', {
+  code: 200,
+  message: 'success',
+  data: {
+    totalGPA: '@float(2.5, 4.0, 2, 2)',
+    totalCredits: '@integer(120, 160)',
+    semesterGPA: {
+      '2023-2024-1': '@float(2.8, 4.0, 2, 2)',
+      '2023-2024-2': '@float(2.8, 4.0, 2, 2)',
+      '2022-2023-1': '@float(2.8, 4.0, 2, 2)',
+      '2022-2023-2': '@float(2.8, 4.0, 2, 2)'
+    }
   }
-]
+})
 
-// ==================== 用户模块数据 ====================
+// 图书馆相关Mock
+Mock.mock('/api/library/books', 'get', {
+  code: 200,
+  message: 'success',
+  'data|10-20': [{
+    id: '@id',
+    title: '@ctitle(5, 15)',
+    author: '@cname',
+    publisher: '@ctitle(3, 8)出版社',
+    isbn: '@string("number", 13)',
+    'available|1': [true, false],
+    location: '@pick(["A区", "B区", "C区"])@integer(1, 5)架',
+    publishDate: '@date'
+  }]
+})
 
-const currentUser: User = {
-  id: 'user001',
-  username: 'zhangsan2024',
-  nickname: '张同学',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
-  email: 'zhangsan@usth.edu.cn',
-  phone: '138****8888',
-  gender: 'male',
-  birthday: '2003-05-15',
-  studentId: '2022010001',
-  college: '计算机与信息工程学院',
-  major: '软件工程',
-  grade: '2022级',
-  role: 'user',
-  status: 'active',
-  balance: 256.80,
-  points: 3280,
-  level: 3,
-  createdAt: '2022-09-01T08:00:00Z',
-  updatedAt: '2026-04-06T18:00:00Z'
-}
+Mock.mock('/api/library/borrowed', 'get', {
+  code: 200,
+  message: 'success',
+  'data|3-5': [{
+    id: '@id',
+    bookTitle: '@ctitle(5, 15)',
+    author: '@cname',
+    borrowDate: '@date',
+    returnDate: '@date',
+    'renewable|1': [true, false]
+  }]
+})
 
-const addresses: Address[] = [
-  {
-    id: 'addr001',
-    userId: 'user001',
-    receiverName: '张三',
-    receiverPhone: '13812348888',
-    province: '黑龙江省',
-    city: '哈尔滨市',
-    district: '松北区',
-    detail: '糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    fullAddress: '黑龙江省哈尔滨市松北区糖厂街1号 黑龙江科技大学 A区6号楼301室',
-    isDefault: true,
-    tag: '学校',
-    createdAt: '2022-09-05T10:00:00Z'
-  },
-  {
-    id: 'addr002',
-    userId: 'user001',
-    receiverName: '张三',
-    receiverPhone: '13812348888',
-    province: '黑龙江省',
-    city: '齐齐哈尔市',
-    district: '龙沙区',
-    detail: '文化大街8号 家属院3单元502',
-    fullAddress: '黑龙江省齐齐哈尔市龙沙区文化大街8号 家属院3单元502',
-    isDefault: false,
-    tag: '家',
-    createdAt: '2022-09-05T10:05:00Z'
-  },
-  {
-    id: 'addr003',
-    userId: 'user001',
-    receiverName: '张三',
-    receiverPhone: '13812348888',
-    province: '黑龙江省',
-    city: '哈尔滨市',
-    district: '南岗区',
-    detail: '西大直街92号 哈工大附近',
-    fullAddress: '黑龙江省哈尔滨市南岗区西大直街92号 哈工大附近',
-    isDefault: false,
-    tag: '公司',
-    createdAt: '2025-06-15T14:30:00Z'
-  }
-]
+// 教室预约相关Mock
+Mock.mock('/api/classroom/buildings', 'get', {
+  code: 200,
+  message: 'success',
+  'data|3': [{
+    id: '@id',
+    name: '@pick(["教学楼A", "教学楼B", "实验楼"])',
+    'classrooms|5-10': [{
+      id: '@id',
+      roomNumber: '@integer(101, 405)',
+      'capacity|30-120': 60,
+      'type|1': ['多媒体教室', '普通教室', '实验室'],
+      'equipment|1-3': ['投影仪', '音响', '电脑'],
+      'available|1': [true, false]
+    }]
+  }]
+})
 
-// ==================== 外卖模块数据 ====================
+Mock.mock('/api/classroom/appointments', 'get', {
+  code: 200,
+  message: 'success',
+  'data|5-10': [{
+    id: '@id',
+    classroomId: '@id',
+    buildingName: '@pick(["教学楼A", "教学楼B"])',
+    roomNumber: '@integer(101, 405)',
+    date: '@date',
+    'startTime|1': ['08:00', '10:00', '14:00', '16:00'],
+    'endTime|1': ['10:00', '12:00', '16:00', '18:00'],
+    purpose: '@ctitle(5, 10)',
+    status: '@pick(["pending", "approved", "rejected"])'
+  }]
+})
 
-/** 外卖商家数据 - 黑科大周边商家 */
-const merchants: Merchant[] = [
-  {
-    id: 'mer001',
-    name: '科大食堂一楼',
-    logo: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&h=300&fit=crop',
-    category: '食堂',
-    rating: 4.7,
-    reviewCount: 2345,
-    monthlySales: 8900,
-    deliveryTime: '15-25分钟',
-    deliveryFee: 0,
-    minOrderAmount: 1,
-    address: '黑龙江科技大学A区食堂一楼',
-    phone: '0451-88036001',
-    openTime: '06:30',
-    closeTime: '21:00',
-    status: 'open',
-    tags: ['经济实惠', '量大管饱', '校园首选'],
-    announcement: '今日新增红烧排骨套餐！',
-    latitude: 45.7965,
-    longitude: 126.6508,
-    distance: 0.2
-  },
-  {
-    id: 'mer002',
-    name: '蜜雪冰城（科大店）',
-    logo: 'https://images.unsplash.com/photo-1558857563-b371033ba7c2?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1558857563-b371033ba7c2?w=600&h=300&fit=crop',
-    category: '奶茶饮品',
-    rating: 4.5,
-    reviewCount: 1876,
-    monthlySales: 12500,
-    deliveryTime: '10-20分钟',
-    deliveryFee: 2,
-    minOrderAmount: 10,
-    address: '黑龙江科技大学B区商业街12号',
-    phone: '0451-88036123',
-    openTime: '09:00',
-    closeTime: '22:30',
-    status: 'open',
-    tags: ['平价奶茶', '冰淇淋', '学生最爱'],
-    announcement: '柠檬水第二杯半价！',
-    latitude: 45.7972,
-    longitude: 126.6515,
-    distance: 0.5
-  },
-  {
-    id: 'mer003',
-    name: '瑞幸咖啡（科技大厦店）',
-    logo: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&h=300&fit=crop',
-    category: '咖啡',
-    rating: 4.6,
-    reviewCount: 987,
-    monthlySales: 5600,
-    deliveryTime: '15-25分钟',
-    deliveryFee: 3,
-    minOrderAmount: 20,
-    address: '科技大厦一层大厅',
-    phone: '0451-88036567',
-    openTime: '07:30',
-    closeTime: '21:00',
-    status: 'open',
-    tags: ['精品咖啡', '生椰拿铁', '提神醒脑'],
-    announcement: '新品上市：樱花莓莓胶原酸奶冻',
-    latitude: 45.7958,
-    longitude: 126.6495,
-    distance: 0.8
-  },
-  {
-    id: 'mer004',
-    name: '杨国福麻辣烫（科大店）',
-    logo: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&h=300&fit=crop',
-    category: '麻辣烫',
-    rating: 4.4,
-    reviewCount: 1567,
-    monthlySales: 7200,
-    deliveryTime: '20-30分钟',
-    deliveryFee: 2,
-    minOrderAmount: 15,
-    address: '黑龙江科技大学C区美食广场3号',
-    phone: '0451-88036234',
-    openTime: '10:00',
-    closeTime: '22:00',
-    status: 'open',
-    tags: ['麻辣烫', '自选菜品', '口味正宗'],
-    announcement: '新用户首单立减5元',
-    latitude: 45.7980,
-    longitude: 126.6520,
-    distance: 0.6
-  },
-  {
-    id: 'mer005',
-    name: '黄焖鸡米饭（学府店）',
-    logo: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&h=300&fit=crop',
-    category: '快餐简餐',
-    rating: 4.3,
-    reviewCount: 1123,
-    monthlySales: 4500,
-    deliveryTime: '20-30分钟',
-    deliveryFee: 2,
-    minOrderAmount: 12,
-    address: '学府路辅街88号',
-    phone: '0451-88036456',
-    openTime: '10:00',
-    closeTime: '21:30',
-    status: 'open',
-    tags: ['黄焖鸡', '下饭神器', '分量足'],
-    announcement: '',
-    latitude: 45.7990,
-    longitude: 126.6530,
-    distance: 1.2
-  },
-  {
-    id: 'mer006',
-    name: '正新鸡排（科大小吃街）',
-    logo: 'https://images.unsplash.com/photo-1626082927389-8cd23f0cfd85?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1626082927389-8cd23f0cfd85?w=600&h=300&fit=crop',
-    category: '炸鸡小吃',
-    rating: 4.2,
-    reviewCount: 890,
-    monthlySales: 3800,
-    deliveryTime: '15-25分钟',
-    deliveryFee: 2,
-    minOrderAmount: 10,
-    address: '黑龙江科技大学东门小吃街15号',
-    phone: '0451-88036789',
-    openTime: '09:30',
-    closeTime: '22:00',
-    status: 'open',
-    tags: ['鸡排', '小吃', '追剧必备'],
-    announcement: '新品：芝士爆浆鸡排上市',
-    latitude: 45.7975,
-    longitude: 126.6525,
-    distance: 0.7
-  },
-  {
-    id: 'mer007',
-    name: '张亮麻辣拌（松北店）',
-    logo: 'https://images.unsplash.com/photo-1582169296194-e4d5444eab9d?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1582169296194-e4d5444eab9d?w=600&h=300&fit=crop',
-    category: '麻辣拌',
-    rating: 4.4,
-    reviewCount: 756,
-    monthlySales: 3100,
-    deliveryTime: '20-30分钟',
-    deliveryFee: 2,
-    minOrderAmount: 15,
-    address: '松北大道188号',
-    phone: '0451-88036890',
-    openTime: '10:30',
-    closeTime: '21:00',
-    status: 'open',
-    tags: ['麻辣拌', '东北特色', '酸甜辣'],
-    announcement: '',
-    latitude: 45.8000,
-    longitude: 126.6540,
-    distance: 1.5
-  },
-  {
-    id: 'mer008',
-    name: '沙县小吃（科技路店）',
-    logo: 'https://images.unsplash.com/photo-1569058242-647d39ae98b7?w=200&h=200&fit=crop',
-    coverImage: 'https://images.unsplash.com/photo-1569058242-647d39ae98b7?w=600&h=300&fit=crop',
-    category: '中式快餐',
-    rating: 4.1,
-    reviewCount: 654,
-    monthlySales: 2800,
-    deliveryTime: '15-25分钟',
-    deliveryFee: 1,
-    minOrderAmount: 8,
-    address: '科技路56号',
-    phone: '0451-88036123',
-    openTime: '07:00',
-    closeTime: '22:00',
-    status: 'open',
-    tags: ['蒸饺', '拌面', '炖罐', '实惠'],
-    announcement: '早餐时段供应包子豆浆',
-    latitude: 45.7960,
-    longitude: 126.6500,
-    distance: 0.4
-  }
-]
-
-/** 菜品模板数据 */
-const dishesTemplate: Record<string, Dish[]> = {
-  mer001: [ // 科大食堂
-    { id: 'dish001', merchantId: 'mer001', name: '红烧排骨饭', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', price: 15, originalPrice: 18, description: '精选猪肋排，秘制酱料慢炖，配米饭和小菜', category: '盖浇饭', sales: 890, rating: 4.8, status: 'available' as const, tags: ['招牌', '荤菜'] },
-    { id: 'dish002', merchantId: 'mer001', name: '宫保鸡丁饭', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400', price: 12, description: '鲜嫩鸡肉丁配花生米，微辣爽口', category: '盖浇饭', sales: 756, rating: 4.6, status: 'available' as const, tags: ['经典', '微辣'] },
-    { id: 'dish003', merchantId: 'mer001', name: '麻婆豆腐饭', image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', price: 10, description: '嫩滑豆腐配猪肉末，麻辣鲜香', category: '盖浇饭', sales: 623, rating: 4.5, status: 'available' as const, tags: ['素食可选', '下饭'] },
-    { id: 'dish004', merchantId: 'mer001', name: '西红柿鸡蛋面', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400', price: 8, description: '手工拉面配新鲜番茄炒蛋，汤鲜味美', category: '面食', sales: 534, rating: 4.4, status: 'available' as const, tags: ['面食', '清淡'] },
-    { id: 'dish005', merchantId: 'mer001', name: '鸡腿套餐', image: 'https://images.unsplash.com/photo-1626082927389-8cd23f0cfd85?w=400', price: 16, originalPrice: 20, description: '大鸡腿配时蔬、米饭、紫菜蛋花汤', category: '套餐', sales: 445, rating: 4.7, status: 'available' as const, tags: ['肉食者', '超值'] },
-    { id: 'dish006', merchantId: 'mer001', name: '酸辣土豆丝', image: 'https://images.unsplash.com/photo-1569058242-647d39ae98b7?w=400', price: 6, description: '脆嫩土豆丝，酸辣开胃', category: '小炒', sales: 345, rating: 4.3, status: 'available' as const, tags: ['素菜', '开胃'] }
+// 校园地图数据 - 黑龙江科技大学（坐标已根据高德地图实际位置校准）
+// 学校地址：哈尔滨市松北区浦源路2468号
+// 基准坐标（高德地图主位置）：126.654111, 45.819751
+const campusMapData = {
+  buildings: [
+    // 行政办公区（校园中心偏北）
+    {
+      id: '1',
+      name: '主楼（行政办公楼）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.654111,
+      latitude: 45.819751,
+      tags: ['办公', '行政', '会议'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033301',
+      description: '学校主办公楼，设有校长办公室、教务处、学生处等行政部门。'
+    },
+    // 教学区（校园中部）
+    {
+      id: '2',
+      name: '第一教学楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652232,
+      latitude: 45.819501,
+      tags: ['上课', '自习', '考试'],
+      openTime: '06:00 - 22:00',
+      phone: '0451-88033302',
+      description: '学校主要教学楼之一，拥有多媒体教室80间。'
+    },
+    {
+      id: '3',
+      name: '第二教学楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652896,
+      latitude: 45.818313,
+      tags: ['上课', '自习', '考试'],
+      openTime: '06:00 - 22:00',
+      phone: '0451-88033303',
+      description: '学校主要教学楼之一，配备现代化教学设备。'
+    },
+    {
+      id: '4',
+      name: '矿业工程实验楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.651109,
+      latitude: 45.816803,
+      tags: ['实验', '科研', '矿业'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033304',
+      description: '矿业工程专业实验楼，配备采矿、安全等专业实验室。'
+    },
+    {
+      id: '5',
+      name: '机电工程实验楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.651124,
+      latitude: 45.817178,
+      tags: ['实验', '科研', '机电'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033305',
+      description: '机电工程专业实验楼，配备机械、电气等专业实验室。'
+    },
+    // 图书馆（校园中心）
+    {
+      id: '6',
+      name: '图书馆',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'library',
+      longitude: 126.654315,
+      latitude: 45.819798,
+      tags: ['借阅', '自习', '电子资源'],
+      openTime: '07:00 - 22:30',
+      phone: '0451-88033306',
+      description: '学校图书馆，总建筑面积31654平方米，藏书185万册，提供自习座位2000个。图书馆改造工程正在有序推进。'
+    },
+    // 食堂区（校园东部）
+    {
+      id: '7',
+      name: '第一食堂（学生一餐厅/沁芳园）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dining',
+      longitude: 126.655437,
+      latitude: 45.820711,
+      tags: ['餐饮', '早餐', '午餐', '晚餐'],
+      openTime: '06:30 - 21:00',
+      phone: '0451-88033307',
+      description: '学校第一食堂（沁芳园），提供各类中式快餐、面食、小吃等。食堂环境显著提升，菜品种类丰富多样。'
+    },
+    {
+      id: '8',
+      name: '第二食堂（学生二餐厅/知味园）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dining',
+      longitude: 126.653199,
+      latitude: 45.816732,
+      tags: ['餐饮', '小炒', '特色菜'],
+      openTime: '06:30 - 21:00',
+      phone: '0451-88033308',
+      description: '学校第二食堂（知味园），以现炒小炒和特色菜品为主。'
+    },
+    {
+      id: '9',
+      name: '教工餐厅',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dining',
+      longitude: 126.652557,
+      latitude: 45.819567,
+      tags: ['餐饮', '教工', '自助餐'],
+      openTime: '11:00 - 13:00, 17:00 - 19:00',
+      phone: '0451-88033309',
+      description: '教工专用餐厅，提供自助餐服务。'
+    },
+    {
+      id: '10',
+      name: '第三食堂（沁香园）',
+      address: '哈尔滨市松北区糖厂街5号',
+      category: 'dining',
+      longitude: 126.651816,
+      latitude: 45.817892,
+      tags: ['餐饮', '快餐', '小吃'],
+      openTime: '06:30 - 21:00',
+      phone: '0451-88033310',
+      description: '学校第三食堂（沁香园），提供各类快餐和小吃。'
+    },
+    // 宿舍区（校园南部）
+    {
+      id: '11',
+      name: '学生公寓1号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.654818,
+      latitude: 45.817689,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033311',
+      description: '男生公寓楼，可容纳1200名学生。住宿费：四人间1200元/年，六人间800元/年。'
+    },
+    {
+      id: '12',
+      name: '学生公寓2号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.655818,
+      latitude: 45.817189,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033312',
+      description: '男生公寓楼，可容纳1200名学生。'
+    },
+    {
+      id: '13',
+      name: '学生公寓3号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.656818,
+      latitude: 45.817689,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033313',
+      description: '女生公寓楼，可容纳1000名学生。'
+    },
+    {
+      id: '14',
+      name: '学生公寓4号楼（第四学生公寓）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.654818,
+      latitude: 45.817689,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033314',
+      description: '女生公寓楼，可容纳1000名学生。'
+    },
+    {
+      id: '15',
+      name: '学生公寓5号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.657818,
+      latitude: 45.817189,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033315',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '16',
+      name: '学生公寓6号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.658818,
+      latitude: 45.817689,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033316',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '17',
+      name: '人才公寓',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.659818,
+      latitude: 45.818189,
+      tags: ['住宿', '人才', '教师'],
+      openTime: '全天',
+      phone: '0451-88033317',
+      description: '高标准"江景房"人才公寓，为引进博士教师提供舒适、温馨的居住条件，助力学校引才工作。'
+    },
+    // 运动场馆（校园西部和北部）
+    {
+      id: '18',
+      name: '体育馆',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.652866,
+      latitude: 45.817261,
+      tags: ['运动', '篮球', '羽毛球', '乒乓球'],
+      openTime: '08:00 - 21:00',
+      phone: '0451-88033318',
+      description: '学校体育馆，设有篮球场、羽毛球场、乒乓球场等室内运动场地。篮球馆已完成升级改造。'
+    },
+    {
+      id: '19',
+      name: '田径运动场',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.651866,
+      latitude: 45.816261,
+      tags: ['运动', '跑步', '足球'],
+      openTime: '06:00 - 22:00',
+      phone: '0451-88033319',
+      description: '标准400米塑胶田径场，设有足球场和跑道。'
+    },
+    {
+      id: '20',
+      name: '游泳馆',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.653057,
+      latitude: 45.819209,
+      tags: ['运动', '游泳', '健身'],
+      openTime: '09:00 - 21:00',
+      phone: '0451-88033320',
+      description: '学校游泳馆，设有标准泳池和健身房。'
+    },
+    {
+      id: '21',
+      name: '气排球馆',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.650866,
+      latitude: 45.817261,
+      tags: ['运动', '气排球', '体育'],
+      openTime: '08:00 - 21:00',
+      phone: '0451-88033321',
+      description: '专业气排球馆，经过改造升级，设施完善，为师生体育锻炼提供优质场地。'
+    },
+    {
+      id: '22',
+      name: '羽毛球馆',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.650866,
+      latitude: 45.815261,
+      tags: ['运动', '羽毛球', '体育'],
+      openTime: '08:00 - 21:00',
+      phone: '0451-88033322',
+      description: '羽毛球馆，正在有序推进改造升级。'
+    },
+    {
+      id: '23',
+      name: '网球场',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.651866,
+      latitude: 45.818261,
+      tags: ['运动', '网球', '体育'],
+      openTime: '06:00 - 22:00',
+      phone: '0451-88033323',
+      description: '学校网球场，为学生提供网球运动场地。'
+    },
+    {
+      id: '24',
+      name: '塑胶操场',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.651866,
+      latitude: 45.815261,
+      tags: ['运动', '跑步', '健身'],
+      openTime: '06:00 - 22:00',
+      phone: '0451-88033324',
+      description: '学校塑胶操场，为学生提供跑步和健身场地。'
+    },
+    // 医疗服务（校园东北部）
+    {
+      id: '25',
+      name: '校医院',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'medical',
+      longitude: 126.658792,
+      latitude: 45.820809,
+      tags: ['医疗', '急诊', '体检'],
+      openTime: '24小时',
+      phone: '0451-88033325',
+      description: '学校附属医院，提供日常诊疗、急诊和体检服务。'
+    },
+    // 服务设施（校园各区域）
+    {
+      id: '26',
+      name: '大学生活动中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.651919,
+      latitude: 45.818793,
+      tags: ['活动', '社团', '会议'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033326',
+      description: '学生活动中心，设有报告厅、会议室、社团活动室等。'
+    },
+    {
+      id: '27',
+      name: '大学生服务中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.652232,
+      latitude: 45.819501,
+      tags: ['服务', '咨询', '办事'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033327',
+      description: '提供学生事务办理、就业指导、心理咨询等服务。'
+    },
+    {
+      id: '28',
+      name: '校园超市（教育超市）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.653525,
+      latitude: 45.817225,
+      tags: ['购物', '日用品', '零食'],
+      openTime: '07:00 - 23:00',
+      phone: '0451-88033328',
+      description: '校园超市，提供日用品、零食、文具等商品。'
+    },
+    {
+      id: '29',
+      name: '快递服务中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.653737,
+      latitude: 45.817529,
+      tags: ['快递', '取件', '寄件'],
+      openTime: '09:00 - 19:00',
+      phone: '0451-88033329',
+      description: '校园快递集中收发点，支持各大快递公司。'
+    },
+    {
+      id: '30',
+      name: '洗浴中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.653737,
+      latitude: 45.817529,
+      tags: ['洗浴', '热水', '生活'],
+      openTime: '10:00 - 22:00',
+      phone: '0451-88033330',
+      description: '学生公共洗浴中心，提供热水淋浴服务。'
+    },
+    {
+      id: '31',
+      name: '开水房',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.654737,
+      latitude: 45.817029,
+      tags: ['热水', '开水', '生活'],
+      openTime: '06:00 - 23:00',
+      phone: '0451-88033331',
+      description: '提供免费开水服务。'
+    },
+    {
+      id: '32',
+      name: '科技大厦',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.651919,
+      latitude: 45.818793,
+      tags: ['科研', '办公', '会议'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033332',
+      description: '科技大厦，设有科研实验室、学术报告厅和会议室。'
+    },
+    {
+      id: '33',
+      name: '安全与应急管理实践平台（碳谷大厦）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652392,
+      latitude: 45.823424,
+      tags: ['实验', '科研', '安全', '应急'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033333',
+      description: '"十四五"教育强国项目，2025年6月竣工投入使用。项目用地面积2.30万平方米，建筑面积2.70万平方米，用于安全与应急管理实践教学。'
+    },
+    {
+      id: '34',
+      name: '学校招待所',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.658625,
+      latitude: 45.819625,
+      tags: ['住宿', '接待', '宾馆'],
+      openTime: '全天',
+      phone: '0451-88033334',
+      description: '学校招待所，为来访人员提供住宿服务。'
+    },
+    {
+      id: '35',
+      name: '创新创业学院',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.651919,
+      latitude: 45.818793,
+      tags: ['创业', '创新', '孵化'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033335',
+      description: '创新创业学院，为学生提供创业指导和孵化服务。'
+    },
+    {
+      id: '36',
+      name: '网络信息中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.650525,
+      latitude: 45.815925,
+      tags: ['网络', '信息', '技术'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033336',
+      description: '网络信息中心，负责校园网络建设和维护。'
+    },
+    {
+      id: '78',
+      name: '科技园松北园区',
+      address: '哈尔滨市松北区浦源路2468号黑龙江科技大学',
+      category: 'service',
+      longitude: 126.652371,
+      latitude: 45.815711,
+      tags: ['科研', '园区', '创新'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033378',
+      description: '黑龙江科技大学科技园松北园区，位于校园内，为科技成果转化和企业孵化提供服务。'
+    },
+    {
+      id: '37',
+      name: '财务处',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.654111,
+      latitude: 45.819751,
+      tags: ['财务', '缴费', '报销'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033337',
+      description: '学校财务处，负责学费收缴、报销等财务业务。'
+    },
+    {
+      id: '38',
+      name: '保卫处',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.658792,
+      latitude: 45.820809,
+      tags: ['安全', '保卫', '门禁'],
+      openTime: '全天',
+      phone: '0451-88033338',
+      description: '学校保卫处，负责校园安全和门禁管理。'
+    },
+    {
+      id: '39',
+      name: '后勤管理处',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.657792,
+      latitude: 45.820309,
+      tags: ['后勤', '维修', '服务'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033339',
+      description: '学校后勤管理处，负责校园设施维护和后勤保障。全校73栋建筑已完成安全体检。'
+    },
+    // 文化场馆（校园北部）- 地矿文化博物馆三馆合一
+    {
+      id: '40',
+      name: '地矿文化博物馆',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.653392,
+      latitude: 45.822809,
+      tags: ['博物馆', '文化', '展览', '三馆合一'],
+      openTime: '09:00 - 11:30（暑期限时开放）',
+      phone: '0451-88033340',
+      description: '总面积约4400平方米，融校史馆、矿业馆、地质馆"三馆"于一体。校史馆约1100平方米，展示600余幅照片和近百件展品；矿业馆包含矿井调度中心、智能开采实验室、智能开采工作面、综采工作面等设施，是国内设置最全的地下模拟矿井；地质馆为中国地质学会科普研学基地、黑龙江省科普示范基地，主要展示岩层地质情况及矿石标本。'
+    },
+    // 高端服务平台（校园西部）
+    {
+      id: '41',
+      name: '现代制造工程中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.650635,
+      latitude: 45.816926,
+      tags: ['制造', '工程', '实训'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033341',
+      description: '具有国内一流水平的现代制造工程中心。'
+    },
+    {
+      id: '42',
+      name: '现代分析测试研究中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.649635,
+      latitude: 45.816426,
+      tags: ['分析', '测试', '科研'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033342',
+      description: '具有国内一流水平的现代分析测试研究中心。'
+    },
+    {
+      id: '43',
+      name: '中奥职业技术培训中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.648635,
+      latitude: 45.817926,
+      tags: ['培训', '职业技术', '国际合作'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033343',
+      description: '中奥职业技术培训中心，开展国际合作办学和职业技能培训。'
+    },
+    {
+      id: '44',
+      name: '工程训练中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.650635,
+      latitude: 45.815926,
+      tags: ['实训', '工程', '实践'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033344',
+      description: '工程训练中心，提供金工实习、电子实习等实践教学。'
+    },
+    // 各学院楼（校园中部和东部）
+    {
+      id: '45',
+      name: '计算机科学与技术学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652398,
+      latitude: 45.818308,
+      tags: ['教学', '计算机', '实验'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033345',
+      description: '计算机科学与技术学院专用教学楼。'
+    },
+    {
+      id: '46',
+      name: '经济管理学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.650525,
+      latitude: 45.815925,
+      tags: ['教学', '经管', '办公'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033346',
+      description: '经济管理学院专用教学楼。'
+    },
+    {
+      id: '47',
+      name: '电气与控制工程学院楼（碳谷大厦B座）',
+      address: '哈尔滨市松北区碳谷大厦B座',
+      category: 'teaching',
+      longitude: 126.650166,
+      latitude: 45.822845,
+      tags: ['教学', '电气', '控制'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033347',
+      description: '电气与控制工程学院专用教学楼，位于碳谷大厦B座。'
+    },
+    {
+      id: '48',
+      name: '测绘工程学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652444,
+      latitude: 45.818157,
+      tags: ['教学', '测绘', '实验'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033348',
+      description: '测绘工程学院专用教学楼。'
+    },
+    {
+      id: '49',
+      name: '材料科学与工程学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652139,
+      latitude: 45.816055,
+      tags: ['教学', '材料', '实验'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033349',
+      description: '材料科学与工程学院专用教学楼。'
+    },
+    {
+      id: '50',
+      name: '人文社会科学学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652557,
+      latitude: 45.819567,
+      tags: ['教学', '人文', '社科'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033350',
+      description: '人文社会科学学院专用教学楼。'
+    },
+    {
+      id: '51',
+      name: '理学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652398,
+      latitude: 45.818308,
+      tags: ['教学', '数学', '物理'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033351',
+      description: '理学院专用教学楼。'
+    },
+    {
+      id: '52',
+      name: '外国语学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.652557,
+      latitude: 45.819567,
+      tags: ['教学', '外语', '语言'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033352',
+      description: '外国语学院专用教学楼。'
+    },
+    {
+      id: '79',
+      name: '马克思主义学院',
+      address: '哈尔滨市松北区浦源路2468号黑龙江科技大学',
+      category: 'teaching',
+      longitude: 126.652503,
+      latitude: 45.819513,
+      tags: ['教学', '思政', '马列'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033379',
+      description: '马克思主义学院，负责思想政治理论课教学和马克思主义理论研究。'
+    },
+    {
+      id: '53',
+      name: '艺术学院楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.653557,
+      latitude: 45.820567,
+      tags: ['教学', '艺术', '设计'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033353',
+      description: '艺术学院专用教学楼。'
+    },
+    {
+      id: '54',
+      name: '体育部',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'sports',
+      longitude: 126.652866,
+      latitude: 45.817261,
+      tags: ['体育', '教学', '训练'],
+      openTime: '08:00 - 21:00',
+      phone: '0451-88033354',
+      description: '体育部办公楼和训练场馆。'
+    },
+    // 红色文化地标（校园中心区域）
+    {
+      id: '55',
+      name: '陈郁塑像',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.653111,
+      latitude: 45.819251,
+      tags: ['雕塑', '红色文化', '地标'],
+      openTime: '全天',
+      phone: '0451-88033355',
+      description: '陈郁塑像，新中国能源工业和煤炭教育事业的开拓者和奠基人，是爱国主义和校史校情教育的重要基地。'
+    },
+    {
+      id: '56',
+      name: '太阳石雕塑',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.653611,
+      latitude: 45.818751,
+      tags: ['雕塑', '文化', '地标'],
+      openTime: '全天',
+      phone: '0451-88033356',
+      description: '太阳石雕塑，代表学校的办学特色和精神文化，是科大精神谱系的重要组成部分。'
+    },
+    {
+      id: '57',
+      name: '劲牛雕塑',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.652611,
+      latitude: 45.818751,
+      tags: ['雕塑', '文化', '地标'],
+      openTime: '全天',
+      phone: '0451-88033357',
+      description: '劲牛雕塑，代表学校艰苦创业的办学历程和奋勇争先的精神，是科大精神谱系的重要组成部分。'
+    },
+    // 校门
+    {
+      id: '58',
+      name: '东北门（正门）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.651958,
+      latitude: 45.82417,
+      tags: ['校门', '出入口'],
+      openTime: '全天',
+      phone: '0451-88033358',
+      description: '学校东北门，面向浦源路，是学校正门。'
+    },
+    {
+      id: '59',
+      name: '东门',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.658792,
+      latitude: 45.820809,
+      tags: ['校门', '出入口'],
+      openTime: '全天',
+      phone: '0451-88033359',
+      description: '学校东门，方便学生出行。'
+    },
+    {
+      id: '60',
+      name: '西门',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.650525,
+      latitude: 45.815925,
+      tags: ['校门', '出入口'],
+      openTime: '全天',
+      phone: '0451-88033360',
+      description: '学校西门，靠近宿舍区。'
+    },
+    // 新增学生公寓（8、11-20号楼）
+    {
+      id: '61',
+      name: '学生公寓8号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.659818,
+      latitude: 45.817189,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033361',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '62',
+      name: '学生公寓11号楼（第十一学生公寓）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.656168,
+      latitude: 45.814702,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033362',
+      description: '学生公寓楼，可容纳1000名学生。'
+    },
+    {
+      id: '63',
+      name: '学生公寓12号楼（第十二学生公寓）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.657047,
+      latitude: 45.809186,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033363',
+      description: '学生公寓楼，可容纳1000名学生。'
+    },
+    {
+      id: '64',
+      name: '学生公寓14号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.658047,
+      latitude: 45.808686,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033364',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '65',
+      name: '学生公寓15号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.657829,
+      latitude: 45.818347,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033365',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '66',
+      name: '学生公寓16号楼（第十六学生公寓）',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.660047,
+      latitude: 45.808686,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033366',
+      description: '学生公寓楼，可容纳1000名学生。'
+    },
+    {
+      id: '67',
+      name: '学生公寓17号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.661047,
+      latitude: 45.809186,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033367',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '68',
+      name: '学生公寓18号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.662047,
+      latitude: 45.808686,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033368',
+      description: '学生公寓楼，可容纳800名学生。'
+    },
+    {
+      id: '69',
+      name: '学生公寓20号楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.656423,
+      latitude: 45.822337,
+      tags: ['住宿', '生活'],
+      openTime: '全天',
+      phone: '0451-88033369',
+      description: '学生公寓楼，可容纳1000名学生。'
+    },
+    // 新增教学楼/实验楼
+    {
+      id: '70',
+      name: '教学实验综合楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.653792,
+      latitude: 45.821309,
+      tags: ['教学', '实验', '综合'],
+      openTime: '06:00 - 22:00',
+      phone: '0451-88033370',
+      description: '教学实验综合楼，集教学和实验功能于一体。'
+    },
+    {
+      id: '71',
+      name: '求是楼',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.654792,
+      latitude: 45.821809,
+      tags: ['教学', '办公'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033371',
+      description: '求是楼，教学楼。'
+    },
+    // 新增研究所/中心
+    {
+      id: '72',
+      name: '光波技术研究所',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.650792,
+      latitude: 45.821309,
+      tags: ['科研', '光波', '技术'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033372',
+      description: '光波技术研究所，从事光波技术相关研究。'
+    },
+    {
+      id: '73',
+      name: '工程力学与材料研究所',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'teaching',
+      longitude: 126.649792,
+      latitude: 45.820809,
+      tags: ['科研', '力学', '材料'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033373',
+      description: '工程力学与材料研究所，从事工程力学与材料相关研究。'
+    },
+    {
+      id: '74',
+      name: '现代教育技术中心',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'service',
+      longitude: 126.651792,
+      latitude: 45.821309,
+      tags: ['教育', '技术', '多媒体'],
+      openTime: '08:00 - 17:00',
+      phone: '0451-88033374',
+      description: '现代教育技术中心，负责多媒体教学设备管理和技术支持。'
+    },
+    {
+      id: '80',
+      name: '电气工程实验与实践中心',
+      address: '哈尔滨市松北区浦源路2468号黑龙江科技大学',
+      category: 'teaching',
+      longitude: 126.651349,
+      latitude: 45.815741,
+      tags: ['实验', '电气', '实践'],
+      openTime: '08:00 - 22:00',
+      phone: '0451-88033380',
+      description: '电气工程实验与实践中心，为电气工程专业提供实验和实践教学服务。'
+    },
+    // 新增食堂
+    {
+      id: '75',
+      name: '第四食堂',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dining',
+      longitude: 126.656792,
+      latitude: 45.818809,
+      tags: ['餐饮', '快餐', '小吃'],
+      openTime: '06:30 - 21:00',
+      phone: '0451-88033375',
+      description: '学校第四食堂，提供各类快餐和小吃。'
+    },
+    // 新增校门
+    {
+      id: '76',
+      name: '北5门',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'other',
+      longitude: 126.654792,
+      latitude: 45.823809,
+      tags: ['校门', '出入口'],
+      openTime: '全天',
+      phone: '0451-88033376',
+      description: '学校北5门，位于校园北部。'
+    },
+    // 新增教师公寓
+    {
+      id: '77',
+      name: '教师公寓',
+      address: '哈尔滨市松北区浦源路2468号',
+      category: 'dormitory',
+      longitude: 126.660047,
+      latitude: 45.818189,
+      tags: ['住宿', '教师', '生活'],
+      openTime: '全天',
+      phone: '0451-88033377',
+      description: '教师公寓，为教职工提供住宿服务。'
+    }
   ],
-  mer002: [ // 蜜雪冰城
-    { id: 'dish007', merchantId: 'mer002', name: '冰鲜柠檬水', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400', price: 4, description: '新鲜柠檬+绿茶，清爽解腻', category: '饮品', sales: 5678, rating: 4.7, status: 'available' as const, tags: ['爆款', '必点'] },
-    { id: 'dish008', merchantId: 'mer002', name: '珍珠奶茶', image: 'https://images.unsplash.com/photo-1558857563-b371033ba7c2?w=400', price: 7, description: '醇香红茶+Q弹珍珠，甜蜜顺滑', category: '奶茶', sales: 3456, rating: 4.6, status: 'available' as const, tags: ['经典', '甜'] },
-    { id: 'dish009', merchantId: 'mer002', name: '草莓圣代', image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400', price: 6, description: '香草冰淇淋配草莓果酱+脆皮', category: '冰淇淋', sales: 2345, rating: 4.5, status: 'available' as const, tags: ['甜品', '冰凉'] },
-    { id: 'dish010', merchantId: 'mer002', name: '满杯百香果', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400', price: 10, description: '百香果原汁+绿茶，维C满满', category: '饮品', sales: 1890, rating: 4.4, status: 'available' as const, tags: ['水果茶', '酸爽'] }
-  ],
-  mer003: [ // 瑞幸咖啡
-    { id: 'dish011', merchantId: 'mer003', name: '生椰拿铁', image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=400', price: 18, description: '厚椰乳+浓缩咖啡，丝滑香醇', category: '咖啡', sales: 2345, rating: 4.8, status: 'available' as const, tags: ['招牌', '爆款'] },
-    { id: 'dish012', merchantId: 'mer003', name: '美式咖啡', image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400', price: 15, description: '经典美式，浓郁醇苦，提神醒脑', category: '咖啡', sales: 1567, rating: 4.5, status: 'available' as const, tags: ['经典', '无奶'] },
-    { id: 'dish013', merchantId: 'mer003', name: '樱花莓莓胶原酸奶冻', image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400', price: 22, description: '季节限定，樱花风味+草莓+胶原蛋白', category: '特调', sales: 890, rating: 4.6, status: 'available' as const, tags: ['新品', '限定'] }
-  ]
+  routes: []
 }
 
-// ==================== 二手市场模块数据 ====================
+// 校园地图API
+Mock.mock('/api/campus/map', 'get', campusMapData)
 
-/** 二手物品分类 */
-const secondHandCategories: SecondHandCategory[] = [
-  { id: 'shcat1', name: '手机数码', icon: 'smartphone', count: 45 },
-  { id: 'shcat2', name: '电脑办公', icon: 'laptop', count: 32 },
-  { id: 'shcat3', name: '图书教材', icon: 'book', count: 128 },
-  { id: 'shcat4', name: '生活家电', icon: 'home', count: 28 },
-  { id: 'shcat5', name: '运动器材', icon: 'basketball', count: 19 },
-  { id: 'shcat6', name: '服饰鞋包', icon: 'tshirt', count: 56 },
-  { id: 'shcat7', name: '美妆护肤', icon: 'cosmetics', count: 23 },
-  { id: 'shcat8', name: '其他闲置', icon: 'box', count: 41 }
-]
+// 课表相关API - 新接口
+Mock.mock('/api/campus/schedule', 'get', {
+  code: 200,
+  message: 'success',
+  'data|5-10': [{
+    id: '@id',
+    courseName: '@ctitle(3, 8)',
+    teacher: '@cname',
+    classroom: '@pick(["教学楼A", "教学楼B", "实验楼", "图书馆"])@integer(101, 405)',
+    'dayOfWeek|0-6': 1,
+    'startSection|1-8': 1,
+    'endSection|1-8': 2,
+    startTime: '@pick(["08:00", "08:55", "10:05", "11:00", "13:30", "14:25", "15:35", "16:30", "18:30", "19:25"])',
+    endTime: '@pick(["08:45", "09:40", "10:50", "11:45", "14:15", "15:10", "16:20", "17:15", "19:15", "20:10"])',
+    color: '@pick(["#667eea", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"])',
+    weeks: '@pick(["1-16周", "1-8周", "9-16周", "3-10周", "5-12周"])'
+  }]
+})
 
-/** 二手物品数据 */
-const secondHandItems: SecondHandItem[] = [
-  {
-    id: 'item001',
-    sellerId: 'seller001',
-    sellerName: '李学长',
-    sellerAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
-    title: '出iPhone 14 Pro Max 256G 深空黑',
-    description: '去年购入，一直戴壳贴膜使用，成色99新。电池健康度95%，无任何维修记录。配件齐全：原装充电器+数据线+耳机+盒子。因换新机所以出，价格可小刀。',
-    images: [
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat1',
-    categoryName: '手机数码',
-    originalPrice: 9999,
-    currentPrice: 5500,
-    condition: 'almost_new' as const,
-    conditionText: '几乎全新',
-    negotiable: true,
-    location: '黑龙江科技大学 A区',
-    viewCount: 234,
-    likeCount: 45,
-    chatCount: 28,
-    status: 'on_sale' as const,
-    createdAt: '2026-04-01T10:00:00Z',
-    updatedAt: '2026-04-05T14:30:00Z'
-  },
-  {
-    id: 'item002',
-    sellerId: 'seller002',
-    sellerName: '王学姐',
-    sellerAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
-    title: '出高数同济七版+习题集 全套',
-    description: '考研上岸出书，高数上下册+线性代数+概率论，全部是正版，有少量笔记但不影响阅读。还送历年真题卷子。',
-    images: [
-      'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat3',
-    categoryName: '图书教材',
-    originalPrice: 120,
-    currentPrice: 45,
-    condition: 'lightly_used' as const,
-    conditionText: '轻微使用痕迹',
-    negotiable: false,
-    location: '黑龙江科技大学 图书馆',
-    viewCount: 189,
-    likeCount: 67,
-    chatCount: 34,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-28T15:00:00Z',
-    updatedAt: '2026-04-04T09:00:00Z'
-  },
-  {
-    id: 'item003',
-    sellerId: 'seller003',
-    sellerName: '赵同学',
-    sellerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    title: '出自行车 山地车 26寸 九成新',
-    description: '大二买的山地车，骑了不到一年，因为要实习了没地方放所以出了。变速正常，刹车灵敏，轮胎还有八成新。送车锁和打气筒。',
-    images: [
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat5',
-    categoryName: '运动器材',
-    originalPrice: 800,
-    currentPrice: 350,
-    condition: 'lightly_used' as const,
-    conditionText: '轻微使用痕迹',
-    negotiable: true,
-    location: '黑龙江科技大学 车棚',
-    viewCount: 156,
-    likeCount: 23,
-    chatCount: 15,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-25T09:00:00Z',
-    updatedAt: '2026-04-02T16:00:00Z'
-  },
-  {
-    id: 'item004',
-    sellerId: 'seller004',
-    sellerName: '陈学长',
-    sellerAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
-    title: '出联想拯救者Y7000P 游戏本',
-    description: '2023款 i7-13620H RTX4060 16G内存 512G固态。玩3A大作无压力，吃鸡稳定144帧。外观有轻微使用痕迹，性能完美运行。送原装电源+鼠标垫。',
-    images: [
-      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat2',
-    categoryName: '电脑办公',
-    originalPrice: 8500,
-    currentPrice: 5200,
-    condition: 'lightly_used' as const,
-    conditionText: '轻微使用痕迹',
-    negotiable: true,
-    location: '黑龙江科技大学 A区',
-    viewCount: 345,
-    likeCount: 78,
-    chatCount: 56,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-20T11:00:00Z',
-    updatedAt: '2026-04-06T10:00:00Z'
-  },
-  {
-    id: 'item005',
-    sellerId: 'seller005',
-    sellerName: '刘学姐',
-    sellerAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop',
-    title: '出小冰箱 93L 宿舍可用',
-    description: '搬家带不走，低价出。制冷效果好，噪音小，宿舍用刚好。买来才用了半年，九五成新。',
-    images: [
-      'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat4',
-    categoryName: '生活家电',
-    originalPrice: 599,
-    currentPrice: 280,
-    condition: 'almost_new' as const,
-    conditionText: '几乎全新',
-    negotiable: true,
-    location: '黑龙江科技大学 C区女生宿舍',
-    viewCount: 98,
-    likeCount: 34,
-    chatCount: 19,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-18T14:00:00Z',
-    updatedAt: '2026-04-01T11:30:00Z'
-  },
-  {
-    id: 'item006',
-    sellerId: 'seller006',
-    sellerName: '孙同学',
-    sellerAvatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop',
-    title: '出AirPods Pro 2代 国行正品',
-    description: '今年年初购入，发票齐全。降噪效果很好，空间音频体验很棒。因换了索尼头戴式所以出，配件全。',
-    images: [
-      'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat1',
-    categoryName: '手机数码',
-    originalPrice: 1899,
-    currentPrice: 1200,
-    condition: 'almost_new' as const,
-    conditionText: '几乎全新',
-    negotiable: false,
-    location: '黑龙江科技大学 B区',
-    viewCount: 267,
-    likeCount: 56,
-    chatCount: 42,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-15T16:00:00Z',
-    updatedAt: '2026-04-03T15:00:00Z'
-  },
-  {
-    id: 'item007',
-    sellerId: 'seller007',
-    sellerName: '周学长',
-    sellerAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop',
-    title: '出考研全套资料 计算机408',
-    description: '已拟录取，出全套408资料：王道四本书+配套视频+真题+笔记。全是精华整理，省去自己整理的时间。',
-    images: [
-      'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat3',
-    categoryName: '图书教材',
-    originalPrice: 300,
-    currentPrice: 120,
-    condition: 'moderately_used' as const,
-    conditionText: '中等使用程度',
-    negotiable: false,
-    location: '黑龙江科技大学 图书馆自习室',
-    viewCount: 423,
-    likeCount: 134,
-    chatCount: 89,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-10T09:00:00Z',
-    updatedAt: '2026-04-05T18:00:00Z'
-  },
-  {
-    id: 'item008',
-    sellerId: 'seller008',
-    sellerName: '吴同学',
-    sellerAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
-    title: '出瑜伽垫 加厚防滑 送收纳袋',
-    description: '买了没练几次，基本全新。加厚10mm，防滑效果好，颜色粉紫色很好看。送瑜伽砖和弹力带。',
-    images: [
-      'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat5',
-    categoryName: '运动器材',
-    originalPrice: 89,
-    currentPrice: 35,
-    condition: 'brand_new' as const,
-    conditionText: '全新',
-    negotiable: true,
-    location: '黑龙江科技大学 体育馆',
-    viewCount: 87,
-    likeCount: 23,
-    chatCount: 12,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-08T13:00:00Z',
-    updatedAt: '2026-03-30T10:00:00Z'
-  },
-  {
-    id: 'item009',
-    sellerId: 'seller009',
-    sellerName: '郑学姐',
-    sellerAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop',
-    title: '出化妆品套装 兰蔻雅诗兰黛等',
-    description: '收拾东西发现好多只用了一点的护肤品和化妆品，都是正品专柜购入。兰蔻粉底液用了1/3，雅诗兰黛小样全新，还有几个口红试色一两次。',
-    images: [
-      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat7',
-    categoryName: '美妆护肤',
-    originalPrice: 2500,
-    currentPrice: 680,
-    condition: 'lightly_used' as const,
-    conditionText: '轻微使用痕迹',
-    negotiable: true,
-    location: '黑龙江科技大学 C区女生宿舍',
-    viewCount: 234,
-    likeCount: 89,
-    chatCount: 67,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-05T10:00:00Z',
-    updatedAt: '2026-04-04T14:00:00Z'
-  },
-  {
-    id: 'item010',
-    sellerId: 'seller010',
-    sellerName: '黄学长',
-    sellerAvatar: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=100&h=100&fit=crop',
-    title: '出投影仪 极米Z6X 家庭影院',
-    description: '在宿舍看剧太爽了，但是要毕业了带不走。1080P分辨率，自动对焦梯形校正，内置音响效果不错。配件全。',
-    images: [
-      'https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat4',
-    categoryName: '生活家电',
-    originalPrice: 3599,
-    currentPrice: 1800,
-    condition: 'lightly_used' as const,
-    conditionText: '轻微使用痕迹',
-    negotiable: true,
-    location: '黑龙江科技大学 A区男生宿舍',
-    viewCount: 178,
-    likeCount: 45,
-    chatCount: 32,
-    status: 'on_sale' as const,
-    createdAt: '2026-03-02T15:00:00Z',
-    updatedAt: '2026-04-02T09:30:00Z'
-  },
-  {
-    id: 'item011',
-    sellerId: 'seller011',
-    sellerName: '林同学',
-    sellerAvatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop',
-    title: '出羽绒服 波司登中长款 S码',
-    description: '买大了穿不了，吊牌还在。波司登官方旗舰店购入，充绒量很高，零下二十度完全没问题。黑色中长款，显瘦又保暖。',
-    images: [
-      'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat6',
-    categoryName: '服饰鞋包',
-    originalPrice: 1299,
-    currentPrice: 600,
-    condition: 'brand_new' as const,
-    conditionText: '全新',
-    negotiable: true,
-    location: '黑龙江科技大学 B区',
-    viewCount: 145,
-    likeCount: 38,
-    chatCount: 25,
-    status: 'on_sale' as const,
-    createdAt: '2026-02-28T11:00:00Z',
-    updatedAt: '2026-04-01T16:00:00Z'
-  },
-  {
-    id: 'item012',
-    sellerId: 'seller012',
-    sellerName: '马学长',
-    sellerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    title: '出Switch游戏机 日版 OLED 续航增强',
-    description: '带塞尔达传说旷野之息+马里奥赛车8+动物森友会三个游戏卡带，还有Pro手柄。机器成色很好，无任何问题。',
-    images: [
-      'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=600&h=600&fit=crop'
-    ],
-    categoryId: 'shcat1',
-    categoryName: '手机数码',
-    originalPrice: 3200,
-    currentPrice: 2100,
-    condition: 'lightly_used' as const,
-    conditionText: '轻微使用痕迹',
-    negotiable: false,
-    location: '黑龙江科技大学 A区',
-    viewCount: 312,
-    likeCount: 98,
-    chatCount: 73,
-    status: 'on_sale' as const,
-    createdAt: '2026-02-25T14:00:00Z',
-    updatedAt: '2026-04-06T08:00:00Z'
+// 添加课程
+Mock.mock('/api/campus/schedule', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    id: '@id',
+    courseName: '@ctitle(3, 8)',
+    teacher: '@cname',
+    classroom: '@pick(["教学楼A", "教学楼B", "实验楼"])@integer(101, 405)',
+    'dayOfWeek|0-6': 1,
+    'startSection|1-8': 1,
+    'endSection|1-8': 2,
+    startTime: '08:00',
+    endTime: '09:40',
+    color: '#667eea'
   }
-]
+})
 
-// ==================== 社区论坛模块数据 ====================
-
-/** 论坛板块数据 */
-const forumBoards: ForumBoard[] = [
-  { id: 'board1', name: '校园生活', description: '分享校园日常、生活经验', icon: 'school', postCount: 3456, todayPostCount: 23, sortOrder: 1 },
-  { id: 'board2', name: '学术交流', description: '课程讨论、学习资源分享', icon: 'book-open', postCount: 2134, todayPostCount: 15, sortOrder: 2 },
-  { id: 'board3', name: '求职招聘', description: '实习校招、职场经验交流', icon: 'briefcase', postCount: 1567, todayPostCount: 8, sortOrder: 3 },
-  { id: 'board4', name: '失物招领', description: '丢失物品发布、捡到物品登记', icon: 'search', postCount: 890, todayPostCount: 5, sortOrder: 4 },
-  { id: 'board5', name: '二手交易', description: '闲置物品转让、求购信息', icon: 'repeat', postCount: 1234, todayPostCount: 12, sortOrder: 5 },
-  { id: 'board6', name: '情感树洞', description: '匿名倾诉、情感交流', icon: 'heart', postCount: 2678, todayPostCount: 18, sortOrder: 6 }
-]
-
-/** 帖子数据 */
-const forumPosts: ForumPost[] = [
-  {
-    id: 'post001',
-    authorId: 'author001',
-    authorName: '计算机小王',
-    authorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
-    boardId: 'board1',
-    boardName: '校园生活',
-    title: '【经验分享】大一到大四的生存指南，建议收藏！',
-    content: '作为一个即将毕业的大四学长，想给学弟学妹们一些真诚的建议：\n\n1. 大一：多参加社团活动，但不要贪多，1-2个足够\n2. 大二：开始关注专业课，GPA很重要\n3. 大三：准备考研或找实习，越早越好\n4. 大四：论文要提前写，别拖到最后\n\n希望对大家有帮助！有问题可以评论区问我~',
-    images: [],
-    viewCount: 2345,
-    likeCount: 456,
-    commentCount: 89,
-    isTop: true,
-    isEssence: true,
-    status: 'published' as const,
-    createdAt: '2026-03-20T10:00:00Z',
-    updatedAt: '2026-03-20T10:00:00Z',
-    lastReplyAt: '2026-04-06T15:30:00Z'
-  },
-  {
-    id: 'post002',
-    authorId: 'author002',
-    authorName: '考研党小李',
-    authorAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
-    boardId: 'board2',
-    boardName: '学术交流',
-    title: '【求助】数据结构链表反转，递归和非递归哪个更好？',
-    content: '最近在复习数据结构，看到链表反转有两种写法：递归和非递归。\n\n递归版本代码简洁但可能栈溢出，非递归版本需要额外指针操作。\n\n请问实际面试中哪种更受青睐？有没有大佬能从时间和空间复杂度上分析一下？\n\n附上我的代码实现，欢迎指正...',
-    images: [
-      'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&h=400&fit=crop'
-    ],
-    viewCount: 876,
-    likeCount: 123,
-    commentCount: 45,
-    isTop: false,
-    isEssence: false,
-    status: 'published' as const,
-    createdAt: '2026-04-05T14:00:00Z',
-    updatedAt: '2026-04-05T14:00:00Z',
-    lastReplyAt: '2026-04-06T09:20:00Z'
-  },
-  {
-    id: 'post003',
-    authorId: 'author003',
-    authorName: 'HR小姐姐',
-    authorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop',
-    boardId: 'board3',
-    boardName: '求职招聘',
-    title: '【校招】字节跳动2026春季校园招聘正式启动！',
-    content: '各位同学好！字节跳动2026春招已经启动啦！\n\n招聘岗位：\n- 后端开发工程师（Go/Java/Python）\n- 前端开发工程师（React/Vue）\n- 算法工程师（NLP/CV/推荐）\n- 产品经理\n- 运营专员\n\n要求：本科及以上学历，2026届毕业生\n\n投递方式：登录官网 career.bytedance.com\n\n截止时间：2026年4月30日\n\n欢迎大家投递！',
-    images: [
-      'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=300&fit=crop'
-    ],
-    viewCount: 3456,
-    likeCount: 567,
-    commentCount: 134,
-    isTop: true,
-    isEssence: true,
-    status: 'published' as const,
-    createdAt: '2026-04-01T09:00:00Z',
-    updatedAt: '2026-04-01T09:00:00Z',
-    lastReplyAt: '2026-04-06T16:00:00Z'
-  },
-  {
-    id: 'post004',
-    authorId: 'author004',
-    authorName: '迷糊的小张',
-    authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    boardId: 'board4',
-    boardName: '失物招领',
-    title: '【寻物】昨天在图书馆丢失了一个黑色钱包，内有学生证和现金',
-    content: '昨天下午（4月5日）大概3点左右在图书馆三楼自习室学习，走的时候忘记拿钱包了。\n\n钱包特征：\n- 黑色长款钱包\n- 内有学生证（姓名：张某，学号：2022xxx）\n- 身份证一张\n- 现金约200元\n- 银行卡2张\n\n如有拾到请联系我：138****8888，必有重谢！🙏',
-    images: [],
-    viewCount: 567,
-    likeCount: 34,
-    commentCount: 23,
-    isTop: false,
-    isEssence: false,
-    status: 'published' as const,
-    createdAt: '2026-04-06T08:00:00Z',
-    updatedAt: '2026-04-06T08:00:00Z',
-    lastReplyAt: '2026-04-06T12:00:00Z'
-  },
-  {
-    id: 'post005',
-    authorId: 'author005',
-    authorName: '数码达人',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
-    boardId: 'board5',
-    boardName: '二手交易',
-    title: '【出售】iPad Air 5 256G WiFi版 星光色 95新',
-    description: '', // 兼容字段
-    content: '因换MacBook所以出iPad，去年双十一购入，一直带壳使用，屏幕完美无划痕。\n\n配置：M1芯片 8G内存 256G存储\n\n配件：原装充电器+Apple Pencil二代（另算200元）\n\n价格：4200元 可小刀\n\n有意私聊，支持当面验货交易',
-    images: [
-      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&h=600&fit=crop'
-    ].slice(0, 1), // 取第一张作为主图
-    viewCount: 456,
-    likeCount: 67,
-    commentCount: 28,
-    isTop: false,
-    isEssence: false,
-    status: 'published' as const,
-    createdAt: '2026-04-04T15:00:00Z',
-    updatedAt: '2026-04-04T15:00:00Z',
-    lastReplyAt: '2026-04-05T20:00:00Z'
-  } as ForumPost,
-  {
-    id: 'post006',
-    authorId: 'author006',
-    authorName: '匿名用户',
-    authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    boardId: 'board6',
-    boardName: '情感树洞',
-    title: '【树洞】大三了还是单身，是不是我不够好？',
-    content: '马上就要大三下了，看着身边的同学都脱单了，心里挺难受的。\n\n我不是不想谈恋爱，只是好像一直没有遇到合适的人。也尝试过主动，但总是以失败告终。\n\n有时候会怀疑是不是自己哪里不够好，或者是不是缘分还没到...\n\n有没有同样感受的朋友？大家是怎么调整心态的？',
-    images: [],
-    viewCount: 1890,
-    likeCount: 345,
-    commentCount: 167,
-    isTop: false,
-    isEssence: false,
-    status: 'published' as const,
-    createdAt: '2026-04-03T21:00:00Z',
-    updatedAt: '2026-04-03T21:00:00Z',
-    lastReplyAt: '2026-04-06T14:30:00Z'
-  },
-  {
-    id: 'post007',
-    authorId: 'author007',
-    authorName: '社团负责人',
-    authorAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop',
-    boardId: 'board1',
-    boardName: '校园生活',
-    title: '【活动】摄影社春季外拍活动报名开始！',
-    content: '各位摄影爱好者注意啦！\n\n本周六（4月12日）下午2点，我们将组织前往太阳岛风景区进行春季外拍活动。\n\n活动安排：\n- 13:30 学校东门集合出发\n- 14:00-17:00 自由拍摄时间\n- 17:00-18:00 作品点评交流\n\n注意事项：\n1. 自备相机或手机均可\n2. 建议穿着便于活动的服装\n3. 注意防晒和补水\n\n名额有限，先报先得！扫码进群报名~',
-    images: [
-      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600&h=400&fit=crop'
-    ],
-    viewCount: 678,
-    likeCount: 123,
-    commentCount: 56,
-    isTop: false,
-    isEssence: true,
-    status: 'published' as const,
-    createdAt: '2026-04-06T10:00:00Z',
-    updatedAt: '2026-04-06T10:00:00Z',
-    lastReplyAt: '2026-04-06T15:00:00Z'
-  },
-  {
-    id: 'post008',
-    authorId: 'author008',
-    authorName: '学霸笔记',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
-    boardId: 'board2',
-    boardName: '学术交流',
-    title: '【资源分享】操作系统重点知识点整理（无偿分享）',
-    content: '刚复习完操作系统，把重点整理成了思维导图和笔记，分享给需要的同学。\n\n内容包括：\n1. 进程管理（进程状态转换、调度算法、同步互斥）\n2. 内存管理（分页分段、虚拟内存、页面置换算法）\n3. 文件系统（文件存储、目录结构、磁盘调度）\n4. I/O管理（缓冲技术、设备分配）\n\n笔记格式：PDF + XMind源文件\n\n获取方式：评论区留言邮箱，我会逐一发送\n\n祝大家期末顺利！',
-    images: [
-      'https://images.unsplash.com/photo-1517842645767-c639042777db?w=600&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&h=400&fit=crop'
-    ],
-    viewCount: 1234,
-    likeCount: 289,
-    commentCount: 98,
-    isTop: false,
-    isEssence: true,
-    status: 'published' as const,
-    createdAt: '2026-04-02T16:00:00Z',
-    updatedAt: '2026-04-02T16:00:00Z',
-    lastReplyAt: '2026-04-06T11:00:00Z'
+// 更新课程
+Mock.mock(/\/api\/campus\/schedule\/\w+/, 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    id: '@id',
+    courseName: '@ctitle(3, 8)',
+    teacher: '@cname',
+    classroom: '@pick(["教学楼A", "教学楼B", "实验楼"])@integer(101, 405)',
+    'dayOfWeek|0-6': 1,
+    'startSection|1-8': 1,
+    'endSection|1-8': 2,
+    startTime: '08:00',
+    endTime: '09:40',
+    color: '#667eea'
   }
-]
+})
 
-// ==================== 社区活动模块数据 =================---
+// 删除课程
+Mock.mock(/\/api\/campus\/schedule\/\w+\/delete/, 'post', {
+  code: 200,
+  message: 'success'
+})
 
-const activities: Activity[] = [
-  {
-    id: 'act1',
-    title: '春季运动会',
-    coverImage: 'https://images.unsplash.com/photo-1461896836934-bd45ba8ba9ef?w=600&h=300&fit=crop',
-    description: '一年一度的春季运动会即将开幕！包括田径比赛、趣味运动项目、团体操表演等精彩环节。欢迎全校师生积极参与，展现青春活力！',
-    category: 'sports' as const,
-    organizer: '体育部',
-    location: '体育场',
-    startTime: '2026-04-20T08:00:00Z',
-    endTime: '2026-04-20T17:00:00Z',
-    maxParticipants: 500,
-    currentParticipants: 367,
-    status: 'upcoming' as const,
-    fee: 0,
-    tags: ['运动', '竞技', '团体'],
-    createdAt: '2026-03-15T10:00:00Z',
-    updatedAt: '2026-04-05T14:00:00Z'
-  },
-  {
-    id: 'act2',
-    title: '校园歌手大赛决赛',
-    coverImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=300&fit=crop',
-    description: '第十届校园歌手大赛总决赛，10位实力唱将同台竞技，更有神秘嘉宾助阵。现场投票选出你心中的最佳歌手！',
-    category: 'entertainment' as const,
-    organizer: '学生会文艺部',
-    location: '大学生活动中心大礼堂',
-    startTime: '2026-04-25T19:00:00Z',
-    endTime: '2026-04-25T22:00:00Z',
-    maxParticipants: 800,
-    currentParticipants: 723,
-    status: 'upcoming' as const,
-    fee: 0,
-    tags: ['音乐', '才艺', '晚会'],
-    createdAt: '2026-03-20T09:00:00Z',
-    updatedAt: '2026-04-04T16:00:00Z'
-  },
-  {
-    id: 'act3',
-    title: 'AI与未来科技讲座',
-    coverImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=300&fit=crop',
-    description: '特邀清华大学人工智能研究院教授主讲，探讨ChatGPT等大语言模型的发展趋势及其对社会各行业的影响。现场互动问答环节。',
-    category: 'academic' as const,
-    organizer: '计算机学院',
-    location: '图书馆报告厅',
-    startTime: '2026-04-18T14:00:00Z',
-    endTime: '2026-04-18T16:30:00Z',
-    maxParticipants: 300,
-    currentParticipants: 278,
-    status: 'upcoming' as const,
-    fee: 0,
-    tags: ['AI', '讲座', '科技'],
-    createdAt: '2026-03-25T11:00:00Z',
-    updatedAt: '2026-04-03T10:00:00Z'
-  },
-  {
-    id: 'act4',
-    title: '志愿服务：敬老院慰问演出',
-    coverImage: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=300&fit=crop',
-    description: '前往松北区敬老院进行慰问演出，为老人们带去歌舞表演、相声小品等节目。传递温暖，弘扬尊老爱幼的传统美德。',
-    category: 'volunteer' as const,
-    organizer: '青年志愿者协会',
-    location: '松北区中心敬老院',
-    startTime: '2026-04-14T09:00:00Z',
-    endTime: '2026-04-14T12:00:00Z',
-    maxParticipants: 40,
-    currentParticipants: 35,
-    status: 'upcoming' as const,
-    fee: 0,
-    tags: ['公益', '志愿', '敬老'],
-    createdAt: '2026-03-28T14:00:00Z',
-    updatedAt: '2026-04-02T09:00:00Z'
-  },
-  {
-    id: 'act5',
-    title: '传统文化节：汉服游园会',
-    coverImage: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=300&fit=crop',
-    description: '穿上汉服，穿越时空！活动现场设有古风拍照区、传统手工艺体验（剪纸、捏面人、画扇面）、茶艺表演、古典乐器演奏等。',
-    category: 'culture' as const,
-    organizer: '国学社',
-    location: '校园人工湖畔',
-    startTime: '2026-04-27T13:00:00Z',
-    endTime: '2026-04-27T17:00:00Z',
-    maxParticipants: 200,
-    currentParticipants: 156,
-    status: 'upcoming' as const,
-    fee: 10,
-    tags: ['汉服', '传统文化', '游园会'],
-    createdAt: '2026-04-01T10:00:00Z',
-    updatedAt: '2026-04-05T11:00:00Z'
-  },
-  {
-    id: 'act6',
-    title: '春季招聘宣讲会——互联网大厂专场',
-    coverImage: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=300&fit=crop',
-    description: '邀请字节跳动、腾讯、阿里巴巴、美团、百度等知名互联网企业HR和技术负责人进行宣讲和面试指导。现场接收简历，优秀者可获得直通面试机会！',
-    category: 'career' as const,
-    organizer: '就业指导中心',
-    location: '大学生活动中心报告厅',
-    startTime: '2026-04-12T14:00:00Z',
-    endTime: '2026-04-12T18:00:00Z',
-    maxParticipants: 300,
-    currentParticipants: 234,
-    status: 'upcoming' as const,
-    fee: 0,
-    tags: ['招聘', '实习', '校招'],
-    createdAt: '2026-03-22T09:00:00Z',
-    updatedAt: '2026-04-04T15:00:00Z'
+// 导入课表
+Mock.mock('/api/campus/schedule/import', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    success: true,
+    imported: '@integer(3, 8)',
+    failed: 0
   }
-]
+})
 
-// ==================== Mock API 定义 ====================
+// 分享课表
+Mock.mock('/api/campus/schedule/share', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    shareId: '@id',
+    shareUrl: 'https://heikeji.com/share/schedule/@id',
+    expiresAt: '@datetime'
+  }
+})
 
-export default [
-  // ==================== 商品相关接口 ====================
+// 获取提醒设置
+Mock.mock('/api/campus/schedule/reminder', 'get', {
+  code: 200,
+  message: 'success',
+  data: {
+    enabled: '@boolean',
+    reminderMinutes: '@pick([5, 10, 15, 30])',
+    reminderMethod: '@pick(["notification", "email", "both"])'
+  }
+})
 
-  /**
-   * 获取商品分类列表
-   * GET /api/categories
-   */
-  {
-    url: '/api/categories',
-    method: 'get',
-    response: () => {
-      return successResponse(categories)
-    }
+// 更新提醒设置
+Mock.mock('/api/campus/schedule/reminder', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    enabled: '@boolean',
+    reminderMinutes: '@pick([5, 10, 15, 30])',
+    reminderMethod: '@pick(["notification", "email", "both"])'
+  }
+})
+
+// 图书馆图书搜索
+Mock.mock('/api/campus/library/search', 'get', {
+  code: 200,
+  message: 'success',
+  data: {
+    'results|10-20': [{
+      id: '@id',
+      isbn: '@string("number", 13)',
+      title: '@ctitle(5, 15)',
+      author: '@cname',
+      publisher: '@pick(["清华大学出版社", "人民邮电出版社", "机械工业出版社", "电子工业出版社"])',
+      category: '@pick(["计算机", "数学", "文学", "科学", "经济", "艺术"])',
+      location: '@pick(["A区", "B区", "C区"])-@integer(1, 5)-@integer(1, 100)',
+      'copies|1-10': 1,
+      available: '@boolean',
+      cover: '@image("140x200", "#10b981", "#FFF", "Book")',
+      intro: '@cparagraph(3, 5)',
+      publishDate: '@date'
+    }],
+    'total|20-100': 1
+  }
+})
+
+// 图书借阅
+Mock.mock('/api/campus/library/borrow', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    success: true,
+    borrowId: '@id',
+    dueDate: '@date'
+  }
+})
+
+// 图书归还
+Mock.mock('/api/campus/library/return', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    success: true,
+    'overdueDays|0-10': 0,
+    'fine|0-50': 0
+  }
+})
+
+// 图书续借
+Mock.mock('/api/campus/library/renew', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    success: true,
+    newDueDate: '@date'
+  }
+})
+
+// 获取我的借阅
+Mock.mock('/api/campus/library/my-borrows', 'get', {
+  code: 200,
+  message: 'success',
+  'data|3-8': [{
+    id: '@id',
+    bookId: '@id',
+    bookTitle: '@ctitle(5, 15)',
+    bookCover: '@image("100x140", "#10b981", "#FFF", "Book")',
+    borrowDate: '@date',
+    dueDate: '@date',
+    returnDate: '@date',
+    'status|1': ['borrowed', 'returned', 'overdue'],
+    'renewCount|0-2': 0
+  }]
+})
+
+// 添加收藏
+Mock.mock('/api/campus/library/favorites', 'post', {
+  code: 200,
+  message: 'success',
+  data: { success: true }
+})
+
+// 取消收藏
+Mock.mock('/api/campus/library/favorites/remove', 'post', {
+  code: 200,
+  message: 'success',
+  data: { success: true }
+})
+
+// 获取我的收藏
+Mock.mock('/api/campus/library/favorites', 'get', {
+  code: 200,
+  message: 'success',
+  'data|5-10': [{
+    id: '@id',
+    isbn: '@string("number", 13)',
+    title: '@ctitle(5, 15)',
+    author: '@cname',
+    publisher: '@pick(["清华大学出版社", "人民邮电出版社", "机械工业出版社"])',
+    category: '@pick(["计算机", "数学", "文学", "科学", "经济", "艺术"])',
+    location: '@pick(["A区", "B区", "C区"])-@integer(1, 5)-@integer(1, 100)',
+    'copies|1-10': 1,
+    available: '@boolean',
+    cover: '@image("140x200", "#10b981", "#FFF", "Book")',
+    intro: '@cparagraph(3, 5)'
+  }]
+})
+
+// 获取座位信息
+Mock.mock('/api/campus/library/seats', 'get', {
+  code: 200,
+  message: 'success',
+  'data|30-50': [{
+    id: '@id',
+    'num|1-200': 1,
+    'floor|1-5': 1,
+    'zone|1': ['A', 'B', 'C'],
+    'row|1-10': 1,
+    'status|1': ['available', 'available', 'available', 'available', 'occupied', 'reserved', 'maintenance']
+  }]
+})
+
+// 预约座位
+Mock.mock('/api/campus/library/seats/book', 'post', {
+  code: 200,
+  message: 'success',
+  data: {
+    success: true,
+    bookingId: '@id'
+  }
+})
+
+// 取消座位预约
+Mock.mock('/api/campus/library/seats/cancel', 'post', {
+  code: 200,
+  message: 'success',
+  data: { success: true }
+})
+
+// 座位签到
+Mock.mock('/api/campus/library/seats/checkin', 'post', {
+  code: 200,
+  message: 'success',
+  data: { success: true }
+})
+
+// 座位签退
+Mock.mock('/api/campus/library/seats/checkout', 'post', {
+  code: 200,
+  message: 'success',
+  data: { success: true }
+})
+
+// 获取我的座位预约
+Mock.mock('/api/campus/library/my-bookings', 'get', {
+  code: 200,
+  message: 'success',
+  'data|3-6': [{
+    id: '@id',
+    seatId: '@id',
+    'seatNum|1-200': 1,
+    'floor|1-5': 1,
+    date: '@date',
+    startTime: '@time',
+    endTime: '@time',
+    'status|1': ['active', 'completed', 'cancelled'],
+    checkInTime: '@time',
+    checkOutTime: '@time'
+  }]
+})
+
+// 导出数据生成函数
+export {
+  generateAnnouncements,
+  generateCampusActivities,
+  generateLeaveApplications,
+  generateScholarships,
+  campusMapData
+}
+
+// 创建 mockAPI 对象供 request.ts 使用
+export const mockAPI = {
+  user: {
+    info: () => Promise.resolve({ code: 200, data: { id: '1', username: 'test', role: 'student' } }),
+    login: (data: any) => Promise.resolve({ code: 200, data: { token: 'mock-token', user: { id: '1', username: data?.username || 'test' } } }),
+    register: (data: any) => Promise.resolve({ code: 200, data: { id: '1', username: data?.username || 'test' } }),
+    logout: () => Promise.resolve({ code: 200, message: 'success' })
   },
-
-  /**
-   * 获取商品列表（分页）
-   * GET /api/products?page=1&pageSize=10&categoryId=&keyword=&sort=
-   */
-  {
-    url: '/api/products',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-      const categoryId = query.categoryId
-      const keyword = query.keyword?.toLowerCase()
-      const sort = query.sort
-
-      let filteredProducts = [...products]
-
-      // 分类筛选
-      if (categoryId && categoryId !== 'all') {
-        filteredProducts = filteredProducts.filter(p => p.categoryId === categoryId)
-      }
-
-      // 关键词搜索
-      if (keyword) {
-        filteredProducts = filteredProducts.filter(p =>
-          p.name.toLowerCase().includes(keyword) ||
-          p.description.toLowerCase().includes(keyword) ||
-          p.tags.some(t => t.toLowerCase().includes(keyword))
-        )
-      }
-
-      // 排序
-      if (sort === 'price_asc') {
-        filteredProducts.sort((a, b) => a.price - b.price)
-      } else if (sort === 'price_desc') {
-        filteredProducts.sort((a, b) => b.price - a.price)
-      } else if (sort === 'sales') {
-        filteredProducts.sort((a, b) => b.sales - a.sales)
-      } else if (sort === 'rating') {
-        filteredProducts.sort((a, b) => b.rating - a.rating)
-      }
-
-      return successResponse(paginate(filteredProducts, page, pageSize))
-    }
+  secondhand: {
+    list: (params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } }),
+    detail: (id: string) => Promise.resolve({ code: 200, data: { id, name: 'Item' } }),
+    categories: () => Promise.resolve({ code: 200, data: [] }),
+    myItems: () => Promise.resolve({ code: 200, data: [] }),
+    publish: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } })
   },
-
-  /**
-   * 获取推荐商品
-   * GET /api/products/recommend?limit=10
-   */
-  {
-    url: '/api/products/recommend',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const limit = parseInt(query.limit || '10')
-      const recommended = [...products]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, limit)
-      return successResponse(recommended)
-    }
+  community: {
+    boards: () => Promise.resolve({ code: 200, data: [] }),
+    posts: (params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } }),
+    postDetail: (id: string) => Promise.resolve({ code: 200, data: { id, title: 'Post' } }),
+    createPost: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } }),
+    likePost: (id: string) => Promise.resolve({ code: 200, message: 'success' }),
+    unlikePost: (id: string) => Promise.resolve({ code: 200, message: 'success' }),
+    addComment: (postId: string, content: string, parentId?: string) => Promise.resolve({ code: 200, data: { id: '1', postId, content } }),
+    lostFoundList: (params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } }),
+    publishLostFound: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } }),
+    activities: (params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } }),
+    activityDetail: (id: string) => Promise.resolve({ code: 200, data: { id, title: 'Activity' } }),
+    joinActivity: (id: string) => Promise.resolve({ code: 200, message: 'success' }),
+    createActivity: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } })
   },
-
-  /**
-   * 获取热门商品
-   * GET /api/products/hot?limit=10
-   */
-  {
-    url: '/api/products/hot',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const limit = parseInt(query.limit || '10')
-      const hotProducts = [...products]
-        .sort((a, b) => b.sales - a.sales)
-        .slice(0, limit)
-      return successResponse(hotProducts)
-    }
+  studentAffairs: {
+    pendingTasks: () => Promise.resolve({ code: 200, data: [] }),
+    leaveApplications: () => Promise.resolve({ code: 200, data: [] }),
+    submitLeave: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } }),
+    cancelLeave: (id: string) => Promise.resolve({ code: 200, message: 'success' }),
+    aidApplications: () => Promise.resolve({ code: 200, data: [] }),
+    submitAid: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } }),
+    militaryOrders: () => Promise.resolve({ code: 200, data: [] }),
+    submitMilitaryOrder: (data: any) => Promise.resolve({ code: 200, data: { id: '1', ...data } }),
+    campusCard: () => Promise.resolve({ code: 200, data: { balance: 100 } }),
+    rechargeRecords: () => Promise.resolve({ code: 200, data: [] }),
+    rechargeCard: (amount: number, method: string) => Promise.resolve({ code: 200, message: 'success' }),
+    reportLost: () => Promise.resolve({ code: 200, message: 'success' }),
+    aidPolicies: () => Promise.resolve({ code: 200, data: [] })
   },
-
-  /**
-   * 获取商品搜索
-   * GET /api/products/search?keyword=xxx
-   */
-  {
-    url: '/api/products/search',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const keyword = query.keyword?.toLowerCase()
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-      let filteredProducts = [...products]
-      if (keyword) {
-        filteredProducts = filteredProducts.filter(p =>
-          p.name.toLowerCase().includes(keyword) ||
-          p.description.toLowerCase().includes(keyword) ||
-          p.tags.some(t => t.toLowerCase().includes(keyword))
-        )
-      }
-      return successResponse(paginate(filteredProducts, page, pageSize))
-    }
+  products: {
+    hot: () => Promise.resolve({ code: 200, data: [] }),
+    list: (params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } }),
+    detail: (id: string) => Promise.resolve({ code: 200, data: { id, name: 'Product' } }),
+    categories: () => Promise.resolve({ code: 200, data: [] }),
+    search: (keyword: string, params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } })
   },
-
-  /**
-   * 获取商品详情
-   * GET /api/products/:id
-   */
-  {
-    url: /\/api\/products\/(\w+)/,
-    method: 'get',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/products\/(\w+)/)
-      const id = match ? match[1] : ''
-      const product = products.find(p => p.id === id)
-      if (!product) {
-        return { code: 404, message: '商品不存在', data: null, timestamp: Date.now() }
-      }
-      return successResponse(product)
-    }
+  takeout: {
+    merchants: (params?: any) => Promise.resolve({ code: 200, data: { list: [], total: 0 } }),
+    searchMerchants: (keyword: string) => Promise.resolve({ code: 200, data: [] }),
+    merchantDetail: (id: string) => Promise.resolve({ code: 200, data: { id, name: 'Merchant' } }),
+    merchantProducts: (merchantId: string) => Promise.resolve({ code: 200, data: [] }),
+    recommendedProducts: (merchantId: string) => Promise.resolve({ code: 200, data: [] }),
+    productDetail: (productId: string) => Promise.resolve({ code: 200, data: { id: productId, name: 'Product' } })
   },
-
-  // ==================== 订单相关接口 ====================
-
-  /**
-   * 获取订单列表（分页）
-   * GET /api/orders?page=1&pageSize=10&status=
-   */
-  {
-    url: '/api/orders',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-      const status = query.status
-
-      let filteredOrders = [...orders].reverse()
-
-      // 状态筛选
-      if (status && status !== 'all') {
-        filteredOrders = filteredOrders.filter(o => o.status === status)
-      }
-
-      return successResponse(paginate(filteredOrders, page, pageSize))
-    }
-  },
-
-  /**
-   * 获取订单详情
-   * GET /api/orders/:id
-   */
-  {
-    url: /\/api\/orders\/(\w+)$/,
-    method: 'get',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/orders\/(\w+)$/)
-      const id = match ? match[1] : ''
-      const order = orders.find(o => o.id === id)
-      if (!order) {
-        return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
-      }
-      return successResponse(order)
-    }
-  },
-
-  /**
-   * 创建订单
-   * POST /api/orders
-   */
-  {
-    url: '/api/orders',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      const newOrder: Order = {
-        id: `order${String(orders.length + 1).padStart(3, '0')}`,
-        orderNo: generateOrderNo(),
-        userId: 'user001',
-        items: body.items,
-        totalAmount: body.totalAmount,
-        discountAmount: body.discountAmount || 0,
-        freightAmount: body.freightAmount || 0,
-        payAmount: body.payAmount,
-        status: 'pending',
-        receiverName: body.receiverName,
-        receiverPhone: body.receiverPhone,
-        receiverAddress: body.receiverAddress,
-        remark: body.remark,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      orders.unshift(newOrder)
-      return successResponse(newOrder)
-    }
-  },
-
-  /**
-   * 取消订单
-   * PUT /api/orders/:id/cancel
-   */
-  {
-    url: /\/api\/orders\/(\w+)\/cancel$/,
-    method: 'put',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/orders\/(\w+)\/cancel$/)
-      const id = match ? match[1] : ''
-      const order = orders.find(o => o.id === id)
-      if (!order) {
-        return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
-      }
-      if (!['pending', 'paid'].includes(order.status)) {
-        return { code: 400, message: '当前状态无法取消', data: null, timestamp: Date.now() }
-      }
-      order.status = 'cancelled'
-      order.updatedAt = new Date().toISOString()
-      return successResponse(order)
-    }
-  },
-
-  /**
-   * 确认收货
-   * POST /api/orders/:id/confirm
-   */
-  {
-    url: /\/api\/orders\/(\w+)\/confirm$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/orders\/(\w+)\/confirm$/)
-      const id = match ? match[1] : ''
-      const order = orders.find(o => o.id === id)
-      if (!order) {
-        return { code: 404, message: '订单不存在', data: null, timestamp: Date.now() }
-      }
-      // 支持 'shipped' (前端状态) 和 'delivered' (后端状态)
-      if (order.status !== 'shipped' && order.status !== 'delivered') {
-        return { code: 400, message: '当前状态无法确认收货', data: null, timestamp: Date.now() }
-      }
-      order.status = 'completed'
-      order.completeTime = new Date().toISOString()
-      order.updatedAt = new Date().toISOString()
-      return successResponse(order)
-    }
-  },
-
-  /**
-   * 获取订单统计
-   * GET /api/orders/stats
-   */
-  {
-    url: '/api/orders/stats',
-    method: 'get',
-    response: () => {
-      const stats = {
-        total: orders.length,
-        pending: orders.filter(o => o.status === 'pending').length,
-        paid: orders.filter(o => o.status === 'paid').length,
-        shipped: orders.filter(o => o.status === 'shipped').length,
-        delivered: orders.filter(o => o.status === 'delivered').length,
-        completed: orders.filter(o => o.status === 'completed').length,
-        cancelled: orders.filter(o => o.status === 'cancelled').length,
-        refunding: orders.filter(o => o.status === 'refunding').length
-      }
-      return successResponse(stats)
-    }
-  },
-
-  // ==================== 购物车相关接口 ====================
-
-  /**
-   * 获取购物车列表
-   * GET /api/cart
-   */
-  {
-    url: '/api/cart',
-    method: 'get',
-    response: () => {
-      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-      const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      const selectedItems = cartItems.filter(item => item.selected)
-      const selectedCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0)
-      const selectedAmount = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-
-      return successResponse({
-        items: cartItems,
-        totalItems,
-        totalAmount,
-        selectedCount,
-        selectedAmount,
-        savedAmount: 0
-      })
-    }
-  },
-
-  /**
-   * 添加商品到购物车
-   * POST /api/cart
-   */
-  {
-    url: '/api/cart',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      const product = products.find(p => p.id === body.productId)
-      if (!product) {
-        return { code: 404, message: '商品不存在', data: null, timestamp: Date.now() }
-      }
-
-      // 检查是否已在购物车中
-      const existingItem = cartItems.find(item => item.productId === body.productId)
-      if (existingItem) {
-        existingItem.quantity += body.quantity || 1
-        existingItem.updatedAt = new Date().toISOString()
-        return successResponse(existingItem)
-      }
-
-      const newItem: CartItem = {
-        id: `cart${String(cartItems.length + 1).padStart(3, '0')}`,
-        productId: product.id,
-        product: {
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          price: product.price,
-          originalPrice: product.originalPrice,
-          stock: product.stock,
-          status: product.status
+  campus: {
+    schedule: (params?: any) => Promise.resolve({ code: 200, data: [] }),
+    grades: (params?: any) => Promise.resolve({ code: 200, data: [] }),
+    gpa: () => Promise.resolve({ code: 200, data: { gpa: 3.5 } }),
+    // 图书馆 - 借阅记录
+    libraryBorrows: () => Promise.resolve({
+      code: 200,
+      data: [
+        {
+          id: '1',
+          bookId: 'b1',
+          bookTitle: 'JavaScript高级程序设计',
+          bookCover: 'https://via.placeholder.com/100x140/10b981/ffffff?text=JS',
+          borrowDate: '2026-04-01',
+          dueDate: '2026-05-01',
+          status: 'borrowed',
+          renewCount: 0
         },
-        quantity: body.quantity || 1,
-        selected: true,
-        addedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      cartItems.push(newItem)
-      return successResponse(newItem)
-    }
-  },
-
-  /**
-   * 更新购物车商品数量
-   * PUT /api/cart/:id
-   */
-  {
-    url: /\/api\/cart\/(\w+)$/,
-    method: 'put',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/cart\/(\w+)$/); const id = match ? match[1] : ''
-      const { body } = config
-      const item = cartItems.find(i => i.id === id)
-      if (!item) {
-        return { code: 404, message: '购物车项不存在', data: null, timestamp: Date.now() }
-      }
-      item.quantity = body.quantity
-      if (body.selected !== undefined) {
-        item.selected = body.selected
-      }
-      return successResponse(item)
-    }
-  },
-
-  /**
-   * 删除购物车商品
-   * DELETE /api/cart/:id
-   */
-  {
-    url: /\/api\/cart\/(\w+)$/,
-    method: 'delete',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/cart\/(\w+)$/); const id = match ? match[1] : ''
-      const index = cartItems.findIndex(i => i.id === id)
-      if (index === -1) {
-        return { code: 404, message: '购物车项不存在', data: null, timestamp: Date.now() }
-      }
-      cartItems.splice(index, 1)
-      return successResponse({ message: '删除成功' })
-    }
-  },
-
-  /**
-   * 清空购物车
-   * DELETE /api/cart/clear
-   */
-  {
-    url: '/api/cart/clear',
-    method: 'delete',
-    response: () => {
-      cartItems.length = 0
-      return successResponse({ message: '购物车已清空' })
-    }
-  },
-
-  // ==================== 用户相关接口 ====================
-
-  /**
-   * 获取当前用户信息
-   * GET /api/user/info
-   */
-  {
-    url: '/api/user/info',
-    method: 'get',
-    response: () => {
-      return successResponse(currentUser)
-    }
-  },
-
-  /**
-   * 更新用户信息
-   * PUT /api/user/info
-   */
-  {
-    url: '/api/user/info',
-    method: 'put',
-    response: ({ body }: { body: any }) => {
-      Object.assign(currentUser, body)
-      currentUser.updatedAt = new Date().toISOString()
-      return successResponse(currentUser)
-    }
-  },
-
-  /**
-   * 获取收货地址列表
-   * GET /api/addresses
-   */
-  {
-    url: '/api/addresses',
-    method: 'get',
-    response: () => {
-      return successResponse(addresses)
-    }
-  },
-
-  /**
-   * 添加收货地址
-   * POST /api/addresses
-   */
-  {
-    url: '/api/addresses',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      const newAddress: Address = {
-        id: `addr${String(addresses.length + 1).padStart(3, '0')}`,
-        userId: 'user001',
-        receiverName: body.name || body.receiverName || '',
-        receiverPhone: body.phone || body.receiverPhone || '',
-        province: body.province || '',
-        city: body.city || '',
-        district: body.district || '',
-        detail: body.detail || body.detailAddress || '',
-        fullAddress: `${body.province || ''}${body.city || ''}${body.district || ''}${body.detail || body.detailAddress || ''}`,
-        isDefault: body.isDefault || false,
-        createdAt: new Date().toISOString()
-      }
-
-      // 如果设为默认地址，取消其他默认
-      if (newAddress.isDefault) {
-        addresses.forEach(addr => addr.isDefault = false)
-      }
-
-      addresses.push(newAddress)
-      return successResponse(newAddress)
-    }
-  },
-
-  /**
-   * 更新收货地址
-   * PUT /api/addresses/:id
-   */
-  {
-    url: /\/api\/addresses\/(\w+)$/,
-    method: 'put',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/addresses\/(\w+)$/); const id = match ? match[1] : ''
-      const { body } = config
-      const address = addresses.find(a => a.id === id)
-      if (!address) {
-        return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
-      }
-      
-      // 兼容不同字段名
-      if (body.name) address.receiverName = body.name
-      if (body.receiverName) address.receiverName = body.receiverName
-      if (body.phone) address.receiverPhone = body.phone
-      if (body.receiverPhone) address.receiverPhone = body.receiverPhone
-      if (body.province) address.province = body.province
-      if (body.city) address.city = body.city
-      if (body.district) address.district = body.district
-      if (body.detail) address.detail = body.detail
-      if (body.detailAddress) address.detail = body.detailAddress
-      if (body.isDefault !== undefined) address.isDefault = body.isDefault
-      
-      address.fullAddress = `${address.province}${address.city}${address.district}${address.detail}`
-
-      if (body.isDefault) {
-        addresses.forEach(addr => {
-          if (addr.id !== id) addr.isDefault = false
-        })
-      }
-
-      return successResponse(address)
-    }
-  },
-
-  /**
-   * 删除收货地址
-   * POST /api/addresses/:id/delete
-   */
-  {
-    url: /\/api\/addresses\/(\w+)\/delete$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/addresses\/(\w+)\/delete$/); const id = match ? match[1] : ''
-      const index = addresses.findIndex(a => a.id === id)
-      if (index === -1) {
-        return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
-      }
-      addresses.splice(index, 1)
-      return successResponse({ message: '删除成功' })
-    }
-  },
-
-  /**
-   * 设置默认地址
-   * POST /api/addresses/:id/default
-   */
-  {
-    url: /\/api\/addresses\/(\w+)\/default$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/addresses\/(\w+)\/default$/); const id = match ? match[1] : ''
-      const address = addresses.find(a => a.id === id)
-      if (!address) {
-        return { code: 404, message: '地址不存在', data: null, timestamp: Date.now() }
-      }
-      addresses.forEach(addr => addr.isDefault = false)
-      address.isDefault = true
-      return successResponse(address)
-    }
-  },
-
-  // ==================== 外卖相关接口 ====================
-
-  /**
-   * 获取外卖商家列表
-   * GET /api/delivery/merchants?category=&keyword=&sort=
-   */
-  {
-    url: '/api/delivery/merchants',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const category = query.category
-      const keyword = query.keyword?.toLowerCase()
-      const sort = query.sort
-
-      let filteredMerchants = [...merchants]
-
-      // 分类筛选
-      if (category && category !== 'all') {
-        filteredMerchants = filteredMerchants.filter(m => m.category === category)
-      }
-
-      // 关键词搜索
-      if (keyword) {
-        filteredMerchants = filteredMerchants.filter(m =>
-          m.name.toLowerCase().includes(keyword) ||
-          m.tags.some(t => t.toLowerCase().includes(keyword))
-        )
-      }
-
-      // 排序
-      if (sort === 'rating') {
-        filteredMerchants.sort((a, b) => b.rating - a.rating)
-      } else if (sort === 'sales') {
-        filteredMerchants.sort((a, b) => b.monthlySales - a.monthlySales)
-      } else if (sort === 'distance') {
-        filteredMerchants.sort((a, b) => a.distance - b.distance)
-      }
-
-      return successResponse(filteredMerchants)
-    }
-  },
-
-  /**
-   * 获取商家详情及菜品
-   * GET /api/delivery/merchants/:id
-   */
-  {
-    url: /\/api\/delivery\/merchants\/(\w+)$/,
-    method: 'get',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/delivery\/merchants\/(\w+)$/); const id = match ? match[1] : ''
-      const merchant = merchants.find(m => m.id === id)
-      if (!merchant) {
-        return { code: 404, message: '商家不存在', data: null, timestamp: Date.now() }
-      }
-      const dishes = dishesTemplate[id] || []
-      return successResponse({ merchant, dishes })
-    }
-  },
-
-  /**
-   * 获取商家分类列表
-   * GET /api/delivery/categories
-   */
-  {
-    url: '/api/delivery/categories',
-    method: 'get',
-    response: () => {
-      const categories = [...new Set(merchants.map(m => m.category))]
-      return successResponse(categories)
-    }
-  },
-
-  /**
-   * 获取推荐商家
-   * GET /api/delivery/merchants/recommend?limit=5
-   */
-  {
-    url: '/api/delivery/merchants/recommend',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const limit = parseInt(query.limit || '5')
-      const recommended = [...merchants]
-        .filter(m => m.status === 'open')
-        .sort((a, b) => b.rating - a.rating || b.monthlySales - a.monthlySales)
-        .slice(0, limit)
-      return successResponse(recommended)
-    }
-  },
-
-  // ==================== 二手市场相关接口 ====================
-
-  /**
-   * 获取二手分类列表
-   * GET /api/secondhand/categories
-   */
-  {
-    url: '/api/secondhand/categories',
-    method: 'get',
-    response: () => {
-      return successResponse(secondHandCategories)
-    }
-  },
-
-  /**
-   * 获取二手物品列表（分页）
-   * GET /api/secondhand/items?page=1&pageSize=10&categoryId=&keyword=&condition=&sort=
-   */
-  {
-    url: '/api/secondhand/items',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-      const categoryId = query.categoryId
-      const keyword = query.keyword?.toLowerCase()
-      const condition = query.condition
-      const sort = query.sort
-
-      let filteredItems = [...secondHandItems]
-
-      // 分类筛选
-      if (categoryId && categoryId !== 'all') {
-        filteredItems = filteredItems.filter(item => item.categoryId === categoryId)
-      }
-
-      // 关键词搜索
-      if (keyword) {
-        filteredItems = filteredItems.filter(item =>
-          item.title.toLowerCase().includes(keyword) ||
-          item.description.toLowerCase().includes(keyword)
-        )
-      }
-
-      // 成色筛选
-      if (condition && condition !== 'all') {
-        filteredItems = filteredItems.filter(item => item.condition === condition)
-      }
-
-      // 排序
-      if (sort === 'price_asc') {
-        filteredItems.sort((a, b) => a.currentPrice - b.currentPrice)
-      } else if (sort === 'price_desc') {
-        filteredItems.sort((a, b) => b.currentPrice - a.currentPrice)
-      } else if (sort === 'time') {
-        filteredItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      }
-
-      return successResponse(paginate(filteredItems, page, pageSize))
-    }
-  },
-
-  /**
-   * 获取二手物品详情
-   * GET /api/secondhand/items/:id
-   */
-  {
-    url: /\/api\/secondhand\/items\/(\w+)$/,
-    method: 'get',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/secondhand\/items\/(\w+)$/); const id = match ? match[1] : ''
-      const item = secondHandItems.find(i => i.id === id)
-      if (!item) {
-        return { code: 404, message: '物品不存在', data: null, timestamp: Date.now() }
-      }
-      // 模拟浏览量增加
-      item.viewCount++
-      return successResponse(item)
-    }
-  },
-
-  /**
-   * 发布二手物品
-   * POST /api/secondhand/items
-   */
-  {
-    url: '/api/secondhand/items',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      const category = secondHandCategories.find(c => c.id === body.categoryId)
-      const newItem: SecondHandItem = {
-        id: `item${String(secondHandItems.length + 1).padStart(3, '0')}`,
-        sellerId: 'user001',
-        sellerName: currentUser.nickname,
-        sellerAvatar: currentUser.avatar,
-        ...body,
-        categoryName: category?.name || '',
-        viewCount: 0,
-        likeCount: 0,
-        chatCount: 0,
-        status: 'on_sale',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      secondHandItems.unshift(newItem)
-      return successResponse(newItem)
-    }
-  },
-
-  // ==================== 社区论坛相关接口 ====================
-
-  /**
-   * 获取论坛板块列表
-   * GET /api/forum/boards
-   */
-  {
-    url: '/api/forum/boards',
-    method: 'get',
-    response: () => {
-      return successResponse(forumBoards)
-    }
-  },
-
-  /**
-   * 获取帖子列表（分页）
-   * GET /api/forum/posts?page=1&pageSize=10&boardId=&keyword=&sort=
-   */
-  {
-    url: '/api/forum/posts',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-      const boardId = query.boardId
-      const keyword = query.keyword?.toLowerCase()
-      const sort = query.sort
-
-      let filteredPosts = [...forumPosts]
-
-      // 板块筛选
-      if (boardId && boardId !== 'all') {
-        filteredPosts = filteredPosts.filter(p => p.boardId === boardId)
-      }
-
-      // 关键词搜索
-      if (keyword) {
-        filteredPosts = filteredPosts.filter(p =>
-          p.title.toLowerCase().includes(keyword) ||
-          p.content.toLowerCase().includes(keyword)
-        )
-      }
-
-      // 排序（置顶优先）
-      if (sort === 'time') {
-        filteredPosts.sort((a, b) => {
-          if (a.isTop !== b.isTop) return b.isTop ? 1 : -1
-          return new Date(b.lastReplyAt || b.createdAt).getTime() - new Date(a.lastReplyAt || a.createdAt).getTime()
-        })
-      } else {
-        // 默认排序：置顶 > 精华 > 最新回复
-        filteredPosts.sort((a, b) => {
-          if (a.isTop !== b.isTop) return b.isTop ? 1 : -1
-          if (a.isEssence !== b.isEssence) return b.isEssence ? 1 : -1
-          return new Date(b.lastReplyAt || b.createdAt).getTime() - new Date(a.lastReplyAt || a.createdAt).getTime()
-        })
-      }
-
-      return successResponse(paginate(filteredPosts, page, pageSize))
-    }
-  },
-
-  /**
-   * 获取帖子详情
-   * GET /api/forum/posts/:id
-   */
-  {
-    url: /\/api\/forum\/posts\/(\w+)$/,
-    method: 'get',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/forum\/posts\/(\w+)$/); const id = match ? match[1] : ''
-      const post = forumPosts.find(p => p.id === id)
-      if (!post) {
-        return { code: 404, message: '帖子不存在', data: null, timestamp: Date.now() }
-      }
-      // 模拟浏览量增加
-      post.viewCount++
-      return successResponse(post)
-    }
-  },
-
-  /**
-   * 发布帖子
-   * POST /api/forum/posts
-   */
-  {
-    url: '/api/forum/posts',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      const board = forumBoards.find(b => b.id === body.boardId)
-      const newPost: ForumPost = {
-        id: `post${String(forumPosts.length + 1).padStart(3, '0')}`,
-        authorId: 'user001',
-        authorName: currentUser.nickname,
-        authorAvatar: currentUser.avatar,
-        boardId: body.boardId,
-        boardName: board?.name || '',
-        title: body.title,
-        content: body.content,
-        images: body.images || [],
-        viewCount: 0,
-        likeCount: 0,
-        commentCount: 0,
-        isTop: false,
-        isEssence: false,
-        status: 'published',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      forumPosts.unshift(newPost)
-
-      // 更新板块帖子数
-      if (board) {
-        board.postCount++
-        board.todayPostCount++
-      }
-
-      return successResponse(newPost)
-    }
-  },
-
-  /**
-   * 点赞帖子
-   * POST /api/forum/posts/:id/like
-   */
-  {
-    url: /\/api\/forum\/posts\/(\w+)\/like$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/forum\/posts\/(\w+)\/like$/); const id = match ? match[1] : ''
-      const post = forumPosts.find(p => p.id === id)
-      if (!post) {
-        return { code: 404, message: '帖子不存在', data: null, timestamp: Date.now() }
-      }
-      post.likeCount++
-      return successResponse({ liked: true, likeCount: post.likeCount })
-    }
-  },
-
-  // ==================== 社区活动相关接口 ====================
-
-  /**
-   * 获取活动列表
-   * GET /api/activities?page=1&pageSize=10&category=&status=
-   */
-  {
-    url: '/api/activities',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-      const category = query.category
-      const status = query.status
-
-      let filteredActivities = [...activities]
-
-      // 分类筛选
-      if (category && category !== 'all') {
-        filteredActivities = filteredActivities.filter(a => a.category === category)
-      }
-
-      // 状态筛选
-      if (status && status !== 'all') {
-        filteredActivities = filteredActivities.filter(a => a.status === status)
-      }
-
-      // 按开始时间排序（最近的在前）
-      filteredActivities.sort((a, b) =>
-        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-      )
-
-      return successResponse(paginate(filteredActivities, page, pageSize))
-    }
-  },
-
-  /**
-   * 获取活动详情
-   * GET /api/activities/:id
-   */
-  {
-    url: /\/api\/activities\/(\w+)$/,
-    method: 'get',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/activities\/(\w+)$/); const id = match ? match[1] : ''
-      const activity = activities.find(a => a.id === id)
-      if (!activity) {
-        return { code: 404, message: '活动不存在', data: null, timestamp: Date.now() }
-      }
-      return successResponse(activity)
-    }
-  },
-
-  /**
-   * 报名参加活动
-   * POST /api/activities/:id/register
-   */
-  {
-    url: /\/api\/activities\/(\w+)\/register$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string; const match = url.match(/\/api\/activities\/(\w+)\/register$/); const id = match ? match[1] : ''
-      const activity = activities.find(a => a.id === id)
-      if (!activity) {
-        return { code: 404, message: '活动不存在', data: null, timestamp: Date.now() }
-      }
-      if (activity.currentParticipants >= activity.maxParticipants) {
-        return { code: 400, message: '名额已满', data: null, timestamp: Date.now() }
-      }
-      activity.currentParticipants++
-
-      // 模拟添加报名者
-      if (!activity.registrants) {
-        activity.registrants = []
-      }
-      activity.registrants.push({
-        userId: 'user001',
-        userName: currentUser.nickname,
-        userAvatar: currentUser.avatar,
-        registeredAt: new Date().toISOString()
-      })
-
-      return successResponse({ message: '报名成功', remaining: activity.maxParticipants - activity.currentParticipants })
-    }
-  },
-
-  /**
-   * 获取活动分类统计
-   * GET /api/activities/categories
-   */
-  {
-    url: '/api/activities/categories',
-    method: 'get',
-    response: () => {
-      const categories = [
-        { key: 'sports', label: '体育运动', count: activities.filter(a => a.category === 'sports').length },
-        { key: 'entertainment', label: '文娱活动', count: activities.filter(a => a.category === 'entertainment').length },
-        { key: 'academic', label: '学术讲座', count: activities.filter(a => a.category === 'academic').length },
-        { key: 'volunteer', label: '志愿服务', count: activities.filter(a => a.category === 'volunteer').length },
-        { key: 'culture', label: '文化活动', count: activities.filter(a => a.category === 'culture').length },
-        { key: 'career', label: '职业发展', count: activities.filter(a => a.category === 'career').length }
+        {
+          id: '2',
+          bookId: 'b2',
+          bookTitle: 'Vue.js实战',
+          bookCover: 'https://via.placeholder.com/100x140/667eea/ffffff?text=Vue',
+          borrowDate: '2026-03-15',
+          dueDate: '2026-04-15',
+          returnDate: '2026-04-10',
+          status: 'returned',
+          renewCount: 1
+        }
       ]
-      return successResponse(categories)
-    }
-  },
+    }),
+    // 图书馆 - 座位信息
+    librarySeats: (floor?: number) => Promise.resolve({
+      code: 200,
+      data: Array.from({ length: 50 }, (_, i) => ({
+        id: `seat-${floor || 3}-${i + 1}`,
+        num: i + 1,
+        floor: floor || 3,
+        zone: ['A', 'B', 'C'][Math.floor(i / 20)],
+        row: Math.floor(i / 10) + 1,
+        status: ['available', 'available', 'available', 'occupied', 'reserved', 'maintenance'][Math.floor(Math.random() * 6)]
+      }))
+    }),
+    // 图书馆 - 座位预约
+    reserveSeat: (data: any) => Promise.resolve({ code: 200, message: 'success', data: { bookingId: 'bk' + Date.now() } }),
+    // 图书馆 - 我的座位预约
+    mySeatBookings: () => Promise.resolve({
+      code: 200,
+      data: [
+        {
+          id: 'bk1',
+          seatId: 'seat-3-42',
+          seatNum: 42,
+          floor: 3,
+          date: '2026-04-25',
+          startTime: '09:00',
+          endTime: '11:00',
+          status: 'active'
+        },
+        {
+          id: 'bk2',
+          seatId: 'seat-2-18',
+          seatNum: 18,
+          floor: 2,
+          date: '2026-04-24',
+          startTime: '14:00',
+          endTime: '16:00',
+          status: 'completed'
+        }
+      ]
+    }),
+    // 图书馆 - 取消预约
+    cancelSeatBooking: (bookingId: string) => Promise.resolve({ code: 200, message: 'success' }),
+    // 图书馆 - 签到
+    checkInSeat: (bookingId: string) => Promise.resolve({ code: 200, message: 'success' }),
+    // 图书馆 - 签退
+    checkOutSeat: (bookingId: string) => Promise.resolve({ code: 200, message: 'success' }),
+    // 图书馆 - 借阅图书
+    borrowBook: (data: any) => Promise.resolve({ code: 200, message: 'success', data: { borrowId: 'br' + Date.now(), dueDate: '2026-05-25' } }),
+    // 图书馆 - 归还图书
+    returnBook: (borrowId: string) => Promise.resolve({ code: 200, message: 'success' }),
+    // 图书馆 - 续借图书
+    renewBook: (borrowId: string) => Promise.resolve({ code: 200, message: 'success', data: { newDueDate: '2026-06-25' } }),
+    // 图书馆 - 添加收藏
+    addToFavorites: (bookId: string) => Promise.resolve({ code: 200, message: 'success' }),
+    // 图书馆 - 获取收藏
+    myFavorites: () => Promise.resolve({ code: 200, data: [] }),
+    pendingPayments: () => Promise.resolve({ code: 200, data: [] }),
+    paymentHistory: () => Promise.resolve({ code: 200, data: [] }),
+    scholarships: () => Promise.resolve({ code: 200, data: [] }),
+    aidPolicies: () => Promise.resolve({ code: 200, data: [] }),
+    activities: () => Promise.resolve({ code: 200, data: [] }),
+    counseling: () => Promise.resolve({ code: 200, data: [] }),
+    careers: () => Promise.resolve({ code: 200, data: [] }),
+    classrooms: (params?: { building?: string; floor?: number; type?: string; date?: string }) => {
+      // 生成教室数据 - 黑龙江科技大学实际教学楼
+      const buildings = ['主楼', '第一教学楼', '第二教学楼', '矿业工程实验楼', '机电工程实验楼']
+      const types = ['lecture', 'lab', 'multimedia', 'seminar']
+      const allClassrooms = []
+      let id = 1
 
-  // ==================== 首页数据聚合接口 ====================
-
-  /**
-   * 获取首页所需的所有数据（减少请求次数）
-   * GET /api/home/data
-   */
-  {
-    url: '/api/home/data',
-    method: 'get',
-    response: () => {
-      const homeData = {
-        // 轮播图/Banner
-        banners: [
-          { id: 1, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=400&fit=crop', title: '开学季特惠 满100减20', link: '/products?promotion=spring' },
-          { id: 2, image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop', title: '春季运动会报名中', link: '/activities/act1' },
-          { id: 3, image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&h=400&fit=crop', title: '数码产品限时折扣', link: '/products?category=cat1' }
-        ],
-
-        // 热门商品
-        hotProducts: products.slice(0, 8),
-
-        // 推荐商家
-        recommendMerchants: merchants.slice(0, 4),
-
-        // 最新帖子
-        latestPosts: forumPosts.slice(0, 5),
-
-        // 即将开始的活动
-        upcomingActivities: activities
-          .filter(a => a.status === 'upcoming')
-          .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-          .slice(0, 3),
-
-        // 最新二手
-        latestSecondHand: secondHandItems.slice(0, 6)
-      }
-      return successResponse(homeData)
-    }
-  },
-
-  /**
-   * 搜索接口（全局搜索）
-   * GET /api/search?keyword=&type=&page=1&pageSize=10
-   */
-  {
-    url: '/api/search',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const keyword = query.keyword?.toLowerCase()
-      const type = query.type
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-
-      if (!keyword) {
-        return successResponse({ results: [], total: 0 })
-      }
-
-      const results: any[] = []
-
-      // 搜索商品
-      if (!type || type === 'product') {
-        const matchedProducts = products.filter(p =>
-          p.name.toLowerCase().includes(keyword) ||
-          p.description.toLowerCase().includes(keyword) ||
-          p.tags.some(t => t.toLowerCase().includes(keyword))
-        ).map(p => ({ type: 'product', ...p }))
-        results.push(...matchedProducts)
-      }
-
-      // 搜索二手
-      if (!type || type === 'secondhand') {
-        const matchedSecondHand = secondHandItems.filter(item =>
-          item.title.toLowerCase().includes(keyword) ||
-          item.description.toLowerCase().includes(keyword)
-        ).map(item => ({ type: 'secondhand', ...item }))
-        results.push(...matchedSecondHand)
+      // 教学楼编号前缀映射
+      const buildingPrefix: Record<string, string> = {
+        '主楼': 'Z',
+        '第一教学楼': 'A',
+        '第二教学楼': 'B',
+        '矿业工程实验楼': 'K',
+        '机电工程实验楼': 'J'
       }
 
-      // 搜索帖子
-      if (!type || type === 'post') {
-        const matchedPosts = forumPosts.filter(p =>
-          p.title.toLowerCase().includes(keyword) ||
-          p.content.toLowerCase().includes(keyword)
-        ).map(p => ({ type: 'post', ...p }))
-        results.push(...matchedPosts)
-      }
+      for (let b = 0; b < buildings.length; b++) {
+        const building = buildings[b]
+        const prefix = buildingPrefix[building] || String.fromCharCode(65 + b)
+        // 不同楼层教室数量不同
+        const floors = building === '主楼' ? 6 : 5
+        const roomsPerFloor = building.includes('实验楼') ? 8 : 10
 
-      // 搜索商家
-      if (!type || type === 'merchant') {
-        const matchedMerchants = merchants.filter(m =>
-          m.name.toLowerCase().includes(keyword) ||
-          m.tags.some(t => t.toLowerCase().includes(keyword))
-        ).map(m => ({ type: 'merchant', ...m }))
-        results.push(...matchedMerchants)
-      }
+        for (let f = 1; f <= floors; f++) {
+          for (let r = 1; r <= roomsPerFloor; r++) {
+            const roomNum = `${prefix}${f}${String(r).padStart(2, '0')}`
+            // 实验室容量较小，教学楼容量较大
+            const capacity = building.includes('实验楼')
+              ? [20, 25, 30, 35, 40][Math.floor(Math.random() * 5)]
+              : [40, 45, 50, 60, 80, 120][Math.floor(Math.random() * 6)]
+            const type = building.includes('实验楼') ? 'lab' : types[Math.floor(Math.random() * types.length)]
+            const facilities = building.includes('实验楼')
+              ? ['电脑', '投影仪', '空调', '实验设备'].filter(() => Math.random() > 0.2)
+              : ['投影仪', '空调', '电脑'].filter(() => Math.random() > 0.3)
 
-      const total = results.length
-      const paginatedResults = results.slice((page - 1) * pageSize, page * pageSize)
-
-      return successResponse({
-        list: paginatedResults,
-        total,
-        page,
-        pageSize
-      })
-    }
-  },
-
-  /**
-   * 用户登录
-   * POST /api/auth/login
-   */
-  {
-    url: '/api/auth/login',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      // 支持多种登录字段: account(账号), studentId(学号), username(用户名)
-      const identifier = body.account || body.studentId || body.username || ''
-      const password = body.password || ''
-
-      // 模拟登录验证 - 管理员账号
-      if ((identifier === 'admin' || identifier === 'admin@usth.edu.cn') && password === 'admin123') {
-        return successResponse({
-          token: 'mock-admin-token-' + Date.now(),
-          user: { ...currentUser, role: 'admin', nickname: '管理员' }
-        })
-      }
-
-      // 模拟学号登录
-      if (body.studentId && /^\d{10,15}$/.test(body.studentId)) {
-        return successResponse({
-          token: 'mock-student-token-' + Date.now(),
-          user: {
-            ...currentUser,
-            studentId: body.studentId,
-            nickname: '学生' + body.studentId.slice(-4)
+            allClassrooms.push({
+              id: String(id++),
+              roomNumber: roomNum,
+              building: building,
+              floor: f,
+              type,
+              capacity,
+              facilities,
+              isAvailable: Math.random() > 0.3,
+              location: `${f}楼${['东侧', '西侧', '中部', '北侧', '南侧'][Math.floor(Math.random() * 5)]}`
+            })
           }
-        })
+        }
       }
 
-      // 默认返回普通用户
-      return successResponse({
-        token: 'mock-user-token-' + Date.now(),
-        user: currentUser
-      })
-    }
-  },
-
-  /**
-   * 用户注册
-   * POST /api/auth/register
-   */
-  {
-    url: '/api/auth/register',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      return successResponse({
-        message: '注册成功',
-        user: {
-          id: 'user' + Date.now(),
-          username: body.username,
-          nickname: body.nickname || body.username,
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
-          role: 'user',
-          status: 'active',
-          balance: 0,
-          points: 0,
-          level: 1,
-          createdAt: new Date().toISOString()
-        }
-      })
-    }
-  },
-
-  /**
-   * 获取通知消息列表
-   * GET /api/notifications?page=1&pageSize=10&type=
-   */
-  {
-    url: '/api/notifications',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-
-      const notifications = [
-        {
-          id: 'noti1',
-          type: 'order',
-          title: '订单已发货',
-          content: '您的订单 HK20260413001 已发货，预计4月15日送达。物流单号：SF1234567890，请留意查收。',
-          isRead: false,
-          createdAt: new Date(Date.now() - 10 * 60000).toISOString(),
-          orderId: 'order001'
-        },
-        {
-          id: 'noti2',
-          type: 'promo',
-          title: '新用户专享福利',
-          content: '恭喜！您的新人优惠券已到账，满99减20、满299减50，快去使用吧~优惠券有效期至4月30日。',
-          isRead: false,
-          createdAt: new Date(Date.now() - 30 * 60000).toISOString()
-        },
-        {
-          id: 'noti3',
-          type: 'system',
-          title: '账户安全提醒',
-          content: '检测到您的账号在新设备上登录，如非本人操作请及时修改密码。登录时间：2026-04-13 10:30，IP：192.168.1.1',
-          isRead: false,
-          createdAt: new Date(Date.now() - 2 * 3600000).toISOString()
-        },
-        {
-          id: 'noti4',
-          type: 'community',
-          title: '有人回复了你的帖子',
-          content: '在「分享一个超好用的学习APP」下，用户@代码侠 回复了你的评论："谢谢分享，确实很好用！"',
-          isRead: true,
-          createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
-          postId: 'post001',
-          senderId: 'user002',
-          senderName: '代码侠'
-        },
-        {
-          id: 'noti5',
-          type: 'order',
-          title: '订单已完成',
-          content: '您的订单 HK20260410003 已完成，感谢您的购买！欢迎评价商品，分享您的使用体验。',
-          isRead: true,
-          createdAt: new Date(Date.now() - 3 * 24 * 3600000).toISOString(),
-          orderId: 'order003'
-        },
-        {
-          id: 'noti6',
-          type: 'promo',
-          title: '限时秒杀活动开始',
-          content: '您关注的商品「蓝牙耳机」正在参与限时秒杀，原价199元，秒杀价仅需99元，限量100件！',
-          isRead: true,
-          createdAt: new Date(Date.now() - 5 * 24 * 3600000).toISOString()
-        },
-        {
-          id: 'noti7',
-          type: 'system',
-          title: '系统维护通知',
-          content: '系统将于今晚凌晨2:00-4:00进行例行维护，期间部分功能可能无法使用，请提前做好准备。',
-          isRead: true,
-          createdAt: new Date(Date.now() - 7 * 24 * 3600000).toISOString()
-        },
-        {
-          id: 'noti8',
-          type: 'community',
-          title: '您的帖子被点赞',
-          content: '用户@学霸小王 点赞了您的帖子「期末复习资料分享」，目前已有128人点赞。',
-          isRead: true,
-          createdAt: new Date(Date.now() - 10 * 24 * 3600000).toISOString(),
-          postId: 'post002',
-          senderId: 'user003',
-          senderName: '学霸小王'
-        }
-      ]
-
-      return successResponse(notifications)
-    }
-  },
-
-  /**
-   * 标记消息已读
-   * POST /api/notifications/:id/read
-   */
-  {
-    url: /\/api\/notifications\/(\w+)\/read$/,
-    method: 'post',
-    response: (config: any) => {
-      return successResponse({ message: '已标记为已读' })
-    }
-  },
-
-  /**
-   * 标记全部已读
-   * POST /api/notifications/read-all
-   */
-  {
-    url: '/api/notifications/read-all',
-    method: 'post',
-    response: () => {
-      return successResponse({ message: '已全部标记为已读' })
-    }
-  },
-
-  /**
-   * 获取未读消息数量
-   * GET /api/notifications/unread-count
-   */
-  {
-    url: '/api/notifications/unread-count',
-    method: 'get',
-    response: () => {
-      return successResponse(3)
-    }
-  },
-
-  // ==================== 收藏相关接口 ====================
-
-  /**
-   * 获取收藏列表
-   * GET /api/favorites?type=&page=1
-   */
-  {
-    url: '/api/favorites',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const page = parseInt(query.page || '1')
-      const pageSize = 10
-
-      // 模拟收藏数据 - 基于商品数据生成
-      const promotions = ['买1送1件礼', '满100减20', '限时特惠', '', '', '']
-      const shopNames = ['华为官方旗舰店', '小米之家', '美妆专营店', '运动户外店', '图书文具店', '食品生鲜店']
-
-      const favorites = products.slice(0, 6).map((product, index) => ({
-        id: `fav${String(index + 1).padStart(3, '0')}`,
-        type: 'product',
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        originalPrice: product.originalPrice,
-        soldCount: product.sales,
-        createdAt: new Date(Date.now() - index * 86400000).toISOString(),
-        promotion: promotions[index] || '',
-        shopName: shopNames[index] || '官方店铺',
-        shopId: `shop${index + 1}`,
-        status: index === 2 ? 'low_stock' : (index === 4 ? 'invalid' : 'normal')
-      }))
-
-      return successResponse({
-        list: favorites,
-        total: favorites.length
-      })
-    }
-  },
-
-  /**
-   * 删除收藏
-   * DELETE /api/favorites/:id
-   */
-  {
-    url: /\/api\/favorites\/(\w+)$/,
-    method: 'delete',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/favorites\/(\w+)$/)
-      const id = match ? match[1] : ''
-
-      return successResponse({ message: '取消收藏成功', id })
-    }
-  },
-
-  /**
-   * 添加收藏
-   * POST /api/favorites
-   */
-  {
-    url: '/api/favorites',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      return successResponse({
-        id: 'fav' + Date.now(),
-        type: body.type || 'product',
-        itemId: body.itemId,
-        createdAt: new Date().toISOString(),
-        message: '收藏成功'
-      })
-    }
-  },
-
-  // ==================== 购物车相关接口 ====================
-
-  /**
-   * 获取购物车列表
-   * GET /api/cart
-   */
-  {
-    url: '/api/cart',
-    method: 'get',
-    response: () => {
-      const cartItems = products.slice(0, 3).map((product, index) => ({
-        id: `cart${String(index + 1).padStart(3, '0')}`,
-        productId: product.id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        originalPrice: product.originalPrice,
-        quantity: Math.floor(Math.random() * 3) + 1,
-        selected: index < 2,
-        stock: product.stock,
-        status: 'valid'
-      }))
-
-      return successResponse({
-        items: cartItems,
-        totalAmount: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        totalCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        selectedCount: cartItems.filter(i => i.selected).reduce((sum, item) => sum + item.quantity, 0),
-        selectedAmount: cartItems.filter(i => i.selected).reduce((sum, item) => sum + item.price * item.quantity, 0)
-      })
-    }
-  },
-
-  /**
-   * 添加商品到购物车
-   * POST /api/cart
-   */
-  {
-    url: '/api/cart',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      return successResponse({
-        id: 'cart' + Date.now(),
-        productId: body.productId,
-        quantity: body.quantity || 1,
-        selected: true,
-        message: '添加成功'
-      })
-    }
-  },
-
-  /**
-   * 更新购物车商品
-   * PUT /api/cart/:itemId
-   */
-  {
-    url: /\/api\/cart\/(\w+)$/,
-    method: 'put',
-    response: (config: any, { body }: { body: any }) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/cart\/(\w+)$/)
-      const itemId = match ? match[1] : ''
-
-      return successResponse({
-        id: itemId,
-        quantity: body.quantity,
-        selected: body.selected,
-        message: '更新成功'
-      })
-    }
-  },
-
-  /**
-   * 删除购物车商品
-   * DELETE /api/cart/:itemId
-   */
-  {
-    url: /\/api\/cart\/(\w+)$/,
-    method: 'delete',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/cart\/(\w+)$/)
-      const itemId = match ? match[1] : ''
-
-      return successResponse({ message: '删除成功', id: itemId })
-    }
-  },
-
-  /**
-   * 批量删除购物车商品
-   * POST /api/cart/batch-remove
-   */
-  {
-    url: '/api/cart/batch-remove',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      return successResponse({
-        message: '批量删除成功',
-        deletedCount: body.itemIds?.length || 0
-      })
-    }
-  },
-
-  /**
-   * 全选/取消全选购物车商品
-   * POST /api/cart/select-all
-   */
-  {
-    url: '/api/cart/select-all',
-    method: 'post',
-    response: ({ body }: { body: any }) => {
-      return successResponse({
-        message: body.selected ? '全选成功' : '取消全选成功',
-        selected: body.selected
-      })
-    }
-  },
-
-  /**
-   * 将购物车商品移入收藏夹
-   * POST /api/cart/:itemId/move-favorite
-   */
-  {
-    url: /\/api\/cart\/(\w+)\/move-favorite$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/cart\/(\w+)\/move-favorite$/)
-      const itemId = match ? match[1] : ''
-
-      return successResponse({
-        message: '已移入收藏夹',
-        itemId,
-        favoriteId: 'fav' + Date.now()
-      })
-    }
-  },
-
-  /**
-   * 清空购物车
-   * DELETE /api/cart/clear
-   */
-  {
-    url: '/api/cart/clear',
-    method: 'delete',
-    response: () => {
-      return successResponse({ message: '购物车已清空' })
-    }
-  },
-
-  // ==================== 优惠券相关接口 ====================
-
-  /**
-   * 获取优惠券列表
-   * GET /api/coupons?status=&page=
-   */
-  {
-    url: '/api/coupons',
-    method: 'get',
-    response: ({ query }: { query: Record<string, string> }) => {
-      const status = query.status || 'available'
-      const page = parseInt(query.page || '1')
-      const pageSize = parseInt(query.pageSize || '10')
-
-      // 模拟优惠券数据
-      const coupons = [
-        {
-          id: 'coupon001',
-          code: 'NEWUSER2026',
-          name: '新用户专享券',
-          type: 'cash',
-          value: 20,
-          minOrder: 100,
-          status: 'available',
-          validFrom: '2026-01-01T00:00:00Z',
-          validTo: '2026-12-31T23:59:59Z',
-          description: '新用户注册即可领取',
-          scope: '全场通用'
-        },
-        {
-          id: 'coupon002',
-          code: 'FOOD50',
-          name: '食品生鲜券',
-          type: 'cash',
-          value: 10,
-          minOrder: 50,
-          status: 'available',
-          validFrom: '2026-04-01T00:00:00Z',
-          validTo: '2026-04-30T23:59:59Z',
-          description: '限食品生鲜类商品使用',
-          scope: '食品生鲜'
-        },
-        {
-          id: 'coupon003',
-          code: 'DIGITAL200',
-          name: '数码家电券',
-          type: 'cash',
-          value: 100,
-          minOrder: 1000,
-          status: 'available',
-          validFrom: '2026-04-01T00:00:00Z',
-          validTo: '2026-05-15T23:59:59Z',
-          description: '限数码家电类商品使用',
-          scope: '数码家电'
-        },
-        {
-          id: 'coupon004',
-          code: 'FREESHIP',
-          name: '免运费券',
-          type: 'free_shipping',
-          value: 0,
-          minOrder: 0,
-          status: 'available',
-          validFrom: '2026-04-01T00:00:00Z',
-          validTo: '2026-04-20T23:59:59Z',
-          description: '全场免运费',
-          scope: '全场通用'
-        },
-        {
-          id: 'coupon005',
-          code: 'DISCOUNT85',
-          name: '85折折扣券',
-          type: 'discount',
-          value: 8.5,
-          minOrder: 200,
-          status: 'used',
-          validFrom: '2026-03-01T00:00:00Z',
-          validTo: '2026-03-31T23:59:59Z',
-          description: '全场商品85折',
-          scope: '全场通用',
-          usedAt: '2026-03-15T10:30:00Z'
-        },
-        {
-          id: 'coupon006',
-          code: 'SPRING30',
-          name: '春季特惠券',
-          type: 'cash',
-          value: 30,
-          minOrder: 150,
-          status: 'expired',
-          validFrom: '2026-03-01T00:00:00Z',
-          validTo: '2026-03-31T23:59:59Z',
-          description: '春季限时特惠',
-          scope: '全场通用'
-        }
-      ]
-
-      // 根据状态筛选
-      let filteredCoupons = coupons
-      if (status && status !== 'all') {
-        filteredCoupons = coupons.filter(c => c.status === status)
+      // 根据参数筛选
+      let result = allClassrooms
+      if (params?.building) {
+        result = result.filter(c => c.building === params.building)
+      }
+      if (params?.floor !== undefined) {
+        result = result.filter(c => c.floor === params.floor)
+      }
+      if (params?.type) {
+        result = result.filter(c => c.type === params.type)
       }
 
-      return successResponse(paginate(filteredCoupons, page, pageSize))
-    }
-  },
-
-  /**
-   * 领取优惠券
-   * POST /api/coupons/:id/claim
-   */
-  {
-    url: /\/api\/coupons\/(\w+)\/claim$/,
-    method: 'post',
-    response: (config: any) => {
-      const url = config.url as string
-      const match = url.match(/\/api\/coupons\/(\w+)\/claim$/)
-      const id = match ? match[1] : ''
-
-      return successResponse({
-        message: '领取成功',
-        couponId: id,
-        claimedAt: new Date().toISOString()
-      })
-    }
-  },
-
-  // ==================== 用户头像上传接口 ====================
-
-  /**
-   * 上传用户头像
-   * POST /api/user/avatar
-   */
-  {
-    url: '/api/user/avatar',
-    method: 'post',
-    response: (req: any) => {
-      // 模拟头像上传成功，返回一个基于时间戳的唯一头像URL
-      // 使用 dicebear 的初始头像 API，基于时间戳生成不同头像
-      const timestamp = Date.now()
-      const seed = `user_${timestamp}`
-      return successResponse({
-        url: `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&size=200&backgroundColor=b6e3f4`,
-        message: '头像上传成功'
-      })
-    }
-  },
-
-  // ==================== 用户统计接口 ====================
-
-  /**
-   * 获取用户个人统计数据
-   * GET /api/user/statistics
-   */
-  {
-    url: '/api/user/statistics',
-    method: 'get',
-    response: () => {
-      return successResponse({
-        postsCount: Math.floor(Math.random() * 50),
-        likesReceived: Math.floor(Math.random() * 200),
-        ordersCompleted: Math.floor(Math.random() * 30),
-        creditScore: 5.0,
-        growthValue: 2680,
-        level: '黑科大在校生'
-      })
-    }
-  },
-
-  // ==================== 缴费相关接口 ====================
-
-  /**
-   * 获取缴费项目列表
-   * GET /api/payment/items
-   */
-  {
-    url: '/api/payment/items',
-    method: 'get',
-    response: () => {
-      return successResponse([
-        {
-          id: 'item001',
-          name: '2024年春季学费',
-          amount: 5500,
-          deadline: '2024-03-01',
-          type: 'tuition',
-          status: 'unpaid',
-          description: '2024年春季学期学费'
-        },
-        {
-          id: 'item002',
-          name: '住宿费',
-          amount: 1200,
-          deadline: '2024-03-01',
-          type: 'accommodation',
-          status: 'paid',
-          paidAt: '2024-02-15',
-          description: '2024年春季学期住宿费'
-        },
-        {
-          id: 'item003',
-          name: '教材费',
-          amount: 350,
-          deadline: '2024-03-10',
-          type: 'material',
-          status: 'unpaid',
-          description: '2024年春季学期教材费'
-        },
-        {
-          id: 'item004',
-          name: '保险费',
-          amount: 100,
-          deadline: '2024-03-15',
-          type: 'insurance',
-          status: 'unpaid',
-          description: '2024年度学生保险'
+      return Promise.resolve({ code: 200, data: result })
+    },
+    classroomTimeSlots: (roomId: string, date: string) => {
+      const slots = [
+        { period: 1, time: '08:00-08:45', available: Math.random() > 0.3 },
+        { period: 2, time: '08:55-09:40', available: Math.random() > 0.3 },
+        { period: 3, time: '10:05-10:50', available: Math.random() > 0.3 },
+        { period: 4, time: '11:00-11:45', available: Math.random() > 0.3 },
+        { period: 5, time: '13:30-14:15', available: Math.random() > 0.3 },
+        { period: 6, time: '14:25-15:10', available: Math.random() > 0.3 },
+        { period: 7, time: '15:35-16:20', available: Math.random() > 0.3 },
+        { period: 8, time: '16:30-17:15', available: Math.random() > 0.3 },
+        { period: 9, time: '18:30-19:15', available: Math.random() > 0.3 },
+        { period: 10, time: '19:25-20:10', available: Math.random() > 0.3 }
+      ]
+      return Promise.resolve({ code: 200, data: slots })
+    },
+    bookClassroom: (roomId: string, data: { date: string; periods: number[]; reason?: string }) => {
+      return Promise.resolve({
+        code: 200,
+        message: '预约成功',
+        data: {
+          success: true,
+          bookingId: 'cb' + Date.now(),
+          message: '教室预约成功'
         }
-      ])
-    }
-  },
-
-  /**
-   * 获取单个缴费项目
-   * GET /api/payment/items/:id
-   */
-  {
-    url: '/api/payment/items/:id',
-    method: 'get',
-    response: (req: any) => {
-      const { id } = req.params
-      return successResponse({
-        id,
-        name: '缴费项目 ' + id,
-        amount: Math.floor(Math.random() * 5000) + 500,
-        deadline: '2024-03-01',
-        type: 'tuition',
-        status: 'unpaid',
-        description: '缴费项目详情'
       })
-    }
-  },
-
-  /**
-   * 创建缴费订单
-   * POST /api/payment/create
-   */
-  {
-    url: '/api/payment/create',
-    method: 'post',
-    response: () => {
-      return successResponse({
-        paymentUrl: 'https://mock-payment.example.com/pay/' + Date.now(),
-        orderId: 'ORD' + Date.now()
+    },
+    myClassroomBookings: () => {
+      return Promise.resolve({
+        code: 200,
+        data: [
+          {
+            id: 'cb1',
+            roomId: '5',
+            roomNumber: 'A202',
+            building: '主楼',
+            floor: 2,
+            date: '2026-04-26',
+            periods: [5, 6],
+            time: '13:30-15:10',
+            reason: '社团活动',
+            status: 'active',
+            bookedAt: '2026-04-25 10:30:00'
+          },
+          {
+            id: 'cb2',
+            roomId: '12',
+            roomNumber: 'B301',
+            building: '信息楼',
+            floor: 3,
+            date: '2026-04-24',
+            periods: [1, 2],
+            time: '08:00-09:40',
+            reason: '小组讨论',
+            status: 'completed',
+            bookedAt: '2026-04-23 14:20:00'
+          }
+        ]
       })
-    }
-  },
-
-  /**
-   * 查询缴费状态
-   * GET /api/payment/status/:orderId
-   */
-  {
-    url: '/api/payment/status/:orderId',
-    method: 'get',
-    response: () => {
-      return successResponse({
-        status: 'pending',
-        paidAt: null
-      })
-    }
-  },
-
-  /**
-   * 获取缴费记录
-   * GET /api/payment/records
-   */
-  {
-    url: '/api/payment/records',
-    method: 'get',
-    response: () => {
-      return successResponse([
-        {
-          id: 'rec001',
-          itemName: '2023年秋季学费',
-          amount: 5500,
-          paidAt: '2023-09-01',
-          method: 'alipay',
-          status: 'success'
-        },
-        {
-          id: 'rec002',
-          itemName: '2023年秋季住宿费',
-          amount: 1200,
-          paidAt: '2023-09-01',
-          method: 'wechat',
-          status: 'success'
-        },
-        {
-          id: 'rec003',
-          itemName: '教材费',
-          amount: 280,
-          paidAt: '2023-09-05',
-          method: 'alipay',
-          status: 'success'
-        }
-      ])
-    }
-  },
-
-  /**
-   * 获取缴费汇总
-   * GET /api/payment/summary
-   */
-  {
-    url: '/api/payment/summary',
-    method: 'get',
-    response: () => {
-      return successResponse({
-        totalAmount: 7150,
-        paidAmount: 1200,
-        unpaidAmount: 5950,
-        overdueAmount: 0,
-        itemCount: 4,
-        paidCount: 1,
-        unpaidCount: 3
-      })
-    }
-  },
-
-  /**
-   * 提交绿色通道申请
-   * POST /api/payment/green-channel
-   */
-  {
-    url: '/api/payment/green-channel',
-    method: 'post',
-    response: (req: any) => {
-      const data = req.body
-      return successResponse({
-        id: 'GC' + Date.now(),
-        ...data,
-        status: 'pending',
-        submittedAt: new Date().toISOString()
-      })
-    }
-  },
-
-  /**
-   * 获取绿色通道申请记录
-   * GET /api/payment/green-channel
-   */
-  {
-    url: '/api/payment/green-channel',
-    method: 'get',
-    response: () => {
-      return successResponse([
-        {
-          id: 'GC001',
-          reason: '家庭经济困难',
-          amount: 5500,
-          status: 'approved',
-          submittedAt: '2024-02-20',
-          reviewedAt: '2024-02-22',
-          reviewerComment: '审核通过，请按时缴费'
-        }
-      ])
-    }
-  },
-
-  // ==================== 用户资料更新接口 ====================
-
-  /**
-   * 更新用户资料
-   * PUT /api/user/profile
-   */
-  {
-    url: '/api/user/profile',
-    method: 'put',
-    response: (req: any) => {
-      const data = req.body
-      console.log('[Mock] Update profile:', data)
-      return successResponse({
-        id: 1,
-        username: 'student_2022020001',
-        email: data.email || 'zhangsan@usth.edu.cn',
-        phone: data.phone || '138****8888',
-        nickname: data.nickname || '张同学',
-        avatar: data.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=33&size=200',
-        gender: data.gender || 'male',
-        birthday: data.birthday || '2000-01-01',
-        studentId: '2022020001',
-        school: data.school || '计算机科学与技术学院',
-        major: data.major || '软件工程',
-        grade: data.grade || '2022级',
-        role: 'user',
-        status: 'active',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: new Date().toISOString()
-      })
-    }
-  },
-
-  // ==================== 验证码相关接口 ====================
-
-  /**
-   * 发送验证码
-   * POST /api/auth/send-code
-   */
-  {
-    url: '/api/auth/send-code',
-    method: 'post',
-    response: (req: any) => {
-      const { target, type } = req.body
-      console.log(`[Mock] 发送验证码到 ${target}, 类型: ${type}`)
-      // 模拟发送验证码成功
-      return successResponse({
-        message: '验证码已发送',
-        target,
-        type
-      })
-    }
-  },
-
-  /**
-   * 验证验证码
-   * POST /api/auth/verify-code
-   */
-  {
-    url: '/api/auth/verify-code',
-    method: 'post',
-    response: (req: any) => {
-      const { target, code } = req.body
-      console.log(`[Mock] 验证验证码: ${target}, 码: ${code}`)
-      // 模拟验证成功（任何6位数字都通过）
-      const isValid = code && code.length === 6 && /^\d{6}$/.test(code)
-      return successResponse({
-        verified: isValid,
-        message: isValid ? '验证成功' : '验证码错误'
-      })
-    }
-  },
-
-  // ==================== 安全设置相关接口 ====================
-
-  /**
-   * 绑定手机号
-   * POST /api/user/security/bind-phone
-   */
-  {
-    url: '/api/user/security/bind-phone',
-    method: 'post',
-    response: (req: any) => {
-      const { phone, code } = req.body
-      console.log(`[Mock] 绑定手机号: ${phone}, 验证码: ${code}`)
-      // 模拟绑定成功
-      return successResponse({
-        message: '手机号绑定成功',
-        phone
-      })
-    }
-  },
-
-  /**
-   * 绑定邮箱
-   * POST /api/user/security/bind-email
-   */
-  {
-    url: '/api/user/security/bind-email',
-    method: 'post',
-    response: (req: any) => {
-      const { email, code } = req.body
-      console.log(`[Mock] 绑定邮箱: ${email}, 验证码: ${code}`)
-      return successResponse({
-        message: '邮箱绑定成功',
-        email
-      })
-    }
+    },
+    cancelClassroomBooking: (bookingId: string) => {
+      return Promise.resolve({ code: 200, message: '取消成功', data: { success: true } })
+    },
+    exams: () => Promise.resolve({ code: 200, data: [] }),
+    busSchedule: () => Promise.resolve({ code: 200, data: [] }),
+    cardBalance: () => Promise.resolve({ code: 200, data: { balance: 100 } }),
+    cardTransactions: () => Promise.resolve({ code: 200, data: [] }),
+    mapData: () => Promise.resolve({ code: 200, data: campusMapData })
   }
-] as MockMethod[]
+}
+
+// 默认导出Mock配置
+export default Mock

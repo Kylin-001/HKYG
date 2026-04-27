@@ -56,7 +56,7 @@ public class MerchantController {
     /**
      * 获取商家详情
      */
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
     @Operation(summary = "获取商家详情")
     public R<Merchant> getMerchantById(@PathVariable Long id) {
         Merchant merchant = merchantService.getById(id);

@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useI18n } from '@/locales'
 import { isOnline, addOnlineStatusListener, getCacheInfo } from '@/utils/pwaHelper'
 
 // Props

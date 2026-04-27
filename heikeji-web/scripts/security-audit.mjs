@@ -74,7 +74,7 @@ class SecurityAuditor {
       }
 
       // 检查是否有未使用的依赖
-      if (deps['jquery']) {
+      if (deps.jquery) {
         this.addIssue({
           severity: 'medium',
           category: '依赖优化',
@@ -92,13 +92,13 @@ class SecurityAuditor {
     console.log('🔐 检查环境变量安全...')
 
     const envFiles = ['.env', '.env.local', '.env.production']
-    
+
     for (const envFile of envFiles) {
       const filePath = path.join(this.projectRoot, envFile)
-      
+
       if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf-8')
-        
+
         // 检查敏感信息
         const sensitivePatterns = [
           { pattern: /PASSWORD\s*=\s*\w+/i, type: '密码' },
@@ -203,7 +203,7 @@ class SecurityAuditor {
     const viteConfigPath = path.join(this.projectRoot, 'vite.config.ts')
     if (fs.existsSync(viteConfigPath)) {
       const config = fs.readFileSync(viteConfigPath, 'utf-8')
-      
+
       if (config.includes('host: "0.0.0.0"') || config.includes("host: '0.0.0.0'")) {
         this.addIssue({
           severity: 'medium',
@@ -233,7 +233,7 @@ class SecurityAuditor {
 
     try {
       const { execSync } = await import('child_process')
-      
+
       // 检查是否有敏感信息提交历史
       const result = execSync(
         'git log --all --full-history -p --diff-filter=ACDM -S "password" -S "secret" -S "api_key" -- . 2>/dev/null | head -20',
@@ -377,7 +377,7 @@ class SecurityAuditor {
     console.log(`   总问题数: ${this.issues.length}`)
     console.log(`   安全评分: ${Math.max(0, totalScore)}/100`)
     console.log('')
-    
+
     if (totalScore < 70) {
       console.log('⚠️  项目存在严重安全问题，建议立即修复！')
     } else if (totalScore < 90) {
@@ -392,12 +392,12 @@ class SecurityAuditor {
 // 主程序
 async function main(): Promise<void> {
   const auditor = new SecurityAuditor()
-  
+
   await auditor.audit()
   auditor.generateReport()
 
   // 输出退出码（有问题时非零退出）
-  const hasCriticalIssues = auditor['issues'].some((i: SecurityIssue) => i.severity === 'critical')
+  const hasCriticalIssues = auditor.issues.some((i: SecurityIssue) => i.severity === 'critical')
   process.exit(hasCriticalIssues ? 1 : 0)
 }
 

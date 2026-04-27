@@ -1,252 +1,830 @@
 <template>
-  <div class="schedule-page">
-    <div class="page-header">
-      <div class="header-content max-w-screen-xl mx-auto px-4 lg:px-8">
-        <h1 class="page-title">
-          <el-icon><Calendar /></el-icon>
-          我的课表
-        </h1>
-        <div class="header-actions">
-          <span class="current-week">第 {{ currentWeek }} 周</span>
-          <button class="today-btn" @click="goToToday">今天</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="main-content max-w-screen-xl mx-auto px-4 lg:px-8 py-6">
-      <div class="view-toggle-bar glass-effect rounded-2xl p-4 mb-6 flex items-center justify-between">
-        <div class="week-nav">
-          <button class="nav-btn" @click="prevWeek">
-            <el-icon><ArrowLeft /></el-icon>
-          </button>
-          <el-date-picker
-            v-model="selectedDate"
-            type="date"
-            placeholder="选择日期"
-            format="MM月dd日"
-            value-format="YYYY-MM-DD"
-            :clearable="false"
-            @change="onDateChange"
-            class="date-picker-custom"
-          />
-          <span class="week-range">{{ weekRangeText }}</span>
-          <button class="nav-btn" @click="nextWeek">
-            <el-icon><ArrowRight /></el-icon>
-          </button>
-        </div>
-        <div class="view-switcher">
-          <button
-            v-for="view in viewModes"
-            :key="view.value"
-            class="view-chip"
-            :class="{ active: currentView === view.value }"
-            @click="currentView = view.value"
-          >
-            {{ view.label }}
-          </button>
-        </div>
-      </div>
-
-      <div v-if="currentView === 'week'" class="schedule-week glass-effect rounded-2xl overflow-hidden">
-        <div class="week-grid">
-          <div class="time-column">
-            <div class="corner-cell"></div>
-            <div v-for="period in timeSlots" :key="period.id" class="time-slot">
-              <span class="period-num">{{ period.id }}</span>
-              <span class="time-range">{{ period.start }}<br/>{{ period.end }}</span>
-            </div>
+  <el-config-provider :locale="elementLocale">
+    <div class="schedule-page">
+      <div class="page-header">
+        <div class="header-content max-w-screen-xl mx-auto px-4 lg:px-8">
+          <h1 class="page-title">
+            <el-icon><Calendar /></el-icon>
+            我的课表
+          </h1>
+          <div class="header-actions">
+            <span class="current-week">第 {{ currentWeek }} 周</span>
+            <button
+              class="today-btn"
+              @click="goToToday"
+            >
+              今天
+            </button>
           </div>
-          <div v-for="day in weekDays" :key="day.key" class="day-column" :class="{ 'is-today': day.isToday }">
-            <div class="day-header">
-              <span class="day-name">{{ day.name }}</span>
-              <span class="day-date" :class="{ today: day.isToday }">{{ day.date }}</span>
-            </div>
-            <div class="courses-area">
+        </div>
+      </div>
+
+      <div class="main-content max-w-screen-xl mx-auto px-4 lg:px-8 py-6">
+        <div class="view-toggle-bar glass-effect rounded-2xl p-4 mb-6 flex items-center justify-between">
+          <div class="week-nav">
+            <button
+              class="nav-btn"
+              @click="prevWeek"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+            </button>
+            <div class="date-picker-wrapper">
+              <el-date-picker
+                v-model="selectedDate"
+                type="date"
+                placeholder="选择日期"
+                value-format="YYYY-MM-DD"
+                :clearable="false"
+                class="date-picker-custom date-picker-hidden"
+                @change="onDateChange"
+              />
               <div
-                v-for="(course, idx) in getCoursesForDay(day.key)"
-                :key="idx"
-                class="course-card"
-                :style="courseStyle(course)"
-                @click="showCourseDetail(course)"
+                class="date-display"
+                @click="openDatePicker"
               >
-                <div class="course-name">{{ course.name }}</div>
-                <div class="course-info">
-                  <span class="course-location">{{ course.location }}</span>
-                  <span class="course-teacher">{{ course.teacher }}</span>
-                </div>
+                {{ selectedDateDisplay }}
               </div>
             </div>
+            <span class="week-range">{{ weekRangeText }}</span>
+            <button
+              class="nav-btn"
+              @click="nextWeek"
+            >
+              <el-icon><ArrowRight /></el-icon>
+            </button>
+          </div>
+          <div class="view-switcher">
+            <button
+              v-for="view in viewModes"
+              :key="view.value"
+              class="view-chip"
+              :class="{ active: currentView === view.value }"
+              @click="currentView = view.value"
+            >
+              {{ view.label }}
+            </button>
           </div>
         </div>
-      </div>
 
-      <div v-if="currentView === 'day'" class="schedule-day glass-effect rounded-2xl overflow-hidden p-6">
-        <div class="day-view-header">
-          <h2 class="day-title">{{ currentDayName }} {{ currentDateStr }}</h2>
-          <div class="day-stats">
-            <span class="stat-item">
-              <el-icon><Notebook /></el-icon>
-              {{ todayCourses.length }} 节课
-            </span>
-            <span class="stat-item free-time">
-              <el-icon><Clock /></el-icon>
-              {{ freePeriods }} 节空闲
-            </span>
-          </div>
-        </div>
-
-        <div class="day-timeline">
-          <div class="timeline-hours">
-            <div v-for="h in 24" :key="h" class="hour-mark">
-              <span class="hour-label">{{ String(h - 1).padStart(2, '0') }}:00</span>
-            </div>
-          </div>
-          <div class="timeline-body">
-            <div v-if="todayCourses.length === 0" class="no-courses">
-              <el-icon><CoffeeCup /></el-icon>
-              <p>今天没有课程，好好休息吧~</p>
+        <div
+          v-if="currentView === 'week'"
+          class="schedule-week glass-effect rounded-2xl overflow-hidden"
+        >
+          <div class="week-grid">
+            <div class="time-column">
+              <div class="corner-cell" />
+              <div
+                v-for="period in timeSlots"
+                :key="period.id"
+                class="time-slot"
+              >
+                <span class="period-num">{{ period.id }}</span>
+                <span class="time-range">{{ period.start }}<br>{{ period.end }}</span>
+              </div>
             </div>
             <div
-              v-for="course in todayCourses"
+              v-for="day in weekDays"
+              :key="day.key"
+              class="day-column"
+              :class="{ 'is-today': day.isToday }"
+            >
+              <div class="day-header">
+                <span class="day-name">{{ day.name }}</span>
+                <span
+                  class="day-date"
+                  :class="{ today: day.isToday }"
+                >{{ day.date }}</span>
+              </div>
+              <div class="courses-area">
+                <div
+                  v-for="(course, idx) in getCoursesForDay(day.key)"
+                  :key="idx"
+                  class="course-card"
+                  :style="courseStyle(course)"
+                  @click="showCourseDetail(course)"
+                >
+                  <div class="course-name">
+                    {{ course.name }}
+                  </div>
+                  <div class="course-info">
+                    <span class="course-location">{{ course.location }}</span>
+                    <span class="course-teacher">{{ course.teacher }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="currentView === 'day'"
+          class="schedule-day glass-effect rounded-2xl overflow-hidden p-6"
+        >
+          <div class="day-view-header">
+            <h2 class="day-title">
+              {{ currentDayName }} {{ currentDateStr }}
+            </h2>
+            <div class="day-stats">
+              <span class="stat-item">
+                <el-icon><Notebook /></el-icon>
+                {{ todayCourses.length }} 节课
+              </span>
+              <span class="stat-item free-time">
+                <el-icon><Clock /></el-icon>
+                {{ freePeriods }} 节空闲
+              </span>
+            </div>
+          </div>
+
+          <div class="day-timeline">
+            <div class="timeline-hours">
+              <div
+                v-for="h in 24"
+                :key="h"
+                class="hour-mark"
+              >
+                <span class="hour-label">{{ String(h - 1).padStart(2, '0') }}:00</span>
+              </div>
+            </div>
+            <div class="timeline-body">
+              <div
+                v-if="todayCourses.length === 0"
+                class="no-courses"
+              >
+                <el-icon><CoffeeCup /></el-icon>
+                <p>今天没有课程，好好休息吧~</p>
+              </div>
+              <div
+                v-for="course in todayCourses"
+                :key="course.id"
+                class="timeline-course"
+                :style="dayViewStyle(course)"
+                @click="showCourseDetail(course)"
+              >
+                <div class="tc-time">
+                  {{ course.startTime }} - {{ course.endTime }}
+                </div>
+                <div class="tc-name">
+                  {{ course.name }}
+                </div>
+                <div class="tc-meta">
+                  <span>{{ course.location }}</span>
+                  <span>{{ course.teacher }}</span>
+                </div>
+              </div>
+              <div
+                v-if="isCurrentDay"
+                class="now-indicator"
+                :style="{ top: nowIndicatorTop }"
+              >
+                <div class="now-dot" />
+                <div class="now-line" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="currentView === 'list'"
+          class="schedule-list glass-effect rounded-2xl overflow-hidden"
+        >
+          <div class="list-header">
+            <h3>全部课程</h3>
+            <span class="total-count">共 {{ allCourses.length }} 门课</span>
+          </div>
+          <div class="course-list-items">
+            <div
+              v-for="course in allCourses"
               :key="course.id"
-              class="timeline-course"
-              :style="dayViewStyle(course)"
+              class="list-course-item"
               @click="showCourseDetail(course)"
             >
-              <div class="tc-time">{{ course.startTime }} - {{ course.endTime }}</div>
-              <div class="tc-name">{{ course.name }}</div>
-              <div class="tc-meta">
-                <span>{{ course.location }}</span>
-                <span>{{ course.teacher }}</span>
+              <div
+                class="lc-color-bar"
+                :style="{ background: course.color }"
+              />
+              <div class="lc-info">
+                <h4 class="lc-name">
+                  {{ course.name }}
+                </h4>
+                <div class="lc-meta">
+                  <span class="lc-tag">
+                    <el-icon><Calendar /></el-icon>
+                    {{ course.dayLabel }}
+                  </span>
+                  <span class="lc-tag">
+                    <el-icon><Clock /></el-icon>
+                    第{{ course.startPeriod }}-{{ course.endPeriod }}节
+                  </span>
+                  <span class="lc-tag">
+                    <el-icon><Location /></el-icon>
+                    {{ course.location }}
+                  </span>
+                  <span class="lc-tag">
+                    <el-icon><User /></el-icon>
+                    {{ course.teacher }}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div class="now-indicator" :style="{ top: nowIndicatorTop }" v-if="isCurrentDay">
-              <div class="now-dot"></div>
-              <div class="now-line"></div>
+              <el-icon class="lc-arrow">
+                <ArrowRight />
+              </el-icon>
             </div>
           </div>
         </div>
-      </div>
 
-      <div v-if="currentView === 'list'" class="schedule-list glass-effect rounded-2xl overflow-hidden">
-        <div class="list-header">
-          <h3>全部课程</h3>
-          <span class="total-count">共 {{ allCourses.length }} 门课</span>
-        </div>
-        <div class="course-list-items">
+        <div class="quick-actions mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           <div
-            v-for="course in allCourses"
-            :key="course.id"
-            class="list-course-item"
-            @click="showCourseDetail(course)"
+            class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform"
+            @click="openAddCourseModal"
           >
-            <div class="lc-color-bar" :style="{ background: course.color }"></div>
-            <div class="lc-info">
-              <h4 class="lc-name">{{ course.name }}</h4>
-              <div class="lc-meta">
-                <span class="lc-tag">
-                  <el-icon><Calendar /></el-icon>
-                  {{ course.dayLabel }}
-                </span>
-                <span class="lc-tag">
-                  <el-icon><Clock /></el-icon>
-                  第{{ course.startPeriod }}-{{ course.endPeriod }}节
-                </span>
-                <span class="lc-tag">
-                  <el-icon><Location /></el-icon>
-                  {{ course.location }}
-                </span>
-                <span class="lc-tag">
-                  <el-icon><User /></el-icon>
-                  {{ course.teacher }}
-                </span>
-              </div>
-            </div>
-            <el-icon class="lc-arrow"><ArrowRight /></el-icon>
+            <el-icon class="action-icon text-blue-500">
+              <DocumentAdd />
+            </el-icon>
+            <p class="action-label">
+              添加课程
+            </p>
+          </div>
+          <div
+            class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform"
+            @click="openImportModal"
+          >
+            <el-icon class="action-icon text-green-500">
+              <Download />
+            </el-icon>
+            <p class="action-label">
+              导入课表
+            </p>
+          </div>
+          <div
+            class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform"
+            @click="openShareModal"
+          >
+            <el-icon class="action-icon text-orange-500">
+              <Share />
+            </el-icon>
+            <p class="action-label">
+              分享课表
+            </p>
+          </div>
+          <div
+            class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform"
+            @click="openReminderModal"
+          >
+            <el-icon class="action-icon text-purple-500">
+              <Bell />
+            </el-icon>
+            <p class="action-label">
+              上课提醒
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="quick-actions mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform">
-          <el-icon class="action-icon text-blue-500"><DocumentAdd /></el-icon>
-          <p class="action-label">添加课程</p>
-        </div>
-        <div class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform">
-          <el-icon class="action-icon text-green-500"><Download /></el-icon>
-          <p class="action-label">导入课表</p>
-        </div>
-        <div class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform">
-          <el-icon class="action-icon text-orange-500"><Share /></el-icon>
-          <p class="action-label">分享课表</p>
-        </div>
-        <div class="action-card glass-effect rounded-2xl p-5 text-center cursor-pointer hover:scale-105 transition-transform">
-          <el-icon class="action-icon text-purple-500"><Bell /></el-icon>
-          <p class="action-label">上课提醒</p>
-        </div>
-      </div>
+      <Teleport to="body">
+        <!-- 课程详情弹窗 -->
+        <transition name="modal-fade">
+          <div
+            v-if="selectedCourse"
+            class="modal-overlay"
+            @click.self="selectedCourse = null"
+          >
+            <div class="course-detail-modal glass-effect rounded-2xl overflow-hidden">
+              <div
+                class="modal-header"
+                :style="{ background: selectedCourse.color }"
+              >
+                <h3>{{ selectedCourse.name }}</h3>
+                <button
+                  class="close-btn"
+                  @click="selectedCourse = null"
+                >
+                  <el-icon><Close /></el-icon>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <span class="detail-label">授课教师</span>
+                    <span class="detail-value">{{ selectedCourse.teacher }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">上课地点</span>
+                    <span class="detail-value">{{ selectedCourse.location }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">上课时间</span>
+                    <span class="detail-value">{{ selectedCourse.dayLabel }} 第{{ selectedCourse.startPeriod }}-{{ selectedCourse.endPeriod }}节</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">具体时段</span>
+                    <span class="detail-value">{{ selectedCourse.startTime }} - {{ selectedCourse.endTime }}</span>
+                  </div>
+                  <div class="detail-item full-width">
+                    <span class="detail-label">周次安排</span>
+                    <span class="detail-value">第 {{ selectedCourse.weeks }}（每周{{ selectedCourse.dayLabel }}）</span>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button
+                    class="modal-btn secondary"
+                    @click="editCourse(selectedCourse)"
+                  >
+                    <el-icon><EditPen /></el-icon>
+                    编辑
+                  </button>
+                  <button class="modal-btn primary">
+                    <el-icon><Location /></el-icon>
+                    导航去教室
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- 上课提醒弹窗 -->
+        <transition name="modal-fade">
+          <div
+            v-if="showReminderModal"
+            class="modal-overlay"
+            @click.self="closeReminderModal"
+          >
+            <div
+              class="course-detail-modal glass-effect rounded-2xl overflow-hidden"
+              style="max-width: 480px;"
+            >
+              <div
+                class="modal-header"
+                style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"
+              >
+                <h3>上课提醒</h3>
+                <button
+                  class="close-btn"
+                  @click="closeReminderModal"
+                >
+                  <el-icon><Close /></el-icon>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="reminder-content">
+                  <div class="reminder-toggle">
+                    <div class="toggle-info">
+                      <h4>开启上课提醒</h4>
+                      <p>在课程开始前自动发送提醒通知</p>
+                    </div>
+                    <el-switch
+                      v-model="reminderForm.enabled"
+                      active-color="#8b5cf6"
+                    />
+                  </div>
+
+                  <transition name="fade">
+                    <div
+                      v-if="reminderForm.enabled"
+                      class="reminder-options"
+                    >
+                      <el-divider />
+                      <el-form label-position="top">
+                        <el-form-item label="提前提醒时间">
+                          <el-radio-group v-model="reminderForm.reminderMinutes">
+                            <el-radio :label="5">
+                              5分钟
+                            </el-radio>
+                            <el-radio :label="10">
+                              10分钟
+                            </el-radio>
+                            <el-radio :label="15">
+                              15分钟
+                            </el-radio>
+                            <el-radio :label="30">
+                              30分钟
+                            </el-radio>
+                          </el-radio-group>
+                        </el-form-item>
+                        <el-form-item label="提醒方式">
+                          <el-radio-group v-model="reminderForm.reminderMethod">
+                            <el-radio label="notification">
+                              浏览器通知
+                            </el-radio>
+                            <el-radio label="email">
+                              邮件提醒
+                            </el-radio>
+                            <el-radio label="both">
+                              两者都用
+                            </el-radio>
+                          </el-radio-group>
+                        </el-form-item>
+                      </el-form>
+                    </div>
+                  </transition>
+                </div>
+                <div class="modal-actions">
+                  <button
+                    class="modal-btn secondary"
+                    @click="closeReminderModal"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="modal-btn primary"
+                    :disabled="campusStore.loading"
+                    @click="saveReminder"
+                  >
+                    <el-icon v-if="campusStore.loading">
+                      <Loading />
+                    </el-icon>
+                    保存设置
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- 分享课表弹窗 -->
+        <transition name="modal-fade">
+          <div
+            v-if="showShareModal"
+            class="modal-overlay"
+            @click.self="closeShareModal"
+          >
+            <div
+              class="course-detail-modal glass-effect rounded-2xl overflow-hidden"
+              style="max-width: 480px;"
+            >
+              <div
+                class="modal-header"
+                style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);"
+              >
+                <h3>分享课表</h3>
+                <button
+                  class="close-btn"
+                  @click="closeShareModal"
+                >
+                  <el-icon><Close /></el-icon>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="share-content">
+                  <div
+                    v-if="!shareUrl"
+                    class="share-options"
+                  >
+                    <p class="share-desc">
+                      生成分享链接，其他人可以通过链接查看你的课表
+                    </p>
+                    <el-form label-position="top">
+                      <el-form-item label="链接有效期">
+                        <el-radio-group v-model="shareExpireDays">
+                          <el-radio :label="1">
+                            1天
+                          </el-radio>
+                          <el-radio :label="7">
+                            7天
+                          </el-radio>
+                          <el-radio :label="30">
+                            30天
+                          </el-radio>
+                        </el-radio-group>
+                      </el-form-item>
+                    </el-form>
+                    <button
+                      class="modal-btn primary w-full mt-4"
+                      :disabled="campusStore.loading"
+                      @click="generateShareLink"
+                    >
+                      <el-icon v-if="campusStore.loading">
+                        <Loading />
+                      </el-icon>
+                      生成分享链接
+                    </button>
+                  </div>
+                  <div
+                    v-else
+                    class="share-result"
+                  >
+                    <div class="share-success">
+                      <el-icon
+                        class="success-icon"
+                        :size="48"
+                        color="#10b981"
+                      >
+                        <CircleCheck />
+                      </el-icon>
+                      <p class="success-text">
+                        分享链接已生成
+                      </p>
+                      <p class="expire-text">
+                        有效期至：{{ shareExpireAt }}
+                      </p>
+                    </div>
+                    <div class="share-url-box">
+                      <el-input
+                        v-model="shareUrl"
+                        readonly
+                        class="share-input"
+                      >
+                        <template #append>
+                          <el-button @click="copyShareLink">
+                            <el-icon><CopyDocument /></el-icon>
+                            复制
+                          </el-button>
+                        </template>
+                      </el-input>
+                    </div>
+                    <div class="share-actions">
+                      <button
+                        class="modal-btn secondary"
+                        @click="resetShare"
+                      >
+                        重新生成
+                      </button>
+                      <button
+                        class="modal-btn primary"
+                        @click="closeShareModal"
+                      >
+                        完成
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- 导入课表弹窗 -->
+        <transition name="modal-fade">
+          <div
+            v-if="showImportModal"
+            class="modal-overlay"
+            @click.self="closeImportModal"
+          >
+            <div
+              class="course-detail-modal glass-effect rounded-2xl overflow-hidden"
+              style="max-width: 480px;"
+            >
+              <div
+                class="modal-header"
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
+              >
+                <h3>导入课表</h3>
+                <button
+                  class="close-btn"
+                  @click="closeImportModal"
+                >
+                  <el-icon><Close /></el-icon>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="import-content">
+                  <p class="import-desc">
+                    支持导入 Excel (.xlsx) 或 CSV 格式的课表文件
+                  </p>
+                  <el-upload
+                    class="upload-area"
+                    drag
+                    action="#"
+                    :auto-upload="false"
+                    :on-change="handleFileChange"
+                    :show-file-list="false"
+                    accept=".xlsx,.csv"
+                  >
+                    <el-icon class="upload-icon">
+                      <Upload />
+                    </el-icon>
+                    <div class="upload-text">
+                      <span>点击或拖拽文件到此处</span>
+                    </div>
+                    <template #tip>
+                      <div class="upload-tip">
+                        请确保文件包含：课程名称、教师、教室、星期、节次等信息
+                      </div>
+                    </template>
+                  </el-upload>
+                  <div
+                    v-if="importFile"
+                    class="selected-file"
+                  >
+                    <el-icon><Document /></el-icon>
+                    <span>{{ importFile.name }}</span>
+                    <el-button
+                      type="danger"
+                      link
+                      @click="importFile = null"
+                    >
+                      删除
+                    </el-button>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button
+                    class="modal-btn secondary"
+                    @click="closeImportModal"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="modal-btn primary"
+                    :disabled="!importFile || campusStore.loading"
+                    @click="importSchedule"
+                  >
+                    <el-icon v-if="campusStore.loading">
+                      <Loading />
+                    </el-icon>
+                    开始导入
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- 添加/编辑课程弹窗 -->
+        <transition name="modal-fade">
+          <div
+            v-if="showAddCourseModal"
+            class="modal-overlay"
+            @click.self="closeAddCourseModal"
+          >
+            <div
+              class="course-detail-modal glass-effect rounded-2xl overflow-hidden"
+              style="max-width: 480px;"
+            >
+              <div
+                class="modal-header"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
+              >
+                <h3>{{ isEditing ? '编辑课程' : '添加课程' }}</h3>
+                <button
+                  class="close-btn"
+                  @click="closeAddCourseModal"
+                >
+                  <el-icon><Close /></el-icon>
+                </button>
+              </div>
+              <div class="modal-body">
+                <el-form
+                  :model="courseForm"
+                  label-position="top"
+                  class="course-form"
+                >
+                  <el-form-item
+                    label="课程名称"
+                    required
+                  >
+                    <el-input
+                      v-model="courseForm.courseName"
+                      placeholder="请输入课程名称"
+                    />
+                  </el-form-item>
+                  <el-form-item label="授课教师">
+                    <el-input
+                      v-model="courseForm.teacher"
+                      placeholder="请输入教师姓名"
+                    />
+                  </el-form-item>
+                  <el-form-item label="上课地点">
+                    <el-input
+                      v-model="courseForm.classroom"
+                      placeholder="请输入教室位置"
+                    />
+                  </el-form-item>
+                  <div class="form-row">
+                    <el-form-item
+                      label="星期"
+                      required
+                      style="flex: 1;"
+                    >
+                      <el-select
+                        v-model="courseForm.dayOfWeek"
+                        placeholder="选择星期"
+                      >
+                        <el-option
+                          v-for="(day, index) in weekDaysOptions"
+                          :key="index"
+                          :label="day"
+                          :value="index"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item
+                      label="开始节次"
+                      required
+                      style="flex: 1;"
+                    >
+                      <el-select
+                        v-model="courseForm.startSection"
+                        placeholder="开始节次"
+                      >
+                        <el-option
+                          v-for="n in 10"
+                          :key="n"
+                          :label="`第${n}节`"
+                          :value="n"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item
+                      label="结束节次"
+                      required
+                      style="flex: 1;"
+                    >
+                      <el-select
+                        v-model="courseForm.endSection"
+                        placeholder="结束节次"
+                      >
+                        <el-option
+                          v-for="n in 10"
+                          :key="n"
+                          :label="`第${n}节`"
+                          :value="n"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                  <div class="form-row">
+                    <el-form-item
+                      label="开始时间"
+                      style="flex: 1;"
+                    >
+                      <el-time-picker
+                        v-model="courseForm.startTime"
+                        format="HH:mm"
+                        placeholder="开始时间"
+                        style="width: 100%;"
+                      />
+                    </el-form-item>
+                    <el-form-item
+                      label="结束时间"
+                      style="flex: 1;"
+                    >
+                      <el-time-picker
+                        v-model="courseForm.endTime"
+                        format="HH:mm"
+                        placeholder="结束时间"
+                        style="width: 100%;"
+                      />
+                    </el-form-item>
+                  </div>
+                  <el-form-item label="课程颜色">
+                    <div class="color-picker">
+                      <div
+                        v-for="color in courseColors"
+                        :key="color"
+                        class="color-option"
+                        :style="{ background: color, border: courseForm.color === color ? '3px solid #333' : 'none' }"
+                        @click="courseForm.color = color"
+                      />
+                    </div>
+                  </el-form-item>
+                </el-form>
+                <div class="modal-actions">
+                  <button
+                    class="modal-btn secondary"
+                    @click="closeAddCourseModal"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="modal-btn primary"
+                    :disabled="!courseForm.courseName || campusStore.loading"
+                    @click="saveCourse"
+                  >
+                    <el-icon v-if="campusStore.loading">
+                      <Loading />
+                    </el-icon>
+                    {{ isEditing ? '保存' : '添加' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </Teleport>
     </div>
-
-    <Teleport to="body">
-      <transition name="modal-fade">
-        <div v-if="selectedCourse" class="modal-overlay" @click.self="selectedCourse = null">
-          <div class="course-detail-modal glass-effect rounded-2xl overflow-hidden">
-            <div class="modal-header" :style="{ background: selectedCourse.color }">
-              <h3>{{ selectedCourse.name }}</h3>
-              <button class="close-btn" @click="selectedCourse = null">
-                <el-icon><Close /></el-icon>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <span class="detail-label">授课教师</span>
-                  <span class="detail-value">{{ selectedCourse.teacher }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">上课地点</span>
-                  <span class="detail-value">{{ selectedCourse.location }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">上课时间</span>
-                  <span class="detail-value">{{ selectedCourse.dayLabel }} 第{{ selectedCourse.startPeriod }}-{{ selectedCourse.endPeriod }}节</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">具体时段</span>
-                  <span class="detail-value">{{ selectedCourse.startTime }} - {{ selectedCourse.endTime }}</span>
-                </div>
-                <div class="detail-item full-width">
-                  <span class="detail-label">周次安排</span>
-                  <span class="detail-value">第 1-16 周（每周{{ selectedCourse.dayLabel }}）</span>
-                </div>
-              </div>
-              <div class="modal-actions">
-                <button class="modal-btn secondary">
-                  <el-icon><EditPen /></el-icon>
-                  编辑
-                </button>
-                <button class="modal-btn primary">
-                  <el-icon><Location /></el-icon>
-                  导航去教室
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </Teleport>
-  </div>
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Calendar, ArrowLeft, ArrowRight, Clock, Location,
   Notebook, CoffeeCup, User, DocumentAdd, Download,
-  Share, Bell, Close, EditPen
+  Share, Bell, Close, EditPen, Loading, Upload, Document,
+  CircleCheck, CopyDocument
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useCampusStore } from '@/stores/campus'
+import type { AddCourseRequest } from '@/api/campus'
+
+// Element Plus 中文语言包
+const elementLocale = zhCn
+
+const { t } = useI18n()
 
 const campusStore = useCampusStore()
 
@@ -262,6 +840,7 @@ interface Course {
   startTime: string
   endTime: string
   color: string
+  weeks: string
 }
 
 const currentView = ref<'week' | 'day' | 'list'>('week')
@@ -269,6 +848,224 @@ const currentWeek = ref(8)
 const selectedDayIndex = ref(new Date().getDay() || 7)
 const selectedCourse = ref<Course | null>(null)
 const selectedDate = ref<string>(new Date().toISOString().split('T')[0])
+
+// 添加/编辑课程相关
+const showAddCourseModal = ref(false)
+const isEditing = ref(false)
+const editingCourseId = ref<string>('')
+
+const weekDaysOptions = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+
+const courseColors = [
+  '#667eea', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
+  '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+]
+
+const courseForm = ref<{
+  courseName: string
+  teacher: string
+  classroom: string
+  dayOfWeek: number
+  startSection: number
+  endSection: number
+  startTime: string
+  endTime: string
+  color: string
+}>({
+  courseName: '',
+  teacher: '',
+  classroom: '',
+  dayOfWeek: 1,
+  startSection: 1,
+  endSection: 2,
+  startTime: '08:00',
+  endTime: '09:40',
+  color: courseColors[0]
+})
+
+function openAddCourseModal() {
+  isEditing.value = false
+  editingCourseId.value = ''
+  courseForm.value = {
+    courseName: '',
+    teacher: '',
+    classroom: '',
+    dayOfWeek: 1,
+    startSection: 1,
+    endSection: 2,
+    startTime: '08:00',
+    endTime: '09:40',
+    color: courseColors[0]
+  }
+  showAddCourseModal.value = true
+}
+
+function editCourse(course: Course) {
+  isEditing.value = true
+  editingCourseId.value = String(course.id)
+  const dayMap: Record<string, number> = {
+    sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6
+  }
+  courseForm.value = {
+    courseName: course.name,
+    teacher: course.teacher,
+    classroom: course.location,
+    dayOfWeek: dayMap[course.day] || 1,
+    startSection: course.startPeriod,
+    endSection: course.endPeriod,
+    startTime: course.startTime,
+    endTime: course.endTime,
+    color: course.color
+  }
+  selectedCourse.value = null
+  showAddCourseModal.value = true
+}
+
+function closeAddCourseModal() {
+  showAddCourseModal.value = false
+}
+
+async function saveCourse() {
+  if (!courseForm.value.courseName) {
+    ElMessage.warning('请输入课程名称')
+    return
+  }
+  if (courseForm.value.startSection > courseForm.value.endSection) {
+    ElMessage.warning('开始节次不能大于结束节次')
+    return
+  }
+
+  const data: AddCourseRequest = {
+    courseName: courseForm.value.courseName,
+    teacher: courseForm.value.teacher,
+    classroom: courseForm.value.classroom,
+    dayOfWeek: courseForm.value.dayOfWeek,
+    startSection: courseForm.value.startSection,
+    endSection: courseForm.value.endSection,
+    startTime: courseForm.value.startTime,
+    endTime: courseForm.value.endTime,
+    color: courseForm.value.color
+  }
+
+  try {
+    if (isEditing.value && editingCourseId.value) {
+      await campusStore.updateCourseItem(editingCourseId.value, data)
+    } else {
+      await campusStore.addCourseItem(data)
+    }
+    closeAddCourseModal()
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
+// 导入课表相关
+const showImportModal = ref(false)
+const importFile = ref<File | null>(null)
+
+function openImportModal() {
+  importFile.value = null
+  showImportModal.value = true
+}
+
+function closeImportModal() {
+  showImportModal.value = false
+  importFile.value = null
+}
+
+function handleFileChange(file: any) {
+  importFile.value = file.raw
+}
+
+async function importSchedule() {
+  if (!importFile.value) {
+    ElMessage.warning('请选择要导入的文件')
+    return
+  }
+  try {
+    await campusStore.importScheduleFile(importFile.value)
+    closeImportModal()
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
+// 分享课表相关
+const showShareModal = ref(false)
+const shareExpireDays = ref(7)
+const shareUrl = ref('')
+const shareExpireAt = ref('')
+
+function openShareModal() {
+  shareUrl.value = ''
+  shareExpireAt.value = ''
+  shareExpireDays.value = 7
+  showShareModal.value = true
+}
+
+function closeShareModal() {
+  showShareModal.value = false
+}
+
+function resetShare() {
+  shareUrl.value = ''
+  shareExpireAt.value = ''
+}
+
+async function generateShareLink() {
+  try {
+    const result = await campusStore.shareScheduleLink(shareExpireDays.value)
+    shareUrl.value = result.shareUrl
+    shareExpireAt.value = new Date(result.expiresAt).toLocaleString('zh-CN')
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
+function copyShareLink() {
+  if (shareUrl.value) {
+    navigator.clipboard.writeText(shareUrl.value).then(() => {
+      ElMessage.success('链接已复制到剪贴板')
+    }).catch(() => {
+      ElMessage.error('复制失败')
+    })
+  }
+}
+
+// 上课提醒相关
+const showReminderModal = ref(false)
+const reminderForm = ref({
+  enabled: false,
+  reminderMinutes: 15,
+  reminderMethod: 'notification' as 'notification' | 'email' | 'both'
+})
+
+function openReminderModal() {
+  // 从store加载当前设置
+  reminderForm.value = {
+    enabled: campusStore.reminderSettings.enabled,
+    reminderMinutes: campusStore.reminderSettings.reminderMinutes,
+    reminderMethod: campusStore.reminderSettings.reminderMethod
+  }
+  showReminderModal.value = true
+}
+
+function closeReminderModal() {
+  showReminderModal.value = false
+}
+
+async function saveReminder() {
+  try {
+    await campusStore.updateReminder({
+      enabled: reminderForm.value.enabled,
+      reminderMinutes: reminderForm.value.reminderMinutes,
+      reminderMethod: reminderForm.value.reminderMethod
+    })
+    closeReminderModal()
+  } catch {
+    // 错误已在store中处理
+  }
+}
 
 const viewModes = [
   { value: 'week', label: '周视图' },
@@ -302,7 +1099,8 @@ const courses = computed<Course[]>(() => {
     endPeriod: item.endSection || 2,
     startTime: item.startTime || '08:00',
     endTime: item.endTime || '09:40',
-    color: item.color || ['#667eea', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'][index % 9]
+    color: item.color || ['#667eea', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'][index % 9],
+    weeks: item.weeks || '1-16周'
   }))
 })
 
@@ -310,7 +1108,8 @@ function getWeekDate(offset: number): Date {
   const base = selectedDate.value ? new Date(selectedDate.value) : new Date()
   const dayOfWeek = base.getDay() || 7
   const monday = new Date(base)
-  monday.setDate(base.getDate() - dayOfWeek + 1 + offset * 7)
+  // 计算本周一的日期，然后加上 offset 天得到本周的某一天
+  monday.setDate(base.getDate() - dayOfWeek + 1 + offset)
   return monday
 }
 
@@ -343,6 +1142,15 @@ const weekRangeText = computed(() => {
   const end = getWeekDate(6)
   const fmt = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日`
   return `${fmt(start)} - ${fmt(end)}`
+})
+
+// 格式化选中的日期显示（用于日期选择器）
+const selectedDateDisplay = computed(() => {
+  if (!selectedDate.value) return ''
+  const d = new Date(selectedDate.value)
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${month}月${day}日`
 })
 
 const currentDayName = computed(() => {
@@ -421,6 +1229,15 @@ function showCourseDetail(course: Course) {
   selectedCourse.value = course
 }
 
+// 打开日期选择器
+function openDatePicker() {
+  // 通过点击隐藏的日期选择器来打开弹窗
+  const datePickerInput = document.querySelector('.date-picker-hidden .el-input__inner') as HTMLElement
+  if (datePickerInput) {
+    datePickerInput.click()
+  }
+}
+
 function prevWeek() {
   const currentDate = selectedDate.value ? new Date(selectedDate.value) : new Date()
   currentDate.setDate(currentDate.getDate() - 7)
@@ -444,7 +1261,7 @@ onMounted(async () => {
   try {
     await campusStore.fetchSchedule()
   } catch {
-    ElMessage.error('获取课表失败')
+    ElMessage.error(t('message.operationFailed'))
   }
 })
 </script>
@@ -565,6 +1382,52 @@ onMounted(async () => {
 .date-picker-custom :deep(.el-input__inner) {
   color: #1f2937;
   text-align: center;
+}
+
+/* 日期选择器包装器 */
+.date-picker-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* 隐藏的日期选择器 */
+.date-picker-hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.date-picker-hidden :deep(.el-input) {
+  width: 0;
+  height: 0;
+}
+
+.date-picker-hidden :deep(.el-input__wrapper) {
+  display: none;
+}
+
+/* 自定义日期显示 */
+.date-display {
+  width: 140px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 0 1px #e5e7eb inset;
+}
+
+.date-display:hover {
+  box-shadow: 0 0 0 1px #667eea inset;
+  border-color: #667eea;
 }
 
 .view-switcher {
@@ -1047,6 +1910,173 @@ onMounted(async () => {
 
 .modal-body {
   padding: 1.5rem;
+}
+
+.course-form :deep(.el-form-item__label) {
+  font-weight: 600;
+  color: #374151;
+  padding-bottom: 0.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.color-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.import-content {
+  padding: 1rem 0;
+}
+
+.import-desc {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.upload-area :deep(.el-upload-dragger) {
+  width: 100%;
+  padding: 2rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
+  transition: all 0.2s;
+}
+
+.upload-area :deep(.el-upload-dragger:hover) {
+  border-color: #667eea;
+  background: #f0efff;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.upload-text {
+  color: #374151;
+  font-size: 1rem;
+}
+
+.upload-tip {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f0efff;
+  border-radius: 8px;
+  color: #4f46e5;
+}
+
+.share-content {
+  padding: 1rem 0;
+}
+
+.share-desc {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.share-success {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.success-icon {
+  margin-bottom: 0.75rem;
+}
+
+.success-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.expire-text {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.share-url-box {
+  margin: 1.5rem 0;
+}
+
+.share-input :deep(.el-input__wrapper) {
+  box-shadow: 0 0 0 1px #e5e7eb inset;
+}
+
+.share-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.reminder-content {
+  padding: 1rem 0;
+}
+
+.reminder-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.toggle-info h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.toggle-info p {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.reminder-options {
+  padding-top: 0.5rem;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .detail-grid {

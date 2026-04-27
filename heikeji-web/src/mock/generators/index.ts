@@ -1,0 +1,1 @@
+// 重新导出 faker 供外部使�?export { faker } from '@faker-js/faker/locale/zh_CN'

@@ -167,7 +167,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useI18n } from '@/locales'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, EditPen, Search, View, Star, DocumentDelete } from '@element-plus/icons-vue'
 import Skeleton from '@/components/Skeleton.vue'

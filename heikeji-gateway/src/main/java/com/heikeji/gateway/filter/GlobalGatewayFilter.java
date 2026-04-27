@@ -51,6 +51,14 @@ public class GlobalGatewayFilter implements GlobalFilter, Ordered {
             "/api/delivery/public",
             "/api/delivery/page",
             "/api/delivery/list",
+            "/api/takeout/merchant/active",
+            "/api/takeout/merchant/detail",
+            "/api/takeout/merchant/search",
+            "/api/takeout/product",
+            "/takeout/merchant/active",
+            "/takeout/merchant/detail",
+            "/takeout/merchant/search",
+            "/takeout/product",
             "/fallback"
     );
 
@@ -65,6 +73,14 @@ public class GlobalGatewayFilter implements GlobalFilter, Ordered {
         
         // 记录请求开始日志
         log.info("[Gateway] 收到请求: {} {} 来自IP: {}", method, path, clientIp);
+        
+        // 记录Authorization头
+        String authHeader = request.getHeaders().getFirst("Authorization");
+        if (StringUtils.isNotBlank(authHeader)) {
+            log.info("[Gateway] Authorization头: {}", maskToken(authHeader));
+        } else {
+            log.info("[Gateway] 无Authorization头");
+        }
         
         // 检查白名单
         boolean isWhiteList = WHITE_LIST.stream().anyMatch(whitePath -> 

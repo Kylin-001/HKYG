@@ -1,0 +1,602 @@
+[
+  {
+    "id": 1,
+    "name": "河南省婷物流无限公司美食",
+    "rating": 4.9,
+    "sales": 2491,
+    "minOrder": 16,
+    "deliveryFee": 1,
+    "deliveryTime": "13分钟",
+    "tags": [
+      "中餐",
+      "快餐",
+      "学生餐"
+    ],
+    "category": "food",
+    "isOpen": true,
+    "location": "胥栋11306号",
+    "phone": "0126-51815728",
+    "businessHours": "06:30-22:00",
+    "description": "Team-oriented encompassing encoding"
+  },
+  {
+    "id": 2,
+    "name": "云南省军传媒集团有限公司饮品",
+    "rating": 4.8,
+    "sales": 2172,
+    "minOrder": 27,
+    "deliveryFee": 0,
+    "deliveryTime": "20分钟",
+    "tags": [
+      "奶茶",
+      "果茶",
+      "咖啡"
+    ],
+    "category": "drink",
+    "isOpen": true,
+    "location": "楚街374号",
+    "phone": "11503062897",
+    "businessHours": "06:30-22:00",
+    "description": "AI-driven fault-tolerant help-desk"
+  },
+  {
+    "id": 3,
+    "name": "北京市凤英燃气有限公司小吃",
+    "rating": 3.7,
+    "sales": 2993,
+    "minOrder": 19,
+    "deliveryFee": 1,
+    "deliveryTime": "16分钟",
+    "tags": [
+      "炸鸡",
+      "汉堡",
+      "烧烤"
+    ],
+    "category": "snack",
+    "isOpen": false,
+    "location": "米桥98号",
+    "phone": "0965-00417895",
+    "businessHours": "06:30-22:00",
+    "description": "Customizable responsive standardization"
+  },
+  {
+    "id": 4,
+    "name": "海南省晓博运输（集团）有限公司水果",
+    "rating": 4.3,
+    "sales": 2806,
+    "minOrder": 25,
+    "deliveryFee": 0,
+    "deliveryTime": "21分钟",
+    "tags": [
+      "水果捞",
+      "鲜切",
+      "果汁"
+    ],
+    "category": "fruit",
+    "isOpen": true,
+    "location": "亓旁660号",
+    "phone": "0787-56043680",
+    "businessHours": "06:30-22:00",
+    "description": "AI-driven 24 hour workforce"
+  },
+  {
+    "id": 5,
+    "name": "济头市国平网络科技有限公司甜点",
+    "rating": 3.7,
+    "sales": 4151,
+    "minOrder": 26,
+    "deliveryFee": 0,
+    "deliveryTime": "16分钟",
+    "tags": [
+      "蛋糕",
+      "面包",
+      "甜品"
+    ],
+    "category": "dessert",
+    "isOpen": true,
+    "location": "季栋3号",
+    "phone": "0646-84233071",
+    "businessHours": "06:30-22:00",
+    "description": "Progressive needs-based definition"
+  },
+  {
+    "id": 6,
+    "name": "贵沙市佳琪水产股份有限公司超市",
+    "rating": 4.3,
+    "sales": 6399,
+    "minOrder": 14,
+    "deliveryFee": 2,
+    "deliveryTime": "28分钟",
+    "tags": [
+      "日用品",
+      "零食",
+      "饮料"
+    ],
+    "category": "supermarket",
+    "isOpen": true,
+    "location": "吴巷5号",
+    "phone": "025-19408026",
+    "businessHours": "06:30-22:00",
+    "description": "Reduced AI-powered success"
+  },
+  {
+    "id": 7,
+    "name": "广东省鑫旅游发展无限责任公司美食",
+    "rating": 3.8,
+    "sales": 6058,
+    "minOrder": 8,
+    "deliveryFee": 0,
+    "deliveryTime": "27分钟",
+    "tags": [
+      "中餐",
+      "快餐",
+      "学生餐"
+    ],
+    "category": "food",
+    "isOpen": true,
+    "location": "偶栋83346号",
+    "phone": "0561-54943423",
+    "businessHours": "06:30-22:00",
+    "description": "Quality-focused directional software"
+  },
+  {
+    "id": 8,
+    "name": "陕西省晋鹏传媒无限公司饮品",
+    "rating": 3.9,
+    "sales": 6459,
+    "minOrder": 9,
+    "deliveryFee": 2,
+    "deliveryTime": "12分钟",
+    "tags": [
+      "奶茶",
+      "果茶",
+      "咖啡"
+    ],
+    "category": "drink",
+    "isOpen": true,
+    "location": "咎栋18号",
+    "phone": "13337888624",
+    "businessHours": "06:30-22:00",
+    "description": "Reactive contextually-based productivity"
+  },
+  {
+    "id": 9,
+    "name": "贵海市思佳建设有限公司小吃",
+    "rating": 4.7,
+    "sales": 2457,
+    "minOrder": 11,
+    "deliveryFee": 1,
+    "deliveryTime": "24分钟",
+    "tags": [
+      "炸鸡",
+      "汉堡",
+      "烧烤"
+    ],
+    "category": "snack",
+    "isOpen": true,
+    "location": "张路63398号",
+    "phone": "18490726717",
+    "businessHours": "06:30-22:00",
+    "description": "User-friendly modular solution"
+  },
+  {
+    "id": 10,
+    "name": "内蒙古自治区伟泽印刷无限公司水果",
+    "rating": 4.4,
+    "sales": 4705,
+    "minOrder": 12,
+    "deliveryFee": 1,
+    "deliveryTime": "25分钟",
+    "tags": [
+      "水果捞",
+      "鲜切",
+      "果汁"
+    ],
+    "category": "fruit",
+    "isOpen": true,
+    "location": "驹路7号",
+    "phone": "0569-28336112",
+    "businessHours": "06:30-22:00",
+    "description": "Diverse dynamic process improvement"
+  },
+  {
+    "id": 11,
+    "name": "山西省志国食品无限公司甜点",
+    "rating": 4.9,
+    "sales": 1140,
+    "minOrder": 9,
+    "deliveryFee": 2,
+    "deliveryTime": "34分钟",
+    "tags": [
+      "蛋糕",
+      "面包",
+      "甜品"
+    ],
+    "category": "dessert",
+    "isOpen": true,
+    "location": "肥中心68号",
+    "phone": "075-60892223",
+    "businessHours": "06:30-22:00",
+    "description": "Horizontal needs-based array"
+  },
+  {
+    "id": 12,
+    "name": "包宁市志明运输集团有限公司超市",
+    "rating": 4.2,
+    "sales": 7557,
+    "minOrder": 25,
+    "deliveryFee": 0,
+    "deliveryTime": "29分钟",
+    "tags": [
+      "日用品",
+      "零食",
+      "饮料"
+    ],
+    "category": "supermarket",
+    "isOpen": true,
+    "location": "澄巷88号",
+    "phone": "16027698992",
+    "businessHours": "06:30-22:00",
+    "description": "Polarised analyzing initiative"
+  },
+  {
+    "id": 13,
+    "name": "吉林省嘉熙水产无限公司美食",
+    "rating": 3.6,
+    "sales": 1922,
+    "minOrder": 12,
+    "deliveryFee": 0,
+    "deliveryTime": "34分钟",
+    "tags": [
+      "中餐",
+      "快餐",
+      "学生餐"
+    ],
+    "category": "food",
+    "isOpen": true,
+    "location": "年街216号",
+    "phone": "13296643205",
+    "businessHours": "06:30-22:00",
+    "description": "Ergonomic encompassing matrices"
+  },
+  {
+    "id": 14,
+    "name": "包林市志泽运输无限责任公司饮品",
+    "rating": 3.7,
+    "sales": 5651,
+    "minOrder": 10,
+    "deliveryFee": 2,
+    "deliveryTime": "17分钟",
+    "tags": [
+      "奶茶",
+      "果茶",
+      "咖啡"
+    ],
+    "category": "drink",
+    "isOpen": true,
+    "location": "行侬600号",
+    "phone": "0672-09107128",
+    "businessHours": "06:30-22:00",
+    "description": "Compatible well-modulated task-force"
+  },
+  {
+    "id": 15,
+    "name": "太徽市琪电力（集团）有限公司小吃",
+    "rating": 4.8,
+    "sales": 6564,
+    "minOrder": 18,
+    "deliveryFee": 0,
+    "deliveryTime": "31分钟",
+    "tags": [
+      "炸鸡",
+      "汉堡",
+      "烧烤"
+    ],
+    "category": "snack",
+    "isOpen": true,
+    "location": "功桥9210号",
+    "phone": "18804653987",
+    "businessHours": "06:30-22:00",
+    "description": "Versatile next generation focus group"
+  },
+  {
+    "id": 16,
+    "name": "宁夏回族自治区雯静保险集团有限公司水果",
+    "rating": 4.7,
+    "sales": 973,
+    "minOrder": 8,
+    "deliveryFee": 1,
+    "deliveryTime": "17分钟",
+    "tags": [
+      "水果捞",
+      "鲜切",
+      "果汁"
+    ],
+    "category": "fruit",
+    "isOpen": true,
+    "location": "禚桥46676号",
+    "phone": "037-24456110",
+    "businessHours": "06:30-22:00",
+    "description": "Streamlined actuating initiative"
+  },
+  {
+    "id": 17,
+    "name": "海安市洁保险（集团）有限公司甜点",
+    "rating": 4.3,
+    "sales": 6914,
+    "minOrder": 26,
+    "deliveryFee": 1,
+    "deliveryTime": "26分钟",
+    "tags": [
+      "蛋糕",
+      "面包",
+      "甜品"
+    ],
+    "category": "dessert",
+    "isOpen": true,
+    "location": "酆桥890号",
+    "phone": "16123633036",
+    "businessHours": "06:30-22:00",
+    "description": "Profound tangible attitude"
+  },
+  {
+    "id": 18,
+    "name": "宁头市俊杰旅游发展集团有限公司超市",
+    "rating": 4.1,
+    "sales": 6047,
+    "minOrder": 12,
+    "deliveryFee": 0,
+    "deliveryTime": "32分钟",
+    "tags": [
+      "日用品",
+      "零食",
+      "饮料"
+    ],
+    "category": "supermarket",
+    "isOpen": true,
+    "location": "钟巷88028号",
+    "phone": "17418720224",
+    "businessHours": "06:30-22:00",
+    "description": "Future-proofed reciprocal productivity"
+  },
+  {
+    "id": 19,
+    "name": "厦京市治涛林业集团有限公司美食",
+    "rating": 4.4,
+    "sales": 5930,
+    "minOrder": 27,
+    "deliveryFee": 1,
+    "deliveryTime": "20分钟",
+    "tags": [
+      "中餐",
+      "快餐",
+      "学生餐"
+    ],
+    "category": "food",
+    "isOpen": true,
+    "location": "威巷4568号",
+    "phone": "0939-44955206",
+    "businessHours": "06:30-22:00",
+    "description": "Front-line 24/7 definition"
+  },
+  {
+    "id": 20,
+    "name": "海南省思佳水产有限责任公司饮品",
+    "rating": 3.8,
+    "sales": 3498,
+    "minOrder": 27,
+    "deliveryFee": 1,
+    "deliveryTime": "16分钟",
+    "tags": [
+      "奶茶",
+      "果茶",
+      "咖啡"
+    ],
+    "category": "drink",
+    "isOpen": true,
+    "location": "候巷630号",
+    "phone": "044-41332441",
+    "businessHours": "06:30-22:00",
+    "description": "Quality-focused static circuit"
+  },
+  {
+    "id": 21,
+    "name": "安徽省家豪燃气集团有限公司小吃",
+    "rating": 3.5,
+    "sales": 5186,
+    "minOrder": 24,
+    "deliveryFee": 2,
+    "deliveryTime": "27分钟",
+    "tags": [
+      "炸鸡",
+      "汉堡",
+      "烧烤"
+    ],
+    "category": "snack",
+    "isOpen": false,
+    "location": "承巷2862号",
+    "phone": "012-07788140",
+    "businessHours": "06:30-22:00",
+    "description": "Realigned uniform installation"
+  },
+  {
+    "id": 22,
+    "name": "河南省梓妍旅游发展有限公司水果",
+    "rating": 4.1,
+    "sales": 5736,
+    "minOrder": 14,
+    "deliveryFee": 0,
+    "deliveryTime": "34分钟",
+    "tags": [
+      "水果捞",
+      "鲜切",
+      "果汁"
+    ],
+    "category": "fruit",
+    "isOpen": true,
+    "location": "止路74364号",
+    "phone": "19178327811",
+    "businessHours": "06:30-22:00",
+    "description": "Optional intangible product"
+  },
+  {
+    "id": 23,
+    "name": "北京市阳建设（集团）有限公司甜点",
+    "rating": 4.4,
+    "sales": 4296,
+    "minOrder": 9,
+    "deliveryFee": 0,
+    "deliveryTime": "34分钟",
+    "tags": [
+      "蛋糕",
+      "面包",
+      "甜品"
+    ],
+    "category": "dessert",
+    "isOpen": true,
+    "location": "却栋93295号",
+    "phone": "0161-39579843",
+    "businessHours": "06:30-22:00",
+    "description": "Reactive neutral customer loyalty"
+  },
+  {
+    "id": 24,
+    "name": "济林市海燕水产（集团）有限公司超市",
+    "rating": 3.6,
+    "sales": 3393,
+    "minOrder": 23,
+    "deliveryFee": 1,
+    "deliveryTime": "20分钟",
+    "tags": [
+      "日用品",
+      "零食",
+      "饮料"
+    ],
+    "category": "supermarket",
+    "isOpen": true,
+    "location": "初路55070号",
+    "phone": "0443-44578650",
+    "businessHours": "06:30-22:00",
+    "description": "Reactive data-driven middleware"
+  },
+  {
+    "id": 25,
+    "name": "南阳市国强燃气（集团）有限公司美食",
+    "rating": 3.6,
+    "sales": 426,
+    "minOrder": 10,
+    "deliveryFee": 0,
+    "deliveryTime": "16分钟",
+    "tags": [
+      "中餐",
+      "快餐",
+      "学生餐"
+    ],
+    "category": "food",
+    "isOpen": true,
+    "location": "兴路38680号",
+    "phone": "042-97810199",
+    "businessHours": "06:30-22:00",
+    "description": "Grass-roots well-modulated complexity"
+  },
+  {
+    "id": 26,
+    "name": "海州市胤祥水产无限公司饮品",
+    "rating": 4.1,
+    "sales": 6519,
+    "minOrder": 25,
+    "deliveryFee": 1,
+    "deliveryTime": "25分钟",
+    "tags": [
+      "奶茶",
+      "果茶",
+      "咖啡"
+    ],
+    "category": "drink",
+    "isOpen": true,
+    "location": "望中心118号",
+    "phone": "032-80331808",
+    "businessHours": "06:30-22:00",
+    "description": "Virtual eco-centric firmware"
+  },
+  {
+    "id": 27,
+    "name": "南汉市梓浩林业有限公司小吃",
+    "rating": 4.3,
+    "sales": 5772,
+    "minOrder": 17,
+    "deliveryFee": 1,
+    "deliveryTime": "33分钟",
+    "tags": [
+      "炸鸡",
+      "汉堡",
+      "烧烤"
+    ],
+    "category": "snack",
+    "isOpen": true,
+    "location": "孙路72698号",
+    "phone": "0599-55190579",
+    "businessHours": "06:30-22:00",
+    "description": "Customizable methodical standardization"
+  },
+  {
+    "id": 28,
+    "name": "宁州市乐驹建设无限责任公司水果",
+    "rating": 3.7,
+    "sales": 2823,
+    "minOrder": 27,
+    "deliveryFee": 1,
+    "deliveryTime": "27分钟",
+    "tags": [
+      "水果捞",
+      "鲜切",
+      "果汁"
+    ],
+    "category": "fruit",
+    "isOpen": true,
+    "location": "朴路25号",
+    "phone": "021-63150195",
+    "businessHours": "06:30-22:00",
+    "description": "Persistent static alliance"
+  },
+  {
+    "id": 29,
+    "name": "山东省静旅游发展无限责任公司甜点",
+    "rating": 3.6,
+    "sales": 5599,
+    "minOrder": 8,
+    "deliveryFee": 2,
+    "deliveryTime": "18分钟",
+    "tags": [
+      "蛋糕",
+      "面包",
+      "甜品"
+    ],
+    "category": "dessert",
+    "isOpen": true,
+    "location": "森侬75562号",
+    "phone": "092-14055184",
+    "businessHours": "06:30-22:00",
+    "description": "Horizontal 24/7 knowledge base"
+  },
+  {
+    "id": 30,
+    "name": "青海省波矿业无限公司超市",
+    "rating": 4.6,
+    "sales": 1686,
+    "minOrder": 15,
+    "deliveryFee": 0,
+    "deliveryTime": "33分钟",
+    "tags": [
+      "日用品",
+      "零食",
+      "饮料"
+    ],
+    "category": "supermarket",
+    "isOpen": true,
+    "location": "佘街9号",
+    "phone": "056-74629589",
+    "businessHours": "06:30-22:00",
+    "description": "Fundamental eco-centric structure"
+  }
+]

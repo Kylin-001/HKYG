@@ -180,4 +180,67 @@ public class AdminUserController {
             return R.error(500, "重置密码失败");
         }
     }
+
+    /**
+     * 获取当前登录用户信息
+     */
+    @Operation(summary = "获取当前登录用户信息")
+    @GetMapping("/profile")
+    public R getProfile(@Parameter(description = "用户ID") @RequestParam Long userId) {
+        AdminUser user = adminUserService.getUserInfo(userId);
+        if (user == null) {
+            return R.error(404, "用户不存在");
+        }
+        // 不返回密码
+        user.setPassword(null);
+        return R.ok().data(user);
+    }
+
+    /**
+     * 更新当前登录用户信息
+     */
+    @Operation(summary = "更新当前登录用户信息")
+    @PutMapping("/profile")
+    public R updateProfile(@Parameter(description = "用户信息") @RequestBody AdminUser user) {
+        if (user.getId() == null) {
+            return R.error(400, "用户ID不能为空");
+        }
+        // 不允许修改敏感字段
+        user.setUsername(null);
+        user.setPassword(null);
+        user.setStatus(null);
+        user.setRoleIds(null);
+
+        boolean success = adminUserService.updateUser(user);
+        if (success) {
+            return R.ok("更新个人信息成功");
+        } else {
+            return R.error(500, "更新个人信息失败");
+        }
+    }
+
+    /**
+     * 更新头像
+     */
+    @Operation(summary = "更新头像")
+    @PutMapping("/avatar")
+    public R updateAvatar(@Parameter(description = "头像信息") @RequestBody Map<String, Object> params) {
+        Long userId = Long.parseLong(params.get("userId").toString());
+        String avatar = (String) params.get("avatar");
+
+        if (avatar == null) {
+            return R.error(400, "头像URL不能为空");
+        }
+
+        AdminUser user = new AdminUser();
+        user.setId(userId);
+        user.setAvatar(avatar);
+
+        boolean success = adminUserService.updateUser(user);
+        if (success) {
+            return R.ok("更新头像成功");
+        } else {
+            return R.error(500, "更新头像失败");
+        }
+    }
 }

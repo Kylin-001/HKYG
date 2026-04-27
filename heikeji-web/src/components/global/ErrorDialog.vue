@@ -143,7 +143,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useI18n } from '@/locales'
 import { ElMessage } from 'element-plus'
 import {
   Warning,

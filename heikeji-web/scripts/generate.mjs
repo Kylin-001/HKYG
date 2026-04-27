@@ -33,8 +33,8 @@ const TEMPLATES = {
 </template>
 
 <script setup lang="${options.lang || 'ts'}">
-${options.withTypes ? `interface Props {\n  // Define props here\n}\n\nconst props = defineProps<Props>()\n` : `defineProps<{\n  // Define props here\n}>()`}
-${options.withTypes ? `const emit = defineEmits<{\n  (e: 'event-name', payload: unknown): void\n}>()\n` : ''}
+${options.withTypes ? 'interface Props {\n  // Define props here\n}\n\nconst props = defineProps<Props>()\n' : 'defineProps<{\n  // Define props here\n}>()'}
+${options.withTypes ? 'const emit = defineEmits<{\n  (e: \'event-name\', payload: unknown): void\n}>()\n' : ''}
 </script>
 
 ${options.withStyle ? `<style scoped>\n.${toKebabCase(name)} {\n  /* Component styles */\n}\n</style>` : ''}`,
@@ -282,7 +282,7 @@ function generate(options: GenerateOptions): void {
 
   if (withTest && TEST_TEMPLATES[type]) {
     const testDir = path.join(process.cwd(), '__tests__', baseDir, type === 'page' ? `${toKebabCase(name)}` : '')
-    
+
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, { recursive: true })
     }

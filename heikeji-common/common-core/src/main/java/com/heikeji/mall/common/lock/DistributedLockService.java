@@ -160,6 +160,6 @@ public class DistributedLockService {
 
     @FunctionalInterface
     public interface LockExecutor<T> {
-        T execute() throws Exception;
+        T execute();
     }
 }

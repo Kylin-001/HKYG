@@ -137,7 +137,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 `
 
-  let content = header + markdown + '\n\n' + existingContent.replace(header, '')
+  const content = header + markdown + '\n\n' + existingContent.replace(header, '')
 
   fs.writeFileSync('CHANGELOG.md', content.trim() + '\n')
 

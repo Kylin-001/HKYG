@@ -112,7 +112,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useI18n } from '@/locales'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Calendar, DocumentDelete } from '@element-plus/icons-vue'
 import { useOrderStore } from '@/stores/order'

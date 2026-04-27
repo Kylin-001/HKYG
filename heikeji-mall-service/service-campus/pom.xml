@@ -61,7 +61,18 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- WebSocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- 通用工具类 -->
+        <dependency>
+            <groupId>com.heikeji</groupId>
+            <artifactId>common-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.heikeji</groupId>
             <artifactId>common-core</artifactId>

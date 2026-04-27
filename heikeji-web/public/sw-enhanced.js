@@ -30,10 +30,10 @@ const CACHE_NAMES = {
 
 // TTL configuration (in milliseconds)
 const CACHE_TTL = {
-  static: 7 * 24 * 60 * 60 * 1000,      // 7 days for static assets
-  api: 5 * 60 * 1000,                     // 5 minutes for API responses
-  images: 30 * 24 * 60 * 60 * 1000,       // 30 days for images
-  fonts: 365 * 24 * 60 * 60 * 1000        // 1 year for fonts
+  static: 7 * 24 * 60 * 60 * 1000, // 7 days for static assets
+  api: 5 * 60 * 1000, // 5 minutes for API responses
+  images: 30 * 24 * 60 * 60 * 1000, // 30 days for images
+  fonts: 365 * 24 * 60 * 60 * 1000 // 1 year for fonts
 }
 
 // Precache manifest - critical resources to cache during install
@@ -43,7 +43,12 @@ const PRECACHE_MANIFEST = [
   '/manifest.json',
   '/manifest-enhanced.json',
   '/offline.html',
-  '/favicon.svg'
+  '/favicon.svg',
+  '/logo-new.png',
+  '/images/campus-1.jpg',
+  '/images/campus-2.jpg',
+  '/images/campus-3.jpg',
+  '/images/campus-4.jpg'
 ]
 
 // Static resource extensions for Cache First strategy
@@ -463,7 +468,7 @@ function createOfflineAPIResponse(url: string): Response {
     error: 'Offline',
     code: 'OFFLINE',
     message: '当前处于离线模式，请检查网络连接后重试',
-    url: url,
+    url,
     cachedAt: null
   }), {
     status: 503,
@@ -613,7 +618,7 @@ async function syncPendingOrders(): Promise<void> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${order.token}`
+          Authorization: `Bearer ${order.token}`
         },
         body: JSON.stringify(order.data)
       })
@@ -640,7 +645,7 @@ async function syncPendingReviews(): Promise<void> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${review.token}`
+          Authorization: `Bearer ${review.token}`
         },
         body: JSON.stringify(review.data)
       })
@@ -667,7 +672,7 @@ async function syncPendingFeedback(): Promise<void> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${feedback.token}`
+          Authorization: `Bearer ${feedback.token}`
         },
         body: JSON.stringify(feedback.data)
       })

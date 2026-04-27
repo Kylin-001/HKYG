@@ -4,7 +4,7 @@
       <div class="header-content max-w-screen-xl mx-auto px-4 lg:px-8">
         <h1 class="page-title">
           <el-icon><Reading /></el-icon>
-          图书馆
+          {{ t('library.title') }}
         </h1>
         <div class="header-tabs">
           <button
@@ -16,25 +16,38 @@
           >
             <el-icon><component :is="tab.icon" /></el-icon>
             {{ tab.label }}
-            <span v-if="tab.badge" class="tab-badge">{{ tab.badge }}</span>
+            <span
+              v-if="tab.badge"
+              class="tab-badge"
+            >{{ tab.badge }}</span>
           </button>
         </div>
       </div>
     </div>
 
     <div class="main-content max-w-screen-xl mx-auto px-4 lg:px-8 py-6">
-      <div v-if="activeTab === 'search'" class="tab-content">
+      <div
+        v-if="activeTab === 'search'"
+        class="tab-content"
+      >
         <div class="search-section glass-effect rounded-2xl p-6 mb-6">
           <div class="search-bar-wrapper">
-            <el-icon class="search-icon"><Search /></el-icon>
+            <el-icon class="search-icon">
+              <Search />
+            </el-icon>
             <input
               v-model="bookSearchKeyword"
               type="text"
-              placeholder="搜索书名、作者、ISBN..."
+              :placeholder="t('library.searchPlaceholder')"
               class="search-input"
               @keyup.enter="handleBookSearch"
-            />
-            <button class="search-btn" @click="handleBookSearch">搜索</button>
+            >
+            <button
+              class="search-btn"
+              @click="handleBookSearch"
+            >
+              {{ t('library.searchBtn') }}
+            </button>
           </div>
 
           <div class="quick-filters">
@@ -50,19 +63,38 @@
           </div>
         </div>
 
-        <div v-if="!hasSearched" class="welcome-section glass-effect rounded-2xl p-8 text-center">
-          <el-icon class="welcome-icon"><Reading /></el-icon>
-          <h2 class="welcome-title">探索知识的海洋</h2>
-          <p class="welcome-desc">搜索你感兴趣的书籍，开启阅读之旅</p>
+        <div
+          v-if="!hasSearched"
+          class="welcome-section glass-effect rounded-2xl p-8 text-center"
+        >
+          <el-icon class="welcome-icon">
+            <Reading />
+          </el-icon>
+          <h2 class="welcome-title">
+            {{ t('library.welcomeTitle') }}
+          </h2>
+          <p class="welcome-desc">
+            {{ t('library.welcomeDesc') }}
+          </p>
           <div class="hot-keywords">
-            <span class="hot-label">热门搜索：</span>
-            <button v-for="kw in hotKeywords" :key="kw" class="keyword-tag" @click="bookSearchKeyword = kw; handleBookSearch()">{{ kw }}</button>
+            <span class="hot-label">{{ t('library.hotSearch') }}</span>
+            <button
+              v-for="kw in hotKeywords"
+              :key="kw"
+              class="keyword-tag"
+              @click="bookSearchKeyword = kw; handleBookSearch()"
+            >
+              {{ kw }}
+            </button>
           </div>
         </div>
 
-        <div v-else class="results-section">
+        <div
+          v-else
+          class="results-section"
+        >
           <div class="results-header">
-            <span class="results-count">找到 {{ searchResults.length }} 本相关书籍</span>
+            <span class="results-count">{{ t('library.resultsCount', { count: searchResults.length }) }}</span>
             <div class="sort-options">
               <button
                 v-for="sort in bookSortOptions"
@@ -84,14 +116,27 @@
               @click="showBookDetail(book)"
             >
               <div class="book-cover">
-                <img :src="book.cover" :alt="book.title" width="140" height="200" loading="lazy" />
-                <span class="availability-badge" :class="book.available ? 'available' : 'unavailable'">
-                  {{ book.available ? '可借' : '已借出' }}
+                <img
+                  :src="book.cover"
+                  :alt="book.title"
+                  width="140"
+                  height="200"
+                  loading="lazy"
+                >
+                <span
+                  class="availability-badge"
+                  :class="book.available ? 'available' : 'unavailable'"
+                >
+                  {{ book.available ? t('library.available') : t('library.unavailable') }}
                 </span>
               </div>
               <div class="book-info">
-                <h3 class="book-title">{{ book.title }}</h3>
-                <p class="book-author">{{ book.author }}</p>
+                <h3 class="book-title">
+                  {{ book.title }}
+                </h3>
+                <p class="book-author">
+                  {{ book.author }}
+                </p>
                 <div class="book-meta">
                   <span class="meta-item">
                     <el-icon><Files /></el-icon>
@@ -99,7 +144,7 @@
                   </span>
                   <span class="meta-item">
                     <el-icon><CollectionTag /></el-icon>
-                    剩余{{ book.copies }}本
+                    {{ t('library.remaining', { count: book.copies }) }}
                   </span>
                 </div>
               </div>
@@ -108,12 +153,15 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'seat'" class="tab-content">
+      <div
+        v-if="activeTab === 'seat'"
+        class="tab-content"
+      >
         <div class="seat-info-bar glass-effect rounded-2xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
           <div class="info-group">
             <div class="info-item">
               <el-icon><OfficeBuilding /></el-icon>
-              <span>当前楼层：{{ currentFloor }}F</span>
+              <span>{{ t('library.currentFloor', { floor: currentFloor }) }}</span>
             </div>
             <div class="info-item">
               <el-icon><Clock /></el-icon>
@@ -121,7 +169,7 @@
             </div>
             <div class="info-item available">
               <el-icon><Chair /></el-icon>
-              <span>可用座位：{{ availableSeats }}/{{ totalSeats }}</span>
+              <span>{{ t('library.availableSeats', { available: availableSeats, total: totalSeats }) }}</span>
             </div>
           </div>
           <div class="floor-selector">
@@ -140,16 +188,16 @@
         <div class="seat-map glass-effect rounded-2xl overflow-hidden">
           <div class="map-header">
             <div class="map-legend">
-              <span class="legend-item"><span class="dot available-dot"></span>可用</span>
-              <span class="legend-item"><span class="dot occupied-dot"></span>已占用</span>
-              <span class="legend-item"><span class="dot reserved-dot"></span>我的预约</span>
-              <span class="legend-item"><span class="dot maintenance-dot"></span>维护中</span>
+              <span class="legend-item"><span class="dot available-dot" />{{ t('library.legendAvailable') }}</span>
+              <span class="legend-item"><span class="dot occupied-dot" />{{ t('library.legendOccupied') }}</span>
+              <span class="legend-item"><span class="dot reserved-dot" />{{ t('library.legendReserved') }}</span>
+              <span class="legend-item"><span class="dot maintenance-dot" />{{ t('library.legendMaintenance') }}</span>
             </div>
           </div>
 
           <div class="seat-grid-container">
             <div class="stage-area">
-              <span class="stage-label">讲 台</span>
+              <span class="stage-label">{{ t('library.stage') }}</span>
             </div>
             <div class="seats-layout">
               <div
@@ -176,14 +224,17 @@
         </div>
 
         <transition name="slide-up">
-          <div v-if="selectedSeat" class="seat-action-bar glass-effect rounded-2xl p-5 mt-6">
+          <div
+            v-if="selectedSeat"
+            class="seat-action-bar glass-effect rounded-2xl p-5 mt-6"
+          >
             <div class="selected-info">
               <div class="seat-detail">
-                <h4>座位 {{ selectedSeat.num }}</h4>
-                <p>{{ currentFloor }}F - {{ selectedSeat.zone }}区 - 第{{ selectedSeat.row }}排</p>
+                <h4>{{ t('library.seatNumber', { num: selectedSeat.num }) }}</h4>
+                <p>{{ t('library.seatInfo', { floor: currentFloor, zone: selectedSeat.zone, row: selectedSeat.row }) }}</p>
               </div>
               <div class="time-picker">
-                <label>预约时长：</label>
+                <label>{{ t('library.bookingDuration') }}</label>
                 <div class="duration-options">
                   <button
                     v-for="d in durations"
@@ -198,19 +249,88 @@
               </div>
             </div>
             <div class="action-buttons">
-              <button class="cancel-btn" @click="selectedSeat = null">取消选择</button>
-              <button class="confirm-btn" @click="confirmBooking">
+              <button
+                class="cancel-btn"
+                @click="selectedSeat = null"
+              >
+                {{ t('library.cancelSelection') }}
+              </button>
+              <button
+                class="confirm-btn"
+                @click="confirmBooking"
+              >
                 <el-icon><Select /></el-icon>
-                确认预约
+                {{ t('library.confirmBooking') }}
               </button>
             </div>
           </div>
         </transition>
 
+        <!-- 我的借阅记录 -->
+        <div class="my-borrows mt-6">
+          <h3 class="section-heading">
+            <el-icon><Reading /></el-icon>
+            我的借阅
+          </h3>
+          <div class="borrow-list glass-effect rounded-2xl overflow-hidden">
+            <div
+              v-for="borrow in myBorrowRecords"
+              :key="borrow.id"
+              class="borrow-item"
+              :class="borrow.status"
+            >
+              <img
+                :src="borrow.bookCover"
+                :alt="borrow.bookTitle"
+                class="borrow-cover"
+              >
+              <div class="borrow-info">
+                <h4>{{ borrow.bookTitle }}</h4>
+                <p>借阅日期：{{ borrow.borrowDate }}</p>
+                <p :class="{ 'text-red-500': borrow.status === 'overdue' }">
+                  应还日期：{{ borrow.dueDate }}
+                  <span
+                    v-if="borrow.status === 'overdue'"
+                    class="overdue-tag"
+                  >已逾期</span>
+                </p>
+              </div>
+              <span
+                class="borrow-status-tag"
+                :class="borrow.status"
+              >{{ getBorrowStatusLabel(borrow.status) }}</span>
+              <div class="borrow-actions">
+                <button
+                  v-if="borrow.status === 'borrowed' && borrow.renewCount < 2"
+                  class="renew-btn"
+                  @click="renewBorrow(borrow.id)"
+                >
+                  续借
+                </button>
+                <button
+                  v-if="borrow.status === 'borrowed'"
+                  class="return-btn"
+                  @click="returnBorrow(borrow.id)"
+                >
+                  归还
+                </button>
+              </div>
+            </div>
+            <div
+              v-if="myBorrowRecords.length === 0"
+              class="empty-borrows text-center py-8"
+            >
+              <p class="text-gray-400">
+                暂无借阅记录
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div class="my-bookings mt-6">
           <h3 class="section-heading">
             <el-icon><Ticket /></el-icon>
-            我的预约记录
+            {{ t('library.myBookings') }}
           </h3>
           <div class="booking-list glass-effect rounded-2xl overflow-hidden">
             <div
@@ -219,22 +339,43 @@
               class="booking-item"
               :class="booking.status"
             >
-              <div class="booking-status-indicator"></div>
+              <div class="booking-status-indicator" />
               <div class="booking-info">
-                <h4>{{ booking.seatNum }} 号座位</h4>
+                <h4>{{ t('library.seatNumber', { num: booking.seatNum }) }}</h4>
                 <p>{{ booking.floor }}F · {{ booking.date }} · {{ booking.timeRange }}</p>
               </div>
               <span class="booking-status-tag">{{ getStatusLabel(booking.status) }}</span>
-              <button
-                v-if="booking.status === 'active'"
-                class="cancel-booking-btn"
-                @click="cancelBooking(booking.id)"
-              >
-                取消预约
-              </button>
+              <div class="booking-actions">
+                <button
+                  v-if="booking.status === 'active'"
+                  class="checkin-btn"
+                  @click="checkInBooking(booking.id)"
+                >
+                  签到
+                </button>
+                <button
+                  v-if="booking.status === 'active'"
+                  class="checkout-btn"
+                  @click="checkOutBooking(booking.id)"
+                >
+                  签退
+                </button>
+                <button
+                  v-if="booking.status === 'active'"
+                  class="cancel-booking-btn"
+                  @click="cancelBooking(booking.id)"
+                >
+                  {{ t('library.cancelBooking') }}
+                </button>
+              </div>
             </div>
-            <div v-if="myBookings.length === 0" class="empty-bookings text-center py-8">
-              <p class="text-gray-400">暂无预约记录</p>
+            <div
+              v-if="myBookings.length === 0"
+              class="empty-bookings text-center py-8"
+            >
+              <p class="text-gray-400">
+                {{ t('library.noBookings') }}
+              </p>
             </div>
           </div>
         </div>
@@ -243,49 +384,71 @@
 
     <Teleport to="body">
       <transition name="modal-fade">
-        <div v-if="selectedBook" class="modal-overlay" @click.self="selectedBook = null">
+        <div
+          v-if="selectedBook"
+          class="modal-overlay"
+          @click.self="selectedBook = null"
+        >
           <div class="book-modal glass-effect rounded-2xl overflow-hidden">
-            <div class="modal-close" @click="selectedBook = null">
+            <div
+              class="modal-close"
+              @click="selectedBook = null"
+            >
               <el-icon><Close /></el-icon>
             </div>
             <div class="modal-body">
               <div class="detail-cover">
-                <img :src="selectedBook.cover" :alt="selectedBook.title" />
+                <img
+                  :src="selectedBook.cover"
+                  :alt="selectedBook.title"
+                >
               </div>
               <div class="detail-info">
                 <h2>{{ selectedBook.title }}</h2>
-                <p class="author-line">{{ selectedBook.author }} 著</p>
+                <p class="author-line">
+                  {{ selectedBook.author }}
+                </p>
                 <div class="detail-meta">
                   <div class="dm-item">
-                    <span class="dm-label">出版社</span>
+                    <span class="dm-label">{{ t('library.publisher') }}</span>
                     <span class="dm-value">{{ selectedBook.publisher }}</span>
                   </div>
                   <div class="dm-item">
-                    <span class="dm-label">ISBN</span>
+                    <span class="dm-label">{{ t('library.isbn') }}</span>
                     <span class="dm-value">{{ selectedBook.isbn }}</span>
                   </div>
                   <div class="dm-item">
-                    <span class="dm-label">分类</span>
+                    <span class="dm-label">{{ t('library.category') }}</span>
                     <span class="dm-value">{{ selectedBook.category }}</span>
                   </div>
                   <div class="dm-item">
-                    <span class="dm-label">馆藏位置</span>
+                    <span class="dm-label">{{ t('library.location') }}</span>
                     <span class="dm-value">{{ selectedBook.location }}</span>
                   </div>
                   <div class="dm-item">
-                    <span class="dm-label">剩余馆藏</span>
-                    <span class="dm-value highlight">{{ selectedBook.copies }} 本</span>
+                    <span class="dm-label">{{ t('library.copies') }}</span>
+                    <span class="dm-value highlight">{{ selectedBook.copies }}</span>
                   </div>
                 </div>
-                <p class="book-intro">{{ selectedBook.intro }}</p>
+                <p class="book-intro">
+                  {{ selectedBook.intro }}
+                </p>
                 <div class="modal-actions">
-                  <button class="action-btn secondary">
+                  <button
+                    class="action-btn secondary"
+                    :disabled="campusStore.loading"
+                    @click="addToFavorites(selectedBook.isbn)"
+                  >
                     <el-icon><Star /></el-icon>
-                    收藏
+                    {{ t('library.favorite') }}
                   </button>
-                  <button class="action-btn primary" :disabled="!selectedBook.available">
+                  <button
+                    class="action-btn primary"
+                    :disabled="!selectedBook.available || campusStore.loading"
+                    @click="borrowBook(selectedBook.isbn)"
+                  >
                     <el-icon><Reading /></el-icon>
-                    {{ selectedBook.available ? '立即借阅' : '已借完' }}
+                    {{ selectedBook.available ? t('library.borrowNow') : t('library.soldOut') }}
                   </button>
                 </div>
               </div>
@@ -298,7 +461,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   Reading, Search, Files, CollectionTag,
@@ -307,35 +471,42 @@ import {
 import { useCampusStore } from '@/stores/campus'
 
 const campusStore = useCampusStore()
+const { t } = useI18n()
 
 const activeTab = ref('search')
-const tabs = [
-  { value: 'search', label: '图书检索', icon: 'Search' },
-  { value: 'seat', label: '座位预约', icon: 'Chair' }
-]
+const tabs = computed(() => [
+  { value: 'search', label: t('library.bookSearch'), icon: 'Search' },
+  { value: 'seat', label: t('library.seatBooking'), icon: 'Chair' }
+])
 
 const bookSearchKeyword = ref('')
 const selectedBookCategory = ref('all')
 const hasSearched = ref(false)
 const bookSortBy = ref('relevance')
 
-const bookCategories = [
-  { value: 'all', label: '全部' },
-  { value: 'cs', label: '计算机' },
-  { value: 'math', label: '数学' },
-  { value: 'literature', label: '文学' },
-  { value: 'science', label: '理工' },
-  { value: 'economics', label: '经管' },
-  { value: 'art', label: '艺术' }
-]
+const bookCategories = computed(() => [
+  { value: 'all', label: t('library.catAll') },
+  { value: 'cs', label: t('library.catCS') },
+  { value: 'math', label: t('library.catMath') },
+  { value: 'literature', label: t('library.catLiterature') },
+  { value: 'science', label: t('library.catScience') },
+  { value: 'economics', label: t('library.catEconomics') },
+  { value: 'art', label: t('library.catArt') }
+])
 
-const hotKeywords = ['高等数学', '数据结构', '人工智能导论', 'Python编程', '算法竞赛']
+const hotKeywords = computed(() => [
+  t('product.keywordHeadphones'),
+  t('product.keywordLaptop'),
+  t('product.keywordSnacks'),
+  t('product.keywordShampoo'),
+  t('product.keywordCharger')
+])
 
-const bookSortOptions = [
-  { value: 'relevance', label: '综合排序' },
-  { value: 'newest', label: '最新入库' },
-  { value: 'popular', label: '热门借阅' }
-]
+const bookSortOptions = computed(() => [
+  { value: 'relevance', label: t('library.sortByRelevance') },
+  { value: 'newest', label: t('library.sortByNewest') },
+  { value: 'popular', label: t('library.sortByPopular') }
+])
 
 interface Book {
   isbn: string
@@ -374,9 +545,9 @@ async function handleBookSearch() {
 
   try {
     await campusStore.searchBooks(bookSearchKeyword.value)
-    ElMessage.success(`找到 ${searchResults.value.length} 本相关书籍`)
+    ElMessage.success(t('library.searchSuccess', { count: searchResults.value.length }))
   } catch {
-    ElMessage.error('搜索失败')
+    ElMessage.error(t('library.searchFailed'))
   }
 }
 
@@ -393,6 +564,23 @@ function showBookDetail(book: Book) {
   selectedBook.value = book
 }
 
+async function borrowBook(bookId: string) {
+  try {
+    await campusStore.borrowBookItem(bookId, 30) // 默认借阅30天
+    selectedBook.value = null
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
+async function addToFavorites(bookId: string) {
+  try {
+    await campusStore.addBookToFavorites(bookId)
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
 interface Seat {
   id: string
   num: number
@@ -405,38 +593,35 @@ const currentFloor = ref(3)
 const selectedSeat = ref<Seat | null>(null)
 const selectedDuration = ref(120)
 
-const durations = [
-  { value: 60, label: '1小时' },
-  { value: 120, label: '2小时' },
-  { value: 180, label: '3小时' },
-  { value: 240, label: '4小时' }
-]
+const durations = computed(() => [
+  { value: 60, label: t('library.duration1h') },
+  { value: 120, label: t('library.duration2h') },
+  { value: 180, label: t('library.duration3h') },
+  { value: 240, label: t('library.duration4h') }
+])
 
-function generateSeats(): Seat[] {
-  const seats: Seat[] = []
-  const zones = ['A', 'B', 'C']
-  const statuses: Seat['status'][] = ['available', 'available', 'available', 'available', 'available', 'occupied', 'occupied', 'reserved', 'maintenance']
+// 从后端获取座位数据
+const allSeats = ref<Seat[]>([])
 
-  for (let row = 1; row <= 10; row++) {
-    const colsPerZone = row <= 3 ? 6 : row <= 7 ? 8 : 10
-    let seatNum = (row - 1) * (colsPerZone * 3) + 1
-
-    for (const zone of zones) {
-      for (let col = 0; col < colsPerZone; col++) {
-        seats.push({
-          id: `${currentFloor.value}-${row}-${zone}-${col}`,
-          num: seatNum++,
-          row,
-          zone,
-          status: statuses[Math.floor(Math.random() * statuses.length)]
-        })
-      }
-    }
+async function loadSeats() {
+  try {
+    const seats = await campusStore.fetchLibrarySeats(currentFloor.value)
+    allSeats.value = seats.map(s => ({
+      id: s.id,
+      num: s.num,
+      row: s.row,
+      zone: s.zone,
+      status: s.status
+    }))
+  } catch {
+    ElMessage.error('获取座位信息失败')
   }
-  return seats
 }
 
-const allSeats = ref<Seat[]>(generateSeats())
+// 楼层切换时重新加载座位
+watch(currentFloor, () => {
+  loadSeats()
+})
 
 const seatRows = computed(() => {
   const rows: { row: number; label: string; seats: Seat[] }[] = []
@@ -448,7 +633,7 @@ const seatRows = computed(() => {
   })
 
   grouped.forEach((seats, rowNum) => {
-    rows.push({ row: rowNum, label: `第${rowNum}排`, seats })
+    rows.push({ row: rowNum, label: t('library.row', { num: rowNum }), seats })
   })
 
   return rows.sort((a, b) => a.row - b.row)
@@ -459,7 +644,7 @@ const availableSeats = computed(() => allSeats.value.filter(s => s.status === 'a
 
 const currentDate = computed(() => {
   const d = new Date()
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+  return d.toLocaleDateString()
 })
 
 function selectSeat(seat: Seat) {
@@ -468,48 +653,114 @@ function selectSeat(seat: Seat) {
   }
 }
 
-function confirmBooking() {
+async function confirmBooking() {
   if (!selectedSeat.value) return
-  ElMessage.success(`成功预约 ${selectedSeat.value.num} 号座位，时长 ${selectedDuration.value} 分钟`)
-  const seat = allSeats.value.find(s => s.id === selectedSeat.value!.id)!
-  seat.status = 'reserved'
-  myBookings.value.unshift({
-    id: Date.now(),
-    seatNum: seat.num,
-    floor: currentFloor.value,
-    date: currentDate.value.replace(/年|月/g, '-').replace('日', ''),
-    timeRange: `${selectedDuration.value}分钟`,
-    status: 'active'
-  })
-  selectedSeat.value = null
+
+  try {
+    const now = new Date()
+    const startTime = now.toTimeString().slice(0, 5)
+    const endTime = new Date(now.getTime() + selectedDuration.value * 60000).toTimeString().slice(0, 5)
+
+    await campusStore.bookLibrarySeat(
+      selectedSeat.value.id,
+      currentFloor.value,
+      now.toISOString().split('T')[0],
+      startTime,
+      endTime
+    )
+
+    // 重新加载座位数据
+    await loadSeats()
+    selectedSeat.value = null
+  } catch {
+    // 错误已在store中处理
+  }
 }
 
-interface Booking {
-  id: number
-  seatNum: number
-  floor: number
-  date: string
-  timeRange: string
-  status: 'active' | 'completed' | 'cancelled'
+// 使用store中的预约记录
+const myBookings = computed(() => {
+  return campusStore.mySeatBookings.map(booking => ({
+    id: booking.id,
+    seatNum: booking.seatNum,
+    floor: booking.floor,
+    date: booking.date,
+    timeRange: `${booking.startTime} - ${booking.endTime}`,
+    status: booking.status
+  }))
+})
+
+async function cancelBooking(id: string) {
+  try {
+    await campusStore.cancelLibrarySeatBooking(id)
+  } catch {
+    // 错误已在store中处理
+  }
 }
 
-const myBookings = ref<Booking[]>([
-  { id: 1, seatNum: 42, floor: 3, date: '2026-04-02', timeRange: '2小时', status: 'active' },
-  { id: 2, seatNum: 18, floor: 2, date: '2026-04-01', timeRange: '3小时', status: 'completed' }
-])
+// 签到功能
+async function checkInBooking(id: string) {
+  try {
+    await campusStore.checkInLibrarySeat(id)
+  } catch {
+    // 错误已在store中处理
+  }
+}
 
-function cancelBooking(id: number) {
-  const booking = myBookings.value.find(b => b.id === id)
-  if (booking) {
-    booking.status = 'cancelled'
-    ElMessage.info('已取消预约')
+// 签退功能
+async function checkOutBooking(id: string) {
+  try {
+    await campusStore.checkOutLibrarySeat(id)
+  } catch {
+    // 错误已在store中处理
   }
 }
 
 function getStatusLabel(status: string): string {
-  const map: Record<string, string> = { active: '进行中', completed: '已完成', cancelled: '已取消' }
+  const map: Record<string, string> = {
+    active: t('library.statusActive'),
+    completed: t('library.statusCompleted'),
+    cancelled: t('library.statusCancelled')
+  }
   return map[status] || status
 }
+
+// 借阅记录计算属性
+const myBorrowRecords = computed(() => campusStore.myBorrows)
+
+// 获取借阅状态标签
+function getBorrowStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    borrowed: '借阅中',
+    returned: '已归还',
+    overdue: '已逾期'
+  }
+  return map[status] || status
+}
+
+// 续借
+async function renewBorrow(borrowId: string) {
+  try {
+    await campusStore.renewBookItem(borrowId)
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
+// 归还
+async function returnBorrow(borrowId: string) {
+  try {
+    await campusStore.returnBookItem(borrowId)
+  } catch {
+    // 错误已在store中处理
+  }
+}
+
+// 页面加载时初始化数据
+onMounted(() => {
+  loadSeats()
+  campusStore.fetchMySeatBookings()
+  campusStore.fetchMyBorrows()
+})
 </script>
 
 <style scoped>

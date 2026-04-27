@@ -91,15 +91,15 @@ spring:
         
         # 认证服务路由
         - id: heikeji-mall-auth
-          uri: http://127.0.0.1:8085
+          uri: http://127.0.0.1:8081
           predicates:
             - Path=/api/auth/**
           filters:
             - StripPrefix=0
-        
+
         # 用户服务路由
         - id: heikeji-mall-user
-          uri: http://127.0.0.1:8085
+          uri: http://127.0.0.1:8081
           predicates:
             - Path=/api/user/**
           filters:
@@ -177,9 +177,17 @@ spring:
           filters:
             - StripPrefix=0
         
-        # 校园服务路由 - takeout
-        - id: heikeji-takeout
-          uri: http://127.0.0.1:8003
+        # 外卖服务路由 - /api/takeout/**
+        - id: heikeji-takeout-api
+          uri: http://127.0.0.1:8005
+          predicates:
+            - Path=/api/takeout/**
+          filters:
+            - StripPrefix=0
+        
+        # 外卖服务路由 - /takeout/** (兼容旧路径)
+        - id: heikeji-takeout-api-legacy
+          uri: http://127.0.0.1:8005
           predicates:
             - Path=/takeout/**
           filters:
@@ -326,6 +334,14 @@ gateway:
       - /api/user/captcha
       - /api/user/captcha/verify
       - /api/product/public/**
+      - /api/takeout/merchant/active
+      - /api/takeout/merchant/detail/**
+      - /api/takeout/merchant/search
+      - /api/takeout/product/**
+      - /takeout/merchant/active
+      - /takeout/merchant/detail/**
+      - /takeout/merchant/search
+      - /takeout/product/**
       - /fallback/**
     # JWT配置
     jwt:

@@ -1,3 +1,27 @@
+// 开发环境自毁机制：检测端口，如果是开发服务器端口则自动注销
+const CURRENT_URL = self.location.href
+const isDevPort = /:(5173|5174|5175|5176)\//.test(CURRENT_URL)
+
+// 如果是开发环境，立即自毁
+if (isDevPort) {
+  console.log('[SW] Development port detected, self-destructing...')
+  self.addEventListener('install', (event) => {
+    self.skipWaiting()
+  })
+  self.addEventListener('activate', (event) => {
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)))
+      }).then(() => self.clients.claim())
+    )
+  })
+  // 拦截所有请求直接返回网络请求，不缓存
+  self.addEventListener('fetch', (event) => {
+    event.respondWith(fetch(event.request).catch(() => new Response('Offline', { status: 503 })))
+  })
+  return
+}
+
 const CACHE_NAME = 'heikeji-v3'
 const STATIC_CACHE = 'heikeji-static-v2'
 const DYNAMIC_CACHE = 'heikeji-dynamic-v2'
@@ -54,8 +78,8 @@ self.addEventListener('activate', (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((name) => name !== CACHE_NAME && 
-                           name !== STATIC_CACHE && 
+            .filter((name) => name !== CACHE_NAME &&
+                           name !== STATIC_CACHE &&
                            name !== DYNAMIC_CACHE &&
                            name !== API_CACHE &&
                            name !== IMAGE_CACHE)
@@ -127,7 +151,7 @@ async function cacheFirst(request, cacheName) {
 
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName)
-      cache.put(request, networkResponse.clone())
+      await cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
@@ -150,7 +174,7 @@ async function networkFirstWithSWR(request, cacheName) {
 
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName)
-      cache.put(request, networkResponse.clone())
+      await cache.put(request, networkResponse.clone())
 
       return networkResponse
     } else if (networkResponse.status === 401 || networkResponse.status === 403) {
@@ -190,7 +214,7 @@ async function networkFirstWithFallback(request) {
 
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE)
-      cache.put(request, networkResponse.clone())
+      await cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
@@ -216,8 +240,9 @@ async function staleWhileRevalidate(request, cacheName) {
   const fetchPromise = fetch(request)
     .then((networkResponse) => {
       if (networkResponse.ok) {
+        const responseToCache = networkResponse.clone()
         caches.open(cacheName).then((cache) => {
-          cache.put(request, networkResponse.clone())
+          cache.put(request, responseToCache)
         })
       }
       return networkResponse

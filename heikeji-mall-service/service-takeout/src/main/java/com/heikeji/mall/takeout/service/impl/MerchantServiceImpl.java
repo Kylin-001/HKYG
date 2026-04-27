@@ -20,7 +20,7 @@ public class MerchantServiceImpl extends ServiceImpl<MerchantMapper, Merchant> i
     @Override
     public List<Merchant> getActiveMerchants() {
         QueryWrapper<Merchant> wrapper = new QueryWrapper<>();
-        wrapper.eq("status", 1) // 营业中
+        wrapper.eq("status", 1) // 营业中 (0-歇业, 1-营业中)
                .orderByDesc("sales");
         return this.list(wrapper);
     }

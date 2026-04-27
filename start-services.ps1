@@ -19,12 +19,12 @@ function Write-Log {
 }
 
 function Show-Banner {
-    Write-Host ""
-    Write-Host "╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║     Heikeji Campus Mall - Full Stack v2.0     ║" -ForegroundColor Cyan
-    Write-Host "║         Enhanced Startup Script                ║" -ForegroundColor Cyan
-    Write-Host "╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
-    Write-Host ""
+    Write-Host ''
+    Write-Host '==============================================' -ForegroundColor Cyan
+    Write-Host '     Heikeji Campus Mall - Full Stack v2.0     ' -ForegroundColor Cyan
+    Write-Host '         Enhanced Startup Script                ' -ForegroundColor Cyan
+    Write-Host '==============================================' -ForegroundColor Cyan
+    Write-Host ''
 }
 
 function Show-Help {
@@ -201,11 +201,11 @@ function Invoke-HealthCheck {
 function Show-Summary {
     param([array]$StartedServices, [timespan]$Duration)
 
-    Write-Host ""
-    Write-Host "╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║           [*] Startup Summary [*]               ║" -ForegroundColor Cyan
-    Write-Host "╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
-    Write-Host ""
+    Write-Host ''
+    Write-Host '==============================================' -ForegroundColor Cyan
+    Write-Host '           [*] Startup Summary [*]               ' -ForegroundColor Cyan
+    Write-Host '==============================================' -ForegroundColor Cyan
+    Write-Host ''
 
     $totalTime = "{0:F2}" -f $Duration.TotalSeconds
     Write-Log "Total startup time: $totalTime seconds" "INFO"
@@ -226,9 +226,9 @@ function Show-Summary {
     $backendSvcs = $StartedServices | Where-Object { $_.Name -ne "heikeji-web" } | Sort-Object Port
     foreach ($svc in $backendSvcs) {
         $portReady = Test-Port -Port $svc.Port -TimeoutMs 500
-        $statusIcon = if ($portReady) { [char]0x2705 } else { [char]0x23F3 }
+        $statusIcon = if ($portReady) { '[OK]' } else { '[..]' }
         $statusColor = if ($portReady) { "Green" } else { "Yellow" }
-        Write-Host "     - $($svc.Name):$($svc.Port.ToString().PadLeft(5))  ($($svc.DisplayName))" -ForegroundColor $statusColor
+        Write-Host "     - $($svc.Name):$($svc.Port.ToString().PadLeft(5))  ($($svc.DisplayName)) $statusIcon" -ForegroundColor $statusColor
     }
 
     Write-Host ""
@@ -294,10 +294,10 @@ $auxiliaryServices = @(
 
 # Start Frontend
 if (-not $backendOnly) {
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-    Write-Host "  [Phase 1/3] Starting Frontend" -ForegroundColor Yellow
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-    Write-Host ""
+    Write-Host '----------------------------------------------' -ForegroundColor DarkGray
+    Write-Host '  [Phase 1/3] Starting Frontend' -ForegroundColor Yellow
+    Write-Host '----------------------------------------------' -ForegroundColor DarkGray
+    Write-Host ''
 
     $frontendResult = Start-Frontend -Parallel $enableParallel
     if ($frontendResult) {
@@ -313,11 +313,11 @@ if (-not $backendOnly) {
 
 # Start Core Backend Services
 if (-not $frontendOnly -and -not $businessOnly) {
-    Write-Host ""
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-    Write-Host "  [Phase 2/3] Starting Core Services" -ForegroundColor Yellow
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-    Write-Host ""
+    Write-Host ''
+    Write-Host '----------------------------------------------' -ForegroundColor DarkGray
+    Write-Host '  [Phase 2/3] Starting Core Services' -ForegroundColor Yellow
+    Write-Host '----------------------------------------------' -ForegroundColor DarkGray
+    Write-Host ''
 
     foreach ($svc in $coreServices) {
         $result = Start-ServiceJob `
@@ -349,11 +349,11 @@ if (-not $frontendOnly -and -not $businessOnly) {
 
 # Start Business Services
 if (-not $frontendOnly -and -not $coreOnly) {
-    Write-Host ""
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-    Write-Host "  [Phase 3/3] Starting Business and Auxiliary Services" -ForegroundColor Yellow
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
-    Write-Host ""
+    Write-Host ''
+    Write-Host '----------------------------------------------' -ForegroundColor DarkGray
+    Write-Host '  [Phase 3/3] Starting Business and Auxiliary Services' -ForegroundColor Yellow
+    Write-Host '----------------------------------------------' -ForegroundColor DarkGray
+    Write-Host ''
 
     $allBusinessServices = $businessServices + $auxiliaryServices
 
@@ -391,12 +391,13 @@ if ($runHealthCheck) {
 $duration = (Get-Date) - $startTime
 Show-Summary -StartedServices $startedServices -Duration $duration
 
-Write-Host "[*] Tips:" -ForegroundColor Yellow
-Write-Host "  - Each service runs in its own window $(if ($enableParallel) { '(minimized)' })" -ForegroundColor White
-Write-Host "  - Wait 2-3 minutes for all services to fully initialize" -ForegroundColor White
-Write-Host "  - Check individual service windows for detailed logs" -ForegroundColor White
-Write-Host "  - Use -check option to verify service status" -ForegroundColor White
-Write-Host ""
+Write-Host '[*] Tips:' -ForegroundColor Yellow
+$parallelText = if ($enableParallel) { '(minimized)' } else { '' }
+Write-Host "  - Each service runs in its own window $parallelText" -ForegroundColor White
+Write-Host '  - Wait 2-3 minutes for all services to fully initialize' -ForegroundColor White
+Write-Host '  - Check individual service windows for detailed logs' -ForegroundColor White
+Write-Host '  - Use -check option to verify service status' -ForegroundColor White
+Write-Host ''
 
 if (-not $noWait) {
     Read-Host 'Press Enter to exit...'

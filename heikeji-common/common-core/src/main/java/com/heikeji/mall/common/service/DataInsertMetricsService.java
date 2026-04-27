@@ -1,6 +1,9 @@
 package com.heikeji.mall.common.service;
 
-import io.micrometer.core.instrument.*;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
@@ -261,7 +264,7 @@ public class DataInsertMetricsService implements HealthIndicator {
         private final AtomicLong maxDuration = new AtomicLong(0);
         private final List<Long> recentTimestamps = Collections.synchronizedList(new ArrayList<>());
 
-        public void record(boolean success, long durationMs, int successCount, int failCount) {
+        public void record(boolean success, long durationMs, int successNum, int failNum) {
             totalCount.incrementAndGet();
             totalDuration.addAndGet(durationMs);
 
@@ -273,9 +276,9 @@ public class DataInsertMetricsService implements HealthIndicator {
             }
 
             if (success) {
-                successCount.incrementAndGet();
+                this.successCount.incrementAndGet();
             } else {
-                failureCount.incrementAndGet();
+                this.failureCount.incrementAndGet();
             }
 
             recentTimestamps.add(System.currentTimeMillis());

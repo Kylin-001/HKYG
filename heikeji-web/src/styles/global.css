@@ -1754,9 +1754,7 @@ img.img-error {
 .el-notification {
   border-radius: var(--radius-lg, 16px) !important;
   border: 1px solid var(--color-border-subtle, #F3F4F6) !important;
-  box-shadow:
-    var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.16)) !important,
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  box-shadow: var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.16)) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 20px 24px !important;
@@ -1766,9 +1764,7 @@ img.img-error {
               box-shadow var(--duration-normal, 250ms) var(--ease-out, ease-out) !important;
 
   &:hover {
-    box-shadow:
-      var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.18)) !important,
-      0 0 30px rgba(59, 130, 246, 0.08) !important;
+    box-shadow: var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.18)) !important;
   }
 
   /* 标题区域 */
@@ -1851,9 +1847,7 @@ img.img-error {
 [data-theme="dark"] .el-notification,
 .dark .el-notification {
   border-color: var(--color-border-strong, #4B5563) !important;
-  box-shadow:
-    0 16px 32px rgba(0, 0, 0, 0.7) !important,
-    0 0 0 1px rgba(75, 85, 99, 0.3) inset !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7) !important;
 
   .el-notification__title {
     color: var(--color-text-primary, #F9FAFB) !important;
@@ -1876,9 +1870,7 @@ img.img-error {
 .el-dialog {
   border-radius: var(--radius-xl, 20px) !important;
   overflow: hidden !important;
-  box-shadow:
-    var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.16)) !important,
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+  box-shadow: var(--shadow-xl, 0 16px 32px rgba(17, 24, 39, 0.16)) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 
@@ -2016,9 +2008,7 @@ img.img-error {
 /* 暗色模式 ElDialog */
 [data-theme="dark"] .el-dialog,
 .dark .el-dialog {
-  box-shadow:
-    0 16px 32px rgba(0, 0, 0, 0.7) !important,
-    0 0 0 1px rgba(75, 85, 99, 0.3) inset !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7) !important;
 
   .el-dialog__header {
     border-bottom-color: var(--color-border-subtle, #1F2937) !important;

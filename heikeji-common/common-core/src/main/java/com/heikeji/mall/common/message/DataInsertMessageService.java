@@ -191,7 +191,13 @@ public class DataInsertMessageService {
 
         if (callbackService != null) {
             callbackService.onBatchCompleted(message.getBatchId(),
-                    new BatchInsertResult(message.getBatchId(), successCount, failCount, errors));
+                    BatchInsertResult.builder()
+                            .batchId(message.getBatchId())
+                            .successCount(successCount)
+                            .failCount(failCount)
+                            .errors(errors)
+                            .completedTime(LocalDateTime.now())
+                            .build());
         }
     }
 
@@ -238,7 +244,13 @@ public class DataInsertMessageService {
                 fail++;
             }
         }
-        return new BatchInsertResult(message.getBatchId(), success, fail, Collections.emptyList());
+        return BatchInsertResult.builder()
+                .batchId(message.getBatchId())
+                .successCount(success)
+                .failCount(fail)
+                .errors(Collections.emptyList())
+                .completedTime(LocalDateTime.now())
+                .build();
     }
 
     private void updateProcessingStatus(String batchId, String status) {

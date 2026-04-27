@@ -6,7 +6,7 @@
  */
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+import { useI18n } from '@/locales'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 

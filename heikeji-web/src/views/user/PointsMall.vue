@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ArrowLeft, Coin, Present, ShoppingBag, TrendCharts,
-  Clock, Check, Star, Ticket, Crown,
+  Clock, Check, Star, Ticket,
   Filter, Search, InfoFilled
 } from '@element-plus/icons-vue'
 

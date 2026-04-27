@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-04-18T10:11:12.982Z",
+  "counts": {
+    "users": 100,
+    "products": 200,
+    "merchants": 30,
+    "orders": 50
+  },
+  "filePaths": [
+    "exported-data\\users.json",
+    "exported-data\\products.json",
+    "exported-data\\merchants.json",
+    "exported-data\\orders.json"
+  ]
+}

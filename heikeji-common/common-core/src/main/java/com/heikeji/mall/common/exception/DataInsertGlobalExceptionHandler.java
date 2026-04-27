@@ -1,6 +1,6 @@
 package com.heikeji.mall.common.exception;
 
-import com.heikeji.mall.common.response.R;
+import com.heikeji.common.core.domain.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -49,7 +49,7 @@ public class DataInsertGlobalExceptionHandler {
                         (existing, replacement) -> existing + "; " + replacement
                 ));
 
-        return R.error(400, "参数验证失败", errors);
+        return R.error(400, "参数验证失败: " + errors);
     }
 
     /**

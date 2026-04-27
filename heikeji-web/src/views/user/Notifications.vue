@@ -6,7 +6,7 @@ import { useAnnouncementStore } from '@/stores/announcement'
 import {
   Bell, Check, Delete, Filter, Search, Setting,
   ShoppingCart, Message, InfoFilled, Present, WarningFilled,
-  CircleCheckFilled, ArrowRight, Empty, RefreshRight,
+  CircleCheckFilled, ArrowRight, RefreshRight,
   MoreFilled, Check as CheckIcon, Clock
 } from '@element-plus/icons-vue'
 

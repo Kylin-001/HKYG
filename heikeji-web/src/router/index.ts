@@ -4,11 +4,14 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useUserStore } from '@/stores/user'
 
+// 首页使用直接导入以确保最快加载（但组件内部使用异步子组件）
+import HomeView from '@/views/home/Index.vue'
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: () => import(/* webpackPrefetch: true */ '@/views/home/Index.vue'),
+    component: HomeView,
     meta: { title: '首页 - 黑科易购', transition: 'page-fade' },
   },
 
@@ -102,6 +105,12 @@ const routes: RouteRecordRaw[] = [
         name: 'OrderSuccess',
         component: () => import('@/views/orders/OrderSuccess.vue'),
         meta: { title: '支付成功' },
+      },
+      {
+        path: 'review/:orderId',
+        name: 'OrderReview',
+        component: () => import('@/views/orders/OrderReview.vue'),
+        meta: { title: '订单评价' },
       },
     ],
   },
@@ -207,7 +216,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/payment',
     component: () => import(/* webpackPrefetch: true */ '@/views/payment/Layout.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
     children: [
       {
         path: '',
@@ -252,6 +261,12 @@ const routes: RouteRecordRaw[] = [
         name: 'AnnouncementList',
         component: () => import('@/views/announcements/List.vue'),
         meta: { title: '信息公告' },
+      },
+      {
+        path: ':id',
+        name: 'AnnouncementDetail',
+        component: () => import('@/views/announcements/List.vue'),
+        meta: { title: '公告详情' },
       },
       {
         path: 'notifications',
@@ -489,6 +504,60 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '订单管理' },
       },
       {
+        path: 'roles',
+        name: 'AdminRoles',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '角色管理' },
+      },
+      {
+        path: 'menus',
+        name: 'AdminMenus',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '菜单管理' },
+      },
+      {
+        path: 'depts',
+        name: 'AdminDepts',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '部门管理' },
+      },
+      {
+        path: 'notices',
+        name: 'AdminNotices',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '公告管理' },
+      },
+      {
+        path: 'profile',
+        name: 'AdminProfile',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '个人中心' },
+      },
+      {
+        path: 'system-config',
+        name: 'AdminSystemConfig',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '系统配置' },
+      },
+      {
+        path: 'files',
+        name: 'AdminFiles',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '文件管理' },
+      },
+      {
+        path: 'logs',
+        name: 'AdminLogs',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '日志管理' },
+      },
+      {
+        path: 'dormitory',
+        name: 'AdminDormitory',
+        component: () => import('@/views/admin/Placeholder.vue'),
+        meta: { title: '宿舍管理' },
+      },
+      {
         path: 'system',
         name: 'AdminSystem',
         component: () => import('@/views/admin/Placeholder.vue'),
@@ -552,6 +621,7 @@ router.beforeEach(async (to, from, next) => {
     document.title = `${to.meta.title} | 黑科易购`
   }
 
+  // 使用已导入的 useUserStore
   const userStore = useUserStore()
   let isAuthenticated = userStore.isAuthenticated
 

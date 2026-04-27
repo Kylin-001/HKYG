@@ -7,6 +7,7 @@
 import { performanceBudget } from '@/config/performance.config'
 import type { PerformanceMetric } from './monitor'
 import { perfMonitor } from './monitor'
+import { safeBase64Encode } from '@/utils/encoding'
 
 /** 性能数据上报格式 */
 export interface PerformanceData {
@@ -294,7 +295,9 @@ class PerformanceReporter {
           ['FCP', 'LCP', 'FID', 'CLS', 'TTFB'].includes(m.metricName)
         )
 
-        const payload = btoa(encodeURIComponent(JSON.stringify(criticalMetrics)))
+        // 使用安全的 Base64 编码（支持中文和 UTF-8 字符）
+        const payload = safeBase64Encode(JSON.stringify(criticalMetrics))
+
         const img = new Image()
 
         img.onload = () =>

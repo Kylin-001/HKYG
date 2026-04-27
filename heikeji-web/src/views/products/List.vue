@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+import { useI18n } from '@/locales'
 import { ElMessage } from 'element-plus'
 import ProductCard from '@/components/ProductCard.vue'
 import { useProductStore } from '@/stores/product'

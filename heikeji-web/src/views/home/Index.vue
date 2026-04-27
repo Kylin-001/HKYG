@@ -1,30 +1,34 @@
 <script setup lang="ts">
 /**
  * 黑科易购 - 全新首页设计 v4.0
- * 
+ *
  * 设计理念：
  * - 现代简约风格，突出校园特色
  * - 卡片式布局，信息层次清晰
  * - 微交互动画，提升用户体验
  * - 完全响应式，适配各种设备
  */
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { 
-  Search, ArrowRight, Timer, Clock, StarFilled, 
+import {
+  Search, ArrowRight, Timer, Clock, StarFilled,
   ShoppingCart, Notebook, MapLocation, ChatDotRound,
   School, Money, CollectionTag, ArrowRightBold
 } from '@element-plus/icons-vue'
 import { useProductStore } from '@/stores/product'
 import { useCartStore } from '@/stores/cart'
-import ProductCard from '@/components/ProductCard.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
-import CampusMapBg from '@/components/CampusMapBg.vue'
-import StudyElementsBg from '@/components/StudyElementsBg.vue'
-import HeroThemeDecoration from '@/components/HeroThemeDecoration.vue'
+
+// 异步加载非关键组件（减少首屏渲染阻塞）
+const ProductCard = defineAsyncComponent(() => import('@/components/ProductCard.vue'))
+const CampusMapBg = defineAsyncComponent(() => import('@/components/CampusMapBg.vue'))
+const StudyElementsBg = defineAsyncComponent(() => import('@/components/StudyElementsBg.vue'))
+const HeroThemeDecoration = defineAsyncComponent(() => import('@/components/HeroThemeDecoration.vue'))
 
 const router = useRouter()
+const { t } = useI18n()
 const productStore = useProductStore()
 const cartStore = useCartStore()
 
@@ -37,13 +41,13 @@ let heroTimer: ReturnType<typeof setInterval> | null = null
 // ==================== Hero 轮播数据 ====================
 // 校园标志性图片 - 使用黑龙江科技大学官网真实图片
 // 新版设计：左侧固定深色区域显示文字，右侧显示校园图片
-const heroSlides = [
+const heroSlides = computed(() => [
   {
     id: 1,
-    title: '黑科易购',
-    subtitle: '一站式校园服务平台',
-    description: '外卖 · 购物 · 学工 · 缴费',
-    tag: '开学季',
+    title: t('home.heroTitle'),
+    subtitle: t('home.heroSubtitle'),
+    description: t('home.heroDescription'),
+    tag: t('home.heroTag'),
     bgImage: '/images/campus-1.jpg',
     bgPosition: 'center',
     themeColor: 'primary',
@@ -51,10 +55,10 @@ const heroSlides = [
   },
   {
     id: 2,
-    title: '校园外卖',
-    subtitle: '满30减5 · 满50减10',
-    description: '30分钟送达校园任意角落',
-    tag: '热门',
+    title: t('home.slideTakeoutTitle'),
+    subtitle: t('home.slideTakeoutSubtitle'),
+    description: t('home.slideTakeoutDesc'),
+    tag: t('home.slideTakeoutTag'),
     bgImage: '/images/campus-2.jpg',
     bgPosition: 'center',
     themeColor: 'orange',
@@ -62,10 +66,10 @@ const heroSlides = [
   },
   {
     id: 3,
-    title: 'AI智慧课堂',
-    subtitle: '16门精品课程免费学',
-    description: '知识图谱驱动个性化学习',
-    tag: '新品',
+    title: t('home.slideAiTitle'),
+    subtitle: t('home.slideAiSubtitle'),
+    description: t('home.slideAiDesc'),
+    tag: t('home.slideAiTag'),
     bgImage: '/images/campus-3.jpg',
     bgPosition: 'center',
     themeColor: 'violet',
@@ -73,72 +77,72 @@ const heroSlides = [
   },
   {
     id: 4,
-    title: '智慧校园',
-    subtitle: '数字化服务 · 便捷生活',
-    description: '课表查询 · 成绩管理 · 图书馆预约',
-    tag: '推荐',
+    title: t('home.slideCampusTitle'),
+    subtitle: t('home.slideCampusSubtitle'),
+    description: t('home.slideCampusDesc'),
+    tag: t('home.slideCampusTag'),
     bgImage: '/images/campus-4.jpg',
     bgPosition: 'center',
     themeColor: 'emerald',
     themeDecoration: 'campus' as const
   }
-]
+])
 
 // ==================== 快捷入口数据 ====================
-const quickActions = [
-  { id: 'takeout', name: '校园外卖', icon: '🍔', color: 'bg-orange-50 text-orange-600', path: '/takeout', badge: '满减' },
-  { id: 'products', name: '校园商城', icon: '🛍️', color: 'bg-blue-50 text-blue-600', path: '/products', badge: null },
-  { id: 'secondhand', name: '二手市场', icon: '♻️', color: 'bg-green-50 text-green-600', path: '/secondhand', badge: null },
-  { id: 'affairs', name: '学工办理', icon: '📋', color: 'bg-indigo-50 text-indigo-600', path: '/student-affairs', badge: '在线' },
-  { id: 'payment', name: '缴费中心', icon: '💳', color: 'bg-emerald-50 text-emerald-600', path: '/payment', badge: null },
-  { id: 'campus', name: '智慧校园', icon: '🏫', color: 'bg-cyan-50 text-cyan-600', path: '/campus/schedule', badge: null },
-  { id: 'community', name: '校园社区', icon: '💬', color: 'bg-purple-50 text-purple-600', path: '/community/forum', badge: '99+' },
-  { id: 'announcement', name: '通知公告', icon: '📢', color: 'bg-rose-50 text-rose-600', path: '/announcements', badge: null },
-]
+const quickActions = computed(() => [
+  { id: 'takeout', name: t('home.quickTakeout'), icon: '🍔', color: 'bg-orange-50 text-orange-600', path: '/takeout', badge: t('home.badgeDiscount') },
+  { id: 'products', name: t('home.quickProducts'), icon: '🛍️', color: 'bg-blue-50 text-blue-600', path: '/products', badge: null },
+  { id: 'secondhand', name: t('home.quickSecondhand'), icon: '♻️', color: 'bg-green-50 text-green-600', path: '/secondhand', badge: null },
+  { id: 'affairs', name: t('home.quickAffairs'), icon: '📋', color: 'bg-indigo-50 text-indigo-600', path: '/student-affairs', badge: t('home.badgeOnline') },
+  { id: 'payment', name: t('home.quickPayment'), icon: '💳', color: 'bg-emerald-50 text-emerald-600', path: '/payment', badge: null },
+  { id: 'campus', name: t('home.quickCampus'), icon: '🏫', color: 'bg-cyan-50 text-cyan-600', path: '/campus/schedule', badge: null },
+  { id: 'community', name: t('home.quickCommunity'), icon: '💬', color: 'bg-purple-50 text-purple-600', path: '/community/forum', badge: '99+' },
+  { id: 'announcement', name: t('home.quickAnnouncement'), icon: '📢', color: 'bg-rose-50 text-rose-600', path: '/announcements', badge: null },
+])
 
 // ==================== 限时秒杀数据 ====================
 const flashSaleProducts = [
-  { id: 1, name: '蓝牙耳机 Pro', price: 99, originalPrice: 299, image: '', sold: 85, total: 100 },
-  { id: 2, name: '机械键盘 RGB', price: 199, originalPrice: 499, image: '', sold: 62, total: 80 },
-  { id: 3, name: '充电宝 20000mAh', price: 59, originalPrice: 129, image: '', sold: 156, total: 200 },
-  { id: 4, name: '护眼台灯', price: 79, originalPrice: 199, image: '', sold: 43, total: 60 },
+  { id: 1, name: '蓝牙耳机 Pro', price: 99, originalPrice: 299, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop', sold: 85, total: 100 },
+  { id: 2, name: '机械键盘 RGB', price: 199, originalPrice: 499, image: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=200&h=200&fit=crop', sold: 62, total: 80 },
+  { id: 3, name: '充电宝 20000mAh', price: 59, originalPrice: 129, image: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=200&h=200&fit=crop', sold: 156, total: 200 },
+  { id: 4, name: '护眼台灯', price: 79, originalPrice: 199, image: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=200&h=200&fit=crop', sold: 43, total: 60 },
 ]
 
 // ==================== 校园服务数据 ====================
-const campusServices = [
-  { 
-    id: 'schedule', 
-    name: '课表查询', 
-    desc: '实时查看课程安排',
-    icon: '📅', 
+const campusServices = computed(() => [
+  {
+    id: 'schedule',
+    name: t('home.serviceSchedule'),
+    desc: t('home.serviceScheduleDesc'),
+    icon: '📅',
     color: 'from-blue-500 to-cyan-400',
     path: '/campus/schedule'
   },
-  { 
-    id: 'library', 
-    name: '图书馆', 
-    desc: '座位预约 · 借阅查询',
-    icon: '📚', 
+  {
+    id: 'library',
+    name: t('home.serviceLibrary'),
+    desc: t('home.serviceLibraryDesc'),
+    icon: '📚',
     color: 'from-emerald-500 to-teal-400',
     path: '/campus/library'
   },
-  { 
-    id: 'grades', 
-    name: '成绩查询', 
-    desc: 'GPA计算 · 学业分析',
-    icon: '📊', 
+  {
+    id: 'grades',
+    name: t('home.serviceGrades'),
+    desc: t('home.serviceGradesDesc'),
+    icon: '📊',
     color: 'from-violet-500 to-purple-400',
     path: '/campus/grades'
   },
-  { 
-    id: 'map', 
-    name: '校园地图', 
-    desc: '3D导航 · 路线规划',
-    icon: '🗺️', 
+  {
+    id: 'map',
+    name: t('home.serviceMap'),
+    desc: t('home.serviceMapDesc'),
+    icon: '🗺️',
     color: 'from-orange-500 to-amber-400',
     path: '/campus/map'
   },
-]
+])
 
 // ==================== 倒计时计算 ====================
 const countdown = ref({ hours: 2, minutes: 34, seconds: 15 })
@@ -146,7 +150,7 @@ const countdown = ref({ hours: 2, minutes: 34, seconds: 15 })
 // ==================== 方法 ====================
 function startHeroAutoPlay() {
   heroTimer = setInterval(() => {
-    currentHeroSlide.value = (currentHeroSlide.value + 1) % heroSlides.length
+    currentHeroSlide.value = (currentHeroSlide.value + 1) % heroSlides.value.length
   }, 5000)
 }
 
@@ -159,8 +163,13 @@ function stopHeroAutoPlay() {
 
 function handleSearch() {
   if (searchKeyword.value.trim()) {
-    router.push(`/products?keyword=${encodeURIComponent(searchKeyword.value)}`)
+    router.push(`/search?q=${encodeURIComponent(searchKeyword.value)}`)
   }
+}
+
+function handleQuickAction(action: any) {
+  console.log('[Home] Clicked quick action:', action.id, 'path:', action.path)
+  router.push(action.path)
 }
 
 function handleAddToCart(product: any) {
@@ -171,7 +180,7 @@ function handleAddToCart(product: any) {
     image: product.image || '',
     quantity: 1
   })
-  ElMessage.success(`已将「${product.name}」加入购物车`)
+  ElMessage.success(t('home.addedToCart', { name: product.name }))
 }
 
 function updateCountdown() {
@@ -194,13 +203,45 @@ function handleScroll() {
 // 获取主题色
 function getThemeColor(theme: string): string {
   const colors: Record<string, string> = {
-    primary: '#000ab0',  // 蓝色
-    orange: '#ea580c',   // 橙色
-    violet: '#7c3aed',   // 紫色
-    emerald: '#059669'   // 绿色
+    primary: '#000ab0', // 蓝色
+    orange: '#ea580c', // 橙色
+    violet: '#7c3aed', // 紫色
+    emerald: '#059669' // 绿色
   }
   return colors[theme] || colors.primary
 }
+
+// ==================== 浮动小卡片数据 - 根据轮播主题动态变化 ====================
+const floatingCards = computed(() => {
+  const currentSlide = heroSlides.value[currentHeroSlide.value]
+  const themeDecoration = currentSlide?.themeDecoration || 'shopping'
+
+  // 根据主题返回对应的卡片
+  const cardSets: Record<string, Array<{ id: number; icon: string; label: string; path: string }>> = {
+    shopping: [
+      { id: 1, icon: '🎓', label: t('home.heroStudy'), path: '/study' },
+      { id: 2, icon: '🍔', label: t('home.heroFood'), path: '/takeout' },
+      { id: 3, icon: '🛍️', label: t('home.heroShop'), path: '/products' }
+    ],
+    food: [
+      { id: 1, icon: '🍜', label: t('home.cardNoodles'), path: '/takeout/noodles' },
+      { id: 2, icon: '🍱', label: t('home.cardBento'), path: '/takeout/bento' },
+      { id: 3, icon: '🥤', label: t('home.cardDrink'), path: '/takeout/drink' }
+    ],
+    education: [
+      { id: 1, icon: '📚', label: t('home.cardCourse'), path: '/study/courses' },
+      { id: 2, icon: '📝', label: t('home.cardExam'), path: '/study/exam' },
+      { id: 3, icon: '🎯', label: t('home.cardPractice'), path: '/study/practice' }
+    ],
+    campus: [
+      { id: 1, icon: '📅', label: t('home.cardSchedule'), path: '/campus/schedule' },
+      { id: 2, icon: '📖', label: t('home.cardLibrary'), path: '/campus/library' },
+      { id: 3, icon: '🗺️', label: t('home.cardMap'), path: '/campus/map' }
+    ]
+  }
+
+  return cardSets[themeDecoration] || cardSets.shopping
+})
 
 // ==================== 生命周期 ====================
 onMounted(() => {
@@ -222,63 +263,92 @@ onUnmounted(() => {
     <section class="hero-section">
       <div class="hero-slider">
         <TransitionGroup name="hero-slide">
-          <div 
-            v-for="(slide, index) in heroSlides" 
-            :key="slide.id"
+          <div
+            v-for="(slide, index) in heroSlides"
             v-show="currentHeroSlide === index"
+            :key="slide.id"
             class="hero-slide hero-split"
           >
             <!-- 左侧：固定深色背景 + 文字内容 -->
-            <div class="hero-left" :style="{ backgroundColor: getThemeColor(slide.themeColor) }">
-              <!-- 主题装饰背景 - 根据轮播内容显示不同主题 -->
-              <HeroThemeDecoration :theme="slide.themeDecoration" :animated="true" />
+            <div
+              class="hero-left"
+              :style="{ backgroundColor: getThemeColor(slide.themeColor) }"
+            >
+              <!-- 主题装饰背景 - 只显示当前激活的轮播项 -->
+              <HeroThemeDecoration
+                v-if="currentHeroSlide === index"
+                :theme="slide.themeDecoration"
+                :animated="true"
+              />
               <div class="hero-left-content">
                 <span class="hero-tag">{{ slide.tag }}</span>
-                <h1 class="hero-title">{{ slide.title }}</h1>
-                <p class="hero-subtitle">{{ slide.subtitle }}</p>
-                <p class="hero-description">{{ slide.description }}</p>
+                <h1 class="hero-title">
+                  {{ slide.title }}
+                </h1>
+                <p class="hero-subtitle">
+                  {{ slide.subtitle }}
+                </p>
+                <p class="hero-description">
+                  {{ slide.description }}
+                </p>
                 <div class="hero-actions">
-                  <BaseButton variant="brand" size="lg" @click="$router.push('/products')">
-                    立即探索
-                    <template #icon><ArrowRight /></template>
+                  <BaseButton
+                    variant="brand"
+                    size="lg"
+                    @click="$router.push('/products')"
+                  >
+                    {{ t('home.heroExplore') }}
+                    <template #icon>
+                      <ArrowRight />
+                    </template>
                   </BaseButton>
-                  <BaseButton variant="outline" size="lg" class="!border-white/50 !text-white hover:!bg-white/20 hover:!border-white">
-                    了解更多
+                  <BaseButton
+                    variant="outline"
+                    size="lg"
+                    class="!border-white/50 !text-white hover:!bg-white/20 hover:!border-white"
+                  >
+                    {{ t('home.heroLearnMore') }}
                   </BaseButton>
                 </div>
-                
-                <!-- 浮动卡片移到左侧底部 -->
-                <div class="hero-cards">
-                  <div class="floating-card-mini">
-                    <span class="text-xl">🎓</span>
-                    <span class="text-xs">学业</span>
+
+                <!-- 浮动卡片移到左侧底部 - 根据轮播主题动态变化 -->
+                <TransitionGroup
+                  name="card-fade"
+                  tag="div"
+                  class="hero-cards"
+                >
+                  <div
+                    v-for="card in floatingCards"
+                    :key="card.id"
+                    class="floating-card-mini"
+                    @click="$router.push(card.path)"
+                  >
+                    <span class="text-xl">{{ card.icon }}</span>
+                    <span class="text-xs">{{ card.label }}</span>
                   </div>
-                  <div class="floating-card-mini">
-                    <span class="text-xl">🍔</span>
-                    <span class="text-xs">外卖</span>
-                  </div>
-                  <div class="floating-card-mini">
-                    <span class="text-xl">🛍️</span>
-                    <span class="text-xs">商城</span>
-                  </div>
-                </div>
+                </TransitionGroup>
               </div>
             </div>
-            
+
             <!-- 右侧：校园图片 -->
             <div class="hero-right">
-              <div class="hero-bg-image" :style="{ backgroundImage: `url(${slide.bgImage})`, backgroundPosition: slide.bgPosition }"></div>
+              <div
+                class="hero-bg-image"
+                :style="{ backgroundImage: `url(${slide.bgImage})`, backgroundPosition: slide.bgPosition }"
+                fetchpriority="high"
+              />
             </div>
           </div>
         </TransitionGroup>
-        
-        <!-- 轮播指示器 -->
+
+        <!-- 轮播指示器 - 移至左侧区域底部 -->
         <div class="hero-indicators">
-          <button 
-            v-for="(_, index) in heroSlides" 
+          <button
+            v-for="(slide, index) in heroSlides"
             :key="index"
             class="indicator"
             :class="{ active: currentHeroSlide === index }"
+            :title="slide.title"
             @click="currentHeroSlide = index; stopHeroAutoPlay(); startHeroAutoPlay()"
           />
         </div>
@@ -286,19 +356,28 @@ onUnmounted(() => {
     </section>
 
     <!-- ==================== 搜索栏 ==================== -->
-    <section class="search-section" :class="{ 'is-sticky': isScrolled }">
+    <section
+      class="search-section"
+      :class="{ 'is-sticky': isScrolled }"
+    >
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="search-box">
-          <el-icon class="search-icon"><Search /></el-icon>
-          <input 
+          <el-icon class="search-icon">
+            <Search />
+          </el-icon>
+          <input
             v-model="searchKeyword"
-            type="text" 
-            placeholder="搜索商品、外卖、校园服务..."
+            type="text"
+            :placeholder="t('home.searchPlaceholder')"
             class="search-input"
             @keyup.enter="handleSearch"
-          />
-          <BaseButton variant="brand" size="md" @click="handleSearch">
-            搜索
+          >
+          <BaseButton
+            variant="brand"
+            size="md"
+            @click="handleSearch"
+          >
+            {{ t('home.search') }}
           </BaseButton>
         </div>
       </div>
@@ -306,18 +385,29 @@ onUnmounted(() => {
 
     <!-- ==================== 快捷入口 ==================== -->
     <section class="quick-actions-section">
-      <!-- 校园地图背景 -->
-      <CampusMapBg primary-color="#000ab0" secondary-color="#3b82f6" :animated="true" />
+      <!-- 校园地图背景 - 延迟加载 -->
+      <CampusMapBg
+        v-if="isScrolled"
+        primary-color="#000ab0"
+        secondary-color="#3b82f6"
+        :animated="true"
+      />
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="quick-actions-grid">
-          <div 
-            v-for="action in quickActions" 
+          <div
+            v-for="action in quickActions"
             :key="action.id"
             class="action-card"
-            @click="$router.push(action.path)"
+            @click="handleQuickAction(action)"
           >
-            <span v-if="action.badge" class="action-badge">{{ action.badge }}</span>
-            <div class="action-icon" :class="action.color">
+            <span
+              v-if="action.badge"
+              class="action-badge"
+            >{{ action.badge }}</span>
+            <div
+              class="action-icon"
+              :class="action.color"
+            >
               <span class="text-2xl">{{ action.icon }}</span>
             </div>
             <span class="action-name">{{ action.name }}</span>
@@ -337,43 +427,70 @@ onUnmounted(() => {
                 <el-icon><Timer /></el-icon>
               </div>
               <div>
-                <h2 class="flash-title">限时秒杀</h2>
-                <p class="flash-subtitle">每日10点/20点准时开抢</p>
+                <h2 class="flash-title">
+                  {{ t('home.flashSale') }}
+                </h2>
+                <p class="flash-subtitle">
+                  {{ t('home.flashSaleSubtitle') }}
+                </p>
               </div>
             </div>
             <div class="countdown">
-              <span class="countdown-label">距结束</span>
-              <div class="countdown-item">{{ String(countdown.hours).padStart(2, '0') }}</div>
+              <span class="countdown-label">{{ t('home.countdownLabel') }}</span>
+              <div class="countdown-item">
+                {{ String(countdown.hours).padStart(2, '0') }}
+              </div>
               <span class="countdown-sep">:</span>
-              <div class="countdown-item">{{ String(countdown.minutes).padStart(2, '0') }}</div>
+              <div class="countdown-item">
+                {{ String(countdown.minutes).padStart(2, '0') }}
+              </div>
               <span class="countdown-sep">:</span>
-              <div class="countdown-item">{{ String(countdown.seconds).padStart(2, '0') }}</div>
+              <div class="countdown-item">
+                {{ String(countdown.seconds).padStart(2, '0') }}
+              </div>
             </div>
           </div>
-          
+
           <!-- 商品列表 -->
           <div class="flash-products">
-            <div 
-              v-for="product in flashSaleProducts" 
+            <div
+              v-for="product in flashSaleProducts"
               :key="product.id"
               class="flash-product"
               @click="$router.push(`/products/${product.id}`)"
             >
               <div class="product-image">
-                <div class="product-placeholder">
+                <img
+                  v-if="product.image"
+                  :src="product.image"
+                  :alt="product.name"
+                  class="product-img"
+                  loading="lazy"
+                >
+                <div
+                  v-else
+                  class="product-placeholder"
+                >
                   <span class="text-3xl">📦</span>
                 </div>
-                <div class="discount-badge">-{{ Math.round((1 - product.price / product.originalPrice) * 100) }}%</div>
+                <div class="discount-badge">
+                  -{{ Math.round((1 - product.price / product.originalPrice) * 100) }}%
+                </div>
               </div>
               <div class="product-info">
-                <h4 class="product-name">{{ product.name }}</h4>
+                <h4 class="product-name">
+                  {{ product.name }}
+                </h4>
                 <div class="product-price">
                   <span class="current-price">¥{{ product.price }}</span>
                   <span class="original-price">¥{{ product.originalPrice }}</span>
                 </div>
                 <div class="progress-bar">
-                  <div class="progress-fill" :style="{ width: `${(product.sold / product.total) * 100}%` }"></div>
-                  <span class="progress-text">已抢{{ product.sold }}件</span>
+                  <div
+                    class="progress-fill"
+                    :style="{ width: `${(product.sold / product.total) * 100}%` }"
+                  />
+                  <span class="progress-text">{{ t('home.sold', { count: product.sold }) }}</span>
                 </div>
               </div>
             </div>
@@ -384,28 +501,45 @@ onUnmounted(() => {
 
     <!-- ==================== 热门推荐 ==================== -->
     <section class="hot-products-section">
-      <!-- 学习元素背景 -->
-      <StudyElementsBg primary-color="#000ab0" secondary-color="#3b82f6" :animated="true" />
+      <!-- 学习元素背景 - 延迟加载 -->
+      <StudyElementsBg
+        v-if="isScrolled"
+        primary-color="#000ab0"
+        secondary-color="#3b82f6"
+        :animated="true"
+      />
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="section-header">
           <div class="flex items-center gap-3">
             <div class="section-icon bg-gradient-to-br from-amber-400 to-orange-500">
-              <el-icon class="text-white"><StarFilled /></el-icon>
+              <el-icon class="text-white">
+                <StarFilled />
+              </el-icon>
             </div>
             <div>
-              <h2 class="section-title">热门推荐</h2>
-              <p class="section-subtitle">精选校园好物，品质保证</p>
+              <h2 class="section-title">
+                {{ t('home.hotProducts') }}
+              </h2>
+              <p class="section-subtitle">
+                {{ t('home.hotProductsSubtitle') }}
+              </p>
             </div>
           </div>
-          <BaseButton variant="ghost" size="sm" @click="$router.push('/products')">
-            查看全部
-            <template #icon><ArrowRightBold /></template>
+          <BaseButton
+            variant="ghost"
+            size="sm"
+            @click="$router.push('/products')"
+          >
+            {{ t('home.viewAll') }}
+            <template #icon>
+              <ArrowRightBold />
+            </template>
           </BaseButton>
         </div>
-        
+
         <div class="products-grid">
-          <ProductCard 
-            v-for="product in (productStore.hotProducts || []).slice(0, 8)" 
+          <ProductCard
+            v-for="product in (productStore.hotProducts || []).slice(0, 8)"
             :key="product.id"
             :product="product"
             @add-to-cart="handleAddToCart"
@@ -416,33 +550,51 @@ onUnmounted(() => {
 
     <!-- ==================== 校园服务 ==================== -->
     <section class="campus-services-section">
-      <!-- 校园地图背景 - 使用不同配色 -->
-      <CampusMapBg primary-color="#059669" secondary-color="#10b981" :animated="true" />
+      <!-- 校园地图背景 - 延迟加载 -->
+      <CampusMapBg
+        v-if="isScrolled"
+        primary-color="#059669"
+        secondary-color="#10b981"
+        :animated="true"
+      />
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="section-header">
           <div class="flex items-center gap-3">
             <div class="section-icon bg-gradient-to-br from-emerald-400 to-teal-500">
-              <el-icon class="text-white"><School /></el-icon>
+              <el-icon class="text-white">
+                <School />
+              </el-icon>
             </div>
             <div>
-              <h2 class="section-title">校园服务</h2>
-              <p class="section-subtitle">便捷校园生活，一键触达</p>
+              <h2 class="section-title">
+                {{ t('home.campusServices') }}
+              </h2>
+              <p class="section-subtitle">
+                {{ t('home.campusServicesSubtitle') }}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div class="services-grid">
-          <div 
-            v-for="service in campusServices" 
+          <div
+            v-for="service in campusServices"
             :key="service.id"
             class="service-card"
             @click="$router.push(service.path)"
           >
-            <div class="service-bg" :class="`bg-gradient-to-br ${service.color}`"></div>
+            <div
+              class="service-bg"
+              :class="`bg-gradient-to-br ${service.color}`"
+            />
             <div class="service-content">
               <span class="service-icon">{{ service.icon }}</span>
-              <h3 class="service-name">{{ service.name }}</h3>
-              <p class="service-desc">{{ service.desc }}</p>
+              <h3 class="service-name">
+                {{ service.name }}
+              </h3>
+              <p class="service-desc">
+                {{ service.desc }}
+              </p>
             </div>
           </div>
         </div>
@@ -451,32 +603,53 @@ onUnmounted(() => {
 
     <!-- ==================== 特色功能 ==================== -->
     <section class="features-section">
-      <!-- 学习元素背景 - 使用暖色调 -->
-      <StudyElementsBg primary-color="#dc2626" secondary-color="#f97316" :animated="true" />
+      <!-- 学习元素背景 - 延迟加载 -->
+      <StudyElementsBg
+        v-if="isScrolled"
+        primary-color="#dc2626"
+        secondary-color="#f97316"
+        :animated="true"
+      />
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="features-grid">
           <div class="feature-card feature-primary">
             <div class="feature-content">
               <span class="feature-icon">📋</span>
-              <h3 class="feature-title">学工办理</h3>
-              <p class="feature-desc">请假 · 助学金 · 校园卡</p>
-              <BaseButton variant="brand" size="sm" @click="$router.push('/student-affairs')">
-                立即办理
+              <h3 class="feature-title">
+                {{ t('home.featureAffairs') }}
+              </h3>
+              <p class="feature-desc">
+                {{ t('home.featureAffairsDesc') }}
+              </p>
+              <BaseButton
+                variant="brand"
+                size="sm"
+                @click="$router.push('/student-affairs')"
+              >
+                {{ t('home.featureAffairsBtn') }}
               </BaseButton>
             </div>
-            <div class="feature-decoration"></div>
+            <div class="feature-decoration" />
           </div>
-          
+
           <div class="feature-card feature-secondary">
             <div class="feature-content">
               <span class="feature-icon">💰</span>
-              <h3 class="feature-title">缴费中心</h3>
-              <p class="feature-desc">学费 · 住宿费 · 水电费</p>
-              <BaseButton variant="brand" size="sm" @click="$router.push('/payment')">
-                立即缴费
+              <h3 class="feature-title">
+                {{ t('home.featurePayment') }}
+              </h3>
+              <p class="feature-desc">
+                {{ t('home.featurePaymentDesc') }}
+              </p>
+              <BaseButton
+                variant="brand"
+                size="sm"
+                @click="$router.push('/payment')"
+              >
+                {{ t('home.featurePaymentBtn') }}
               </BaseButton>
             </div>
-            <div class="feature-decoration"></div>
+            <div class="feature-decoration" />
           </div>
         </div>
       </div>
@@ -484,28 +657,34 @@ onUnmounted(() => {
 
     <!-- ==================== 校训展示 ==================== -->
     <section class="motto-section">
-      <div class="motto-bg"></div>
+      <div class="motto-bg" />
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="motto-content">
-          <p class="motto-en">Heilongjiang University of Science & Technology</p>
-          <h2 class="motto-text">厚德博学 · 强吾兴邦</h2>
-          <div class="motto-divider"></div>
-          <p class="motto-sub">自强不息求发展 · 创业创新创特色</p>
-          
+          <p class="motto-en">
+            Heilongjiang University of Science & Technology
+          </p>
+          <h2 class="motto-text">
+            {{ t('home.motto') }}
+          </h2>
+          <div class="motto-divider" />
+          <p class="motto-sub">
+            {{ t('home.mottoSub') }}
+          </p>
+
           <div class="motto-stats">
             <div class="stat-item">
               <span class="stat-number">77+</span>
-              <span class="stat-label">办学年限</span>
+              <span class="stat-label">{{ t('home.statYears') }}</span>
             </div>
-            <div class="stat-divider"></div>
+            <div class="stat-divider" />
             <div class="stat-item">
               <span class="stat-number">21000+</span>
-              <span class="stat-label">在校学生</span>
+              <span class="stat-label">{{ t('home.statStudents') }}</span>
             </div>
-            <div class="stat-divider"></div>
+            <div class="stat-divider" />
             <div class="stat-item">
               <span class="stat-number">57</span>
-              <span class="stat-label">本科专业</span>
+              <span class="stat-label">{{ t('home.statMajors') }}</span>
             </div>
           </div>
         </div>
@@ -595,18 +774,18 @@ onUnmounted(() => {
   .hero-split {
     flex-direction: column;
   }
-  
+
   .hero-left {
     width: 100%;
     height: 60%;
     padding: 1.5rem;
   }
-  
+
   .hero-right {
     width: 100%;
     height: 40%;
   }
-  
+
   .hero-left-content {
     text-align: center;
   }
@@ -680,6 +859,26 @@ onUnmounted(() => {
   font-size: 1.5rem;
 }
 
+/* 浮动卡片过渡动画 */
+.card-fade-enter-active,
+.card-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+}
+
+.card-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
+}
+
+.card-fade-move {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* 背景图案 - 保留作为备用 */
 .hero-pattern {
   position: absolute;
@@ -704,7 +903,7 @@ onUnmounted(() => {
 }
 
 .pattern-grid {
-  background-image: 
+  background-image:
     linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
   background-size: 40px 40px;
@@ -757,66 +956,41 @@ onUnmounted(() => {
   animation: fadeInUp 0.6s ease-out 0.4s both;
 }
 
-
-
-
-
-/* Hero Indicators - 优化轮播指示器 */
+/* Hero Indicators - 位于左侧内容区底部 */
 .hero-indicators {
   position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 2rem;
+  left: 5%;
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   z-index: 20;
-  padding: 0.75rem 1.25rem;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(12px);
-  border-radius: 9999px;
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .indicator {
-  width: 2.5rem;
-  height: 0.4rem;
+  width: 32px;
+  height: 3px;
+  border-radius: 1.5px;
   background: rgba(255,255,255,0.3);
-  border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.indicator::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: white;
-  border-radius: 9999px;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .indicator.active {
-  background: rgba(255,255,255,0.5);
-  width: 3rem;
+  background: white;
+  width: 48px;
 }
 
-.indicator.active::before {
-  transform: scaleX(1);
-  animation: indicatorProgress 5s linear;
+.indicator:hover {
+  background: rgba(255,255,255,0.6);
 }
 
-@keyframes indicatorProgress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
+/* 移动端指示器调整 */
+@media (max-width: 768px) {
+  .hero-indicators {
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
@@ -1096,6 +1270,13 @@ onUnmounted(() => {
   width: 80px;
   height: 80px;
   flex-shrink: 0;
+}
+
+.product-image .product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.75rem;
 }
 
 .product-placeholder {
@@ -1386,7 +1567,7 @@ onUnmounted(() => {
 .motto-bg {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     radial-gradient(circle at 20% 50%, rgba(59,130,246,0.15) 0%, transparent 50%),
     radial-gradient(circle at 80% 50%, rgba(245,158,11,0.1) 0%, transparent 50%);
 }
@@ -1502,37 +1683,37 @@ onUnmounted(() => {
     min-height: 400px;
     max-height: none;
   }
-  
+
   .hero-split {
     flex-direction: column;
   }
-  
+
   .hero-left {
     width: 100%;
     height: 55%;
     min-height: 280px;
     padding: 1.5rem;
   }
-  
+
   .hero-right {
     width: 100%;
     height: 45%;
     min-height: 200px;
   }
-  
+
   .hero-left-content {
     text-align: center;
     max-width: 100%;
   }
-  
+
   .hero-cards {
     justify-content: center;
   }
-  
+
   .hero-title {
     font-size: clamp(2rem, 6vw, 3rem);
   }
-  
+
   .hero-subtitle {
     font-size: clamp(1rem, 3vw, 1.3rem);
   }
@@ -1546,7 +1727,7 @@ onUnmounted(() => {
     margin-top: -56px;
     padding-top: 56px;
   }
-  
+
   .hero-left {
     height: 65%;
     min-height: 350px;
@@ -1554,98 +1735,98 @@ onUnmounted(() => {
     justify-content: flex-start;
     padding-top: 4rem;
   }
-  
+
   .hero-right {
     height: 35%;
     min-height: 180px;
   }
-  
+
   .hero-title {
     font-size: 2rem;
     line-height: 1.2;
   }
-  
+
   .hero-subtitle {
     font-size: 1rem;
   }
-  
+
   .hero-description {
     font-size: 0.875rem;
   }
-  
+
   .hero-actions {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .hero-actions .el-button {
     width: 100%;
     justify-content: center;
   }
-  
+
   .hero-cards {
     gap: 0.75rem;
     margin-top: 1.5rem;
   }
-  
+
   .floating-card-mini {
     min-width: 70px;
     min-height: 60px;
     padding: 0.75rem 1rem;
   }
-  
+
   .floating-card-mini span:first-child {
     font-size: 1.25rem;
   }
-  
+
   .floating-card-mini span:last-child {
     font-size: 0.75rem;
   }
-  
+
   .hero-indicators {
     bottom: 1rem;
     padding: 0.5rem 1rem;
     gap: 0.5rem;
   }
-  
+
   .indicator {
     width: 2rem;
     height: 0.35rem;
   }
-  
+
   .indicator.active {
     width: 2.5rem;
   }
-  
+
   .flash-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .motto-stats {
     flex-direction: column;
     gap: 1.5rem;
   }
-  
+
   .stat-divider {
     width: 3rem;
     height: 1px;
   }
-  
+
   .quick-actions-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
   }
-  
+
   .action-card {
     padding: 0.75rem 0.25rem;
   }
-  
+
   .action-icon {
     width: 3rem;
     height: 3rem;
   }
-  
+
   .action-name {
     font-size: 0.75rem;
   }
@@ -1656,31 +1837,31 @@ onUnmounted(() => {
   .hero-left {
     padding-top: 3.5rem;
   }
-  
+
   .hero-title {
     font-size: 1.75rem;
   }
-  
+
   .hero-tag {
     font-size: 0.75rem;
     padding: 0.25rem 0.75rem;
   }
-  
+
   .hero-cards {
     gap: 0.5rem;
   }
-  
+
   .floating-card-mini {
     min-width: 60px;
     min-height: 50px;
     padding: 0.5rem 0.75rem;
     border-radius: 0.75rem;
   }
-  
+
   .floating-card-mini span:first-child {
     font-size: 1.1rem;
   }
-  
+
   .floating-card-mini span:last-child {
     font-size: 0.7rem;
   }

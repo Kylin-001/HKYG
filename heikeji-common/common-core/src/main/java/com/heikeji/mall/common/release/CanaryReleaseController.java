@@ -1,6 +1,6 @@
 package com.heikeji.mall.common.release;
 
-import com.heikeji.mall.common.response.R;
+import com.heikeji.common.core.domain.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;

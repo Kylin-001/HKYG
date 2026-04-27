@@ -4,7 +4,7 @@ import { useAnnouncementStore } from '@/stores/announcement'
 import {
   Document, CircleCheckFilled, Search, Money,
   Setting, Bell, Promotion, Notification as NotifIcon,
-  Check, Trash, Filter, CircleCheck, Clock, MoreFilled
+  Check, Delete as Trash, Filter, CircleCheck, Clock, MoreFilled
 } from '@element-plus/icons-vue'
 
 const store = useAnnouncementStore()

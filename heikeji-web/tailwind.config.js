@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -22,7 +22,7 @@ export default {
           800: 'var(--color-primary-800)',
           900: 'var(--color-primary-900)',
         },
-        
+
         // 品牌辅助色
         gold: {
           light: 'var(--color-gold-light)',
@@ -30,14 +30,14 @@ export default {
           dark: 'var(--color-gold-dark)',
           bg: 'var(--color-gold-bg)',
         },
-        
+
         crimson: {
           light: 'var(--color-crimson-light)',
           DEFAULT: 'var(--color-crimson)',
           dark: 'var(--color-crimson-dark)',
           bg: 'var(--color-crimson-bg)',
         },
-        
+
         pine: {
           light: 'var(--color-pine-light)',
           DEFAULT: 'var(--color-pine)',
@@ -78,7 +78,7 @@ export default {
           tertiary: 'var(--color-surface-tertiary)',
           elevated: 'var(--color-surface-elevated)',
         },
-        
+
         text: {
           primary: 'var(--color-text-primary)',
           secondary: 'var(--color-text-secondary)',
@@ -88,7 +88,7 @@ export default {
           disabled: 'var(--color-text-disabled)',
           link: 'var(--color-text-link)',
         },
-        
+
         border: {
           subtle: 'var(--color-border-subtle)',
           DEFAULT: 'var(--color-border)',
@@ -183,9 +183,9 @@ export default {
         'scale-in': 'scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         'spin-slow': 'spin 1s linear infinite',
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
-        'shimmer': 'shimmer 2s linear infinite',
+        shimmer: 'shimmer 2s linear infinite',
         'bounce-in': 'bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-        'shake': 'shake 0.5s ease-in-out',
+        shake: 'shake 0.5s ease-in-out',
       },
 
       keyframes: {
@@ -259,7 +259,7 @@ export default {
         drawer: '200',
         'dialog-overlay': '1000',
         'dialog-content': '1010',
-        dialog-popper: '1100',
+        'dialog-popper': '1100',
         toast: '2000',
       },
 
